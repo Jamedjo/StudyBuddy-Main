@@ -273,11 +273,14 @@ class Table
         do
         {
             mid = (low + high)/2;
+            if (SearchFor == null)
+                System.out.print("SearchFor is null\n");
+            System.out.print("mid is " + mid + "\n");
             if (SearchFor.compareTo(Records[mid].getField(0)) < 0)
-                high = mid - 1;
+                high = mid;
             else
                 low = mid + 1;
-        } while (low <= high && SearchFor.compareTo(Records[mid].getField(0)) != 0);
+        } while (low < high && SearchFor.compareTo(Records[mid].getField(0)) != 0);
         // Check if "SearchFor" has been found at Records[mid]
         if (SearchFor.compareTo(Records[mid].getField(0)) == 0)
         {   
@@ -310,7 +313,6 @@ class Table
         int high = NumRecords;
         int mid;
         int i;
-        int Stop = 0;
         // If this is the first record then just insert it
         if (NumRecords == 0)
             Records[0] = new Record(r);
@@ -321,22 +323,13 @@ class Table
             {
                 mid = (low + high)/2;
                 if (r.getField(0).compareTo(Records[mid].getField(0)) < 0)
-                    high = mid - 1;
+                    high = mid;
                 else
                     low = mid + 1;
             } while (low < high && r.getField(0).compareTo(Records[mid].getField(0)) != 0);
-            // This outputs the nearest or a matching record
-            // The record to insert is then moved down the table until it is less than or equal to a record
-            while (Stop == 0)
-            {
-                if (Records[mid] != null)
-                    if (r.getField(0).compareTo(Records[mid].getField(0)) > 0)
-                        mid++;
-                    else
-                        Stop = 1;
-                else
-                    Stop = 1;
-            }
+            // This outputs the best slot for insertion of the record
+            if (low == high)
+                mid = low;
             // Records below it are then moved down to produce a space
             i = NumRecords - 1;
             while (i >= mid)
@@ -371,29 +364,42 @@ class Table
     }
     
     // Deletes the record r from the table
-    void deleteRecord(Record r)
+    int deleteRecord(Record r)
     {
         int Index;
         // Perform a binary search for the record
         Index = find(r.getField(0));
-        // If its not found then throw an error
+        // If its not found then return -1
         if (Index == -1)
-            throw new Error("Error record not present");
+        {
+            // Record not present
+            return -1;
+        }
         else
         {
             // Since find works only on column 0, move down table until all columns match
-            while (Records[Index].matches(r) == false)    
+            while (Records[Index].matches(r) == false && Index < NumRecords)    
                 Index++;
-            // Move all records below the one to delete up one (overwriting the record)
-            while (Index < NumRecords - 1)
+            // First column found but not matching record
+            if (Index == NumRecords)
+                return -1;
+            else
             {
-                System.out.print("rippling\n");
-                Records[Index] = new Record(Records[Index+1]);
-                Index++;
+                // Move all records below the one to delete up one (overwriting the record)
+                System.out.print("Removing from " + Index + "\n");
+                while (Index < NumRecords - 1)
+                {
+                    System.out.print("rippling\n");
+                    Records[Index] = new Record(Records[Index+1]);
+                    Index++;
+                }
+                // Reduce record count
+                NumRecords--;
+                System.out.print("Removed");
+                store("print");
+                return 1;
             }
         }
-        // Reduce record count
-        NumRecords--;
     }
 
 }

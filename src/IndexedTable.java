@@ -76,16 +76,29 @@ class IndexedTable
         }
     }
     
-    void deleteRecord(Record r)
+    int deleteRecord(Record r)
     {
         String[] IndexRecord = new String[2];
-        MainTable.deleteRecord(r);
-        for (int i = 1; i < MainTable.getNumFields() - 1; i++)
+        int Result = MainTable.deleteRecord(r);
+        for (int i = 0; i < MainTable.getNumFields() - 1; i++)
         {
             IndexRecord[0] = r.getField(i + 1);
             IndexRecord[1] = r.getField(0);
-            Indexes[i].deleteRecord(new Record(IndexRecord));
+            if (Indexes[i].deleteRecord(new Record(IndexRecord)) == -1)
+                Result = -1;
         }
+        return Result;
+    }
+    
+    int deleteRecords(Record r)
+    {
+        int c = 0;
+        while (deleteRecord(r) != -1)
+            c++;
+        if (c > 0)
+            return c;
+        else
+            return -1;
     }
     
     IndexedTable findMultiple(String SearchFor, int Field)

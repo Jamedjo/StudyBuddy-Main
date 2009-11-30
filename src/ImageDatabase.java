@@ -5,6 +5,8 @@ class ImageDatabase
     private IndexedTable ImageToTagTable;
     private IndexedTable TagToTagTable;
     private String Name;
+    private int NextImageID;
+    private int NextTagID;
     
     ImageDatabase(String name)
     {
@@ -22,6 +24,15 @@ class ImageDatabase
         TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader));
     }
     
+    ImageDatabase(String name, String filename)
+    {
+        Name = name;
+        ImageTable = new IndexedTable("ImageTable", filename + "_ImageTable");
+        TagTable = new IndexedTable("TagTable", filename + "_TagTable");
+        ImageToTagTable = new IndexedTable("ImageToTagTable", filename + "_ImageToTagTable");
+        TagToTagTable = new IndexedTable("TagToTagTable", filename + "_TagToTagTable");
+    }
+    
     String getName() { return Name; }
     IndexedTable getImageTable() { return ImageTable; }
     IndexedTable getTagTable() { return TagTable; }
@@ -36,21 +47,59 @@ class ImageDatabase
         TagToTagTable.print();
     }
     
+    void store(String filename)
+    {
+        ImageTable.store(filename + "_ImageTable");
+        TagTable.store(filename + "_TagTable");
+        ImageToTagTable.store(filename + "_ImageToTagTable");
+        TagToTagTable.store(filename + "_TagToTagTable");
+    }
+    
     void addImage(String ImageID, String Title, String Filename)
     {
-        String[] RecordString = { ImageID, Title, Filename }; 
+        String[] RecordString = { ImageID, Title, Filename };
         ImageTable.insertRecord(new Record(RecordString));
     }
     
-    void deleteImage(String ImageID, String Title, String Filename)
+    int deleteImage(String ImageID, String Title, String Filename)
     {
-        String[] RecordString = { ImageID, Title, Filename }; 
-        ImageTable.deleteRecord(new Record(RecordString));
+        int Result1 = 0;
+        int Result2 = 0;
+        IndexedTable ImageTags = getImageToTagTable().findMultiple(ImageID, 0);
+        String[] ImageString = { ImageID, Title, Filename };
+        Result1 = ImageTable.deleteRecord(new Record(ImageString));
+        if (Result1 == 1)
+            System.out.print("Deleted from main table\n");
+        for (int i = 0; i < ImageTags.getNumFields(); i++)
+        {
+            Result2 = ImageToTagTable.deleteRecords(new Record(ImageTags.getRecord(i)));
+        }
+        if (Result2 == 1)
+            System.out.print("Deleted from other tables\n");
+        if (Result1 == 1 || Result2 == 1)
+            return 1;
+        else
+            return 0;
     }
     
-    void deleteImage(Record r)
+    int deleteImage(Record r)
     {
-        ImageTable.deleteRecord(r);
+        int Result1 = 0;
+        int Result2 = 0;
+        IndexedTable ImageTags = getImageToTagTable().findMultiple(r.getField(0), 0);
+        Result1 = ImageTable.deleteRecord(r);
+        if (Result1 == 1)
+            System.out.print("Deleted from main table\n");
+        for (int i = 0; i < ImageTags.getNumFields(); i++)
+        {
+            Result2 = ImageToTagTable.deleteRecords(new Record(ImageTags.getRecord(i)));
+        }
+        if (Result2 == 1)
+            System.out.print("Deleted from other tables\n");
+        if (Result1 == 1 || Result2 == 1)
+            return 1;
+        else
+            return 0;
     }
     
     void addTag(String TagID, String Title)
@@ -116,6 +165,11 @@ class ImageDatabase
             return FoundRecord.getField(2);
     }
     
+    String[] getPossibleIDs(String Title)
+    {
+        return ImageTable.findMultiple(Title, 1).getCol(0);
+    }
+    
     Record getImageRecord(String ImageID)
     {
         Record FoundRecord;
@@ -125,4 +179,5 @@ class ImageDatabase
         else
             return FoundRecord;
     }
+    
 }
