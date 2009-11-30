@@ -36,7 +36,7 @@ class Table
         char TempChar;
         int TempInt;
         String FieldVal = "";
-        ArrayList FieldList = new ArrayList();
+        ArrayList<String> FieldList = new ArrayList<String>();
         String[] FieldArray;
         TheFile = new File(filename);
         Records = new Record[10];
@@ -65,7 +65,7 @@ class Table
                         Escaped = true;
                     else
                     {
-                        // If its an escape character convert back to real format
+                        // If its an escape character convert ba<String> ck to real format
                         if (Escaped)
                         {
                             if (TempChar == 'c')
@@ -94,7 +94,7 @@ class Table
                                     FieldVal = new String("");
                                     FieldArray = new String[FieldList.size()];
                                     FieldList.toArray(FieldArray);
-                                    FieldList = new ArrayList();
+                                    FieldList = new ArrayList<String>();
                                     // Check if the record is the first record (i.e. the header) and add accordingly
                                     if (IsHeader)
                                     {
