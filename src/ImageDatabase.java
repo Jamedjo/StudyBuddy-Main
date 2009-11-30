@@ -1,3 +1,4 @@
+import java.io.*;
 class ImageDatabase
 {
     private IndexedTable ImageTable;
@@ -11,6 +12,8 @@ class ImageDatabase
     ImageDatabase(String name)
     {
         Name = name;
+        NextTagID = 0;
+        NextImageID = 0;
         String[] ImageHeader = {"ImageID", "Title", "Filename"};
         ImageTable = new IndexedTable("ImageTable", new Record(ImageHeader));
         
@@ -26,7 +29,22 @@ class ImageDatabase
     
     ImageDatabase(String name, String filename)
     {
+        File IDFile;
+        FileReader TheStream;
+        BufferedReader FileInput;
         Name = name;
+        try
+        {
+            IDFile = new File(filename + "_ID");
+            TheStream = new FileReader(IDFile);
+            FileInput = new BufferedReader(TheStream);
+            NextImageID = Integer.parseInt(FileInput.readLine());
+            NextTagID = Integer.parseInt(FileInput.readLine());
+        }
+        catch (Exception TheError)
+        {
+            throw new Error(TheError);    
+        } 
         ImageTable = new IndexedTable("ImageTable", filename + "_ImageTable");
         TagTable = new IndexedTable("TagTable", filename + "_TagTable");
         ImageToTagTable = new IndexedTable("ImageToTagTable", filename + "_ImageToTagTable");
@@ -49,15 +67,33 @@ class ImageDatabase
     
     void store(String filename)
     {
+        File IDFile;
+        FileOutputStream TheStream;
+        PrintStream FileOutput;
+        try
+        {
+            IDFile = new File(filename + "_ID");
+            TheStream = new FileOutputStream(IDFile);
+            FileOutput = new PrintStream(TheStream);
+            FileOutput.print(Integer.toString(NextImageID));
+            FileOutput.print("\n");
+            FileOutput.print(Integer.toString(NextTagID));
+            FileOutput.print("\n");
+        }
+        catch (Exception TheError)
+        {
+            throw new Error(TheError);    
+        } 
         ImageTable.store(filename + "_ImageTable");
         TagTable.store(filename + "_TagTable");
         ImageToTagTable.store(filename + "_ImageToTagTable");
         TagToTagTable.store(filename + "_TagToTagTable");
     }
     
-    void addImage(String ImageID, String Title, String Filename)
+    void addImage(String Title, String Filename)
     {
-        String[] RecordString = { ImageID, Title, Filename };
+        String[] RecordString = {Integer.toString(NextImageID), Title, Filename };
+        NextImageID++;
         ImageTable.insertRecord(new Record(RecordString));
     }
     
@@ -102,9 +138,10 @@ class ImageDatabase
             return 0;
     }
     
-    void addTag(String TagID, String Title)
+    void addTag(String Title)
     {
-        String[] RecordString = { TagID, Title}; 
+        String[] RecordString = {Integer.toString(NextTagID), Title};
+        NextTagID++;
         TagTable.insertRecord(new Record(RecordString));
     }
     
@@ -178,6 +215,11 @@ class ImageDatabase
             throw new Error("ImageID not found");
         else
             return FoundRecord;
+    }
+    
+    String[] getAllFilenames()
+    {    
+        return ImageTable.getCol(2);
     }
     
 }
