@@ -92,6 +92,9 @@ class GUI implements ActionListener, ComponentListener{
 	bThumbsS = new JButton("Show Thumbnails");
         bThumbsS.addActionListener(this);
 
+	bAddTag = new JButton("Add Tag");
+        bAddTag.addActionListener(this);
+
 	bThumbsH = new JButton("HIde Thumbnails");
         bThumbsH.addActionListener(this);
 	bThumbsH.setVisible(false);
@@ -105,7 +108,8 @@ class GUI implements ActionListener, ComponentListener{
 	toolbarMain.addSeparator();       
 	toolbarMain.add(bThumbsS);        
 	toolbarMain.add(bThumbsH); 
-	toolbarMain.addSeparator();       
+	toolbarMain.addSeparator();
+	toolbarMain.add(bAddTag);        
 	//toolbarMain.add(bZoom); 
 
 	//workaround to prevent toolbar from steeling focus
@@ -205,6 +209,11 @@ class GUI implements ActionListener, ComponentListener{
 	    HideThumbs.setVisible(true);
 	    bThumbsH.setVisible(true);
         }
+
+	if(e.getSource()==bAddTag){
+		
+	}
+
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
 	    thumbPanel.setVisible(false);
 	    ShowThumbs.setVisible(true);
