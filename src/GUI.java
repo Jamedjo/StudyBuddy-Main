@@ -47,7 +47,7 @@ class GUI implements ActionListener, ComponentListener{
     }
 
     void quickRestart(){
-	state = new ProgramState(this);        
+	state = new ProgramState(this);
 
 	mainPanel = new MainPanel(this);
 	mainPanel.addComponentListener(this);
@@ -286,17 +286,21 @@ class ImageObject {
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
 class ProgramState{
-    ImageObject[] imageList = new ImageObject[5];
+    ImageDatabase mainImageDatabase;
+    ImageObject[] imageList;
     int lastIndex = 4;
     int currentI = 0;
     GUI mainGUI;
 
     ProgramState(GUI parentGUI){
-        imageList[0] = new ImageObject("img_2810b_small.jpg");
-        imageList[1] = new ImageObject("img_5672bp_small.jpg");
-        imageList[2] = new ImageObject("img_6088b_small.jpg");
-        imageList[3] = new ImageObject("img_2926_small.jpg");
-        imageList[4] = new ImageObject("img_F028c_small.jpg");
+//Create image database by loading database
+	mainImageDatabase = new ImageDatabase;
+	imageList = mainImageDatabase.getAllFilenames();
+        //imageList[0] = new ImageObject("img_2810b_small.jpg");
+        //imageList[1] = new ImageObject("img_5672bp_small.jpg");
+        //imageList[2] = new ImageObject("img_6088b_small.jpg");
+        //imageList[3] = new ImageObject("img_2926_small.jpg");
+        //imageList[4] = new ImageObject("img_F028c_small.jpg");
 	mainGUI = parentGUI;
     }
 
