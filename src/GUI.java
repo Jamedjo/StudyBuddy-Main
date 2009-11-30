@@ -249,6 +249,8 @@ mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagT
 			foundTags,
 			"Initials selection");
 state = new ProgramState(this,filterTag);
+mainPanel.repaint();
+thumbPanel.repaint();
 	    //mainImageDB.print();
 	}
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
@@ -418,11 +420,9 @@ class MainPanel extends JPanel {
     int boardW_start = 550;
     int boardH_start = 350;
     GUI mainGUI; //could be passed in contructor, it could be useful to know parent.
-    ProgramState state;
 
     MainPanel(GUI parentGUI) {
 	mainGUI = parentGUI;
-	state = mainGUI.state;
 	gridSize = new Dimension(boardW_start,boardH_start);
 	boardW = boardW_start;
 	boardH = boardH_start;
@@ -448,10 +448,10 @@ class MainPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 	//Set dimensions
-	useWH = state.scaleToMax(state.getCurrentImage().width,state.getCurrentImage().height, boardW, boardH);
+	useWH = mainGUI.state.scaleToMax(mainGUI.state.getCurrentImage().width,mainGUI.state.getCurrentImage().height, boardW, boardH);
 	int leftOfset = (boardW - useWH[0]) / 2;
 	int topOfset = (boardH - useWH[1]) / 2;
-	g2.drawImage(state.getCurrentImage().bImage, leftOfset, topOfset,useWH[0],useWH[1], this);
+	g2.drawImage(mainGUI.state.getCurrentImage().bImage, leftOfset, topOfset,useWH[0],useWH[1], this);
     }
 }
 
@@ -463,12 +463,10 @@ class ThumbPanel extends JPanel {
     int tileW = 5;
     int tileH = 1;
     int squareSize;
-    GUI mainGUI; //could be passed in contructor, it could be useful to know parent.
-    ProgramState state;
+    GUI mainGUI;
 
     ThumbPanel(GUI parentGUI) {
 	mainGUI = parentGUI;
-	state = mainGUI.state;
 	gridSize = new Dimension(boardW_start,boardH_start);
 	boardW = boardW_start;
 	boardH = boardH_start;
@@ -506,17 +504,17 @@ class ThumbPanel extends JPanel {
 
 	int leftOfset = (boardW - tileW*(squareSize+2)) /2;
 	int topOfset = 0;
-	int currentThumb = state.currentI;
+	int currentThumb = mainGUI.state.currentI;
 	int thumbOfsetW =0;
 	int thumbOfsetH = 0;
 	for(int i = 0; i<tileW;i++){
 	    //set dimension
-	    useWH = state.scaleToMax(state.imageList[currentThumb].width,state.imageList[currentThumb].height, squareSize, squareSize);
+	    useWH = mainGUI.state.scaleToMax(mainGUI.state.imageList[currentThumb].width,mainGUI.state.imageList[currentThumb].height, squareSize, squareSize);
 	    thumbOfsetW= (squareSize - useWH[0])/2;
 	    thumbOfsetH= (squareSize - useWH[1])/2;
-	    g2.drawImage(state.imageList[currentThumb].bImage, leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
+	    g2.drawImage(mainGUI.state.imageList[currentThumb].bImage, leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
 	leftOfset+=(squareSize + 2);
-	currentThumb = state.next(currentThumb);
+	currentThumb = mainGUI.state.next(currentThumb);
 	}
     }
 }
