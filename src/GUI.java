@@ -17,7 +17,7 @@ class GUI implements ActionListener, ComponentListener{
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, helpMenu;
     JMenuItem mRestart, NextImage, PrevImage,ShowThumbs,HideThumbs, Options, Exit, About, Help;
-    JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom;
+    JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag;
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
