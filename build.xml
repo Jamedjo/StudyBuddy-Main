@@ -20,7 +20,7 @@
 	</target>
 
 	<target name="run" depends="init,compile">
-		<java classname="GUI">
+		<java classname="GUI" fork="true">
 			<classpath>
 				<fileset dir="${lib}" includes="**/*.jar"/>
 				<path location="${build}"/>
