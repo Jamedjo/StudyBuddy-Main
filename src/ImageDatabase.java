@@ -231,7 +231,7 @@ class ImageDatabase
     String getTagIDFromTagTitle(String TagTitle)
     {
         Record TempRecord = new Record(TagTable.findSingle(TagTitle, 1));
-        if (Record == null)
+        if (TempRecord == null)
             return null;
         else
             return TempRecord.getField(0);
