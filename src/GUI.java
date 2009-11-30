@@ -304,17 +304,26 @@ class ImageObject {
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
 class ProgramState{
-    ImageObject[] imageList = new ImageObject[5];
+    ImageDatabase mainImageDatabase;
+    ImageObject[] imageList;
+    String[] imageFiles;
     int lastIndex = 4;
     int currentI = 0;
     GUI mainGUI;
 
     ProgramState(GUI parentGUI){
-        imageList[0] = new ImageObject("img_2810b_small.jpg");
-        imageList[1] = new ImageObject("img_5672bp_small.jpg");
-        imageList[2] = new ImageObject("img_6088b_small.jpg");
-        imageList[3] = new ImageObject("img_2926_small.jpg");
-        imageList[4] = new ImageObject("img_F028c_small.jpg");
+	//Create image database by loading database
+	mainImageDatabase = new ImageDatabase("mainDB");
+	mainImageDatabase.addImage("Title 1","img_2810b_small.jpg");
+	mainImageDatabase.addImage("Title 1","img_6088b_small.jpg");
+	mainImageDatabase.addImage("Title 1","img_5672bp_small.jpg");
+	mainImageDatabase.addImage("Title 1","img_2926_small.jpg");
+	mainImageDatabase.addImage("Title 1","img_F028c_small.jpg");
+	imageFiles = mainImageDatabase.getAllFilenames();
+	imageList = new ImageObject[imageFiles.length];
+	for(int i=0; i<imageFiles.length;i++){
+	    imageList[i] = new ImageObject(imageFiles[i]);
+	}
 	mainGUI = parentGUI;
     }
 
