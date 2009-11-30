@@ -9,11 +9,11 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane.*;
 
- //Program stucture needs to be redesigned to implement SwingWorker threads to load images
- //Each image will be published once loaded and the worker will be done when all are loaded
- //This prevents loading large images from freezing/crashing the program,
- //allows the GUI to load quicker at startup instead of waiting for all images to load
- //and allows for the worker to be cancelled if it is too slow.
+//Program stucture needs to be redesigned to implement SwingWorker threads to load images
+//Each image will be published once loaded and the worker will be done when all are loaded
+//This prevents loading large images from freezing/crashing the program,
+//allows the GUI to load quicker at startup instead of waiting for all images to load
+//and allows for the worker to be cancelled if it is too slow.
 
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
 class GUI implements ActionListener, ComponentListener{
@@ -207,7 +207,7 @@ class GUI implements ActionListener, ComponentListener{
     }
 
     public void actionPerformed(ActionEvent e){
-          if(e.getSource()==mRestart) {
+	if(e.getSource()==mRestart) {
             quickRestart();
         }
         if(e.getSource()==NextImage || e.getSource()==bNext) {
@@ -225,39 +225,39 @@ class GUI implements ActionListener, ComponentListener{
         }
 	if(e.getSource()==bAddTag){
 	    String newTag = JOptionPane.showInputDialog(
-			w, 
-			"What Tag would you like to add?", 
-			"Create Tag", 
-			JOptionPane.PLAIN_MESSAGE);
+							w, 
+							"What Tag would you like to add?", 
+							"Create Tag", 
+							JOptionPane.PLAIN_MESSAGE);
 	    mainImageDB.addTag(newTag);
 	    //mainImageDB.print();
 	}
 	if(e.getSource()==bTagThis){
 	    Object[] foundTags = mainImageDB.getAllTagTitles();
 	    String newTag = (String)JOptionPane.showInputDialog(
-			w, 
-			"Which tag would you like to add to this image?", 
-			"Add Tag to image", 
-			JOptionPane.PLAIN_MESSAGE,
-			null,
-			foundTags,
-			"Initials selection");
-mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
+								w, 
+								"Which tag would you like to add to this image?", 
+								"Add Tag to image", 
+								JOptionPane.PLAIN_MESSAGE,
+								null,
+								foundTags,
+								"Initials selection");
+	    mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
 	    //mainImageDB.print();
 	}
 	if(e.getSource()==bTagFilter){
 	    Object[] foundTags = mainImageDB.getAllTagTitles();
 	    String filterTag = (String)JOptionPane.showInputDialog(
-			w, 
-			"Which tag would you like to add to this image?", 
-			"Add Tag to image", 
-			JOptionPane.PLAIN_MESSAGE,
-			null,
-			foundTags,
-			"Initials selection");
-state = new ProgramState(this,filterTag);
-mainPanel.repaint();
-thumbPanel.repaint();
+								   w, 
+								   "Which tag would you like to add to this image?", 
+								   "Add Tag to image", 
+								   JOptionPane.PLAIN_MESSAGE,
+								   null,
+								   foundTags,
+								   "Initials selection");
+	    state = new ProgramState(this,filterTag);
+	    mainPanel.repaint();
+	    thumbPanel.repaint();
 	    //mainImageDB.print();
 	}
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
@@ -281,17 +281,17 @@ thumbPanel.repaint();
 
     public void componentResized(ComponentEvent e) {
 	// if(e.getSource()==boardScroll) {
- if(e.getSource()==mainPanel) {
+	if(e.getSource()==mainPanel) {
             mainPanel.onResize();
 	    thumbPanel.onResize();
         }
-// 	if(e.getSource()==w){
-// 	    int newWidth = w.getWidth();
-// 	    int newHeight = w.getHeight();
-// 	    if(newWidth<200) newWidth = 200;
-// 	    if(newHeight<200) newHeight = 200;
-// 	    w.setSize(newWidth,newHeight);
-// 	}
+	// 	if(e.getSource()==w){
+	// 	    int newWidth = w.getWidth();
+	// 	    int newHeight = w.getHeight();
+	// 	    if(newWidth<200) newWidth = 200;
+	// 	    if(newHeight<200) newHeight = 200;
+	// 	    w.setSize(newWidth,newHeight);
+	// 	}
     }
 
     public void componentHidden(ComponentEvent e){}
@@ -316,7 +316,7 @@ class ImageObject {
             bImage = ImageIO.read(urlAddress);
             //File fileAddress = new File(relativeURL);
             //img = ImageIO.read(fileAddress)
-;
+	    ;
             width = bImage.getWidth(null);
             height = bImage.getHeight(null);
 	    if(height<width) iOri = Orientation.Landscape;
@@ -516,7 +516,7 @@ class ThumbPanel extends JPanel {
 	int currentThumb = mainGUI.state.currentI;
 	int thumbOfsetW =0;
 	int thumbOfsetH = 0;
-	for(int i = 0; i<tileW;i++){
+	for(int i = 0; (i<tileW)&&(i<mainGUI.state.imageIDs.length);i++){
 	    //set dimension
 	    currentThumb = mainGUI.state.next(currentThumb);
 	    useWH = mainGUI.state.scaleToMax(mainGUI.state.imageList[currentThumb].width,mainGUI.state.imageList[currentThumb].height, squareSize, squareSize);

@@ -154,7 +154,7 @@ class IndexedTable
         {
             if (Field == 0)
             {
-                System.out.print("Searching for " + SearchFor + "\n");
+                //System.out.print("Searching for " + SearchFor + "\n");
                 Index = MainTable.find(SearchFor);   
                     if (Index == -1)
                         return null;

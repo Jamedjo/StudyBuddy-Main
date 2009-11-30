@@ -216,7 +216,7 @@ class ImageDatabase
                 for (int j = 0; j < TempTable.getNumRecords(); j++)
                 {
                     Result.insertRecord(new Record(TempTable.getRecord(j)));
-                    Result.print();
+                    //Result.print();
                 }
             }
             if (Result.getNumRecords() == 0)

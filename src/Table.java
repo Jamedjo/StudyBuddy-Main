@@ -274,8 +274,10 @@ class Table
         {
             mid = (low + high)/2;
             if (SearchFor == null)
+	    {
                 System.out.print("SearchFor is null\n");
-            System.out.print("mid is " + mid + "\n");
+	    }
+            //System.out.print("mid is " + mid + "\n");
             if (SearchFor.compareTo(Records[mid].getField(0)) < 0)
                 high = mid;
             else
