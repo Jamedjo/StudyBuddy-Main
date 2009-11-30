@@ -221,8 +221,8 @@ class GUI implements ActionListener, ComponentListener{
 	    //state.mainImageDB.print();
 	}
 	if(e.getSource()==bTagThis){
-	    Object[] foundTags = getAllTagTitles();
-	    String newTag = JOptionPane.showInputDialog(
+	    Object[] foundTags = state.mainImageDB.getAllTagTitles();
+	    String newTag = (String)JOptionPane.showInputDialog(
 			w, 
 			"Which tag would you like to add to this image?", 
 			"Add Tag to image", 
@@ -230,7 +230,6 @@ class GUI implements ActionListener, ComponentListener{
 			null,
 			foundTags,
 			"Initials selection");
-	    state.mainImageDB.addTag(newTag);
 	    //state.mainImageDB.print();
 	}
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
