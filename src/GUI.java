@@ -14,13 +14,14 @@ class GUI implements ActionListener, ComponentListener{
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, helpMenu;
     JMenuItem mRestart, NextImage, PrevImage,ShowThumbs,HideThumbs, Options, Exit, About, Help;
-    JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag, bTagThis;
+    JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag, bTagThis, bTagFilter;
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
     JScrollPane boardScroll;
     ProgramState state;
     JOptionPane tagBox;
+    ImageDatabase mainImageDB;
 
 
     public static void main(String[] args){
@@ -96,6 +97,9 @@ class GUI implements ActionListener, ComponentListener{
 	bTagThis = new JButton("Tag This Image");
         bTagThis.addActionListener(this);
 
+	bTagFilter = new JButton("Filter By Tag");
+        bTagFilter.addActionListener(this);
+
 	bThumbsH = new JButton("HIde Thumbnails");
         bThumbsH.addActionListener(this);
 	bThumbsH.setVisible(false);
@@ -112,6 +116,7 @@ class GUI implements ActionListener, ComponentListener{
 	toolbarMain.addSeparator();
 	toolbarMain.add(bAddTag);
 	toolbarMain.add(bTagThis);
+	toolbarMain.add(bTagFilter);
 	//toolbarMain.add(bZoom); 
 
 	//workaround to prevent toolbar from steeling focus
@@ -217,11 +222,11 @@ class GUI implements ActionListener, ComponentListener{
 			"What Tag would you like to add?", 
 			"Create Tag", 
 			JOptionPane.PLAIN_MESSAGE);
-	    state.mainImageDB.addTag(newTag);
-	    //state.mainImageDB.print();
+	    mainImageDB.addTag(newTag);
+	    //mainImageDB.print();
 	}
 	if(e.getSource()==bTagThis){
-	    Object[] foundTags = state.mainImageDB.getAllTagTitles();
+	    Object[] foundTags = mainImageDB.getAllTagTitles();
 	    String newTag = (String)JOptionPane.showInputDialog(
 			w, 
 			"Which tag would you like to add to this image?", 
@@ -230,7 +235,21 @@ class GUI implements ActionListener, ComponentListener{
 			null,
 			foundTags,
 			"Initials selection");
-	    //state.mainImageDB.print();
+mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
+	    //mainImageDB.print();
+	}
+	if(e.getSource()==bTagFilter){
+	    Object[] foundTags = mainImageDB.getAllTagTitles();
+	    String filterTag = (String)JOptionPane.showInputDialog(
+			w, 
+			"Which tag would you like to add to this image?", 
+			"Add Tag to image", 
+			JOptionPane.PLAIN_MESSAGE,
+			null,
+			foundTags,
+			"Initials selection");
+state = new ProgramState(this,filterTag);
+	    //mainImageDB.print();
 	}
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
 	    thumbPanel.setVisible(false);
@@ -305,7 +324,6 @@ class ImageObject {
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
 class ProgramState{
-    ImageDatabase mainImageDB;
     ImageObject[] imageList;
     String[] imageIDs;
     int lastIndex = 4;
@@ -313,21 +331,34 @@ class ProgramState{
     GUI mainGUI;
 
     ProgramState(GUI parentGUI){
+	mainGUI = parentGUI;
+
 	//Create image database by loading database
-	mainImageDB = new ImageDatabase("mainDB");
-	mainImageDB.addImage("Title 1","img_2810b_small.jpg");
-	mainImageDB.addImage("Title 1","img_6088b_small.jpg");
-	mainImageDB.addImage("Title 1","img_5672bp_small.jpg");
-	mainImageDB.addImage("Title 1","img_2926_small.jpg");
-	mainImageDB.addImage("Title 1","img_F028c_small.jpg");
+	mainGUI.mainImageDB = new ImageDatabase("mainDB");
+	mainGUI.mainImageDB.addImage("Title 1","img_2810b_small.jpg");
+	mainGUI.mainImageDB.addImage("Title 1","img_6088b_small.jpg");
+	mainGUI.mainImageDB.addImage("Title 1","img_5672bp_small.jpg");
+	mainGUI.mainImageDB.addImage("Title 1","img_2926_small.jpg");
+	mainGUI.mainImageDB.addImage("Title 1","img_F028c_small.jpg");
 	
-imageIDs = mainImageDB.getAllImageIDs();
+	imageIDs = mainGUI.mainImageDB.getAllImageIDs();
 
 	imageList = new ImageObject[imageIDs.length];
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainImageDB.getImageFilename(imageIDs[i]));
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
+    }
+	
+    ProgramState(GUI parentGUI, String filterTag){
 	mainGUI = parentGUI;
+
+	//Create image database by loading database	
+	imageIDs = mainGUI.mainImageDB.getImageIDsFromTagTitle(filterTag);
+
+	imageList = new ImageObject[imageIDs.length];
+	for(int i=0; i<imageIDs.length;i++){
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
+	}
     }
 
     int next(int val){
