@@ -228,6 +228,15 @@ class ImageDatabase
             return null;
     }
     
+    String getTagIDFromTagTitle(String TagTitle)
+    {
+        Record TempRecord = new Record(TagTable.findSingle(TagTitle, 1));
+        if (Record == null)
+            return null;
+        else
+            return TempRecord.getField(0);
+    }  
+    
     String[] getFilenamesFromTagTitle(String TagTitle)
     {
         IndexedTable TempTable;
