@@ -7,6 +7,8 @@ import javax.swing.border.*;
 import javax.imageio.*;
 import java.io.*;
 import java.net.*;
+import javax.swing.JOptionPane.*;
+
 
 //would be useful if database could store both portrait/landscape orientation, and up,down,left,right rotate orientation.
 //on second thoughts, storing width and heigh gives you p/l and is needed for scaling anyway
@@ -23,6 +25,7 @@ class GUI implements ActionListener, ComponentListener{
     JToolBar toolbarMain;
     JScrollPane boardScroll;
     ProgramState state;
+    JOptionPane tagBox;
 
 
     public static void main(String[] args){
@@ -47,7 +50,7 @@ class GUI implements ActionListener, ComponentListener{
     }
 
     void quickRestart(){
-	state = new ProgramState(this);
+	state = new ProgramState(this);        
 
 	mainPanel = new MainPanel(this);
 	mainPanel.addComponentListener(this);
@@ -59,6 +62,16 @@ class GUI implements ActionListener, ComponentListener{
 
 	toolbarMain = new JToolBar("StudyBuddy Toolbar");
 	toolbarMain.setFocusable(false);
+
+	//Create GUI elements here
+
+	//tagBox
+	//tagBox = new JOptionPane(this);
+	//tagBox.setVisible(false);
+	
+	
+			
+			
 
 	//boardScroll = new JScrollPane(mainPanel);
 	//boardScroll.addComponentListener(this);
@@ -211,7 +224,12 @@ class GUI implements ActionListener, ComponentListener{
         }
 
 	if(e.getSource()==bAddTag){
-		
+	    String s = JOptionPane.showInputDialog(
+			w, 
+			"What Tag would you like to add?\n", 
+			"Create Tag\n", 
+			JOptionPane.PLAIN_MESSAGE);
+	    
 	}
 
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
@@ -286,26 +304,17 @@ class ImageObject {
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
 class ProgramState{
-    ImageDatabase mainImageDatabase;
-    ImageObject[] imageList;
-    String[] imageFiles;
+    ImageObject[] imageList = new ImageObject[5];
     int lastIndex = 4;
     int currentI = 0;
     GUI mainGUI;
 
     ProgramState(GUI parentGUI){
-	//Create image database by loading database
-	mainImageDatabase = new ImageDatabase("mainDB");
-	mainImageDatabase.addImage("Title 1","img_2810b_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_6088b_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_5672bp_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_2926_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_F028c_small.jpg");
-	imageFiles = mainImageDatabase.getAllFilenames();
-	imageList = new ImageObject[imageFiles.length];
-	for(int i=0; i<imageFiles.length;i++){
-	    imageList[i] = new ImageObject(imageFiles[i]);
-	}
+        imageList[0] = new ImageObject("img_2810b_small.jpg");
+        imageList[1] = new ImageObject("img_5672bp_small.jpg");
+        imageList[2] = new ImageObject("img_6088b_small.jpg");
+        imageList[3] = new ImageObject("img_2926_small.jpg");
+        imageList[4] = new ImageObject("img_F028c_small.jpg");
 	mainGUI = parentGUI;
     }
 
