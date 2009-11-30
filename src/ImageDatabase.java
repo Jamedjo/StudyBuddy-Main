@@ -90,11 +90,12 @@ class ImageDatabase
         TagToTagTable.store(filename + "_TagToTagTable");
     }
     
-    void addImage(String Title, String Filename)
+    String addImage(String Title, String Filename)
     {
         String[] RecordString = {Integer.toString(NextImageID), Title, Filename };
         NextImageID++;
         ImageTable.insertRecord(new Record(RecordString));
+        return Integer.toString(NextImageID - 1);
     }
     
     int deleteImage(String ImageID, String Title, String Filename)
@@ -138,11 +139,12 @@ class ImageDatabase
             return 0;
     }
     
-    void addTag(String Title)
+    String addTag(String Title)
     {
         String[] RecordString = {Integer.toString(NextTagID), Title};
         NextTagID++;
         TagTable.insertRecord(new Record(RecordString));
+        return Integer.toString(NextTagID - 1);
     }
     
     void tagImage(String ImageID, String TagID)
@@ -169,14 +171,19 @@ class ImageDatabase
                 TagToTagTable.insertRecord(new Record(RecordString));
     }
     
-    IndexedTable getImagesFromTag(String TagID)
+    // Produce a sub table of Images that are tagged with the TagID
+    IndexedTable getImagesFromTagID(String TagID)
     {
         IndexedTable Result;
         IndexedTable ImageIDs;
+        // Produce a table of ImageIDs that are tagged with the TagID
         ImageIDs = ImageToTagTable.findMultiple(TagID, 1);
+        // Result is an indexed table in the format of ImageTable
         Result = new IndexedTable("Result Table", ImageTable.getHeader());
+        // Check there are ImageIDs with the Tag
         if (ImageIDs != null)
         {
+            // For all the ImageIDs find the complete image record and add it to the result table
             for (int i = 0; i < ImageIDs.getNumRecords(); i++)
             {
                 Result.insertRecord(new Record(ImageTable.findSingle(ImageIDs.getRecord(i).getField(0), 0)));
@@ -187,9 +194,58 @@ class ImageDatabase
             return null;
     }
     
+    // Produce a sub table of Images that are tagged with the TagTitle
+    IndexedTable getImagesFromTagTitle(String TagTitle)
+    {
+        IndexedTable Result;
+        IndexedTable TagIDs;
+        IndexedTable TempTable;
+        //  Find all TagIDs that have the required title
+        TagIDs = TagTable.findMultiple(TagTitle, 1);
+        //  Result is an indexed table in the format of ImageTable
+        Result = new IndexedTable("Result Table", ImageTable.getHeader());
+        // If there are tags with the title
+        if (TagIDs != null)
+        {
+            // For all the TagIDs find all images with the TagID and add them to the result table
+            for (int i = 0; i < TagIDs.getNumRecords(); i++)
+            {
+                // Get all images with the tag
+                TempTable = getImagesFromTagID(TagIDs.getRecord(i).getField(0));
+                // Add all images with the tag to the results table
+                for (int j = 0; j < TempTable.getNumRecords(); j++)
+                {
+                    Result.insertRecord(new Record(TempTable.getRecord(j)));
+                    Result.print();
+                }
+            }
+            if (Result.getNumRecords() == 0)
+                return null;
+            else
+                return Result;
+        }
+        else
+            return null;
+    }
+    
+    String[] getFilenamesFromTagTitle(String TagTitle)
+    {
+        IndexedTable TempTable;
+        TempTable = getImagesFromTagTitle(TagTitle);
+        if (TempTable == null)
+            return null;
+        else
+            return TempTable.getCol(2);
+    }
+    
     String[] getAllImageIDs()
     {
         return ImageTable.getCol(0);
+    }
+    
+    String[] getAllTagTitles()
+    {
+        return TagTable.getCol(1);
     }
     
     String getImageFilename(String ImageID)
@@ -221,5 +277,5 @@ class ImageDatabase
     {    
         return ImageTable.getCol(2);
     }
-    
+
 }
