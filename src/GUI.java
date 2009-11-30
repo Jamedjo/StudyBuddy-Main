@@ -9,17 +9,12 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane.*;
 
-
-//would be useful if database could store both portrait/landscape orientation, and up,down,left,right rotate orientation.
-//on second thoughts, storing width and heigh gives you p/l and is needed for scaling anyway
-//and u/d/l/r is in exif data.... and these can be stored in ImageObject type anyway.
-
 class GUI implements ActionListener, ComponentListener{
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, helpMenu;
     JMenuItem mRestart, NextImage, PrevImage,ShowThumbs,HideThumbs, Options, Exit, About, Help;
-    JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag;
+    JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag, bTagThis;
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
@@ -35,7 +30,7 @@ class GUI implements ActionListener, ComponentListener{
 
     void play(){
         w = new JFrame();
-        w.setTitle("Study Buddy 0.2alpha");
+        w.setTitle("Study Buddy 0.3alpha");
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
         buildMenu();
         w.setJMenuBar(menuBar);
@@ -62,16 +57,6 @@ class GUI implements ActionListener, ComponentListener{
 
 	toolbarMain = new JToolBar("StudyBuddy Toolbar");
 	toolbarMain.setFocusable(false);
-
-	//Create GUI elements here
-
-	//tagBox
-	//tagBox = new JOptionPane(this);
-	//tagBox.setVisible(false);
-	
-	
-			
-			
 
 	//boardScroll = new JScrollPane(mainPanel);
 	//boardScroll.addComponentListener(this);
@@ -108,6 +93,9 @@ class GUI implements ActionListener, ComponentListener{
 	bAddTag = new JButton("Add Tag");
         bAddTag.addActionListener(this);
 
+	bTagThis = new JButton("Tag This Image");
+        bTagThis.addActionListener(this);
+
 	bThumbsH = new JButton("HIde Thumbnails");
         bThumbsH.addActionListener(this);
 	bThumbsH.setVisible(false);
@@ -116,13 +104,14 @@ class GUI implements ActionListener, ComponentListener{
         //bZoom.addActionListener(this);
 
 	toolbarMain.addSeparator(); 
-	toolbarMain.add(bPrev);        
+	toolbarMain.add(bPrev);
 	toolbarMain.add(bNext); 
-	toolbarMain.addSeparator();       
-	toolbarMain.add(bThumbsS);        
+	toolbarMain.addSeparator();
+	toolbarMain.add(bThumbsS);
 	toolbarMain.add(bThumbsH); 
 	toolbarMain.addSeparator();
-	toolbarMain.add(bAddTag);        
+	toolbarMain.add(bAddTag);
+	toolbarMain.add(bTagThis);
 	//toolbarMain.add(bZoom); 
 
 	//workaround to prevent toolbar from steeling focus
@@ -222,16 +211,28 @@ class GUI implements ActionListener, ComponentListener{
 	    HideThumbs.setVisible(true);
 	    bThumbsH.setVisible(true);
         }
-
 	if(e.getSource()==bAddTag){
-	    String s = JOptionPane.showInputDialog(
+	    String newTag = JOptionPane.showInputDialog(
 			w, 
-			"What Tag would you like to add?\n", 
-			"Create Tag\n", 
+			"What Tag would you like to add?", 
+			"Create Tag", 
 			JOptionPane.PLAIN_MESSAGE);
-	    
+	    state.mainImageDB.addTag(newTag);
+	    //state.mainImageDB.print();
 	}
-
+	if(e.getSource()==bTagThis){
+	    Object[] foundTags = getAllTagTitles();
+	    String newTag = JOptionPane.showInputDialog(
+			w, 
+			"Which tag would you like to add to this image?", 
+			"Add Tag to image", 
+			JOptionPane.PLAIN_MESSAGE,
+			null,
+			foundTags,
+			"Initials selection");
+	    state.mainImageDB.addTag(newTag);
+	    //state.mainImageDB.print();
+	}
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
 	    thumbPanel.setVisible(false);
 	    ShowThumbs.setVisible(true);
@@ -280,6 +281,7 @@ class ImageObject {
     BufferedImage bImage;
     Orientation iOri;
     int width,height;
+    String imageID;
 
     ImageObject(String relativeURL){//,MainPanel parentPane) {
         try {
@@ -304,25 +306,27 @@ class ImageObject {
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
 class ProgramState{
-    ImageDatabase mainImageDatabase;
+    ImageDatabase mainImageDB;
     ImageObject[] imageList;
-    String[] imageFiles;
+    String[] imageIDs;
     int lastIndex = 4;
     int currentI = 0;
     GUI mainGUI;
 
     ProgramState(GUI parentGUI){
 	//Create image database by loading database
-	mainImageDatabase = new ImageDatabase("mainDB");
-	mainImageDatabase.addImage("Title 1","img_2810b_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_6088b_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_5672bp_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_2926_small.jpg");
-	mainImageDatabase.addImage("Title 1","img_F028c_small.jpg");
-	imageFiles = mainImageDatabase.getAllFilenames();
-	imageList = new ImageObject[imageFiles.length];
-	for(int i=0; i<imageFiles.length;i++){
-	    imageList[i] = new ImageObject(imageFiles[i]);
+	mainImageDB = new ImageDatabase("mainDB");
+	mainImageDB.addImage("Title 1","img_2810b_small.jpg");
+	mainImageDB.addImage("Title 1","img_6088b_small.jpg");
+	mainImageDB.addImage("Title 1","img_5672bp_small.jpg");
+	mainImageDB.addImage("Title 1","img_2926_small.jpg");
+	mainImageDB.addImage("Title 1","img_F028c_small.jpg");
+	
+imageIDs = mainImageDB.getAllImageIDs();
+
+	imageList = new ImageObject[imageIDs.length];
+	for(int i=0; i<imageIDs.length;i++){
+	    imageList[i] = new ImageObject(mainImageDB.getImageFilename(imageIDs[i]));
 	}
 	mainGUI = parentGUI;
     }
