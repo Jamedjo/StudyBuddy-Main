@@ -9,6 +9,13 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane.*;
 
+ //Program stucture needs to be redesigned to implement SwingWorker threads to load images
+ //Each image will be published once loaded and the worker will be done when all are loaded
+ //This prevents loading large images from freezing/crashing the program,
+ //allows the GUI to load quicker at startup instead of waiting for all images to load
+ //and allows for the worker to be cancelled if it is too slow.
+
+//Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
 class GUI implements ActionListener, ComponentListener{
     JFrame w;
     JMenuBar menuBar;
@@ -276,7 +283,7 @@ thumbPanel.repaint();
 	// if(e.getSource()==boardScroll) {
  if(e.getSource()==mainPanel) {
             mainPanel.onResize();
-	    //thumbPanel.onResize();
+	    thumbPanel.onResize();
         }
 // 	if(e.getSource()==w){
 // 	    int newWidth = w.getWidth();
@@ -328,7 +335,7 @@ class ImageObject {
 class ProgramState{
     ImageObject[] imageList;
     String[] imageIDs;
-    int lastIndex = 4;
+    int lastIndex; //Must be updated when number of images changes
     int currentI = 0;
     GUI mainGUI;
 
@@ -349,6 +356,7 @@ class ProgramState{
 	for(int i=0; i<imageIDs.length;i++){
 	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
+	lastIndex = (imageIDs.length - 1);
     }
 	
     ProgramState(GUI parentGUI, String filterTag){
@@ -361,6 +369,7 @@ class ProgramState{
 	for(int i=0; i<imageIDs.length;i++){
 	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
+	lastIndex = (imageIDs.length - 1);
     }
 
     int next(int val){
@@ -509,12 +518,12 @@ class ThumbPanel extends JPanel {
 	int thumbOfsetH = 0;
 	for(int i = 0; i<tileW;i++){
 	    //set dimension
+	    currentThumb = mainGUI.state.next(currentThumb);
 	    useWH = mainGUI.state.scaleToMax(mainGUI.state.imageList[currentThumb].width,mainGUI.state.imageList[currentThumb].height, squareSize, squareSize);
 	    thumbOfsetW= (squareSize - useWH[0])/2;
 	    thumbOfsetH= (squareSize - useWH[1])/2;
 	    g2.drawImage(mainGUI.state.imageList[currentThumb].bImage, leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
-	leftOfset+=(squareSize + 2);
-	currentThumb = mainGUI.state.next(currentThumb);
+	    leftOfset+=(squareSize + 2);
 	}
     }
 }
