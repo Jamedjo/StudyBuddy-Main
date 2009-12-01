@@ -9,7 +9,6 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane.*;
 
-//The tag "Show All Images" is not a valid tag anymore as it shows all images. This is potenially a bug.
 
 //Program stucture needs to be redesigned to implement SwingWorker threads to load images
 //Each image will be published once loaded and the worker will be done when all are loaded
@@ -22,8 +21,9 @@ class GUI implements ActionListener, ComponentListener{
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
-    JMenuItem mRestart, NextImage, PrevImage,ShowThumbs,HideThumbs, AddTag, TagThis, TagFilter, Options, Exit, About, Help;
-    JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag, bTagThis, bTagFilter;
+    JMenuItem mRestart, mImport, NextImage, PrevImage,ShowThumbs,HideThumbs, AddTag, TagThis, TagFilter, Options, Exit, About, Help;
+    JButton bPrev, bNext, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag, bTagThis, bTagFilter;
+    final JFileChooser fileGetter = new JFileChooser();
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
@@ -152,6 +152,10 @@ class GUI implements ActionListener, ComponentListener{
         imageMenu = new JMenu("Image");
         imageMenu.setMnemonic(KeyEvent.VK_I);
 
+        mImport = new JMenuItem("Import Image",KeyEvent.VK_I);//Will become imageS and have seperate for directoryS
+        mImport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK));
+        mImport.addActionListener(this);
+
         mRestart = new JMenuItem("Restart Viewer",KeyEvent.VK_R);
         mRestart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
         mRestart.addActionListener(this);
@@ -159,7 +163,7 @@ class GUI implements ActionListener, ComponentListener{
         Exit = new JMenuItem("Exit",KeyEvent.VK_X);
         Exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
         Exit.addActionListener(this);
-
+	imageMenu.add(mImport);
         imageMenu.add(mRestart);
         imageMenu.add(Exit);
     }
@@ -233,6 +237,13 @@ class GUI implements ActionListener, ComponentListener{
     }
 
     public void actionPerformed(ActionEvent e){
+	if(e.getSource()==mImport) {
+	    int wasGot = fileGetter.showOpenDialog(w);
+	    if(wasGot==JFileChooser.APPROVE_OPTION){
+		state.importImage(fileGetter.getSelectedFile().getAbsolutePath());
+	    }
+	    return;
+	}
 	if(e.getSource()==mRestart) {
             quickRestart();
 	    return;
@@ -305,8 +316,6 @@ class GUI implements ActionListener, ComponentListener{
 		else {
 		    state = new ProgramState(LoadType.Filter,this,filterTag);
 		}
-		mainPanel.repaint();
-		thumbPanel.repaint();
 		//mainImageDB.print();
                 return;
             }
@@ -360,29 +369,78 @@ class GUI implements ActionListener, ComponentListener{
 enum Orientation {Landscape,Portrait}
 
 class ImageObject {
-    BufferedImage bImage;
+    BufferedImage bImage = null;
     Orientation iOri;
     int width,height;
-    String imageID;
+    //String imageID;
 
-    ImageObject(String relativeURL){//,MainPanel parentPane) {
+    ImageObject(String absoluteURL){
+	URL urlAddress;
+	if(absoluteURL.startsWith("///\\\\\\")){
+	    String relativeURL = absoluteURL.substring(6);
+	    //System.out.println(relativeURL +  " is relative and absolute is " + absoluteURL);
+	    urlAddress = GUI.class.getResource(relativeURL); //could be null
+	}
+	else {
+	    File file = new File(absoluteURL);
+	    try{
+		//URI uriT = new URI(absoluteURL);
+		urlAddress = file.toURI().toURL();
+		System.out.println(absoluteURL +  " is absolute and file is "+file.toString() +" and URL is " + urlAddress.toString());
+	    } catch (MalformedURLException e){
+		urlAddress = null;
+		System.err.println("Image file " + absoluteURL + " could not be found " + "\nError was: " + e.toString());
+	    }
+	}
+    if(urlAddress==null){
+	System.err.println("File could not be found at " + absoluteURL);
+	}
+	ImageObjectConstructor(urlAddress,absoluteURL);
+    }
+
+    ImageObject(URL urlAddress){
+	String absoluteURL = urlAddress.toString();//should find absoluteURL for printing
+	ImageObjectConstructor(urlAddress,absoluteURL);
+    }
+
+    //ImageObject(URL urlAddress, String absoluteURL){
+    //	ImageObjectConstructor(urlAddress, absoluteURL);
+    //}
+
+    void ImageObjectConstructor(URL urlAddress, String absoluteURL){
         try {
-            URL urlAddress = GUI.class.getResource(relativeURL);
             bImage = ImageIO.read(urlAddress);
             //File fileAddress = new File(relativeURL);
             //img = ImageIO.read(fileAddress)
-	    ;
-            width = bImage.getWidth(null);
-            height = bImage.getHeight(null);
-	    if(height<width) iOri = Orientation.Landscape;
-	    else iOri = Orientation.Portrait;
+	    setVars();
 
-            //img2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
         } catch (IOException e) {
-	    System.err.println("Error Loading Image" + e.toString());
+	    System.err.println("Error loading image " + absoluteURL + "\nError was: " + e.toString());
+	    setToXasFileNotFound();
 	    //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
-        }
+        } catch (IllegalArgumentException e) {
+	    System.err.println("Image file " + absoluteURL + " could not be found " + "\nError was: " + e.toString());
+	    setToXasFileNotFound();
+	} catch (NullPointerException e) {
+	    System.err.println("Could not load image from file " + absoluteURL + "\nError was: " + e.toString());
+	    setToXasFileNotFound();
+	}
     }
+
+    void setVars(){
+	width = bImage.getWidth(null);
+	height = bImage.getHeight(null);
+	if(height<width) iOri = Orientation.Landscape;
+	else iOri = Orientation.Portrait;
+    }
+
+    void setToXasFileNotFound(){
+	//set the buffered image to a java graphics drawn X icon
+	//bImage = ######
+	//set width, height and orientation
+	//setVars();
+    }
+
 }
 
 //Type of load ProgramState does. Respectivly:
@@ -395,6 +453,7 @@ class ProgramState{
     ImageObject[] imageList;
     String[] imageIDs;
     int lastIndex; //Must be updated when number of images changes
+    String currentFilter;
     int currentI = 0;
     GUI mainGUI;
 
@@ -413,29 +472,50 @@ class ProgramState{
 	switch (loadType){
 	case Init:
 	    mainGUI.mainImageDB = new ImageDatabase("mainDB");
-	    mainGUI.mainImageDB.addImage("Title 1","img_2810b_small.jpg");
-	    mainGUI.mainImageDB.addImage("Title 1","img_6088b_small.jpg");
-	    mainGUI.mainImageDB.addImage("Title 1","img_5672bp_small.jpg");
-	    mainGUI.mainImageDB.addImage("Title 1","img_2926_small.jpg");
-	    mainGUI.mainImageDB.addImage("Title 1","img_F028c_small.jpg");
+	    //If there are no files you get loads of errors
+	    // Relative urls must start with '///\\\' but \\ is used as \ is escape sequence
+	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_2810b_small.jpg");
+	    //mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_monkeys_small.jpg");
+	    //mainGUI.mainImageDB.addImage("Title 1","///\\\\\\NotAnImage.txt");
+	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_6088b_small.jpg");
+	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_5672bp_small.jpg");
+	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_2926_small.jpg");
+	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_F028c_small.jpg");
 	    //no break as image list must still be passed from DB
 	case Refresh:
 	    //Create image database by loading database
+	    currentFilter = "Show All Images";
 	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
 	    break;
 	case Load: System.exit(1); //Load DB not yet implemented
 	    break;
 	case Filter:
 	    //Create image database by loading database	
+	    currentFilter = filterTag;
 	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagTitle(filterTag);
 	    break;
 	}
-
+	//if imageIDs.length==0
+	//then a file should be added first (Construct with Init&imports, then return;)
       	imageList = new ImageObject[imageIDs.length];
 	for(int i=0; i<imageIDs.length;i++){
 	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
 	lastIndex = (imageIDs.length - 1);
+	if(loadType!=LoadType.Init){
+	    mainGUI.mainPanel.repaint();
+	    mainGUI.thumbPanel.repaint();
+	}
+    }
+
+    void importImage(String absolutePath){
+	mainGUI.mainImageDB.addImage("Title 1",absolutePath);
+	if(currentFilter.equals("Show All Images")){
+	    mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
+	}
+	else {
+	    mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
+	}
     }
 
     int next(int val){
@@ -459,6 +539,7 @@ class ProgramState{
 	mainGUI.thumbPanel.repaint();
     }
 
+    // Must be edited so empty DB / imageList does no cause error
     ImageObject getCurrentImage(){
 	return imageList[currentI];
     }
