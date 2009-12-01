@@ -9,6 +9,8 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane.*;
 
+//The tag "Show All Images" is not a valid tag anymore as it shows all images. This is potenially a bug.
+
 //Program stucture needs to be redesigned to implement SwingWorker threads to load images
 //Each image will be published once loaded and the worker will be done when all are loaded
 //This prevents loading large images from freezing/crashing the program,
@@ -19,8 +21,8 @@ import javax.swing.JOptionPane.*;
 class GUI implements ActionListener, ComponentListener{
     JFrame w;
     JMenuBar menuBar;
-    JMenu imageMenu, viewMenu, helpMenu;
-    JMenuItem mRestart, NextImage, PrevImage,ShowThumbs,HideThumbs, Options, Exit, About, Help;
+    JMenu imageMenu, viewMenu, tagMenu, helpMenu;
+    JMenuItem mRestart, NextImage, PrevImage,ShowThumbs,HideThumbs, AddTag, TagThis, TagFilter, Options, Exit, About, Help;
     JButton bPrev, bNext, bImport, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag, bTagThis, bTagFilter;
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
@@ -38,7 +40,7 @@ class GUI implements ActionListener, ComponentListener{
 
     void play(){
         w = new JFrame();
-        w.setTitle("Study Buddy 0.3alpha");
+        w.setTitle("Study Buddy 0.4alpha");
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
         buildMenu();
         w.setJMenuBar(menuBar);
@@ -53,7 +55,7 @@ class GUI implements ActionListener, ComponentListener{
     }
 
     void quickRestart(){
-	state = new ProgramState(this);        
+	state = new ProgramState(LoadType.Init,this);        
 
 	mainPanel = new MainPanel(this);
 	mainPanel.addComponentListener(this);
@@ -137,10 +139,12 @@ class GUI implements ActionListener, ComponentListener{
     void buildMenu(){
         menuBar = new JMenuBar();
         buildImageMenu();
+	buildTagMenu();
 	buildViewMenu();
         buildHelpMenu();
         menuBar.add(imageMenu);
 	menuBar.add(viewMenu);
+	menuBar.add(tagMenu);
         menuBar.add(helpMenu);
     }
     
@@ -159,6 +163,28 @@ class GUI implements ActionListener, ComponentListener{
         imageMenu.add(mRestart);
         imageMenu.add(Exit);
     }
+    
+    void buildTagMenu(){
+        tagMenu = new JMenu("Tag");
+        tagMenu.setMnemonic(KeyEvent.VK_T);
+
+        AddTag = new JMenuItem("Create new tag",KeyEvent.VK_N);
+        //AddTag.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        AddTag.addActionListener(this);
+
+        TagThis = new JMenuItem("Tag this Image",KeyEvent.VK_T);
+        TagThis.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,0));
+        TagThis.addActionListener(this);
+
+        TagFilter = new JMenuItem("Filter Images by Tag",KeyEvent.VK_F);
+        //TagFilter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
+        TagFilter.addActionListener(this);
+
+        tagMenu.add(AddTag);
+        tagMenu.add(TagThis);
+        tagMenu.add(TagFilter);
+    }
+
     void buildViewMenu(){
         viewMenu = new JMenu("View");
         viewMenu.setMnemonic(KeyEvent.VK_V);
@@ -209,12 +235,15 @@ class GUI implements ActionListener, ComponentListener{
     public void actionPerformed(ActionEvent e){
 	if(e.getSource()==mRestart) {
             quickRestart();
+	    return;
         }
         if(e.getSource()==NextImage || e.getSource()==bNext) {
             state.nextImage();
+	    return;
         }
         if(e.getSource()==PrevImage || e.getSource()==bPrev) {
             state.prevImage();
+	    return;
         }
         if(e.getSource()==ShowThumbs || e.getSource()==bThumbsS) {
 	    thumbPanel.setVisible(true);
@@ -222,17 +251,23 @@ class GUI implements ActionListener, ComponentListener{
 	    bThumbsS.setVisible(false);
 	    HideThumbs.setVisible(true);
 	    bThumbsH.setVisible(true);
+	    return;
         }
-	if(e.getSource()==bAddTag){
+	if(e.getSource()==bAddTag || e.getSource()==AddTag){
 	    String newTag = JOptionPane.showInputDialog(
 							w, 
 							"What Tag would you like to add?", 
 							"Create Tag", 
 							JOptionPane.PLAIN_MESSAGE);
-	    mainImageDB.addTag(newTag);
-	    //mainImageDB.print();
+	    if ((newTag != null) && (newTag.length() > 0)) {
+                mainImageDB.addTag(newTag);
+		//mainImageDB.print();
+                return;
+            }
+	    //Was cancelled
+	    return;
 	}
-	if(e.getSource()==bTagThis){
+	if(e.getSource()==bTagThis || e.getSource()==TagThis){
 	    Object[] foundTags = mainImageDB.getAllTagTitles();
 	    String newTag = (String)JOptionPane.showInputDialog(
 								w, 
@@ -242,23 +277,40 @@ class GUI implements ActionListener, ComponentListener{
 								null,
 								foundTags,
 								"Initials selection");
-	    mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
-	    //mainImageDB.print();
+	    if ((newTag != null) && (newTag.length() > 0)) {
+		mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
+		//mainImageDB.print();
+                return;
+            }
+	    return;
 	}
-	if(e.getSource()==bTagFilter){
-	    Object[] foundTags = mainImageDB.getAllTagTitles();
+	if(e.getSource()==bTagFilter || e.getSource()==TagFilter){
+	    String[] foundTags = mainImageDB.getAllTagTitles();
+	    String[] tagFilters = new String[(foundTags.length + 1)];
+	    tagFilters[0] = "Show All Images";
+	    System.arraycopy(foundTags,0,tagFilters,1,foundTags.length);
+
 	    String filterTag = (String)JOptionPane.showInputDialog(
 								   w, 
-								   "Which tag would you like to add to this image?", 
+								   "Which tag do you want to search for?", 
 								   "Add Tag to image", 
 								   JOptionPane.PLAIN_MESSAGE,
 								   null,
-								   foundTags,
-								   "Initials selection");
-	    state = new ProgramState(this,filterTag);
-	    mainPanel.repaint();
-	    thumbPanel.repaint();
-	    //mainImageDB.print();
+								   tagFilters,
+								   "Initials selection"); //dont know how this line works
+	    if ((filterTag != null) && (filterTag.length() > 0)) {
+		if(filterTag.equals("Show All Images")){
+		    state = new ProgramState(LoadType.Refresh,this);
+		}
+		else {
+		    state = new ProgramState(LoadType.Filter,this,filterTag);
+		}
+		mainPanel.repaint();
+		thumbPanel.repaint();
+		//mainImageDB.print();
+                return;
+            }
+	    return;
 	}
         if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
 	    thumbPanel.setVisible(false);
@@ -266,6 +318,7 @@ class GUI implements ActionListener, ComponentListener{
 	    bThumbsS.setVisible(true);
 	    HideThumbs.setVisible(false);
 	    bThumbsH.setVisible(false);
+	    return;
         }
         if(e.getSource()==Exit) {
             System.exit(0);
@@ -273,9 +326,11 @@ class GUI implements ActionListener, ComponentListener{
         if(e.getSource()==Help) {
             //Not final help- needs improving
             JOptionPane.showMessageDialog(w,"Visit http://www.studybuddy.com for help and tutorials","Study Help",JOptionPane.INFORMATION_MESSAGE);
+	    return;
         }
         if(e.getSource()==About) {
             JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE);
+	    return;
         }
     }
 
@@ -330,6 +385,10 @@ class ImageObject {
     }
 }
 
+//Type of load ProgramState does. Respectivly:
+//(Creates new DB, loads DB from file, uses existing DB with filter, uses whole existing DB)
+enum LoadType{Init,Load,Filter,Refresh}
+
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
 class ProgramState{
@@ -339,33 +398,40 @@ class ProgramState{
     int currentI = 0;
     GUI mainGUI;
 
-    ProgramState(GUI parentGUI){
-	mainGUI = parentGUI;
-
-	//Create image database by loading database
-	mainGUI.mainImageDB = new ImageDatabase("mainDB");
-	mainGUI.mainImageDB.addImage("Title 1","img_2810b_small.jpg");
-	mainGUI.mainImageDB.addImage("Title 1","img_6088b_small.jpg");
-	mainGUI.mainImageDB.addImage("Title 1","img_5672bp_small.jpg");
-	mainGUI.mainImageDB.addImage("Title 1","img_2926_small.jpg");
-	mainGUI.mainImageDB.addImage("Title 1","img_F028c_small.jpg");
-	
-	imageIDs = mainGUI.mainImageDB.getAllImageIDs();
-
-	imageList = new ImageObject[imageIDs.length];
-	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
-	}
-	lastIndex = (imageIDs.length - 1);
+    ProgramState(LoadType loadType, GUI parentGUI){
+	ContructProgramState(loadType,  parentGUI,""); //loadType should not be filter here
     }
-	
     ProgramState(GUI parentGUI, String filterTag){
+	ContructProgramState(LoadType.Filter, parentGUI, filterTag);
+    }
+    ProgramState(LoadType loadType, GUI parentGUI, String filterTag){
+	ContructProgramState(loadType, parentGUI, filterTag);
+    }
+
+    void ContructProgramState(LoadType loadType, GUI parentGUI, String filterTag){
 	mainGUI = parentGUI;
+	switch (loadType){
+	case Init:
+	    mainGUI.mainImageDB = new ImageDatabase("mainDB");
+	    mainGUI.mainImageDB.addImage("Title 1","img_2810b_small.jpg");
+	    mainGUI.mainImageDB.addImage("Title 1","img_6088b_small.jpg");
+	    mainGUI.mainImageDB.addImage("Title 1","img_5672bp_small.jpg");
+	    mainGUI.mainImageDB.addImage("Title 1","img_2926_small.jpg");
+	    mainGUI.mainImageDB.addImage("Title 1","img_F028c_small.jpg");
+	    //no break as image list must still be passed from DB
+	case Refresh:
+	    //Create image database by loading database
+	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
+	    break;
+	case Load: System.exit(1); //Load DB not yet implemented
+	    break;
+	case Filter:
+	    //Create image database by loading database	
+	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagTitle(filterTag);
+	    break;
+	}
 
-	//Create image database by loading database	
-	imageIDs = mainGUI.mainImageDB.getImageIDsFromTagTitle(filterTag);
-
-	imageList = new ImageObject[imageIDs.length];
+      	imageList = new ImageObject[imageIDs.length];
 	for(int i=0; i<imageIDs.length;i++){
 	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
