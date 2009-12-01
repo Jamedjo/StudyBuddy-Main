@@ -384,16 +384,15 @@ class ImageObject {
 	else {
 	    File file = new File(absoluteURL);
 	    try{
-		//URI uriT = new URI(absoluteURL);
 		urlAddress = file.toURI().toURL();
-		System.out.println(absoluteURL +  " is absolute and file is "+file.toString() +" and URL is " + urlAddress.toString());
+		//System.out.println(absoluteURL +  " is absolute and file is "+file.toString() +" and URL is " + urlAddress.toString());
 	    } catch (MalformedURLException e){
 		urlAddress = null;
 		System.err.println("Image file " + absoluteURL + " could not be found " + "\nError was: " + e.toString());
 	    }
 	}
-    if(urlAddress==null){
-	System.err.println("File could not be found at " + absoluteURL);
+	if(urlAddress==null){
+	    System.err.println("File could not be found at " + absoluteURL);
 	}
 	ImageObjectConstructor(urlAddress,absoluteURL);
     }
