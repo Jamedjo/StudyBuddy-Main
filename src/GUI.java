@@ -22,7 +22,7 @@ class GUI implements ActionListener, ComponentListener{
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
     JMenuItem mRestart, mImport, NextImage, PrevImage,ShowThumbs,HideThumbs, AddTag, TagThis, TagFilter, Options, Exit, About, Help;
-    JButton bPrev, bNext, bThumbsS, bThumbsH, bSideBar,bZoom, bAddTag, bTagThis, bTagFilter;
+    JButton bSideBar;
     final JFileChooser fileGetter = new JFileChooser();
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
@@ -87,44 +87,7 @@ class GUI implements ActionListener, ComponentListener{
     }
 
     void buildToolbar(){
-        bPrev = new JButton("Prev");
-        //button.setActionCommand(Prev);
-        //button.setToolTipText(toolTipText);
-        bPrev.addActionListener(this);
-
-	bNext = new JButton("Next");
-        bNext.addActionListener(this);
-
-	bThumbsS = new JButton("Show Thumbnails");
-        bThumbsS.addActionListener(this);
-
-	bAddTag = new JButton("Add Tag");
-        bAddTag.addActionListener(this);
-
-	bTagThis = new JButton("Tag This Image");
-        bTagThis.addActionListener(this);
-
-	bTagFilter = new JButton("Filter By Tag");
-        bTagFilter.addActionListener(this);
-
-	bThumbsH = new JButton("HIde Thumbnails");
-        bThumbsH.addActionListener(this);
-	bThumbsH.setVisible(false);
-
-	//bZoom = new JButton("Zoom");
-        //bZoom.addActionListener(this);
-
-	toolbarMain.addSeparator(); 
-	toolbarMain.add(bPrev);
-	toolbarMain.add(bNext); 
-	toolbarMain.addSeparator();
-	toolbarMain.add(bThumbsS);
-	toolbarMain.add(bThumbsH); 
-	toolbarMain.addSeparator();
-	toolbarMain.add(bAddTag);
-	toolbarMain.add(bTagThis);
-	toolbarMain.add(bTagFilter);
-	//toolbarMain.add(bZoom); 
+	ToolBar.addAll(toolbarMain,(ActionListener)this);
 
 	//workaround to prevent toolbar from steeling focus
 	for( int i=0; i<toolbarMain.getComponentCount(); i++ ){
@@ -246,23 +209,25 @@ class GUI implements ActionListener, ComponentListener{
             quickRestart();
 	    return;
         }
-        if(e.getSource()==NextImage || e.getSource()==bNext) {
+        if(e.getSource()==NextImage || e.getActionCommand()=="bNext") {
             state.nextImage();
 	    return;
         }
-        if(e.getSource()==PrevImage || e.getSource()==bPrev) {
+        if(e.getSource()==PrevImage || e.getActionCommand()=="bPrev") {
             state.prevImage();
 	    return;
         }
-        if(e.getSource()==ShowThumbs || e.getSource()==bThumbsS) {
+        if(e.getSource()==ShowThumbs || e.getActionCommand()=="bThumbsS") {
 	    thumbPanel.setVisible(true);
+	    
 	    ShowThumbs.setVisible(false);
-	    bThumbsS.setVisible(false);
 	    HideThumbs.setVisible(true);
-	    bThumbsH.setVisible(true);
+
+	    ToolBar.bThumbsS.hide();	    
+	    ToolBar.bThumbsH.show();
 	    return;
         }
-	if(e.getSource()==bAddTag || e.getSource()==AddTag){
+	if(e.getSource()==AddTag || e.getActionCommand()=="bAddTag"){
 	    String newTag = (String)JOptionPane.showInputDialog(
 							w, 
 							"Please enter the tag you wish to create?",
@@ -279,7 +244,7 @@ class GUI implements ActionListener, ComponentListener{
 	    //Was cancelled
 	    return;
 	}
-	if(e.getSource()==bTagThis || e.getSource()==TagThis){
+	if(e.getSource()==TagThis || e.getActionCommand()=="bTagThis"){
 	    Object[] foundTags = mainImageDB.getAllTagTitles();
 	    String newTag = (String)JOptionPane.showInputDialog(
 								w, 
@@ -296,7 +261,7 @@ class GUI implements ActionListener, ComponentListener{
             }
 	    return;
 	}
-	if(e.getSource()==bTagFilter || e.getSource()==TagFilter){
+	if(e.getSource()==TagFilter || e.getActionCommand()=="bTagFilter"){
 	    String[] foundTags = mainImageDB.getAllTagTitles();
 	    String[] tagFilters = new String[(foundTags.length + 1)];
 	    tagFilters[0] = "Show All Images";
@@ -322,12 +287,14 @@ class GUI implements ActionListener, ComponentListener{
             }
 	    return;
 	}
-        if(e.getSource()==HideThumbs || e.getSource()==bThumbsH) {
+        if(e.getSource()==HideThumbs || e.getActionCommand()=="bThumbsH") {
 	    thumbPanel.setVisible(false);
+	    
 	    ShowThumbs.setVisible(true);
-	    bThumbsS.setVisible(true);
 	    HideThumbs.setVisible(false);
-	    bThumbsH.setVisible(false);
+
+	    ToolBar.bThumbsS.show();	    
+	    ToolBar.bThumbsH.hide();
 	    return;
         }
         if(e.getSource()==Exit) {
@@ -342,6 +309,7 @@ class GUI implements ActionListener, ComponentListener{
             JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE);
 	    return;
         }
+	System.err.println("ActionEvent " + e.getActionCommand() + " was not dealt with,\nand had prameter string " + e.paramString()); //+ ",\nwith source:\n\n " + e.getSource());
     }
 
     public void componentResized(ComponentEvent e) {
