@@ -80,6 +80,8 @@ class GUI implements ActionListener, ComponentListener{
 		}
 	    }
 	    );
+	fileGetter.setDialogTitle("Import Image");
+	fileGetter.setMultiSelectionEnabled(true);
 
     }
 
@@ -130,7 +132,7 @@ class GUI implements ActionListener, ComponentListener{
 	if(e.getActionCommand()=="mImport") {
 	    int wasGot = fileGetter.showOpenDialog(w);
 	    if(wasGot==JFileChooser.APPROVE_OPTION){
-		state.importImage(fileGetter.getSelectedFile().getAbsolutePath());
+		state.importImages(fileGetter.getSelectedFiles());
 	    }
 	    return;
 	}
@@ -294,7 +296,7 @@ class ProgramState{
 	//then a file should be added first (Construct with Init&imports, then return;)
       	imageList = new ImageObject[imageIDs.length];
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));//VERY BAD code, loads all images into limited memory
 	}
 	lastIndex = (imageIDs.length - 1);
 	if(loadType!=LoadType.Init){
@@ -303,6 +305,25 @@ class ProgramState{
 	}
     }
 
+    void importImages(File[] files){
+	for(File f : files){
+	    System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
+	    mainGUI.mainImageDB.addImage("Title 1",f.getAbsolutePath());
+	}
+	try{
+	    if(currentFilter.equals("Show All Images")){
+		mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
+		mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
+	    }
+	    else {
+		mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
+	    }
+	} catch(java.lang.OutOfMemoryError e){
+            JOptionPane.showMessageDialog(mainGUI.w,"Out of memory- over 128MB was needed\n"
+					  +"SwingWorker should be used in code,\n"
+					  +"and not all images should be buffered","Fatal Error",JOptionPane.ERROR_MESSAGE);
+	}
+    }
     void importImage(String absolutePath){
 	mainGUI.mainImageDB.addImage("Title 1",absolutePath);
 	if(currentFilter.equals("Show All Images")){
