@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.*;
 import javax.swing.JOptionPane.*;
 
+//We should use javadoc.
 
 //Program stucture needs to be redesigned to implement SwingWorker threads to load images
 //Each image will be published once loaded and the worker will be done when all are loaded
@@ -25,7 +26,7 @@ class GUI implements ActionListener, ComponentListener{
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
-    JMenuItem mRestart, mImport, NextImage, PrevImage,ShowThumbs,HideThumbs, AddTag, TagThis, TagFilter, Options, Exit, About, Help;
+    JMenuItem  Options;
     JButton bSideBar;
     final JFileChooser fileGetter = new JFileChooser();
     MainPanel mainPanel;
@@ -50,10 +51,36 @@ class GUI implements ActionListener, ComponentListener{
         w.setIconImage(SysIcon.Logo.Icon.getImage());
 	//w.addComponentListener(this);
         //w.setResizable(false);
+	buildFileGetter();
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         //while (true) {Thread.sleep(30);}
+    }
+    void buildFileGetter(){
+	fileGetter.addChoosableFileFilter( new javax.swing.filechooser.FileFilter(){
+		public boolean accept(File f){
+		    if(f.isDirectory()) return true;
+		    String[] exts = {"jpeg","jpg","gif","bmp","png","tiff","tif","tga","pcx","xbm","svg"};
+		    String ext = null;
+		    String name = f.getName();
+		    int pos = name.lastIndexOf(".");
+		    if(pos>0 && pos<(name.length() - 1)){
+			    ext = name.substring(pos+1).toLowerCase();
+			    for(String imgExt : exts){
+				if(ext.equals(imgExt)){
+				    return true;
+				}
+			    }
+			} 
+		    return false;
+		}
+		public String getDescription() {
+		    return "All Images";
+		}
+	    }
+	    );
+
     }
 
     void buildMenuBar(){
