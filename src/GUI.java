@@ -40,19 +40,7 @@ class GUI implements ActionListener, ComponentListener{
         w = new JFrame();
         w.setTitle("Study Buddy 0.5alpha");
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
-
-
-        menuBar = new JMenuBar();
-        buildImageMenu();
-	buildTagMenu();
-	buildViewMenu();
-        buildHelpMenu();
-        menuBar.add(imageMenu);
-	menuBar.add(viewMenu);
-	menuBar.add(tagMenu);
-        menuBar.add(helpMenu);
-
-
+	buildMenuBar();
         w.setJMenuBar(menuBar);
         w.setLocationByPlatform(true);
         w.setIconImage(SysIcon.Logo.Icon.getImage());
@@ -62,6 +50,18 @@ class GUI implements ActionListener, ComponentListener{
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         //while (true) {Thread.sleep(30);}
+    }
+
+    void buildMenuBar(){
+        menuBar = new JMenuBar();
+        imageMenu = ImageMenu.build((ActionListener)this);
+        tagMenu = TagMenu.build((ActionListener)this);
+        viewMenu = ViewMenu.build((ActionListener)this);
+        helpMenu = HelpMenu.build((ActionListener)this);
+        menuBar.add(imageMenu);
+	menuBar.add(viewMenu);
+	menuBar.add(tagMenu);
+        menuBar.add(helpMenu);
     }
 
     void quickRestart(){
@@ -75,8 +75,7 @@ class GUI implements ActionListener, ComponentListener{
 	thumbPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 	thumbPanel.setVisible(false);
 
-	toolbarMain = new JToolBar("StudyBuddy Toolbar");
-	toolbarMain.setFocusable(false);
+	toolbarMain = ToolBar.build((ActionListener)this);
 
 	//boardScroll = new JScrollPane(mainPanel);
 	//boardScroll.addComponentListener(this);
@@ -89,121 +88,43 @@ class GUI implements ActionListener, ComponentListener{
 	Panel contentPane = new Panel();
     	contentPane.setLayout(new BorderLayout());
 
-	ToolBar.addAll(toolbarMain,(ActionListener)this);
-
         //contentPane.add(boardScroll, BorderLayout.CENTER);
 	contentPane.add(contentSet, BorderLayout.CENTER);//contentPane.add(mainPanel);
 	contentPane.add(toolbarMain, BorderLayout.PAGE_START);
         w.setContentPane(contentPane);
         w.pack();
     }
-
-    void buildImageMenu(){
-        imageMenu = new JMenu("Image");
-        imageMenu.setMnemonic(KeyEvent.VK_I);
-
-	ImageMenu.addAll(imageMenu,(ActionListener)this);
-    }
     
-    void buildTagMenu(){
-        tagMenu = new JMenu("Tag");
-        tagMenu.setMnemonic(KeyEvent.VK_T);
-
-        AddTag = new JMenuItem("Create new tag",KeyEvent.VK_N);
-        //AddTag.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        AddTag.addActionListener(this);
-
-        TagThis = new JMenuItem("Tag this Image",KeyEvent.VK_T);
-        TagThis.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,0));
-        TagThis.addActionListener(this);
-
-        TagFilter = new JMenuItem("Filter Images by Tag",KeyEvent.VK_F);
-        //TagFilter.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
-        TagFilter.addActionListener(this);
-
-        tagMenu.add(AddTag);
-        tagMenu.add(TagThis);
-        tagMenu.add(TagFilter);
-    }
-
-    void buildViewMenu(){
-        viewMenu = new JMenu("View");
-        viewMenu.setMnemonic(KeyEvent.VK_V);
-
-        NextImage = new JMenuItem("Next Image",KeyEvent.VK_N);
-	NextImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0));
-        NextImage.addActionListener(this);
-        //NextImage.setEnabled(false);
-
-        PrevImage = new JMenuItem("Previous Image",KeyEvent.VK_P);
-	PrevImage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0));
-        PrevImage.addActionListener(this);
-        //PrevImage.setEnabled(false);
-
-        ShowThumbs = new JMenuItem("Show Thumbnails Bar",KeyEvent.VK_T);
-	ShowThumbs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,ActionEvent.CTRL_MASK));
-        ShowThumbs.addActionListener(this);
-        //ShowThumbs.setEnabled(false);
-
-        HideThumbs = new JMenuItem("Hide Thumbnails Bar",KeyEvent.VK_T);
-	HideThumbs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,ActionEvent.CTRL_MASK));
-        HideThumbs.addActionListener(this);
-	HideThumbs.setVisible(false);
-        //HideThumbs.setEnabled(false);
-
-        viewMenu.add(NextImage);
-	viewMenu.add(PrevImage);
-	viewMenu.addSeparator();
-	viewMenu.add(ShowThumbs);
-	viewMenu.add(HideThumbs);
-    }
-    
-    void buildHelpMenu(){
-        helpMenu = new JMenu("Help");
-        helpMenu.setMnemonic(KeyEvent.VK_H);
-
-        About = new JMenuItem("About",KeyEvent.VK_A);
-        About.addActionListener(this);
-
-        Help = new JMenuItem("StudyBuddy Help!",KeyEvent.VK_H);
-        Help.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
-        Help.addActionListener(this);
-
-        helpMenu.add(Help);
-        helpMenu.add(About);        
-    }
-
     public void actionPerformed(ActionEvent e){
-	if(e.getSource()==mImport) {
+	if(e.getActionCommand()=="mImport") {
 	    int wasGot = fileGetter.showOpenDialog(w);
 	    if(wasGot==JFileChooser.APPROVE_OPTION){
 		state.importImage(fileGetter.getSelectedFile().getAbsolutePath());
 	    }
 	    return;
 	}
-	if(e.getSource()==mRestart) {
+	if(e.getActionCommand()=="mRestart") {
             quickRestart();
 	    return;
         }
-        if(e.getSource()==NextImage || e.getActionCommand()=="bNext") {
+        if(e.getActionCommand()=="Next") {
             state.nextImage();
 	    return;
         }
-        if(e.getSource()==PrevImage || e.getActionCommand()=="bPrev") {
+        if(e.getActionCommand()=="Prev") {
             state.prevImage();
 	    return;
         }
-        if(e.getSource()==ShowThumbs || e.getActionCommand()=="bThumbsS") {
+        if(e.getActionCommand()=="ThumbsS") {
 	    thumbPanel.setVisible(true);
 	    
-	    ShowThumbs.setVisible(false);
-	    HideThumbs.setVisible(true);
-
+	    ViewMenu.ShowThumbs.hide();	    
+	    ViewMenu.HideThumbs.show();
 	    ToolBar.bThumbsS.hide();	    
 	    ToolBar.bThumbsH.show();
 	    return;
         }
-	if(e.getSource()==AddTag || e.getActionCommand()=="bAddTag"){
+	if(e.getActionCommand()=="AddTag"){
 	    String newTag = (String)JOptionPane.showInputDialog(
 							w, 
 							"Please enter the tag you wish to create?",
@@ -220,7 +141,7 @@ class GUI implements ActionListener, ComponentListener{
 	    //Was cancelled
 	    return;
 	}
-	if(e.getSource()==TagThis || e.getActionCommand()=="bTagThis"){
+	if(e.getActionCommand()=="TagThis"){
 	    Object[] foundTags = mainImageDB.getAllTagTitles();
 	    String newTag = (String)JOptionPane.showInputDialog(
 								w, 
@@ -237,7 +158,7 @@ class GUI implements ActionListener, ComponentListener{
             }
 	    return;
 	}
-	if(e.getSource()==TagFilter || e.getActionCommand()=="bTagFilter"){
+	if(e.getActionCommand()=="TagFilter"){
 	    String[] foundTags = mainImageDB.getAllTagTitles();
 	    String[] tagFilters = new String[(foundTags.length + 1)];
 	    tagFilters[0] = "Show All Images";
@@ -263,25 +184,24 @@ class GUI implements ActionListener, ComponentListener{
             }
 	    return;
 	}
-        if(e.getSource()==HideThumbs || e.getActionCommand()=="bThumbsH") {
+        if(e.getActionCommand()=="ThumbsH") {
 	    thumbPanel.setVisible(false);
 	    
-	    ShowThumbs.setVisible(true);
-	    HideThumbs.setVisible(false);
-
+	    ViewMenu.ShowThumbs.show();	    
+	    ViewMenu.HideThumbs.hide();
 	    ToolBar.bThumbsS.show();	    
 	    ToolBar.bThumbsH.hide();
 	    return;
         }
-        if(e.getSource()==Exit) {
+        if(e.getActionCommand()=="Exit") {
             System.exit(0);
         }
-        if(e.getSource()==Help) {
+        if(e.getActionCommand()=="Help") {
             //Not final help- needs improving
             JOptionPane.showMessageDialog(w,"Visit http://www.studybuddy.com for help and tutorials","Study Help",JOptionPane.INFORMATION_MESSAGE);
 	    return;
         }
-        if(e.getSource()==About) {
+        if(e.getActionCommand()=="About") {
             JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE);
 	    return;
         }

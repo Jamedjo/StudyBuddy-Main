@@ -37,7 +37,7 @@
 	
 	<target name="jar" depends="init,compile" description="produce a jar file">
 		<jar destfile="${jar.name}">
-			<fileset dir="${build}" />
+			<fileset dir="${build}" excludes="**/*.jar" />
 			<fileset dir="${img}" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
@@ -62,8 +62,11 @@
 	</target>
 
 	<target name="clean" description="clean up" >
-		<delete dir="${build}"/>
-		<mkdir dir="${jar.dir}" />
-		<mkdir dir="${build}" />
+		<delete verbose="true">
+			<fileset dir="${build}" includes="**/*.class" />
+			<fileset dir="${build}" includes="**/*.jar" />
+		</delete>
+		<!-- <mkdir dir="${jar.dir}" /> -->
+		<!-- <mkdir dir="${build}" /> -->
 	</target>
 </project>
