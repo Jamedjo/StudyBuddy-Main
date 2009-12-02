@@ -16,6 +16,10 @@ import javax.swing.JOptionPane.*;
 //allows the GUI to load quicker at startup instead of waiting for all images to load
 //and allows for the worker to be cancelled if it is too slow.
 
+//Type of load ProgramState does. Respectivly:
+//(Creates new DB, loads DB from file, uses existing DB with filter, uses whole existing DB)
+enum LoadType{Init,Load,Filter,Refresh}
+
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
 class GUI implements ActionListener, ComponentListener{
     JFrame w;
@@ -125,14 +129,8 @@ class GUI implements ActionListener, ComponentListener{
 	    return;
         }
 	if(e.getActionCommand()=="AddTag"){
-	    String newTag = (String)JOptionPane.showInputDialog(
-								w, 
-								"Please enter the tag you wish to create?",
-								"Create Tag",
-								JOptionPane.PLAIN_MESSAGE,
-								SysIcon.Question.Icon,
-								null,
-								"");
+	    String newTag = (String)JOptionPane.showInputDialog(w,"Please enter the tag you wish to create?","Create Tag",
+								JOptionPane.PLAIN_MESSAGE,SysIcon.Question.Icon,null,"");
 	    if ((newTag != null) && (newTag.length() > 0)) {
                 mainImageDB.addTag(newTag);
 		//mainImageDB.print();
@@ -143,14 +141,8 @@ class GUI implements ActionListener, ComponentListener{
 	}
 	if(e.getActionCommand()=="TagThis"){
 	    Object[] foundTags = mainImageDB.getAllTagTitles();
-	    String newTag = (String)JOptionPane.showInputDialog(
-								w, 
-								"Which tag would you like to add to this image?", 
-								"Add Tag to image", 
-								JOptionPane.PLAIN_MESSAGE,
-								SysIcon.Question.Icon,
-								foundTags,
-								"");
+	    String newTag = (String)JOptionPane.showInputDialog(w,"Which tag would you like to add to this image?", "Add Tag to image", 
+								JOptionPane.PLAIN_MESSAGE,SysIcon.Question.Icon,foundTags,"");
 	    if ((newTag != null) && (newTag.length() > 0)) {
 		mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
 		//mainImageDB.print();
@@ -164,14 +156,8 @@ class GUI implements ActionListener, ComponentListener{
 	    tagFilters[0] = "Show All Images";
 	    System.arraycopy(foundTags,0,tagFilters,1,foundTags.length);
 
-	    String filterTag = (String)JOptionPane.showInputDialog(
-								   w, 
-								   "Which tag do you want to search for?", 
-								   "Add Tag to image", 
-								   JOptionPane.PLAIN_MESSAGE,
-								   SysIcon.Question.Icon,
-								   tagFilters,
-								   "Show All Images");
+	    String filterTag = (String)JOptionPane.showInputDialog(w,"Which tag do you want to search for?","Add Tag to image", 
+								   JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, tagFilters, "Show All Images");
 	    if ((filterTag != null) && (filterTag.length() > 0)) {
 		if(filterTag.equals("Show All Images")){
 		    state = new ProgramState(LoadType.Refresh,this);
@@ -205,7 +191,8 @@ class GUI implements ActionListener, ComponentListener{
             JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE);
 	    return;
         }
-	System.err.println("ActionEvent " + e.getActionCommand() + " was not dealt with,\nand had prameter string " + e.paramString()); //+ ",\nwith source:\n\n " + e.getSource());
+	System.err.println("ActionEvent " + e.getActionCommand() + " was not dealt with,\nand had prameter string "+ e.paramString()); 
+	//+ ",\nwith source:\n\n " + e.getSource());
     }
 
     public void componentResized(ComponentEvent e) {
@@ -222,98 +209,10 @@ class GUI implements ActionListener, ComponentListener{
 	// 	    w.setSize(newWidth,newHeight);
 	// 	}
     }
-
     public void componentHidden(ComponentEvent e){}
     public void componentMoved(ComponentEvent e){}
     public void componentShown(ComponentEvent e){}
-
 }
-
-
-
-enum Orientation {Landscape,Portrait}
-
-class ImageObject {
-    BufferedImage bImage = null;
-    Orientation iOri;
-    int width,height;
-    //String imageID;
-
-    ImageObject(String absoluteURL){
-	URL urlAddress;
-	if(absoluteURL.startsWith("///\\\\\\")){
-	    String relativeURL = absoluteURL.substring(6);
-	    //System.out.println(relativeURL +  " is relative and absolute is " + absoluteURL);
-	    urlAddress = GUI.class.getResource(relativeURL); //could be null
-	}
-	else {
-	    File file = new File(absoluteURL);
-	    try{
-		urlAddress = file.toURI().toURL();
-		//System.out.println(absoluteURL +  " is absolute and file is "+file.toString() +" and URL is " + urlAddress.toString());
-	    } catch (MalformedURLException e){
-		urlAddress = null;
-		System.err.println("Image file " + absoluteURL + " could not be found " + "\nError was: " + e.toString());
-	    }
-	}
-	if(urlAddress==null){
-	    System.err.println("File could not be found at " + absoluteURL);
-	}
-	ImageObjectConstructor(urlAddress,absoluteURL);
-    }
-
-    ImageObject(URL urlAddress){
-	String absoluteURL = urlAddress.toString();//should find absoluteURL for printing
-	ImageObjectConstructor(urlAddress,absoluteURL);
-    }
-
-    //ImageObject(URL urlAddress, String absoluteURL){
-    //	ImageObjectConstructor(urlAddress, absoluteURL);
-    //}
-
-    void ImageObjectConstructor(URL urlAddress, String absoluteURL){
-        try {
-            bImage = ImageIO.read(urlAddress);
-            //File fileAddress = new File(relativeURL);
-            //img = ImageIO.read(fileAddress)
-	    setVars();
-        } catch (IOException e) {
-	    System.err.println("Error loading image " + absoluteURL + "\nError was: " + e.toString());
-	    setToXasFileNotFound();
-	    //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
-        } catch (IllegalArgumentException e) {
-	    System.err.println("Image file " + absoluteURL + " could not be found " + "\nError was: " + e.toString());
-	    setToXasFileNotFound();
-	} catch (NullPointerException e) {
-	    System.err.println("Could not load image from file " + absoluteURL + "\nError was: " + e.toString());
-	    setToXasFileNotFound();
-	}
-    }
-
-    void setVars(){
-	width = bImage.getWidth(null);
-	height = bImage.getHeight(null);
-	if(height<width) iOri = Orientation.Landscape;
-	else iOri = Orientation.Portrait;
-    }
-
-    void setToXasFileNotFound(){
-	//set image to error icon
-	//improvement: set the buffered image to a java graphics drawn X icon
-	try{
-	bImage = ImageIO.read(SysIcon.Error.imgURL);
-	setVars();
-	} catch (IOException e) {
-	    System.err.println("Error loading image: " + e.toString());
-	    //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
-        } 
-    }
-
-}
-
-//Type of load ProgramState does. Respectivly:
-//(Creates new DB, loads DB from file, uses existing DB with filter, uses whole existing DB)
-enum LoadType{Init,Load,Filter,Refresh}
 
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
