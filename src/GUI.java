@@ -38,9 +38,21 @@ class GUI implements ActionListener, ComponentListener{
 
     GUI(){
         w = new JFrame();
-        w.setTitle("Study Buddy 0.4alpha");
+        w.setTitle("Study Buddy 0.5alpha");
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
-        buildMenu();
+
+
+        menuBar = new JMenuBar();
+        buildImageMenu();
+	buildTagMenu();
+	buildViewMenu();
+        buildHelpMenu();
+        menuBar.add(imageMenu);
+	menuBar.add(viewMenu);
+	menuBar.add(tagMenu);
+        menuBar.add(helpMenu);
+
+
         w.setJMenuBar(menuBar);
         w.setLocationByPlatform(true);
         w.setIconImage(SysIcon.Logo.Icon.getImage());
@@ -77,7 +89,7 @@ class GUI implements ActionListener, ComponentListener{
 	Panel contentPane = new Panel();
     	contentPane.setLayout(new BorderLayout());
 
-	buildToolbar();
+	ToolBar.addAll(toolbarMain,(ActionListener)this);
 
         //contentPane.add(boardScroll, BorderLayout.CENTER);
 	contentPane.add(contentSet, BorderLayout.CENTER);//contentPane.add(mainPanel);
@@ -86,47 +98,11 @@ class GUI implements ActionListener, ComponentListener{
         w.pack();
     }
 
-    void buildToolbar(){
-	ToolBar.addAll(toolbarMain,(ActionListener)this);
-
-	//workaround to prevent toolbar from steeling focus
-	for( int i=0; i<toolbarMain.getComponentCount(); i++ ){
-	    if( toolbarMain.getComponent(i) instanceof JButton ){
-		((JButton)toolbarMain.getComponent(i)).setFocusable(false);
-	    }
-	}
-    }
-
-    void buildMenu(){
-        menuBar = new JMenuBar();
-        buildImageMenu();
-	buildTagMenu();
-	buildViewMenu();
-        buildHelpMenu();
-        menuBar.add(imageMenu);
-	menuBar.add(viewMenu);
-	menuBar.add(tagMenu);
-        menuBar.add(helpMenu);
-    }
-    
     void buildImageMenu(){
         imageMenu = new JMenu("Image");
         imageMenu.setMnemonic(KeyEvent.VK_I);
 
-        mImport = new JMenuItem("Import Image",KeyEvent.VK_I);//Will become imageS and have seperate for directoryS
-        mImport.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I, ActionEvent.CTRL_MASK));
-        mImport.addActionListener(this);
-
-        mRestart = new JMenuItem("Restart Viewer",KeyEvent.VK_R);
-        mRestart.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
-        mRestart.addActionListener(this);
-
-        Exit = new JMenuItem("Exit",KeyEvent.VK_X);
-        Exit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W, ActionEvent.CTRL_MASK));
-        Exit.addActionListener(this);
-	imageMenu.add(mImport);
-        imageMenu.add(mRestart);
-        imageMenu.add(Exit);
+	ImageMenu.addAll(imageMenu,(ActionListener)this);
     }
     
     void buildTagMenu(){
