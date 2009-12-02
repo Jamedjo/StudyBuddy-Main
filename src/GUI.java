@@ -32,20 +32,18 @@ class GUI implements ActionListener, ComponentListener{
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
 
-
     public static void main(String[] args){
         GUI mainGUI = new GUI();
-        mainGUI.play();
     }
 
-    void play(){
+    GUI(){
         w = new JFrame();
         w.setTitle("Study Buddy 0.4alpha");
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
         buildMenu();
         w.setJMenuBar(menuBar);
         w.setLocationByPlatform(true);
-        w.setIconImage(new ImageIcon("ball2gr.gif").getImage());
+        w.setIconImage(SysIcon.Logo.Icon.getImage());
 	//w.addComponentListener(this);
         //w.setResizable(false);
         quickRestart();
@@ -265,11 +263,14 @@ class GUI implements ActionListener, ComponentListener{
 	    return;
         }
 	if(e.getSource()==bAddTag || e.getSource()==AddTag){
-	    String newTag = JOptionPane.showInputDialog(
+	    String newTag = (String)JOptionPane.showInputDialog(
 							w, 
-							"What Tag would you like to add?", 
-							"Create Tag", 
-							JOptionPane.PLAIN_MESSAGE);
+							"Please enter the tag you wish to create?",
+							"Create Tag",
+							JOptionPane.PLAIN_MESSAGE,
+							SysIcon.Question.Icon,
+							null,
+							"");
 	    if ((newTag != null) && (newTag.length() > 0)) {
                 mainImageDB.addTag(newTag);
 		//mainImageDB.print();
@@ -285,9 +286,9 @@ class GUI implements ActionListener, ComponentListener{
 								"Which tag would you like to add to this image?", 
 								"Add Tag to image", 
 								JOptionPane.PLAIN_MESSAGE,
-								null,
+								SysIcon.Question.Icon,
 								foundTags,
-								"Initials selection");
+								"");
 	    if ((newTag != null) && (newTag.length() > 0)) {
 		mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
 		//mainImageDB.print();
@@ -306,9 +307,9 @@ class GUI implements ActionListener, ComponentListener{
 								   "Which tag do you want to search for?", 
 								   "Add Tag to image", 
 								   JOptionPane.PLAIN_MESSAGE,
-								   null,
+								   SysIcon.Question.Icon,
 								   tagFilters,
-								   "Initials selection"); //dont know how this line works
+								   "Show All Images");
 	    if ((filterTag != null) && (filterTag.length() > 0)) {
 		if(filterTag.equals("Show All Images")){
 		    state = new ProgramState(LoadType.Refresh,this);
@@ -472,14 +473,15 @@ class ProgramState{
 	case Init:
 	    mainGUI.mainImageDB = new ImageDatabase("mainDB");
 	    //If there are no files you get loads of errors
-	    // Relative urls must start with '///\\\' but \\ is used as \ is escape sequence
+
 	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_2810b_small.jpg");
-	    //mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_monkeys_small.jpg");
-	    //mainGUI.mainImageDB.addImage("Title 1","///\\\\\\NotAnImage.txt");
+	    //mainGUI.mainImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
+	    //mainGUI.mainImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
 	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_6088b_small.jpg");
 	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_5672bp_small.jpg");
 	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_2926_small.jpg");
 	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_F028c_small.jpg");
+
 	    //no break as image list must still be passed from DB
 	case Refresh:
 	    //Create image database by loading database
@@ -511,6 +513,7 @@ class ProgramState{
 	mainGUI.mainImageDB.addImage("Title 1",absolutePath);
 	if(currentFilter.equals("Show All Images")){
 	    mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
+	    mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
 	}
 	else {
 	    mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
