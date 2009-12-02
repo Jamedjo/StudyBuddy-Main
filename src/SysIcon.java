@@ -9,8 +9,9 @@ public enum SysIcon{
     Help("help.gif");
 
     ImageIcon Icon;
+    URL imgURL;
     SysIcon(String path){
-        URL imgURL = SysIcon.class.getResource(path);
+        imgURL = SysIcon.class.getResource(path);
         if (imgURL != null) {
             Icon = new ImageIcon(imgURL);
         } else {

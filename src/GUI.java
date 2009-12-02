@@ -126,13 +126,13 @@ class GUI implements ActionListener, ComponentListener{
         }
 	if(e.getActionCommand()=="AddTag"){
 	    String newTag = (String)JOptionPane.showInputDialog(
-							w, 
-							"Please enter the tag you wish to create?",
-							"Create Tag",
-							JOptionPane.PLAIN_MESSAGE,
-							SysIcon.Question.Icon,
-							null,
-							"");
+								w, 
+								"Please enter the tag you wish to create?",
+								"Create Tag",
+								JOptionPane.PLAIN_MESSAGE,
+								SysIcon.Question.Icon,
+								null,
+								"");
 	    if ((newTag != null) && (newTag.length() > 0)) {
                 mainImageDB.addTag(newTag);
 		//mainImageDB.print();
@@ -277,7 +277,6 @@ class ImageObject {
             //File fileAddress = new File(relativeURL);
             //img = ImageIO.read(fileAddress)
 	    setVars();
-
         } catch (IOException e) {
 	    System.err.println("Error loading image " + absoluteURL + "\nError was: " + e.toString());
 	    setToXasFileNotFound();
@@ -299,10 +298,15 @@ class ImageObject {
     }
 
     void setToXasFileNotFound(){
-	//set the buffered image to a java graphics drawn X icon
-	//bImage = ######
-	//set width, height and orientation
-	//setVars();
+	//set image to error icon
+	//improvement: set the buffered image to a java graphics drawn X icon
+	try{
+	bImage = ImageIO.read(SysIcon.Error.imgURL);
+	setVars();
+	} catch (IOException e) {
+	    System.err.println("Error loading image: " + e.toString());
+	    //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
+        } 
     }
 
 }
