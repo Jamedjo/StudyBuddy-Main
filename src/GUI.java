@@ -253,6 +253,9 @@ class GUI implements ActionListener, ComponentListener{
     public void componentShown(ComponentEvent e){}
 }
 
+//Should the program import pdfs? this would allow many more types of notes...
+//...but would be alot of work for us
+
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
 //Should keep track of whether to flush the curent image and various thumbs based-
@@ -325,7 +328,7 @@ class ProgramState{
     void importImages(File[] files){
 	isLocked = true;
 	for(File f : files){
-	    System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
+	    //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
 	    mainGUI.mainImageDB.addImage("Title 1",f.getAbsolutePath());
 	}
 	try{
