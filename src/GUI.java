@@ -11,6 +11,8 @@ import javax.swing.JOptionPane.*;
 
 //We should use javadoc.
 
+//Refresh image feature?
+
 //Program stucture needs to be redesigned to implement SwingWorker threads to load images
 //Each image will be published once loaded and the worker will be done when all are loaded
 //This prevents loading large images from freezing/crashing the program,
@@ -36,6 +38,7 @@ class GUI implements ActionListener, ComponentListener{
     ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
+    //JLabel mainPhoto;
 
     public static void main(String[] args){
         GUI mainGUI = new GUI();
@@ -100,8 +103,15 @@ class GUI implements ActionListener, ComponentListener{
     void quickRestart(){
 	state = new ProgramState(LoadType.Init,this);        
 
+	//mainPhoto = new JLabel();
+        //mainPhoto.setVerticalTextPosition(JLabel.BOTTOM);
+        //mainPhoto.setHorizontalTextPosition(JLabel.CENTER);
+        //mainPhoto.setHorizontalAlignment(JLabel.CENTER);
+
+
 	mainPanel = new MainPanel(this);
 	mainPanel.addComponentListener(this);
+	//mainPanel.add(mainPhoto);
 
 	thumbPanel = new ThumbPanel(this);
 	//thumbPanel.addComponentListener(this);
@@ -213,11 +223,11 @@ class GUI implements ActionListener, ComponentListener{
         }
         if(e.getActionCommand()=="Help") {
             //Not final help- needs improving
-            JOptionPane.showMessageDialog(w,"Visit http://www.studybuddy.com for help and tutorials","Study Help",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(w,"Visit http://www.studybuddy.com for help and tutorials","Study Help",JOptionPane.INFORMATION_MESSAGE,SysIcon.Info.Icon);
 	    return;
         }
         if(e.getActionCommand()=="About") {
-            JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE,SysIcon.Help.Icon);
 	    return;
         }
 	System.err.println("ActionEvent " + e.getActionCommand() + " was not dealt with,\nand had prameter string "+ e.paramString()); 
@@ -245,13 +255,16 @@ class GUI implements ActionListener, ComponentListener{
 
 //Should hold data relating to program state and control program state
 //Should hold references to databses and image locations
+//Should keep track of whether to flush the curent image and various thumbs based-
+//Previous image and 3 next images should be kept, others flushed.
 class ProgramState{
-    ImageObject[] imageList;
+    private ImageObject[] imageList;
     String[] imageIDs;
     int lastIndex; //Must be updated when number of images changes
     String currentFilter;
-    int currentI = 0;
+    int currentI = 0;//make private
     GUI mainGUI;
+    boolean isLocked = false;//Do not draw if locked.
 
     ProgramState(LoadType loadType, GUI parentGUI){
 	ContructProgramState(loadType,  parentGUI,""); //loadType should not be filter here
@@ -296,7 +309,7 @@ class ProgramState{
 	//then a file should be added first (Construct with Init&imports, then return;)
       	imageList = new ImageObject[imageIDs.length];
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));//VERY BAD code, loads all images into limited memory
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
 	lastIndex = (imageIDs.length - 1);
 	if(loadType!=LoadType.Init){
@@ -306,6 +319,7 @@ class ProgramState{
     }
 
     void importImages(File[] files){
+	isLocked = true;
 	for(File f : files){
 	    System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
 	    mainGUI.mainImageDB.addImage("Title 1",f.getAbsolutePath());
@@ -313,7 +327,11 @@ class ProgramState{
 	try{
 	    if(currentFilter.equals("Show All Images")){
 		mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
-		mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
+		//Sets image to last image
+		//mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
+		//Sets current image to first loaded image.
+		//mainGUI.state.currentI = this.lastIndex + 1;//Bad code as if load fails the this is out of bounds
+		//Will be replaced by feeding lastIndex+1 into constructor above
 	    }
 	    else {
 		mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
@@ -324,11 +342,11 @@ class ProgramState{
 					  +"and not all images should be buffered","Fatal Error",JOptionPane.ERROR_MESSAGE);
 	}
     }
-    void importImage(String absolutePath){
+    void importImage(String absolutePath){//should make a file and call importImages(new File[])
 	mainGUI.mainImageDB.addImage("Title 1",absolutePath);
 	if(currentFilter.equals("Show All Images")){
-	    mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
-	    mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
+	    mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);//could just add image to end of currentIDs
+	    mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;//could just go to last image
 	}
 	else {
 	    mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
@@ -356,35 +374,15 @@ class ProgramState{
 	mainGUI.thumbPanel.repaint();
     }
 
-    // Must be edited so empty DB / imageList does no cause error
+    // Must be edited so empty DB/imageList does not cause error
     ImageObject getCurrentImage(){
 	return imageList[currentI];
     }
 
-    //Finds maximum with and height somthing can be scaled to, without changing aspect ratio
-    //Takes the dimensions of the object inW and inH
-    //and the dimensions of the box it is to be fitted into maxW and maxH
-    //Returns (Width,Height) as an array of two integers.
-    //Not sure which class it belongs in.
-    int[] scaleToMax(int inW, int inH, int maxW, int maxH) {
-	float f_inW,f_inH,f_maxW,f_maxH;
-	f_inW = inW;
-	f_inH = inH;
-	f_maxW = maxW;
-	f_maxH = maxH;
-	int[] outWH = new int[2];
-	if ( (f_inW/f_inH)<(f_maxW/f_maxH) ) {
-	    //narrower at same scale
-	    outWH[1] = maxH;
-	    outWH[0] = Math.round((f_maxH / f_inH)* f_inW);
-	}
-	else {
-	    //wider at same scale
-	    outWH[0] = maxW;
-	    outWH[1] = Math.round(( f_maxW / f_inW)* f_inH);
-	}
-	return outWH;
+    ImageObject getImageI(int i){
+	return imageList[i];//will be changed later to keep track of images in memory
     }
+ 
 }
 
 class MainPanel extends JPanel {
@@ -421,10 +419,13 @@ class MainPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 	//Set dimensions
-	useWH = mainGUI.state.scaleToMax(mainGUI.state.getCurrentImage().width,mainGUI.state.getCurrentImage().height, boardW, boardH);
+	useWH = ImageObject.scaleToMax(mainGUI.state.getCurrentImage().getWidthAndMake(),mainGUI.state.getCurrentImage().getHeightAndMake(), boardW, boardH);
 	int leftOfset = (boardW - useWH[0]) / 2;
 	int topOfset = (boardH - useWH[1]) / 2;
-	g2.drawImage(mainGUI.state.getCurrentImage().bImage, leftOfset, topOfset,useWH[0],useWH[1], this);
+
+	//mainGUI.mainPhoto.setIcon(mainGUI.state.getCurrentImage().getIcon(ImgSize.Full));
+
+	g2.drawImage(mainGUI.state.getCurrentImage().getImage(ImgSize.Full), leftOfset, topOfset,useWH[0],useWH[1], this);
     }
 }
 
@@ -483,10 +484,11 @@ class ThumbPanel extends JPanel {
 	for(int i = 0; (i<tileW)&&(i<mainGUI.state.imageIDs.length);i++){
 	    //set dimension
 	    currentThumb = mainGUI.state.next(currentThumb);
-	    useWH = mainGUI.state.scaleToMax(mainGUI.state.imageList[currentThumb].width,mainGUI.state.imageList[currentThumb].height, squareSize, squareSize);
+	    useWH = ImageObject.scaleToMax(mainGUI.state.getImageI(currentThumb).getWidthAndMake(),mainGUI.state.getImageI(currentThumb).getHeightAndMake(), squareSize, squareSize);
 	    thumbOfsetW= (squareSize - useWH[0])/2;
 	    thumbOfsetH= (squareSize - useWH[1])/2;
-	    g2.drawImage(mainGUI.state.imageList[currentThumb].bImage, leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
+	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgSize.Thumb));
+	    g2.drawImage(mainGUI.state.getImageI(currentThumb).getImage(ImgSize.Thumb), leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
 	    leftOfset+=(squareSize + 2);
 	}
     }
