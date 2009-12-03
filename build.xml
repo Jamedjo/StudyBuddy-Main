@@ -1,4 +1,4 @@
-
+<?xml version="1.0" encoding="UTF-8"?> 
 <project name="jaccuzif-pc" basedir="." default="run">
   <!-- set global properties for this build -->
 	<property name="src" location="src"/>
@@ -12,8 +12,10 @@
 	<property name="jar.name" value="${jar.dir}/StudyBuddy.jar" />
 
 	<target name="init">
-    <!-- Create the time stamp -->
-		<tstamp/>
+		<!-- Create the time stamp -->
+		<tstamp>  
+			<format property="TODAY_UK" pattern="dd MMM yyyy HH.mm" locale="en_GB" />  
+		</tstamp>   
 	</target>
 
 	<target name="compile" depends="init" description="compile the source " >
@@ -24,8 +26,10 @@
 		</javac>
 	</target>
 
-	<!-- compile and run. Changes here should be relected in runold -->
-	<target name="run" depends="init,compile">
+	<!-- run current build without compiling -->
+	<!-- useful when changes have been made which create compile errors -->
+	<!-- also used for run-->
+	<target name="running" description="run current build">
 		<java classname="${main-class}" fork="true">
 			<classpath>
 				<fileset dir="${lib}" includes="**/*.jar"/>
@@ -34,7 +38,12 @@
 			</classpath>
 		</java>
 	</target>
-	
+
+	<!-- compile and run. Changes here should be relected in runold -->
+	<target name="run" depends="init,compile,running" description="compile and run">
+		<echo message="Finished running" />
+	</target>
+		
 	<target name="jar" depends="init,compile" description="produce a jar file">
 		<jar destfile="${jar.name}">
 			<fileset dir="${build}" excludes="**/*.jar" />
@@ -45,21 +54,10 @@
 		</jar>
 	</target>
 	
-	<target name="runjar" depends="init,compile,jar">
+	<target name="runjar" depends="init,compile,jar" description="compile, produce a jar file and run it">
 		<java jar="${jar.name}" fork="true" />
 	</target>
-	
-	<!-- run old build without compiling -->
-	<!-- useful when changes have been made which create compile errors -->
-	<target name="runold">
-		<java classname="${main-class}" fork="true">
-			<classpath>
-				<fileset dir="${lib}" includes="**/*.jar"/>
-				<path location="${build}"/>
-				<path location="${img}"/>
-			</classpath>
-		</java>
-	</target>
+
 
 	<target name="clean" description="clean up" >
 		<delete verbose="true">
@@ -69,4 +67,14 @@
 		<!-- <mkdir dir="${jar.dir}" /> -->
 		<!-- <mkdir dir="${build}" /> -->
 	</target>
+	
+	<target name="cleanrun" description="clean, build and run" depends="clean,init,compile,run" />
+	
+	<target name="help" depends="usage" />  
+ 
+	<target name="usage" description="Display usage info">  
+		<echo message="  Use 'ant -projecthelp' to get descriptions of commands" />  
+		<echo message="  Use 'ant -help' for Ant help file" />  
+	</target>
+	
 </project>
