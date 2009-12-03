@@ -199,10 +199,10 @@ class GUI implements ActionListener, ComponentListener{
 								   JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, tagFilters, "Show All Images");
 	    if ((filterTag != null) && (filterTag.length() > 0)) {
 		if(filterTag.equals("Show All Images")){
-		    state = new ProgramState(LoadType.Refresh,this);
+		    state = new ProgramState(LoadType.Refresh,this);//flush first?
 		}
 		else {
-		    state = new ProgramState(LoadType.Filter,this,filterTag);
+		    state = new ProgramState(LoadType.Filter,this,filterTag);//flush first?
 		}
 		//mainImageDB.print();
                 return;
@@ -340,17 +340,41 @@ class ProgramState{
             JOptionPane.showMessageDialog(mainGUI.w,"Out of memory- over 128MB was needed\n"
 					  +"SwingWorker should be used in code,\n"
 					  +"and not all images should be buffered","Fatal Error",JOptionPane.ERROR_MESSAGE);
+	} finally {
+	    isLocked = false;
+	    safelyDestruct();
 	}
     }
+
     void importImage(String absolutePath){//should make a file and call importImages(new File[])
+	isLocked = true;
 	mainGUI.mainImageDB.addImage("Title 1",absolutePath);
 	if(currentFilter.equals("Show All Images")){
-	    mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);//could just add image to end of currentIDs
-	    mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;//could just go to last image
+	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
+	    if(lastIndex != (imageIDs.length - 1)) lastIndex = imageIDs.length - 1;
+	    else return; //If there are no more images than before import, then failure
+	    currentI = lastIndex;
+	    imageList[lastIndex] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[lastIndex]));
+	    mainGUI.mainPanel.repaint();
+	    mainGUI.thumbPanel.repaint();
 	}
 	else {
 	    mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
+	    safelyDestruct();
 	}
+	isLocked = false;
+    }
+
+    //flushes all images and thumbs
+    void safelyDestruct(){
+	//might check if mainGUI.state==this, as this would imply no need to distruct yet.
+	for(ImageObject imgObj : imageList){
+	    imgObj.destroy();
+	    imgObj = null;
+	}
+	imageList = null;
+	imageIDs = null;
+	//call garbage collect?
     }
 
     int next(int val){
@@ -415,6 +439,7 @@ class MainPanel extends JPanel {
     //all scaling in terms of height. max size is 20 times minimum. 
 
     public void paintComponent(java.awt.Graphics g) {
+	if(mainGUI.state.isLocked) return;
 	int[] useWH;
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
@@ -423,9 +448,9 @@ class MainPanel extends JPanel {
 	int leftOfset = (boardW - useWH[0]) / 2;
 	int topOfset = (boardH - useWH[1]) / 2;
 
-	//mainGUI.mainPhoto.setIcon(mainGUI.state.getCurrentImage().getIcon(ImgSize.Full));
+	//mainGUI.mainPhoto.setIcon(mainGUI.state.getCurrentImage().getIcon(ImgSize.Screen));
 
-	g2.drawImage(mainGUI.state.getCurrentImage().getImage(ImgSize.Full), leftOfset, topOfset,useWH[0],useWH[1], this);
+	g2.drawImage(mainGUI.state.getCurrentImage().getImage(ImgSize.Screen), leftOfset, topOfset,useWH[0],useWH[1], this);
     }
 }
 
@@ -471,6 +496,7 @@ class ThumbPanel extends JPanel {
     //all scaling in terms of height. max size is 20 times minimum. 
 
     public void paintComponent(java.awt.Graphics g) {
+	if(mainGUI.state.isLocked) return;
 	int[] useWH;
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
@@ -484,7 +510,7 @@ class ThumbPanel extends JPanel {
 	for(int i = 0; (i<tileW)&&(i<mainGUI.state.imageIDs.length);i++){
 	    //set dimension
 	    currentThumb = mainGUI.state.next(currentThumb);
-	    useWH = ImageObject.scaleToMax(mainGUI.state.getImageI(currentThumb).getWidthAndMake(),mainGUI.state.getImageI(currentThumb).getHeightAndMake(), squareSize, squareSize);
+	    useWH = ImageObject.scaleToMax(mainGUI.state.getImageI(currentThumb).getWidthForThumb(),mainGUI.state.getImageI(currentThumb).getHeightForThumb(), squareSize, squareSize);
 	    thumbOfsetW= (squareSize - useWH[0])/2;
 	    thumbOfsetH= (squareSize - useWH[1])/2;
 	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgSize.Thumb));
