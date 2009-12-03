@@ -283,13 +283,17 @@ class ProgramState{
 	    mainGUI.mainImageDB = new ImageDatabase("mainDB");
 	    //If there are no files you get loads of errors
 
-	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_2810b_small.jpg");
-	    //mainGUI.mainImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
-	    //mainGUI.mainImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
-	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_6088b_small.jpg");
-	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_5672bp_small.jpg");
-	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_2926_small.jpg");
-	    mainGUI.mainImageDB.addImage("Title 1","///\\\\\\img_F028c_small.jpg");
+	    mainGUI.mainImageDB.addImage("Park","///\\\\\\img_2810b_small.jpg");
+	    
+	    mainGUI.mainImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
+
+	    mainGUI.mainImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
+	    mainGUI.mainImageDB.addImage("Igloo in Bristol","///\\\\\\img_6088b_small.jpg");
+	    mainGUI.mainImageDB.addImage("Pink","///\\\\\\img_5672bp_small.jpg");
+	    mainGUI.mainImageDB.addImage("Speed","///\\\\\\img_2926_small.jpg");
+	    mainGUI.mainImageDB.addImage("Food","///\\\\\\img_F028c_small.jpg");
+	    mainGUI.mainImageDB.addImage("Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
+	    mainGUI.mainImageDB.addImage("Graph Notes for C/W","///\\\\\\DSA_7.bmp");
 
 	    //no break as image list must still be passed from DB
 	case Refresh:

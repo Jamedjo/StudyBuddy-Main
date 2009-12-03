@@ -43,41 +43,49 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
     }
 }
 
-class ImageObject {//could be updated to take a File instead, or a javase7 path
+class ImageObject { //could be updated to take a File instead, or a javase7 path
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. Flushed when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.
-    URL urlAddress;
+    URL urlAddress;//Replace with file
     String absolutePath;//Kept for error messages. Likely to be similar to urlAddress.toString()
+    //    File pathFile;
     Orientation iOri;
     private Integer Bwidth = null;
     private Integer Bheight = null;//make private- external programs do not know if initialized
     int screenWidth, screenHeight;
-    //String imageID;
-    //String title,filename,comments?
     static final int thumbMaxW = 200;
     static final int thumbMaxH = 200;
     ImgSize currentLarge;//The size of the large bImage (Max or Screen)
+    //String imageID;
+    //String title,filename,comments?
 
-    ImageObject(String absoluteURL){
-	if(absoluteURL.startsWith("///\\\\\\")){
-	    String relativeURL = absoluteURL.substring(6);
-	    //System.out.println(relativeURL +  " is relative and absolute is " + absoluteURL);
-	    urlAddress = GUI.class.getResource(relativeURL); //could be null
-	    absolutePath = urlAddress.toString();
-	}
-	else {
-	    File file = new File(absoluteURL);
-	    try{
-		absolutePath = absoluteURL;
-		urlAddress = file.toURI().toURL();
-		//System.out.println(absoluteURL +  " is absolute and file is "+file.toString() +" and URL is " + urlAddress.toString());
-	    } catch (MalformedURLException e){
-		urlAddress = null;
-		System.err.println("Image file " + absoluteURL + " could not be found " + "\nError was: " + e.toString());
+    ImageObject(String absoluteUrL){
+	try{
+	    if(absoluteUrL.startsWith("///\\\\\\")){
+		String relativeUrL = absoluteUrL.substring(6);
+		//System.out.println(relativeUrL +  " is relative and absolute is " + absoluteURL);
+	    
+		urlAddress = GUI.class.getResource(relativeUrL); //could be null
+		absolutePath = urlAddress.toString();
 	    }
+	    else {
+		File file = new File(absoluteUrL);
+	    
+		absolutePath = absoluteUrL;
+		urlAddress = file.toURI().toURL();
+		//System.out.println(absoluteUrL +  " is absolute and file is "+file.toString() +" and URL is " + urlAddress.toString());
+	    }
+	} catch (MalformedURLException e){
+	    urlAddress = null;
+	    System.err.println("Image file " + absoluteUrL + " could not be found " + "\nError was: " + e.toString());
+	}catch (NullPointerException e) {
+	    urlAddress = null;
+	    System.err.println("Could not load image from file " + absolutePath + "\nError was: " + e.toString());
 	}
+	
+	
 	if(urlAddress==null){
-	    System.err.println("File could not be found at " + absoluteURL);
+	    System.err.println("File could not be found at " + absoluteUrL);
 	}
 	//ImageObjectConstructor();
 	//getImage(ImgSize.Screen);
@@ -105,6 +113,12 @@ class ImageObject {//could be updated to take a File instead, or a javase7 path
 	return Bheight;
     }
 
+    //if(pos>0 && pos<(name.length() - 1)){
+    //ext = name.substring(pos+1).toLowerCase();
+    //Iterator readers = ImageIO.getImageReadersByFormatName("gif");
+    //ImageReader reader = (ImageReader)readers.next();
+
+
     int getWidthForThumb(){
 	if(bImage!=null) return Bwidth;
 	//get width from file using a reader
@@ -127,15 +141,17 @@ class ImageObject {//could be updated to take a File instead, or a javase7 path
     }
 
     ImageObject(URL urlAddress){
-	absolutePath = urlAddress.toString();//should find absoluteURL for printing
+	absolutePath = urlAddress.toString();//should find absoluteUrL for printing
 	initVars();
 	//ImageObjectConstructor();
 	//getImage(ImgSize.Screen);
     }
 
-    //ImageObject(URL urlAddress, String absoluteURL){
-    //	ImageObjectConstructor(urlAddress, absoluteURL);
+    //ImageObject(URL urlAddress, String absoluteUrL){
+    //	ImageObjectConstructor(urlAddress, absoluteUrL);
     //}
+
+    //BufferedImage extractIcon(...)
 
     BufferedImage getImage(ImgSize size){
 	System.out.println("Image requested: " + absolutePath + " at size " + size);
@@ -151,7 +167,7 @@ class ImageObject {//could be updated to take a File instead, or a javase7 path
 	    }
 	    else currentLarge = ImgSize.Max;
 	    bThumb =  makeThumb(bImage);
-            //File fileAddress = new File(relativeURL);
+            //File fileAddress = new File(relativeUrL);
             //img = ImageIO.read(fileAddress)
 	    setVars();
         } catch (IOException e) {
