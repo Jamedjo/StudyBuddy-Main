@@ -1,3 +1,6 @@
+import javax.imageio.ImageReader;
+import java.util.Iterator;
+import javax.imageio.stream.ImageInputStream;
 import java.awt.Dimension;
 import java.net.URL;
 import java.awt.image.BufferedImage;
@@ -46,9 +49,8 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
 
 class ImageObject { //could be updated to take a File instead, or a javase7 path
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. Flushed when not needed.
-    private BufferedImage bThumb = null;//Created when large created, not removed.
-    //URL urlAddress;//Replace with file
-    String absolutePath;//Kept for error messages. Likely to be similar to urlAddress.toString()
+    private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
+    String absolutePath;//Kept for error messages. Likely to be similar to pathFile.toString()
     File pathFile;
     Orientation iOri;
     private Integer Bwidth = null;
@@ -116,27 +118,51 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	return Bheight;
     }
 
-    //if(pos>0 && pos<(name.length() - 1)){
-    //ext = name.substring(pos+1).toLowerCase();
-    //Iterator readers = ImageIO.getImageReadersByFormatName("gif");
-    //ImageReader reader = (ImageReader)readers.next();
+    //gets files dimension and thumbnail without loading it to memory
+    void manualReadImage(){
+	if(pathFile==null) return;
+	String ext = null;
+	int pos = pathFile.getName().lastIndexOf(".");
+	if(pos>0 && pos<(absolutePath.length() - 1)){
+	    ext = absolutePath.substring(pos+1).toLowerCase();
+	}
+	if(ext==null) {
+	    System.err.println("Unable to get file extension from "+absolutePath);
+	    return;
+	}
 
+	Iterator readers = ImageIO.getImageReadersBySuffix("jpg");
+	ImageReader reader = (ImageReader)readers.next();
+
+	try{
+	    ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
+	    reader.setInput(inputStream,false);
+
+	    Bwidth = reader.getWidth(0);//gets the width of the first image in the file
+	    Bheight = reader.getHeight(0);
+	} catch (IOException e) {
+	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	}
+    
+	//reader.getNumThumbnails(imageIndex);
+	//If a thumbnail image is present, it can be retrieved by calling:
+	//int thumbailIndex = 0;
+	//BufferedImage bi;
+	//bi = reader.readThumbnail(imageIndex, thumbnailIndex);
+	System.out.println("Dimensions "+Bwidth+"x"+Bheight+"suceesfully got for " +absolutePath);
+	stophere();
+    }
+    void stophere(){}
 
     int getWidthForThumb(){
 	if(bImage!=null) return Bwidth;
-	//get width from file using a reader
-	//note that the bImage should now be flushed to clear memory
-	getImage(ImgSize.Screen);//for now
-	if(bImage!=null) bImage.flush();
-	return Bwidth;
+	manualReadImage();	
+	return getWidthAndMake();//Makes error icon if pathFile was null. Returns value if present.
     }
     int getHeightForThumb(){
 	if(bImage!=null) return Bheight;
-	//get  height from file using a reader
-	//note that the bImage should now be flushed to clear memory
-	getImage(ImgSize.Screen);//for now
-	if(bImage!=null) bImage.flush();
-	return Bheight;
+	manualReadImage();
+	return getHeightAndMake();//Returns Bheight if manualReadImage worked, makes an errror icon if path was null
     }
 
     void flush(){

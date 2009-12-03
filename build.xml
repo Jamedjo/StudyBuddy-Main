@@ -25,6 +25,14 @@
 			</classpath>
 		</javac>
 	</target>
+	
+	<target name="compile-debug" depends="clean,init" description="compile the source with debug option" >
+		<javac srcdir="${src}" destdir="${build}" debug="on" debuglevel="lines,vars,source">
+			<classpath>
+				<fileset dir="${lib}" includes="**/*.jar"/>
+			</classpath>
+		</javac>
+	</target>
 
 	<!-- run current build without compiling -->
 	<!-- useful when changes have been made which create compile errors -->
