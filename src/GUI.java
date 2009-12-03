@@ -123,12 +123,12 @@ class GUI implements ActionListener, ComponentListener{
 	//boardScroll = new JScrollPane(mainPanel);
 	//boardScroll.addComponentListener(this);
 
-        Panel contentSet = new Panel();
+        JPanel contentSet = new JPanel();
     	contentSet.setLayout(new BorderLayout());
 	contentSet.add(mainPanel,BorderLayout.CENTER);
 	contentSet.add(thumbPanel,BorderLayout.PAGE_END);
 
-	Panel contentPane = new Panel();
+	JPanel contentPane = new JPanel();
     	contentPane.setLayout(new BorderLayout());
 
         //contentPane.add(boardScroll, BorderLayout.CENTER);
