@@ -287,10 +287,8 @@ class ProgramState{
 	    //If there are no files you get loads of errors
 
 	    mainGUI.mainImageDB.addImage("Park","///\\\\\\img_2810b_small.jpg");
-	    
-	    mainGUI.mainImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
-
-	    mainGUI.mainImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
+	    //mainGUI.mainImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
+	    //mainGUI.mainImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
 	    mainGUI.mainImageDB.addImage("Igloo in Bristol","///\\\\\\img_6088b_small.jpg");
 	    mainGUI.mainImageDB.addImage("Pink","///\\\\\\img_5672bp_small.jpg");
 	    mainGUI.mainImageDB.addImage("Speed","///\\\\\\img_2926_small.jpg");
@@ -308,7 +306,7 @@ class ProgramState{
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados09.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados10.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados-08-046-733284.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\jamaica1730homannsheirs.jpg");
+	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\jamaica1730homannsheirs.jpg");
 
 
 	    //no break as image list must still be passed from DB
@@ -398,15 +396,17 @@ class ProgramState{
     }
 
     int next(int val){
-	if(val==lastIndex) return 0;
-	else return (val +1);
+	if(val==lastIndex) return 0;//>=
+	val += 1;
+	return val;
     }
 
     int prev(int val){
-	if(val==0) return lastIndex;
-	else return (val -1);
+	if(val==0) return lastIndex;//<=
+	val -= 1 ;
+	return val;
     }
-
+ 
     void nextImage() {
 	currentI = next(currentI);
 	mainGUI.mainPanel.repaint();
@@ -418,14 +418,46 @@ class ProgramState{
 	mainGUI.thumbPanel.repaint();
     }
 
+    int relItoFixI(int in){
+	int c;
+	int outI = currentI;
+	if(in==0) return outI;
+	if(in>0){
+	    for(c=0;c!=in;c++){//>=
+		outI = next(outI);
+	    }
+	}
+	else for(c=0;c!=in;c--){//<=
+	    outI = prev(outI);
+	}
+	return outI;
+    }
+
     // Must be edited so empty DB/imageList does not cause error
     ImageObject getCurrentImage(){
 	return imageList[currentI];
     }
 
+    int[] getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
+int imageIndex = relItoFixI(relativeImage);
+	//Dimension out = new Dimension();
+	int[] useWH;
+	if(size.isLarge()){
+	    useWH= ImageObject.scaleToMax(getCurrentImage().getWidthAndMake(),getCurrentImage().getHeightAndMake(), MaxW, MaxH);//should use relativeImage, 0 is current
+	}
+	else {
+	    useWH = ImageObject.scaleToMax(getImageI(imageIndex).getWidthForThumb(),getImageI(imageIndex).getHeightForThumb(), MaxW, MaxH);
+	}
+	return useWH;
+    }
+
     ImageObject getImageI(int i){
 	return imageList[i];//will be changed later to keep track of images in memory
     }
+
+BufferedImage getBImageI(int relativeImage, ImgSize size){
+	    return imageList[relItoFixI(relativeImage)].getImage(size);
+}
  
 }
 
@@ -464,13 +496,13 @@ class MainPanel extends JPanel {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 	//Set dimensions
-	useWH = ImageObject.scaleToMax(mainGUI.state.getCurrentImage().getWidthAndMake(),mainGUI.state.getCurrentImage().getHeightAndMake(), boardW, boardH);
+	useWH = mainGUI.state.getRelImageWH(ImgSize.Screen,boardW,boardH,0);
 	int leftOfset = (boardW - useWH[0]) / 2;
 	int topOfset = (boardH - useWH[1]) / 2;
 
 	//mainGUI.mainPhoto.setIcon(mainGUI.state.getCurrentImage().getIcon(ImgSize.Screen));
 
-	g2.drawImage(mainGUI.state.getCurrentImage().getImage(ImgSize.Screen), leftOfset, topOfset,useWH[0],useWH[1], this);
+	g2.drawImage(mainGUI.state.getBImageI(0,ImgSize.Screen), leftOfset, topOfset,useWH[0],useWH[1], this);
     }
 }
 
@@ -512,7 +544,6 @@ class ThumbPanel extends JPanel {
 	} else squareSize = boardH/tileH;
     }
 
- 
     //all scaling in terms of height. max size is 20 times minimum. 
 
     public void paintComponent(java.awt.Graphics g) {
@@ -524,17 +555,17 @@ class ThumbPanel extends JPanel {
 
 	int leftOfset = (boardW - tileW*(squareSize+2)) /2;
 	int topOfset = 0;
-	int currentThumb = mainGUI.state.currentI;
+	//int currentThumb = mainGUI.state.currentI;
 	int thumbOfsetW =0;
 	int thumbOfsetH = 0;
-	for(int i = 0; (i<tileW)&&(i<mainGUI.state.imageIDs.length);i++){
+	for(int im = 0; (im<tileW)&&(im<mainGUI.state.imageIDs.length);im++){
 	    //set dimension
-	    currentThumb = mainGUI.state.next(currentThumb);
-	    useWH = ImageObject.scaleToMax(mainGUI.state.getImageI(currentThumb).getWidthForThumb(),mainGUI.state.getImageI(currentThumb).getHeightForThumb(), squareSize, squareSize);
+	    //currentThumb = mainGUI.state.next(currentThumb);
+	    useWH = mainGUI.state.getRelImageWH(ImgSize.Thumb,squareSize,squareSize,im);
 	    thumbOfsetW= (squareSize - useWH[0])/2;
 	    thumbOfsetH= (squareSize - useWH[1])/2;
 	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgSize.Thumb));
-	    g2.drawImage(mainGUI.state.getImageI(currentThumb).getImage(ImgSize.Thumb), leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
+	    g2.drawImage(mainGUI.state.getBImageI(im,ImgSize.Thumb), leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
 	    leftOfset+=(squareSize + 2);
 	}
     }

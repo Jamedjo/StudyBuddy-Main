@@ -155,12 +155,12 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     void stophere(){}
 
     int getWidthForThumb(){
-	if(bImage!=null) return Bwidth;
+	if(Bwidth!=null) return Bwidth;
 	manualReadImage();	
 	return getWidthAndMake();//Makes error icon if pathFile was null. Returns value if present.
     }
     int getHeightForThumb(){
-	if(bImage!=null) return Bheight;
+	if(Bheight!=null) return Bheight;
 	manualReadImage();
 	return getHeightAndMake();//Returns Bheight if manualReadImage worked, makes an errror icon if path was null
     }
