@@ -39,10 +39,10 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
     }
     public String toString(){
 	switch (this){
-	    case Thumb: return "ThumbOnly";
-	    case ThumbFull: return "Thumb";//ThumbFull requests size Thumb, but not flushing the full image as it may be used later
-	    case Screen: return "Screen";
-	    default: return "Max";//Max is not yet implemented.
+	case Thumb: return "ThumbOnly";
+	case ThumbFull: return "Thumb";//ThumbFull requests size Thumb, but not flushing the full image as it may be used later
+	case Screen: return "Screen";
+	default: return "Max";//Max is not yet implemented.
 	}
     }
 }
@@ -208,7 +208,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	    System.err.println("Could not load image from file " + absolutePath + "\nError was: " + e.toString());
 	    setToXasFileNotFound();
 	} catch(java.lang.OutOfMemoryError e){
-           System.err.println("Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
+	    System.err.println("Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
 	}
 	if(bImage==null) return null;//if big is null, so is thumb.
 	if(size.isLarge()) return bImage;
@@ -266,9 +266,9 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	//set image to error icon
 	//improvement: set the buffered image to a java graphics drawn X icon
 	try{
-	bImage = ImageIO.read(SysIcon.Error.imgURL);
-	bThumb = ImageIO.read(SysIcon.Error.imgURL);
-	setVars();
+	    bImage = ImageIO.read(SysIcon.Error.imgURL);
+	    bThumb = ImageIO.read(SysIcon.Error.imgURL);
+	    setVars();
 	} catch (IOException e) {
 	    System.err.println("Error loading image: " + e.toString());
 	    //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);

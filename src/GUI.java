@@ -69,13 +69,13 @@ class GUI implements ActionListener, ComponentListener{
 		    String name = f.getName();
 		    int pos = name.lastIndexOf(".");
 		    if(pos>0 && pos<(name.length() - 1)){
-			    ext = name.substring(pos+1).toLowerCase();
-			    for(String imgExt : exts){
-				if(ext.equals(imgExt)){
-				    return true;
-				}
+			ext = name.substring(pos+1).toLowerCase();
+			for(String imgExt : exts){
+			    if(ext.equals(imgExt)){
+				return true;
 			    }
-			} 
+			}
+		    } 
 		    return false;
 		}
 		public String getDescription() {
@@ -428,8 +428,8 @@ class ProgramState{
 	    }
 	}
 	else for(c=0;c!=in;c--){//<=
-	    outI = prev(outI);
-	}
+		outI = prev(outI);
+	    }
 	return outI;
     }
 
@@ -439,7 +439,7 @@ class ProgramState{
     }
 
     int[] getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
-int imageIndex = relItoFixI(relativeImage);
+	int imageIndex = relItoFixI(relativeImage);
 	//Dimension out = new Dimension();
 	int[] useWH;
 	if(size.isLarge()){
@@ -455,9 +455,9 @@ int imageIndex = relItoFixI(relativeImage);
 	return imageList[i];//will be changed later to keep track of images in memory
     }
 
-BufferedImage getBImageI(int relativeImage, ImgSize size){
-	    return imageList[relItoFixI(relativeImage)].getImage(size);
-}
+    BufferedImage getBImageI(int relativeImage, ImgSize size){
+	return imageList[relItoFixI(relativeImage)].getImage(size);
+    }
  
 }
 
