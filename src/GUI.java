@@ -146,6 +146,16 @@ class GUI implements ActionListener, ComponentListener{
 	    }
 	    return;
 	}
+
+        if(e.getActionCommand()=="ThumbsH"||e.getActionCommand()=="mRestart") {
+	    thumbPanel.setVisible(false);
+	    
+	    ViewMenu.ShowThumbs.show();	    
+	    ViewMenu.HideThumbs.hide();
+	    ToolBar.bThumbsS.show();	    
+	    ToolBar.bThumbsH.hide();
+	    if(e.getActionCommand()=="ThumbsH") return;
+        }
 	if(e.getActionCommand()=="mRestart") {
             quickRestart();
 	    return;
@@ -209,15 +219,6 @@ class GUI implements ActionListener, ComponentListener{
             }
 	    return;
 	}
-        if(e.getActionCommand()=="ThumbsH") {
-	    thumbPanel.setVisible(false);
-	    
-	    ViewMenu.ShowThumbs.show();	    
-	    ViewMenu.HideThumbs.hide();
-	    ToolBar.bThumbsS.show();	    
-	    ToolBar.bThumbsH.hide();
-	    return;
-        }
         if(e.getActionCommand()=="Exit") {
             System.exit(0);
         }
@@ -355,9 +356,7 @@ class ProgramState{
 		mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
 	    }
 	} catch(java.lang.OutOfMemoryError e){
-            JOptionPane.showMessageDialog(mainGUI.w,"Out of memory- over 128MB was needed\n"
-					  +"SwingWorker should be used in code,\n"
-					  +"and not all images should be buffered","Fatal Error",JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(mainGUI.w,"Out of memory","Fatal Error",JOptionPane.ERROR_MESSAGE);
 	} finally {
 	    isLocked = false;
 	    safelyDestruct();
@@ -396,15 +395,13 @@ class ProgramState{
     }
 
     int next(int val){
-	if(val==lastIndex) return 0;//>=
-	val += 1;
-	return val;
+	if(val>=lastIndex) return 0;
+	return (val+1);
     }
 
     int prev(int val){
-	if(val==0) return lastIndex;//<=
-	val -= 1 ;
-	return val;
+	if(val<=0) return lastIndex;
+	return (val-1);
     }
  
     void nextImage() {
@@ -438,12 +435,12 @@ class ProgramState{
 	return imageList[currentI];
     }
 
-    int[] getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
+    Dimension getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
 	int imageIndex = relItoFixI(relativeImage);
-	//Dimension out = new Dimension();
-	int[] useWH;
+	Dimension useWH = new Dimension();
+	//int[] useWH;
 	if(size.isLarge()){
-	    useWH= ImageObject.scaleToMax(getCurrentImage().getWidthAndMake(),getCurrentImage().getHeightAndMake(), MaxW, MaxH);//should use relativeImage, 0 is current
+	    useWH= ImageObject.scaleToMax(getImageI(imageIndex).getWidthAndMake(),getImageI(imageIndex).getHeightAndMake(), MaxW, MaxH);
 	}
 	else {
 	    useWH = ImageObject.scaleToMax(getImageI(imageIndex).getWidthForThumb(),getImageI(imageIndex).getHeightForThumb(), MaxW, MaxH);
@@ -492,17 +489,17 @@ class MainPanel extends JPanel {
 
     public void paintComponent(java.awt.Graphics g) {
 	if(mainGUI.state.isLocked) return;
-	int[] useWH;
+	Dimension useWH;
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 	//Set dimensions
 	useWH = mainGUI.state.getRelImageWH(ImgSize.Screen,boardW,boardH,0);
-	int leftOfset = (boardW - useWH[0]) / 2;
-	int topOfset = (boardH - useWH[1]) / 2;
+	int leftOfset = (boardW - useWH.width) / 2;
+	int topOfset = (boardH - useWH.height) / 2;
 
 	//mainGUI.mainPhoto.setIcon(mainGUI.state.getCurrentImage().getIcon(ImgSize.Screen));
 
-	g2.drawImage(mainGUI.state.getBImageI(0,ImgSize.Screen), leftOfset, topOfset,useWH[0],useWH[1], this);
+	g2.drawImage(mainGUI.state.getBImageI(0,ImgSize.Screen), leftOfset, topOfset,useWH.width,useWH.height, this);
     }
 }
 
@@ -548,7 +545,7 @@ class ThumbPanel extends JPanel {
 
     public void paintComponent(java.awt.Graphics g) {
 	if(mainGUI.state.isLocked) return;
-	int[] useWH;
+	Dimension useWH;
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 	//Use icons for thumbnails, populate icons in loop and then position icons.
@@ -558,14 +555,14 @@ class ThumbPanel extends JPanel {
 	//int currentThumb = mainGUI.state.currentI;
 	int thumbOfsetW =0;
 	int thumbOfsetH = 0;
-	for(int im = 0; (im<tileW)&&(im<mainGUI.state.imageIDs.length);im++){
+	for(int im = 1; (im<=tileW)&&(im<=mainGUI.state.imageIDs.length);im++){
 	    //set dimension
 	    //currentThumb = mainGUI.state.next(currentThumb);
 	    useWH = mainGUI.state.getRelImageWH(ImgSize.Thumb,squareSize,squareSize,im);
-	    thumbOfsetW= (squareSize - useWH[0])/2;
-	    thumbOfsetH= (squareSize - useWH[1])/2;
+	    thumbOfsetW= (squareSize - useWH.width)/2;
+	    thumbOfsetH= (squareSize - useWH.height)/2;
 	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgSize.Thumb));
-	    g2.drawImage(mainGUI.state.getBImageI(im,ImgSize.Thumb), leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH[0],useWH[1], this);
+	    g2.drawImage(mainGUI.state.getBImageI(im,ImgSize.Thumb), leftOfset+thumbOfsetW, topOfset+thumbOfsetH,useWH.width,useWH.height, this);
 	    leftOfset+=(squareSize + 2);
 	}
     }

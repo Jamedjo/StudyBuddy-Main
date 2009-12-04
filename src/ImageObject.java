@@ -14,6 +14,13 @@ import java.io.IOException;
 import java.awt.RenderingHints;
 //import javax.swing.JOptionPane;
 
+//Library of code under lib/
+//Various image utilities. needed as default image reader could not read thumbnails from exif
+import org.apache.sanselan.*;
+import org.apache.sanselan.common.IImageMetadata;
+import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
+
+
 //use jpeg thumbs where availiable
 
 //BufferedImage takes 4MB per megapixel, so a 5megaPixel file is 20MB of java heap memory. On some VMs 64MB is max heap.
@@ -51,7 +58,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. Flushed when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
     String absolutePath;//Kept for error messages. Likely to be similar to pathFile.toString()
-    File pathFile;
+    File pathFile = null;
     Orientation iOri;
     private Integer Bwidth = null;
     private Integer Bheight = null;//make private- external programs do not know if initialized
@@ -69,7 +76,10 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	    if(inputPath.startsWith("///\\\\\\")){
 		tempPath = inputPath.substring(6);
 		absolutePath = (GUI.class.getResource(tempPath)).getPath();//could be null
-		pathFile = new File(absolutePath);
+		if(absolutePath==null){
+		    absolutePath=tempPath;
+		}
+		else pathFile = new File(absolutePath);
 	    }
 	    else {
 		absolutePath = inputPath;
@@ -103,6 +113,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	Dimension scrD = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	screenWidth = scrD.width;
 	screenHeight = scrD.height;
+	manualReadImage();
     }
 
     int getWidthAndMake(){
@@ -123,45 +134,58 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	if(pathFile==null) return;
 	String ext = null;
 	int pos = pathFile.getName().lastIndexOf(".");
-	if(pos>0 && pos<(absolutePath.length() - 1)){
-	    ext = absolutePath.substring(pos+1).toLowerCase();
+	if(pos>0 && pos<(pathFile.getName().length() - 1)){
+	    ext = pathFile.getName().substring(pos+1).toLowerCase();
 	}
 	if(ext==null) {
 	    System.err.println("Unable to get file extension from "+absolutePath);
 	    return;
 	}
 
-	Iterator readers = ImageIO.getImageReadersBySuffix("jpg");
-	ImageReader reader = (ImageReader)readers.next();
+	//Iterator readers = ImageIO.getImageReadersBySuffix(ext);
+	//ImageReader reader = (ImageReader)readers.next();
 
 	try{
-	    ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
-	    reader.setInput(inputStream,false);
+	    //ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
+	    //reader.setInput(inputStream,false);
 
-	    Bwidth = reader.getWidth(0);//gets the width of the first image in the file
-	    Bheight = reader.getHeight(0);
-	} catch (IOException e) {
-	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
-	}
-    
-	//reader.getNumThumbnails(imageIndex);
+	    // get the image's width and height. 
+	    Dimension image_d = Sanselan.getImageSize(pathFile);
+	    Bwidth = image_d.width;
+	    Bheight = image_d.height;
+	    
+	    IImageMetadata metadata = Sanselan.getMetadata(pathFile);
+	    if (metadata instanceof JpegImageMetadata) {
+		JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
+		bThumb = jpegMetadata.getEXIFThumbnail();
+if(bThumb!=null) System.out.println("Read exif of image " + absolutePath);
+	    }
+	    
+	    	    
+	    //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
+	    //Bheight = reader.getHeight(0);
+	
+	//int thumbnum = reader.getNumThumbnails(0);//imageIndex = 0 as we look at the first image in file
+	//System.out.println("Has "+thumbnum+" thumbnails. Using reader " +reader.getClass().getName());
 	//If a thumbnail image is present, it can be retrieved by calling:
 	//int thumbailIndex = 0;
 	//BufferedImage bi;
 	//bi = reader.readThumbnail(imageIndex, thumbnailIndex);
-	System.out.println("Dimensions "+Bwidth+"x"+Bheight+"suceesfully got for " +absolutePath);
-	stophere();
+	} catch (IOException e) {
+	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	} catch (ImageReadException e) {
+System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+	}
+    
+	//System.out.println("Dimensions "+Bwidth+"x"+Bheight+" suceesfully got for " +absolutePath);
     }
-    void stophere(){}
 
     int getWidthForThumb(){
 	if(Bwidth!=null) return Bwidth;
-	manualReadImage();	
 	return getWidthAndMake();//Makes error icon if pathFile was null. Returns value if present.
     }
     int getHeightForThumb(){
 	if(Bheight!=null) return Bheight;
-	manualReadImage();
 	return getHeightAndMake();//Returns Bheight if manualReadImage worked, makes an errror icon if path was null
     }
 
@@ -183,7 +207,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     //BufferedImage extractIcon(...)
 
     BufferedImage getImage(ImgSize size){
-	System.out.println("Image requested: " + absolutePath + " at size " + size);
+	//System.out.println("Image requested: " + absolutePath + " at size " + size);
 	//gets thumbnail or full image
 	if(size.isThumb()&&bThumb!=null) return bThumb;
 	if(size==currentLarge&&bImage!=null) return bImage;//If there is an image which matches size
@@ -212,6 +236,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	}
 	if(bImage==null) return null;//if big is null, so is thumb.
 	if(size.isLarge()) return bImage;
+	System.out.println("Made thumb for "+absolutePath);
 	if(size==ImgSize.ThumbFull) return bThumb;
 	else{
 	    //as only thumb needed, flush bImage
@@ -221,17 +246,17 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     }
 
     BufferedImage makeThumb(BufferedImage bigImg){
-	int[] iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),thumbMaxW,thumbMaxH);
-	if(!(iconWH[0]<bigImg.getWidth())) return bigImg;
+	Dimension iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),thumbMaxW,thumbMaxH);
+	if(!(iconWH.width<bigImg.getWidth())) return bigImg;
 
 	//Image tempimage = bigIcon.getImage();
 	BufferedImage tempimage =bigImg;
 
-        Graphics2D g2 = (new BufferedImage(iconWH[0],iconWH[1],BufferedImage.TYPE_3BYTE_BGR)).createGraphics();//TYPE_INT_RGB
+        Graphics2D g2 = (new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR)).createGraphics();//TYPE_INT_RGB
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-        g2.drawImage(tempimage, 0, 0, iconWH[0],iconWH[1], null);
+        g2.drawImage(tempimage, 0, 0, iconWH.width,iconWH.height, null);
         g2.dispose();
 
 	return tempimage;	
@@ -239,16 +264,16 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 
     //could merge two functions
     BufferedImage makeScreenImg(BufferedImage bigImg){
-	int[] iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),screenWidth,screenHeight);
-	if(!(iconWH[0]<bigImg.getWidth())) return bigImg;
+	Dimension iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),screenWidth,screenHeight);
+	if(!(iconWH.width<bigImg.getWidth())) return bigImg;
 	//Image tempimage = bigIcon.getImage();
 	BufferedImage tempimage =bigImg;
 
-        Graphics2D g2 = (new BufferedImage(iconWH[0],iconWH[1],BufferedImage.TYPE_3BYTE_BGR)).createGraphics();//TYPE_INT_RGB takes 4bytes, this takes 3. Less memory used
+        Graphics2D g2 = (new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR)).createGraphics();//TYPE_INT_RGB takes 4bytes, this takes 3. Less memory used
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);//might not be avaliable on all systems // might not have spelt biquibic right
         //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.drawImage(tempimage, 0, 0, iconWH[0],iconWH[1], null);
+        g2.drawImage(tempimage, 0, 0, iconWH.width,iconWH.height, null);
         g2.dispose();
 
 	return tempimage;	
@@ -296,28 +321,29 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     //and the dimensions of the box it is to be fitted into maxW and maxH
     //Returns (Width,Height) as an array of two integers.
     //Not sure which class it belongs in.
-    static int[] scaleToMax(int inW, int inH, int maxW, int maxH) {
+    static Dimension scaleToMax(int inW, int inH, int maxW, int maxH) {
 	float f_inW,f_inH,f_maxW,f_maxH;
 	f_inW = inW;
 	f_inH = inH;
 	f_maxW = maxW;
 	f_maxH = maxH;
-	int[] outWH = new int[2];
+	//int[] outWH = new int[2];
+Dimension outWH = new Dimension();
 	if ( (f_inW/f_inH)<(f_maxW/f_maxH) ) {
 	    //narrower at same scale
-	    outWH[1] = maxH;
-	    outWH[0] = Math.round((f_maxH / f_inH)* f_inW);
+	    outWH.height = maxH;
+	    outWH.width = Math.round((f_maxH / f_inH)* f_inW);
 	}
 	else {
 	    //wider at same scale
-	    outWH[0] = maxW;
-	    outWH[1] = Math.round(( f_maxW / f_inW)* f_inH);
+	    outWH.width = maxW;
+	    outWH.height = Math.round(( f_maxW / f_inW)* f_inH);
 	}
 	return outWH;
     }
-    static int[] scaleDownToMax(int inW, int inH, int maxW, int maxH) {
-	int[] tempWH = scaleToMax(inW, inH, maxW, maxH);
-	if(tempWH[0]<inW) return tempWH;
-	return new int[] {inW,inH};
+    static Dimension scaleDownToMax(int inW, int inH, int maxW, int maxH) {
+	Dimension tempWH = scaleToMax(inW, inH, maxW, maxH);
+	if(tempWH.width<inW) return tempWH;
+	return new Dimension(inW,inH);
     }
 }
