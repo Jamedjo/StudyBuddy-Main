@@ -1,3 +1,4 @@
+import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import java.util.Iterator;
 import javax.imageio.stream.ImageInputStream;
@@ -13,6 +14,7 @@ import java.io.IOException;
 //import javax.swing.ImageIcon;
 import java.awt.RenderingHints;
 //import javax.swing.JOptionPane;
+import java.util.Calendar;
 
 //Library of code under lib/
 //Various image utilities. needed as default image reader could not read thumbnails from exif
@@ -47,7 +49,7 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
     public String toString(){
 	switch (this){
 	case Thumb: return "ThumbOnly";
-	case ThumbFull: return "Thumb";//ThumbFull requests size Thumb, but not flushing the full image as it may be used later
+	case ThumbFull: return "Thumb";//ThumbFull requests size Thumb, but not clearing the full image as it may be used later
 	case Screen: return "Screen";
 	default: return "Max";//Max is not yet implemented.
 	}
@@ -55,7 +57,7 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
 }
 
 class ImageObject { //could be updated to take a File instead, or a javase7 path
-    private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. Flushed when not needed.
+    private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
     String absolutePath;//Kept for error messages. Likely to be similar to pathFile.toString()
     File pathFile = null;
@@ -65,6 +67,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     int screenWidth, screenHeight;
     static final int thumbMaxW = 200;
     static final int thumbMaxH = 200;
+    boolean isQuickThumb = false;
     ImgSize currentLarge;//The size of the large bImage (Max or Screen)
     //String imageID;
     //String title,filename,comments?
@@ -113,70 +116,82 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	Dimension scrD = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	screenWidth = scrD.width;
 	screenHeight = scrD.height;
-	manualReadImage();
+	manualReadImage();//Should be moved to do first time image or thumb is requested.
     }
 
     int getWidthAndMake(){
 	if(Bheight!=null) return Bwidth;
 	getImage(ImgSize.Screen);
-	//note that the bImage should now be flushed to clear memory
+	//note that the bImage should now be set to null to clear memory
 	return Bwidth;
     }
     int getHeightAndMake(){
 	if(Bheight!=null) return Bheight;
 	getImage(ImgSize.Screen);
-	//note that the bImage should now be flushed to clear memory
+	//note that the bImage should now be set to null to clear memory
 	return Bheight;
     }
 
-    //gets files dimension and thumbnail without loading it to memory
-    void manualReadImage(){
-	if(pathFile==null) return;
-	String ext = null;
-	int pos = pathFile.getName().lastIndexOf(".");
-	if(pos>0 && pos<(pathFile.getName().length() - 1)){
-	    ext = pathFile.getName().substring(pos+1).toLowerCase();
-	}
-	if(ext==null) {
-	    System.err.println("Unable to get file extension from "+absolutePath);
-	    return;
-	}
-
-	//Iterator readers = ImageIO.getImageReadersBySuffix(ext);
-	//ImageReader reader = (ImageReader)readers.next();
-
+void getThumbQuick(){
+long start = Calendar.getInstance().getTimeInMillis();
+	if(pathFile==null||Bwidth==null) return;
 	try{
-	    //ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
-	    //reader.setInput(inputStream,false);
-
-	    // get the image's width and height. 
-	    Dimension image_d = Sanselan.getImageSize(pathFile);
-	    Bwidth = image_d.width;
-	    Bheight = image_d.height;
-	    
 	    IImageMetadata metadata = Sanselan.getMetadata(pathFile);
 	    if (metadata instanceof JpegImageMetadata) {
 		JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
 		bThumb = jpegMetadata.getEXIFThumbnail();
-if(bThumb!=null) System.out.println("Read exif of image " + absolutePath);
 	    }
-	    
-	    	    
+//TODO IMPORTANT if width and height not found thumbnail could fail. Bad for non exif formats, bmp,gif,etc.
+	if(bThumb!=null) System.out.println("Read exif of image " + absolutePath);
+	    String ext = null;
+	    int pos = pathFile.getName().lastIndexOf(".");
+	    if(pos>0 && pos<(pathFile.getName().length() - 1)){
+		ext = pathFile.getName().substring(pos+1).toLowerCase();
+	    }
+	    if(ext==null) {
+		System.err.println("Unable to get file extension from "+absolutePath);
+		return;
+	    }
+	    int sampleFactor = (int)Math.floor((double)Math.max((double)Bwidth,(double)Bheight)/((double)600));
+	    if(sampleFactor<=1) return;
+	    Iterator readers = ImageIO.getImageReadersBySuffix(ext);
+	    ImageReader reader = (ImageReader)readers.next();
+	    ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
+	    reader.setInput(inputStream,false);
+	    ImageReadParam readParam = reader.getDefaultReadParam();
+	    //To make thumnail at least 200 pixels, finds how many times bigger input is.
+	    //Looks at largest dimension as a square thumnail is limited by largest dimension.
+	    readParam.setSourceSubsampling(sampleFactor,sampleFactor,0,0);//reads the image at 1/4 size
+	    bThumb = reader.read(0,readParam);
+	    if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" miliseconds to sample image to read thumb"); isQuickThumb = true;}
 	    //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
 	    //Bheight = reader.getHeight(0);
-	
+	} catch (IOException e) {
+	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	} catch (ImageReadException e) {
+	System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+	}
 	//int thumbnum = reader.getNumThumbnails(0);//imageIndex = 0 as we look at the first image in file
 	//System.out.println("Has "+thumbnum+" thumbnails. Using reader " +reader.getClass().getName());
 	//If a thumbnail image is present, it can be retrieved by calling:
 	//int thumbailIndex = 0;
 	//BufferedImage bi;
 	//bi = reader.readThumbnail(imageIndex, thumbnailIndex);
+}
+
+    //gets files dimension and thumbnail without loading it to memory
+    void manualReadImage(){
+	if(pathFile==null) return;
+	try{
+	    // get the image's width and height. 
+	    Dimension image_d = Sanselan.getImageSize(pathFile);
+	    Bwidth = image_d.width;
+	    Bheight = image_d.height;	    
 	} catch (IOException e) {
 	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
-	} catch (ImageReadException e) {
-System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+	}  catch (ImageReadException e) {
+	System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
 	}
-    
 	//System.out.println("Dimensions "+Bwidth+"x"+Bheight+" suceesfully got for " +absolutePath);
     }
 
@@ -187,10 +202,6 @@ System.err.println("Error reading exif of image " + absolutePath + "\nError was:
     int getHeightForThumb(){
 	if(Bheight!=null) return Bheight;
 	return getHeightAndMake();//Returns Bheight if manualReadImage worked, makes an errror icon if path was null
-    }
-
-    void flush(){
-	if(bImage!=null) bImage.flush();
     }
 
     //ImageObject(URL urlAddress){
@@ -212,14 +223,26 @@ System.err.println("Error reading exif of image " + absolutePath + "\nError was:
 	if(size.isThumb()&&bThumb!=null) return bThumb;
 	if(size==currentLarge&&bImage!=null) return bImage;//If there is an image which matches size
 	//Build large icon and small icon, return relevent.
+	if(size.isThumb()) {
+	    getThumbQuick();
+	    if(bThumb!=null) return bThumb;
+//should now add rendering the thumb properly to a task list for another thread
+	}
         try {
-            bImage = ImageIO.read(pathFile);//VERY BAD code, loads all images into limited memory
-	    if(size!=ImgSize.Max){//&& not thumb only (as this would be extra work)
+long start = Calendar.getInstance().getTimeInMillis();
+//ImageIO.setUseCache(true);
+//ImageIO.setCacheDirectory(File);
+            bImage = ImageIO.read(pathFile);
+System.out.println("Loading image "+absolutePath+"\n      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" miliseconds to read image to memory");
+start = Calendar.getInstance().getTimeInMillis();
+
+	    if(size==ImgSize.Screen||size==ImgSize.ThumbFull){//&& not thumb only (as this would be extra work)
 		bImage = makeScreenImg(bImage);
 		currentLarge = ImgSize.Screen;
 	    }
 	    else currentLarge = ImgSize.Max;
 	    bThumb =  makeThumb(bImage);
+System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" miliseconds to process image");
 	    setVars();
         } catch (IOException e) {
 	    System.err.println("Error loading image " + absolutePath + "\nError was: " + e.toString());
@@ -239,13 +262,13 @@ System.err.println("Error reading exif of image " + absolutePath + "\nError was:
 	System.out.println("Made thumb for "+absolutePath);
 	if(size==ImgSize.ThumbFull) return bThumb;
 	else{
-	    //as only thumb needed, flush bImage
-	    bImage.flush();//	if(bImage!=null) not needed as would have returned
+	    //as only thumb needed, clear bImage
+	    bImage = null;
 	    return bThumb;
 	}
     }
 
-    BufferedImage makeThumb(BufferedImage bigImg){
+    BufferedImage makeThumb(BufferedImage bigImg){//quick one image read to bimage
 	Dimension iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),thumbMaxW,thumbMaxH);
 	if(!(iconWH.width<bigImg.getWidth())) return bigImg;
 
@@ -253,12 +276,11 @@ System.err.println("Error reading exif of image " + absolutePath + "\nError was:
 	BufferedImage tempimage =bigImg;
 
         Graphics2D g2 = (new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR)).createGraphics();//TYPE_INT_RGB
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
         g2.drawImage(tempimage, 0, 0, iconWH.width,iconWH.height, null);
         g2.dispose();
-
 	return tempimage;	
     }
 
@@ -302,14 +324,11 @@ System.err.println("Error reading exif of image " + absolutePath + "\nError was:
 
     void clearMem(){
 	//clears the full size image.
-	if(bImage!=null) bImage.flush();
 	bImage = null;
 	//bThumb = null;
     }
 
     void destroy(){
-	if(bImage!=null) bImage.flush();
-	if(bThumb!=null) bThumb.flush();
 	bImage = null;
 	bThumb = null;
 	pathFile = null;

@@ -453,9 +453,13 @@ class ProgramState{
     }
 
     BufferedImage getBImageI(int relativeImage, ImgSize size){
-	return imageList[relItoFixI(relativeImage)].getImage(size);
+	if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
+	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
+	for(int i=4;i<lastIndex;i++){
+	    imageList[relItoFixI(relativeImage)].bImage.flush();
+	}
+	return returnImage;
     }
- 
 }
 
 class MainPanel extends JPanel {
