@@ -116,8 +116,12 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	Dimension scrD = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	screenWidth = scrD.width;
 	screenHeight = scrD.height;
-	manualReadImage();//Should be moved to do first time image or thumb is requested.
+	manualReadImage();
     }
+
+void flush(){//called externally
+bImage=null;
+}
 
     int getWidthAndMake(){
 	if(Bheight!=null) return Bwidth;
@@ -136,13 +140,14 @@ void getThumbQuick(){
 long start = Calendar.getInstance().getTimeInMillis();
 	if(pathFile==null||Bwidth==null) return;
 	try{
-	    IImageMetadata metadata = Sanselan.getMetadata(pathFile);
-	    if (metadata instanceof JpegImageMetadata) {
-		JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
-		bThumb = jpegMetadata.getEXIFThumbnail();
-	    }
-//TODO IMPORTANT if width and height not found thumbnail could fail. Bad for non exif formats, bmp,gif,etc.
-	if(bThumb!=null) System.out.println("Read exif of image " + absolutePath);
+	    //IImageMetadata metadata = Sanselan.getMetadata(pathFile);
+	    //if (metadata instanceof JpegImageMetadata) {
+		//JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
+		//bThumb = jpegMetadata.getEXIFThumbnail();
+	    //} //Wasn't working very well so has been removed
+	    //if(bThumb!=null) System.out.println("Read exif of image " + absolutePath);
+	    //System.out.println("Reading thumbnail from exif for file "+absolutePath+" with dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start));
+start = Calendar.getInstance().getTimeInMillis();
 	    String ext = null;
 	    int pos = pathFile.getName().lastIndexOf(".");
 	    if(pos>0 && pos<(pathFile.getName().length() - 1)){
@@ -152,7 +157,7 @@ long start = Calendar.getInstance().getTimeInMillis();
 		System.err.println("Unable to get file extension from "+absolutePath);
 		return;
 	    }
-	    int sampleFactor = (int)Math.floor((double)Math.max((double)Bwidth,(double)Bheight)/((double)600));
+	    int sampleFactor = (int)Math.floor((double)Math.max((double)Bwidth,(double)Bheight)/((double)9));//200));
 	    if(sampleFactor<=1) return;
 	    Iterator readers = ImageIO.getImageReadersBySuffix(ext);
 	    ImageReader reader = (ImageReader)readers.next();
@@ -168,9 +173,10 @@ long start = Calendar.getInstance().getTimeInMillis();
 	    //Bheight = reader.getHeight(0);
 	} catch (IOException e) {
 	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
-	} catch (ImageReadException e) {
-	System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
-	}
+	} //catch (ImageReadException e) {
+	//System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+	//}
+
 	//int thumbnum = reader.getNumThumbnails(0);//imageIndex = 0 as we look at the first image in file
 	//System.out.println("Has "+thumbnum+" thumbnails. Using reader " +reader.getClass().getName());
 	//If a thumbnail image is present, it can be retrieved by calling:
@@ -192,6 +198,7 @@ long start = Calendar.getInstance().getTimeInMillis();
 	}  catch (ImageReadException e) {
 	System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
 	}
+	if(Bwidth==null) System.err.println("Error reading exif dimensions of image " + absolutePath);
 	//System.out.println("Dimensions "+Bwidth+"x"+Bheight+" suceesfully got for " +absolutePath);
     }
 

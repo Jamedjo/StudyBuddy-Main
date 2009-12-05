@@ -295,19 +295,19 @@ class ProgramState{
 	    mainGUI.mainImageDB.addImage("Speed","///\\\\\\img_2926_small.jpg");
 	    mainGUI.mainImageDB.addImage("Food","///\\\\\\img_F028c_small.jpg");
 	    mainGUI.mainImageDB.addImage("Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
+	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\jamaica1730homannsheirs.jpg");
 	    mainGUI.mainImageDB.addImage("Graph Notes for C/W","///\\\\\\DSA_7.bmp");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados01.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados02.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados03.jpg");
+	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados02.jpg");
+	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados03.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados04.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados05.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados06.jpg");
+	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados06.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados07.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados08.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados09.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados10.jpg");
+	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados10.jpg");
 	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados-08-046-733284.jpg");
-	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\jamaica1730homannsheirs.jpg");
 
 
 	    //no break as image list must still be passed from DB
@@ -456,7 +456,7 @@ class ProgramState{
 	if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
 	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
 	for(int i=4;i<lastIndex;i++){
-	    imageList[relItoFixI(relativeImage)].bImage.flush();
+	    imageList[relItoFixI(relativeImage)].flush();
 	}
 	return returnImage;
     }
