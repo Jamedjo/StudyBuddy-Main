@@ -78,7 +78,8 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	try{
 	    if(inputPath.startsWith("///\\\\\\")){
 		tempPath = inputPath.substring(6);
-		absolutePath = (GUI.class.getResource(tempPath)).getPath();//could be null
+		absolutePath = (GUI.class.getResource(tempPath)).getFile();//could be null
+		//absolutePath = "etc/img/"+tempPath;//for use with jar files.
 		if(absolutePath==null){
 		    absolutePath=tempPath;
 		}
@@ -159,15 +160,21 @@ start = Calendar.getInstance().getTimeInMillis();
 	    }
 	    int sampleFactor = (int)Math.floor((double)Math.max((double)Bwidth,(double)Bheight)/((double)9));//200));
 	    if(sampleFactor<=1) return;
+//ImageIO.scanForPlugins();
 	    Iterator readers = ImageIO.getImageReadersBySuffix(ext);
 	    ImageReader reader = (ImageReader)readers.next();
+if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println("next reader");}
 	    ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
 	    reader.setInput(inputStream,false);
 	    ImageReadParam readParam = reader.getDefaultReadParam();
+	    //readParam.setSourceProgressivePasses(0,1);
 	    //To make thumnail at least 200 pixels, finds how many times bigger input is.
 	    //Looks at largest dimension as a square thumnail is limited by largest dimension.
 	    readParam.setSourceSubsampling(sampleFactor,sampleFactor,0,0);//reads the image at 1/4 size
 	    bThumb = reader.read(0,readParam);
+	    reader.dispose();
+	    inputStream.close();
+
 	    if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" miliseconds to sample image to read thumb"); isQuickThumb = true;}
 	    //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
 	    //Bheight = reader.getHeight(0);

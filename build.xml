@@ -6,10 +6,11 @@
 	<property name="dist"  location="dist"/>
 	<property name="lib"   location="lib"/>
 	<property name="img" location="etc/img" />
-	<property name="jar.dir" value="${build}/jar" />
+	<property name="icons" location="etc/icons" />
+	<!-- <property name="jar.dir" value="${build}/jar" /> -->
 	
 	<property name="main-class" value="GUI" />
-	<property name="jar.name" value="${jar.dir}/StudyBuddy.jar" />
+	<property name="jar.name" value="StudyBuddy.jar" />
 
 	<target name="init">
 		<!-- Create the time stamp -->
@@ -61,13 +62,14 @@
 			</classpath>
 		</java>
 	</target>
-
+	
 	<target name="jar" depends="init,compile" description="produce a jar file">
 		<jar destfile="${jar.name}">
 			<fileset dir="${build}" excludes="**/*.jar" />
-			<fileset dir="${img}" />
+			<fileset dir="${icons}" />
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
+				<attribute name="Class-Path" value="lib/sanselan-0.97-incubator.jar" />
 			</manifest>
 		</jar>
 	</target>
