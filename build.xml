@@ -44,6 +44,7 @@
 				<fileset dir="${lib}" includes="**/*.jar"/>
 				<path location="${build}"/>
 				<path location="${img}"/>
+				<path location="${icons}"/>
 			</classpath>
 		</java>
 	</target>
