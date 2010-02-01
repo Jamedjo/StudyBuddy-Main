@@ -1,182 +1,141 @@
+import java.util.ArrayList;
+import java.io.*;
+import java.util.Enumeration;
+
 class IndexedTable
 {
-    private Table MainTable;
-    private Table[] Indexes;
-    
-    IndexedTable(String name, Record Header)
+  private Table MainTable;
+  private Index[] Indexes;
+  
+  // Create a new empty indexed table
+  IndexedTable(String Name, Record Header, boolean[] NewKeyFields)
+  {
+    MainTable = new Table(Name, Header, NewKeyFields);
+    Indexes = new Index[Header.getNumFields()];
+    for (int i = 0; i < MainTable.getNumFields(); i++)
+      Indexes[i] = new Index(Name + "_index_" + i);
+  }
+  
+  // Create a new indexed table from file
+  IndexedTable(String Filename)
+  {
+      MainTable = new Table(Filename);
+      Indexes = new Index[MainTable.getNumFields()];
+      for (int i = 0; i < MainTable.getNumFields(); i ++)
+        Indexes[i] = new Index(Filename + "_index_" + i, Filename + "_index_" + i);
+  }
+  
+  int getNumRecords() { return MainTable.getNumRecords(); }
+  int getNumFields() { return MainTable.getNumFields(); }
+  boolean[] getKeyFields() { return MainTable.getKeyFields(); }
+  Record getHeader() { return MainTable.getHeader(); }
+  Enumeration elements() { return MainTable.elements(); }
+  Enumeration keys() { return MainTable.elements(); }
+  
+  // Returns a whole column of the table as an arraylist
+  ArrayList getColList(int col)
+  {
+    return MainTable.getColList(col);
+  }
+  
+  // Returns a whole column of the table as an arraylist
+  String[] getColArray(int col)
+  {
+    return MainTable.getColArray(col);
+  }
+  
+  // Store table and indexes in files
+  void save(String Filename)
+  {
+    MainTable.save(Filename);
+    for (int i = 0; i < MainTable.getNumFields(); i++)
     {
-        String[] IndexHeader = new String[2];
-        MainTable = new Table(name, Header);
-        Indexes = new Table[MainTable.getNumFields() - 1];
-        for (int i = 0; i < MainTable.getNumFields() - 1; i ++)
-        {
-            IndexHeader[0] = MainTable.getFieldName(i + 1);
-            IndexHeader[1] = MainTable.getFieldName(0);
-            Indexes[i] = new Table(name + "_index_" + i, new Record(IndexHeader));
-        }
+      Indexes[i].save(Filename + "_index_" + i);
     }
-    
-    IndexedTable(String name, String filename)
+  }
+  
+  // Returns a string diagram representing the table
+  public String toString() 
+  {
+    return MainTable.toString();
+  }
+  
+  // Adds the record into the table and indexes
+  int addRecord(Record RecordToAdd)
+  {
+    if (MainTable.addRecord(RecordToAdd) == -1)
+      return -1;
+    else
+      for (int i = 0; i < MainTable.getNumFields(); i++)
+        Indexes[i].addIndex(RecordToAdd, i, MainTable.getKeyFields());
+    return 1;
+  }
+  
+  // Deletes the record from the table and indexes
+  int deleteRecord(Record RecordToDel)
+  {
+    if (MainTable.deleteRecord(RecordToDel) == -1)
+      return -1;
+    for (int i = 0; i < MainTable.getNumFields(); i++)
+      if (Indexes[i].deleteIndex(RecordToDel, i, MainTable.getKeyFields()) == -1)
+        return -1;
+    return 1;
+  }
+  
+  // Returns a sub table of all records matching the supplied field
+  IndexedTable getRecords(String SearchFor, int Field)
+  {
+    int Index;
+    ArrayList IndexResult;
+    IndexedTable Result = new IndexedTable("Result_Table", MainTable.getHeader(), MainTable.getKeyFields());
+    if ((Field < MainTable.getNumFields()) && (Field >= 0) && (SearchFor != null))
     {
-        MainTable = new Table(name, filename);
-        Indexes = new Table[MainTable.getNumFields() - 1];
-        for (int i = 0; i < MainTable.getNumFields() - 1; i ++)
-        {
-            Indexes[i] = new Table(name + "_index_" + i, filename + "_index_" + i);
-        }
+      IndexResult = Indexes[Field].getMatches(SearchFor);
+      if (IndexResult != null)
+        for (int i=0; i<IndexResult.size(); i++)
+          Result.addRecord(MainTable.getRecord((String)IndexResult.get(i)));
     }
-    
-    int getNumRecords() { return MainTable.getNumRecords(); }
-    int getNumFields() { return MainTable.getNumFields(); }
-    Record getHeader() { return MainTable.getHeader(); }
-    Record getRecord(int row) { return MainTable.getRecord(row); }
-    
-    String[] getCol(int col)
-    {
-        String[] Result = new String[MainTable.getNumRecords()];
-        for (int i = 0; i < MainTable.getNumRecords(); i++)
-        {
-            Result[i] = new String(MainTable.getRecord(i).getField(col));
-        }
-        return Result;
-    }
-    
-    void store(String filename)
-    {
-        MainTable.store(filename);
-        for (int i = 0; i < MainTable.getNumFields() - 1; i ++)
-        {
-            Indexes[i].store(filename + "_index_" + i);
-        }
-    }
-    
-    void print() 
-    {
-        System.out.print("--------------------\n"); 
-        System.out.print(MainTable.getName() + "\n\n");
-        MainTable.store("print");
-        System.out.print("--------------------\n");
-        for (int i = 0; i < MainTable.getNumFields() - 1; i ++)
-        {
-            System.out.print(Indexes[i].getName() + "\n\n");
-            Indexes[i].store("print");
-            System.out.print("--------------------\n");
-        } 
-    }
-    
-    void insertRecord(Record r)
-    {
-        String[] IndexRecord = new String[2];
-        MainTable.insertRecord(r);
-        for (int i = 0; i < MainTable.getNumFields() - 1; i++)
-        {
-            IndexRecord[0] = r.getField(i + 1);
-            IndexRecord[1] = r.getField(0);
-            Indexes[i].insertRecord(new Record(IndexRecord));
-        }
-    }
-    
-    int deleteRecord(Record r)
-    {
-        String[] IndexRecord = new String[2];
-        int Result = MainTable.deleteRecord(r);
-        for (int i = 0; i < MainTable.getNumFields() - 1; i++)
-        {
-            IndexRecord[0] = r.getField(i + 1);
-            IndexRecord[1] = r.getField(0);
-            if (Indexes[i].deleteRecord(new Record(IndexRecord)) == -1)
-                Result = -1;
-        }
-        return Result;
-    }
-    
-    int deleteRecords(Record r)
-    {
-        int c = 0;
-        while (deleteRecord(r) != -1)
-            c++;
-        if (c > 0)
-            return c;
-        else
-            return -1;
-    }
-    
-    IndexedTable findMultiple(String SearchFor, int Field)
-    {
-        int Index;
-        IndexedTable PartWayTable;
-        IndexedTable ResultTable = new IndexedTable("Result_Table", MainTable.getHeader());
-        if (Field > MainTable.getNumFields() - 1 || Field < 0)
-            throw new Error("Field not in table");
-        else
-        {
-            if (Field == 0)
-            {
-                Index = MainTable.find(SearchFor);
-                if (Index == -1)
-                    return null;
-                while (Index < MainTable.getNumRecords() && MainTable.getRecord(Index).getField(0).compareTo(SearchFor) == 0)
-                {
-                    ResultTable.insertRecord(new Record(MainTable.getRecord(Index)));
-                    Index++;
-                }
-            }
-            else
-            {
-                Index = Indexes[Field - 1].find(SearchFor);
-                if (Index == -1)
-                    return null;
-                PartWayTable = new IndexedTable("Temp_Table", Indexes[Field - 1].getHeader());
-                while (Index < Indexes[Field - 1].getNumRecords() && Indexes[Field - 1].getRecord(Index).getField(0).compareTo(SearchFor) == 0)
-                {
-                    PartWayTable.insertRecord(new Record(Indexes[Field - 1].getRecord(Index)));
-                    Index++;
-                }
-                for (int i = 0; i < PartWayTable.getNumRecords(); i++)
-                {
-                    Index = MainTable.find(PartWayTable.getRecord(i).getField(1));
-                    ResultTable.insertRecord(MainTable.getRecord(Index));
-                }
-            
-            }
-        }
-        return ResultTable;
-    }
-    
-    Record findSingle(String SearchFor, int Field)
-    {
-        int Index;
-        Record ResultRecord;
-        Record PartWayRecord;
-        if (Field > MainTable.getNumFields() - 1 || Field < 0)
-            throw new Error("Field not in table");
-        else
-        {
-            if (Field == 0)
-            {
-                //System.out.print("Searching for " + SearchFor + "\n");
-                Index = MainTable.find(SearchFor);   
-                    if (Index == -1)
-                        return null;
-                    else
-                        ResultRecord = new Record(MainTable.getRecord(Index));
-            }
-            else
-            {
-                Index = Indexes[Field - 1].find(SearchFor);
-                if (Index == -1)
-                    return null;
-                else
-                {   
-                    PartWayRecord = new Record(Indexes[Field - 1].getRecord(Index));
-                    Index = MainTable.find(PartWayRecord.getField(1));
-                    ResultRecord = MainTable.getRecord(Index);
-                }
-            }
-        }
-        return ResultRecord;
-    }
-    
-    
-    
+    return Result;
+  }
+  
+  // Returns a sub table of all records matching the supplied record, null fields ignored
+  IndexedTable getRecords(Record SearchFor)
+  {
+    IndexedTable Result = new IndexedTable("Result_Table", MainTable.getHeader(), MainTable.getKeyFields());
+    boolean First = true;
+    if (SearchFor != null)
+      for (int i=0; i<this.getNumFields(); i++)
+      {
+        if (SearchFor.getField(i) != null)
+          if (First)
+          {
+            Result = this.getRecords(SearchFor.getField(i), i);
+            First = false;
+          }
+          else
+            Result = Result.getRecords(SearchFor.getField(i), i);
+      }
+    return Result;
+  }
+  
+  // Returns the first record matching the supplied field
+  Record getRecord(String SearchFor, int Field)
+  {
+    Enumeration Results = this.getRecords(SearchFor, Field).elements();
+    if (Results.hasMoreElements())
+      return (Record) Results.nextElement();
+    else
+      return null;
+  }
+  
+  // Returns the first record matching the supplied record, null fields ignored
+  Record getRecord(Record SearchFor)
+  {
+    Enumeration Results = this.getRecords(SearchFor).elements();
+    if (Results.hasMoreElements())
+      return (Record) Results.nextElement();
+    else
+      return null;
+  }
+        
 }
