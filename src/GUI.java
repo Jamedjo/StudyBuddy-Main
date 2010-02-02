@@ -46,7 +46,7 @@ class GUI implements ActionListener, ComponentListener{
 
     GUI(){
         w = new JFrame();
-        w.setTitle("Study Buddy 0.5alpha");
+        w.setTitle("Study Buddy 0.6beta");
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
 	buildMenuBar();
         w.setJMenuBar(menuBar);
@@ -101,7 +101,7 @@ class GUI implements ActionListener, ComponentListener{
     }
 
     void quickRestart(){
-	state = new ProgramState(LoadType.Init,this);        
+	state = new ProgramState(this);        
 
 	//mainPhoto = new JLabel();
         //mainPhoto.setVerticalTextPosition(JLabel.BOTTOM);
@@ -269,9 +269,16 @@ class ProgramState{
     int currentI = 0;//make private
     GUI mainGUI;
     boolean isLocked = false;//Do not draw if locked.
+    final String saveFileName = "savefile.txt";
 
     ProgramState(LoadType loadType, GUI parentGUI){
 	ContructProgramState(loadType,  parentGUI,""); //loadType should not be filter here
+    }
+
+    ProgramState(GUI parentGUI){
+        //if savefile exists, LoadType.Load, else LoadType.Init
+	LoadType lType = LoadType.Init;
+	ContructProgramState(lType,  parentGUI,""); //loadType should not be filter here
     }
     ProgramState(GUI parentGUI, String filterTag){
 	ContructProgramState(LoadType.Filter, parentGUI, filterTag);
@@ -281,43 +288,46 @@ class ProgramState{
     }
 
     void ContructProgramState(LoadType loadType, GUI parentGUI, String filterTag){
+
 	mainGUI = parentGUI;
 	switch (loadType){
 	case Init:
-	    mainGUI.mainImageDB = new ImageDatabase("mainDB");
+            ImageDatabase tempImageDB;
+	    tempImageDB = new ImageDatabase("mainDB");
 	    //If there are no files you get loads of errors
 
-	    mainGUI.mainImageDB.addImage("Park","///\\\\\\img_2810b_small.jpg");
-	    //mainGUI.mainImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
-	    //mainGUI.mainImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
-	    mainGUI.mainImageDB.addImage("Igloo in Bristol","///\\\\\\img_6088b_small.jpg");
-	    mainGUI.mainImageDB.addImage("Pink","///\\\\\\img_5672bp_small.jpg");
-	    mainGUI.mainImageDB.addImage("Speed","///\\\\\\img_2926_small.jpg");
-	    mainGUI.mainImageDB.addImage("Food","///\\\\\\img_F028c_small.jpg");
-	    mainGUI.mainImageDB.addImage("Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\jamaica1730homannsheirs.jpg");
-	    mainGUI.mainImageDB.addImage("Graph Notes for C/W","///\\\\\\DSA_7.bmp");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados01.jpg");
-	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados02.jpg");
-	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados03.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados04.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados05.jpg");
-	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados06.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados07.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados08.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados09.jpg");
-	    //mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados10.jpg");
-	    mainGUI.mainImageDB.addImage("Barbados","///\\\\\\barbados-08-046-733284.jpg");
+	    tempImageDB.addImage("Park","///\\\\\\img_2810b_small.jpg");
+	    //tempImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
+	    //tempImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
+	    tempImageDB.addImage("Igloo in Bristol","///\\\\\\img_6088b_small.jpg");
+	    tempImageDB.addImage("Pink","///\\\\\\img_5672bp_small.jpg");
+	    tempImageDB.addImage("Speed","///\\\\\\img_2926_small.jpg");
+	    tempImageDB.addImage("Food","///\\\\\\img_F028c_small.jpg");
+	    tempImageDB.addImage("Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
+	    tempImageDB.addImage("Barbados","///\\\\\\jamaica1730homannsheirs.jpg");
+	    tempImageDB.addImage("Graph Notes for C/W","///\\\\\\DSA_7.bmp");
+	    tempImageDB.addImage("Barbados","///\\\\\\barbados01.jpg");
+	    //tempImageDB.addImage("Barbados","///\\\\\\barbados02.jpg");
+	    //tempImageDB.addImage("Barbados","///\\\\\\barbados03.jpg");
+	    tempImageDB.addImage("Barbados","///\\\\\\barbados04.jpg");
+	    tempImageDB.addImage("Barbados","///\\\\\\barbados05.jpg");
+	    //tempImageDB.addImage("Barbados","///\\\\\\barbados06.jpg");
+	    tempImageDB.addImage("Barbados","///\\\\\\barbados07.jpg");
+	    tempImageDB.addImage("Barbados","///\\\\\\barbados08.jpg");
+	    tempImageDB.addImage("Barbados","///\\\\\\barbados09.jpg");
+	    //tempImageDB.addImage("Barbados","///\\\\\\barbados10.jpg");
+	    tempImageDB.addImage("Barbados","///\\\\\\barbados-08-046-733284.jpg");
 
-
+            tempImageDB.save(saveFileName);
+	case Load: 
+	    mainGUI.mainImageDB = new ImageDatabase("mainDB",saveFileName);
 	    //no break as image list must still be passed from DB
 	case Refresh:
 	    //Create image database by loading database
 	    currentFilter = "Show All Images";
 	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
 	    break;
-	case Load: System.exit(1); //Load DB not yet implemented
-	    break;
+
 	case Filter:
 	    //Create image database by loading database	
 	    currentFilter = filterTag;
