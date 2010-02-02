@@ -459,7 +459,7 @@ class ImageDatabase
   }
   
   // Delete a tag from the database from a selection on a tag tree
-  public JTree removeTagFromTree(JTree TreeDelFrom)
+  public JTree deleteTagFromTree(JTree TreeDelFrom)
   {
     DefaultMutableTreeNode NodeToDel;
     TagNode NodeToDelObject;
