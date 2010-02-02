@@ -478,7 +478,7 @@ class ImageDatabase
       deleteTag(NodeToDelObject.getTagID(), NodeToDelObject.toString());
     return toTree();
   }
-
+  
   // Converts the imagedatabase to a tree and returns the tree
   public JTree toTree()
   {
