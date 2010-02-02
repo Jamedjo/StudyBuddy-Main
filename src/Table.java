@@ -8,7 +8,7 @@ class Table
     private String Name;
     private Record Header;
     private int NumRecords;
-    private Hashtable Records;
+    private Hashtable<String,Record> Records;
     private boolean[] KeyFields;
     
     // Return the Header record
@@ -34,7 +34,7 @@ class Table
     {
         Name = TableName;
         Header = new Record(NewHeader);
-        Records = new Hashtable();
+        Records = new Hashtable<String,Record>();
         NumRecords = 0;
         KeyFields = new boolean[NewKeyFields.length];
         System.arraycopy(NewKeyFields, 0, KeyFields, 0, NewKeyFields.length);
@@ -46,7 +46,7 @@ class Table
       String[] TempArray;
       BufferedReader FileInput;
       String RecordString;
-      Records = new Hashtable();
+      Records = new Hashtable<String,Record>();
       try
       {
         // Try to open the file and read it
@@ -231,15 +231,15 @@ class Table
     }
     
     // Returns a whole column of the table as an arraylist
-    ArrayList getColList(int col)
+    ArrayList<String> getColList(int col)
     {
       Record TempRecord;
-      ArrayList Result = new ArrayList<String>();
+      ArrayList<String> Result = new ArrayList<String>();
       Enumeration AllRecords = Records.elements();
       while (AllRecords.hasMoreElements())
       {
         TempRecord = (Record) AllRecords.nextElement();
-        Result.add(TempRecord.getField(col));
+        Result.add( TempRecord.getField(col));
       }
       return Result;
     }

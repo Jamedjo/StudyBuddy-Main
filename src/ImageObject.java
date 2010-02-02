@@ -158,7 +158,7 @@ start = Calendar.getInstance().getTimeInMillis();
 		System.err.println("Unable to get file extension from "+absolutePath);
 		return;
 	    }
-	    int sampleFactor = (int)Math.floor((double)Math.max((double)Bwidth,(double)Bheight)/((double)9));//200));
+	    int sampleFactor = (int)Math.floor((double)Math.max((double)Bwidth,(double)Bheight)/((double)200));//9));
 	    if(sampleFactor<=1) return;
 //ImageIO.scanForPlugins();
 	    Iterator readers = ImageIO.getImageReadersBySuffix(ext);

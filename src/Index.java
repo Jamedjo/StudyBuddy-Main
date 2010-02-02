@@ -5,20 +5,20 @@ import java.util.Enumeration;
 
 class Index
 {
-  private Hashtable Records;
+  private Hashtable<String,ArrayList<String>> Records;
   private String Name;
   
   // Create a new index
   Index(String NewName)
   {
-    Records = new Hashtable();
+    Records = new Hashtable<String,ArrayList<String>>();
     Name = NewName;
   }
   
   // Create an index from a file
   Index(String Filename, String NewName)
   {
-    Records = new Hashtable();
+    Records = new Hashtable<String,ArrayList<String>>();
     ArrayList<String> KeyList;
     BufferedReader FileInput;
     String IndexKey;
@@ -70,7 +70,7 @@ class Index
       while (AllKeys.hasMoreElements())
       {
         TempKey = (String)AllKeys.nextElement();
-        TempList = (ArrayList)Records.get(TempKey);
+        TempList = Records.get(TempKey);
         if (TempList.size() > 0)
         {
           FileOutput.println();
@@ -94,18 +94,18 @@ class Index
   // Add a record into the index
   public void addIndex(Record RecordToAdd, int FieldToIndex, boolean[] KeyFields)
   {
-    ArrayList TempList;
+    ArrayList<String> TempList;
     String IndexKey = RecordToAdd.getField(FieldToIndex);
     String MainTableKey = RecordToAdd.getKey(KeyFields);
     if (Records.containsKey(IndexKey))
     {
-      TempList = (ArrayList)Records.get(IndexKey);
+      TempList = Records.get(IndexKey);
       TempList.add(MainTableKey);
       Records.put(IndexKey, TempList);
     }
     else
     {
-      TempList = new ArrayList();
+      TempList = new ArrayList<String>();
       TempList.add(MainTableKey);
       Records.put(IndexKey, TempList);
     }
@@ -115,14 +115,14 @@ class Index
   public int deleteIndex(Record RecordToDel, int FieldToDel, boolean[] KeyFields)
   {
     int ListIndex;
-    ArrayList TempList;
+    ArrayList<String> TempList;
     String IndexKey = RecordToDel.getField(FieldToDel);
     String MainTableKey = RecordToDel.getKey(KeyFields);
     if (Records.containsKey(IndexKey) == false)
       return -1;
     else
     {
-      TempList = (ArrayList)Records.get(IndexKey);
+      TempList = Records.get(IndexKey);
       ListIndex = TempList.indexOf(MainTableKey);
       if (ListIndex == -1)
         return -1;

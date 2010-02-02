@@ -388,7 +388,7 @@ class ImageDatabase
   }
   
   // Adds all tags tagged by a node to that node (in a tree)
-  private DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable PathTags)
+  private DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,TagNode> PathTags)
   {
     String[] TagIDs;
     DefaultMutableTreeNode TempTreeNode;
@@ -421,7 +421,7 @@ class ImageDatabase
   {
     JTree Result;
     DefaultMutableTreeNode RootNode = new DefaultMutableTreeNode(new TagNode("-1", "All Tags"));
-    RootNode = addTreeTags(RootNode, new Hashtable());
+    RootNode = addTreeTags(RootNode, new Hashtable<String,TagNode>());
     Result = new JTree(RootNode);
     return Result;
   }
