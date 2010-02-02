@@ -7,6 +7,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import jaavax.swing.*;
 
 class ImageDatabase
 {
@@ -416,6 +417,42 @@ class ImageDatabase
     return NodeAddTo;
   }
 
+  // Add a tag to the database from a selection on a tag tree
+  public JTree addTagFromTree(JTree TreeAddTo, JFrame Window)
+  {
+    String NewTag = (String)JOptionPane.showInputDialog(Window, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");
+    String AddResult;
+    DefaultMutableTreeNode NodeAddTo = null;
+    TagNode NodeAddToObject = null;
+    boolean AddToRoot = false;
+    // Check user inputted tag name is valid
+    if ((NewTag != null) && (NewTag.length() > 0))
+    {
+      // Add the new tag into the tag table
+      AddResult = addTag(NewTag);
+      if (AddResult != null)
+      {
+        // Find the currently selected node in the tree
+        NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
+        // If root node or no node selected then add to root node
+        if (NodeAddTo != null)
+        {
+          NodeAddToObject = (TagNode)NodeAddTo.getUserObject();
+          if (NodeAddToObject.getTagID().equals(-1))
+            AddToRoot = true;
+        }
+        else
+        {
+          AddToRoot = true;
+          NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getModel().getRoot();
+        }
+      }
+      if (AddToRoot == false)
+        tagTag(AddResult, NodeAddToObject.getTagID());
+      NodeAddTo.add(new DefaultMutableTreeNode(new TagNode(AddResult, NewTag)));
+    }
+    return TreeAddTo;
+  }
 
   // Converts the imagedatabase to a tree and returns the tree
   public JTree toTree()
@@ -424,6 +461,7 @@ class ImageDatabase
     DefaultMutableTreeNode RootNode = new DefaultMutableTreeNode(new TagNode("-1", "All Tags"));
     RootNode = addTreeTags(RootNode, new Hashtable<String,TagNode>());
     Result = new JTree(RootNode);
+    Result.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     return Result;
   }
 
