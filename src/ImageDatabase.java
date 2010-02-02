@@ -392,26 +392,26 @@ class ImageDatabase
   }
   
   // Adds all tags tagged by a node to that node (in a tree)
-  private DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,TagNode> PathTags)
+  private DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,IDTitle> PathTags)
   {
     String[] TagIDs;
     DefaultMutableTreeNode TempTreeNode;
-    TagNode TempTagNode;
+    IDTitle TempIDTitle;
     // Gets a list of tags tagged with this tag (or all if root node)
-    TempTagNode = (TagNode) NodeAddTo.getUserObject();
-    if (TempTagNode.getTagID().equals("-1"))
+    TempIDTitle = (IDTitle) NodeAddTo.getUserObject();
+    if (TempIDTitle.getID().equals("-1"))
       TagIDs = getAllTagIDs();
     else
-      TagIDs = getTagIDsFromTagID(TempTagNode.getTagID());
+      TagIDs = getTagIDsFromTagID(TempIDTitle.getID());
     // For all of those tags, add them to the node as branches and recurse
     if (TagIDs != null)
       for (int i=0; i<TagIDs.length; i++)
       {
         if (PathTags.containsKey(TagIDs[i]) == false)
         {
-          TempTagNode = new TagNode(TagIDs[i], getTagTitleFromTagID(TagIDs[i]));
-          TempTreeNode = new DefaultMutableTreeNode(TempTagNode);
-          PathTags.put(TagIDs[i], TempTagNode);
+          TempIDTitle = new IDTitle(TagIDs[i], getTagTitleFromTagID(TagIDs[i]));
+          TempTreeNode = new DefaultMutableTreeNode(TempIDTitle);
+          PathTags.put(TagIDs[i], TempIDTitle);
           TempTreeNode = addTreeTags(TempTreeNode, PathTags);
           PathTags.remove(TagIDs[i]);
           NodeAddTo.add(TempTreeNode);
@@ -427,7 +427,7 @@ class ImageDatabase
     String AddResult;
     DefaultMutableTreeNode NodeAddTo = null;
     DefaultMutableTreeNode NodeToAdd = null;
-    TagNode NodeAddToObject = null;
+    IDTitle NodeAddToObject = null;
     boolean AddToRoot = false;
     DefaultTreeModel Model;
     // Check user inputted tag name is valid
@@ -444,15 +444,15 @@ class ImageDatabase
         {
           NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
           // If root node selected then add to root node
-          NodeAddToObject = (TagNode)NodeAddTo.getUserObject();
+          NodeAddToObject = (IDTitle)NodeAddTo.getUserObject();
           if (NodeAddToObject.getTagID().equals(-1))
             AddToRoot = true;
           if (AddToRoot == false)
-          tagTag(AddResult, NodeAddToObject.getTagID());
+          tagTag(AddResult, NodeAddToObject.getID());
         }
         if (AddToRoot == true)
           NodeAddTo = (DefaultMutableTreeNode) TreeAddTo.getModel().getRoot();
-        NodeToAdd = new DefaultMutableTreeNode(new TagNode(AddResult, NewTag));
+        NodeToAdd = new DefaultMutableTreeNode(new IDTitle(AddResult, NewTag));
         Model =(DefaultTreeModel)TreeAddTo.getModel();
         Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
       }
@@ -464,7 +464,7 @@ class ImageDatabase
   public JTree deleteTagFromTree(JTree TreeDelFrom)
   {
     DefaultMutableTreeNode NodeToDel;
-    TagNode NodeToDelObject = null;
+    IDTitle NodeToDelObject = null;
     boolean IsRoot = false;
     // Find the currently selected node in the tree
     if (TreeDelFrom.getSelectionPath() == null)
@@ -472,15 +472,12 @@ class ImageDatabase
     else
     {
       NodeToDel = (DefaultMutableTreeNode)TreeDelFrom.getLastSelectedPathComponent();
-      NodeToDelObject = (TagNode)NodeToDel.getUserObject();
-      if (NodeToDelObject.getTagID().equals(-1))
+      NodeToDelObject = (IDTitle)NodeToDel.getUserObject();
+      if (NodeToDelObject.getID().equals("-1"))
         IsRoot = true;
     }
     if (IsRoot == false)
-    {
-      deleteTag(NodeToDelObject.getTagID());
-      System.out.println("deleteing tag with id: " + NodeToDelObject.getTagID() + "& name: " + NodeToDelObject.toString());
-    }
+      deleteTag(NodeToDelObject.getID());
     return toTree();
   }
   
@@ -488,8 +485,8 @@ class ImageDatabase
   public JTree toTree()
   {
     JTree Result;
-    DefaultMutableTreeNode RootNode = new DefaultMutableTreeNode(new TagNode("-1", "All Tags"));
-    RootNode = addTreeTags(RootNode, new Hashtable<String,TagNode>());
+    DefaultMutableTreeNode RootNode = new DefaultMutableTreeNode(new IDTitle("-1", "All Tags"));
+    RootNode = addTreeTags(RootNode, new Hashtable<String,IDTitle>());
     Result = new JTree(RootNode);
     Result.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
     return Result;
