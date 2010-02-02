@@ -7,7 +7,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import jaavax.swing.*;
+import javax.swing.*;
 
 class ImageDatabase
 {
@@ -423,6 +423,7 @@ class ImageDatabase
     String NewTag = (String)JOptionPane.showInputDialog(Window, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");
     String AddResult;
     DefaultMutableTreeNode NodeAddTo = null;
+    DefaultMutableTreeNode NodeToAdd = null;
     TagNode NodeAddToObject = null;
     boolean AddToRoot = false;
     // Check user inputted tag name is valid
@@ -433,25 +434,25 @@ class ImageDatabase
       if (AddResult != null)
       {
         // Find the currently selected node in the tree
-        NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
-        // If root node or no node selected then add to root node
-        if (NodeAddTo != null)
+        if (TreeAddTo.getSelectionPath() == null)
+          AddToRoot == true;
+        else
         {
+          NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
+          // If root node selected then add to root node
           NodeAddToObject = (TagNode)NodeAddTo.getUserObject();
           if (NodeAddToObject.getTagID().equals(-1))
             AddToRoot = true;
+          if (AddToRoot == false)
+          tagTag(AddResult, NodeAddToObject.getTagID());
         }
-        else
-        {
-          AddToRoot = true;
-          NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getModel().getRoot();
-        }
+        if (AddToRoot == true)
+          NodeAddTo = TreeAddTo.getModel().getRoot();
+        NodeToAdd = new DefaultMutableTreeNode(new TagNode(AddResult, NewTag));
+        TreeAddTo.getModel().insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
       }
-      if (AddToRoot == false)
-        tagTag(AddResult, NodeAddToObject.getTagID());
-      NodeAddTo.add(new DefaultMutableTreeNode(new TagNode(AddResult, NewTag)));
     }
-    return TreeAddTo;
+    return TreeAddTo();
   }
 
   // Converts the imagedatabase to a tree and returns the tree
