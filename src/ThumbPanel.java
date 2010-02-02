@@ -68,14 +68,20 @@ class ThumbPanel extends JPanel {
         this.setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
         boardW = boardW_start;
+        this.add(buildThumbHolders(),BorderLayout.CENTER);
+        this.validate();
+    }
+
+    JPanel buildThumbHolders(){
+        int sizeW = squareSize + 6;
+        noTiles = (boardW-(boardW % sizeW)) / sizeW; //removes remainder to ensure int
 
         thumbnails = new ThumbButton[noTiles];
         JPanel centrePan = new JPanel();
         centrePan.setLayout(new BoxLayout(centrePan,BoxLayout.LINE_AXIS));
-        centrePan.setMinimumSize(new Dimension(0,squareSize));
-        centrePan.setPreferredSize(gridSize);
+        centrePan.setMinimumSize(new Dimension(squareSize,squareSize));
+        centrePan.setPreferredSize(new Dimension((squareSize+3)*noTiles,squareSize));//Includes border
         centrePan.setBackground(Color.darkGray);
-        //Need code to manage margins,borders,gaps etc. Change colours to find where.
 
         for (int i=0;i<thumbnails.length;i++){
             thumbnails[i] = new ThumbButton(mainGUI,squareSize,(i+1));
@@ -83,7 +89,8 @@ class ThumbPanel extends JPanel {
             //if((i+1)<thumbnails.length) centrePan.add(Box.createRigidArea(new Dimension(2,0)));//gap between thumbnails
         }
 
-        this.add(centrePan,BorderLayout.CENTER);
+        centrePan.validate();
+        return centrePan;
     }
 
     void onResize(){
@@ -91,6 +98,11 @@ class ThumbPanel extends JPanel {
 	//boardH = getParent().getHeight();
 	boardW = getWidth();
 	boardH = getHeight();
+
+        this.remove(0);
+        this.add(buildThumbHolders(),BorderLayout.CENTER);
+        this.validate();
+
 	this.repaint();
 	//this.setPreferredSize(new Dimension(boardW,boardH));
 	//this.revalidate();
