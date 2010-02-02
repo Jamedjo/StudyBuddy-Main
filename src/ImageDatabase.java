@@ -160,7 +160,8 @@ class ImageDatabase
     TagRecords = TagMatches.elements();
     while (TagRecords.hasMoreElements())
     {
-      if (ImageToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
+      System.out.println("deleting as tagee");
+      if (TagToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
         return -1;
     }
     // Get tag to tag records including the tag (as tagger) and delete them
@@ -168,7 +169,7 @@ class ImageDatabase
     TagRecords = TagMatches.elements();
     while (TagRecords.hasMoreElements())
     {
-      if (ImageToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
+      if (TagToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
         return -1;
     }
     // Delete tag from tagtable
