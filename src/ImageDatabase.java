@@ -445,7 +445,7 @@ class ImageDatabase
           NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
           // If root node selected then add to root node
           NodeAddToObject = (IDTitle)NodeAddTo.getUserObject();
-          if (NodeAddToObject.getTagID().equals(-1))
+          if (NodeAddToObject.getID().equals(-1))
             AddToRoot = true;
           if (AddToRoot == false)
           tagTag(AddResult, NodeAddToObject.getID());
