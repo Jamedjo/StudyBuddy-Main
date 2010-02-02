@@ -426,6 +426,7 @@ class ImageDatabase
     DefaultMutableTreeNode NodeToAdd = null;
     TagNode NodeAddToObject = null;
     boolean AddToRoot = false;
+    DefaultTreeModel Model;
     // Check user inputted tag name is valid
     if ((NewTag != null) && (NewTag.length() > 0))
     {
@@ -449,10 +450,11 @@ class ImageDatabase
         if (AddToRoot == true)
           NodeAddTo = (DefaultMutableTreeNode) TreeAddTo.getModel().getRoot();
         NodeToAdd = new DefaultMutableTreeNode(new TagNode(AddResult, NewTag));
-        TreeAddTo.getModel().insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
+        Model =(DefaultTreeModel)TreeAddTo.getModel();
+        Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
       }
     }
-    return TreeAddTo();
+    return TreeAddTo;
   }
 
   // Converts the imagedatabase to a tree and returns the tree
