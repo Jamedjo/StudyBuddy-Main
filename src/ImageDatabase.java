@@ -435,7 +435,7 @@ class ImageDatabase
       {
         // Find the currently selected node in the tree
         if (TreeAddTo.getSelectionPath() == null)
-          AddToRoot == true;
+          AddToRoot = true;
         else
         {
           NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
@@ -447,7 +447,7 @@ class ImageDatabase
           tagTag(AddResult, NodeAddToObject.getTagID());
         }
         if (AddToRoot == true)
-          NodeAddTo = TreeAddTo.getModel().getRoot();
+          NodeAddTo = (DefaultMutableTreeNode) TreeAddTo.getModel().getRoot();
         NodeToAdd = new DefaultMutableTreeNode(new TagNode(AddResult, NewTag));
         TreeAddTo.getModel().insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
       }
