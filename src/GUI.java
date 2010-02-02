@@ -30,6 +30,7 @@ class GUI implements ActionListener, ComponentListener{
     ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
+    JTree TagTree;
     //JLabel mainPhoto;
 
     public static void main(String[] args){
@@ -180,16 +181,18 @@ class GUI implements ActionListener, ComponentListener{
 	    //Was cancelled
 	    return;
 	}
-	if(e.getActionCommand()=="TagThis"){
-	    Object[] foundTags = mainImageDB.getAllTagTitles();
-	    String newTag = (String)JOptionPane.showInputDialog(w,"Which tag would you like to add to this image?", "Add Tag to image", 
-								JOptionPane.PLAIN_MESSAGE,SysIcon.Question.Icon,foundTags,"");
-	    if ((newTag != null) && (newTag.length() > 0)) {
-		mainImageDB.tagImage(state.imageIDs[state.currentI],mainImageDB.getTagIDFromTagTitle(newTag));
-		//mainImageDB.print();
-                return;
-            }
-	    return;
+	if(e.getActionCommand()=="TagThis")
+  {
+    Object[] AllTags = mainImageDB.getTagIDTitles();
+    Object NewTag = JOptionPane.showInputDialog(w, "Which tag would you like to add to this image?", "Add Tag to image", 
+              JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
+    if (newTag != null && newTag instanceof IDTitle)
+    {
+      IDTitle NewTagIDTitle = (IDTitle) NewTag;
+      mainImageDB.tagImage(state.imageIDs[state.currentI], newTagIDTitle.getID());
+      mainImageDB.print();
+    }
+    return;
 	}
 	if(e.getActionCommand()=="TagFilter"){
 	    String[] foundTags = mainImageDB.getAllTagTitles();

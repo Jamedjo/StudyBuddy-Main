@@ -344,6 +344,16 @@ class ImageDatabase
   }
   
   // Get an array of all the tag IDs
+  IDTitle[] getTagIDTitles()
+  {
+    String[] TagIDs = TagTable.getColArray(0);
+    IDTitle[] Result = new IDTitle[TagIDs.length];
+    for (int i=0; i<Result.length; i++)
+      Result[i] = new IDTitle(TagIDs[i], getTagTitleFromTagID(TagIDs[i]));
+    return Result;
+  }
+  
+  // Get an array of IDTitles of all tags
   String[] getAllTagIDs()
   {
     return TagTable.getColArray(0);
