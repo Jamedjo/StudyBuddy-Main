@@ -3,6 +3,7 @@ import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
 import javax.swing.event.TreeSelectionEvent;
