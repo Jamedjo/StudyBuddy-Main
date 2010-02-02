@@ -247,8 +247,9 @@ class ImageDatabase
     // Result is an indexed table in the format of ImageTable
     Result = new IndexedTable("Result_Table", TagTable.getHeader(), TagTable.getKeyFields());
     // For all the TagIDs find the complete tag record and add it to the result table
-    for (int i=0; i<TagIDs.length; i++)
-      Result.addRecord(TagTable.getRecord(TagIDs[i], 0));
+    if (TagIDs != null)
+      for (int i=0; i<TagIDs.length; i++)
+        Result.addRecord(TagTable.getRecord(TagIDs[i], 0));
     return Result;
   }
   
