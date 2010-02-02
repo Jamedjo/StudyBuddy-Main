@@ -182,7 +182,7 @@ class ImageDatabase
     NextTagID++;
     if (TagTable.addRecord(new Record(RecordArray)) == -1)
     {
-      throw new Error("Tag cannot be added: already exists");
+      return null;
     }
     else
       return Integer.toString(NextTagID - 1);
@@ -415,6 +415,7 @@ class ImageDatabase
       }
     return NodeAddTo;
   }
+
 
   // Converts the imagedatabase to a tree and returns the tree
   public JTree toTree()
