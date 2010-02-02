@@ -119,6 +119,8 @@ class GUI implements ActionListener, ComponentListener{
         JPanel contentSet = new JPanel();
     	contentSet.setLayout(new BorderLayout());
 	contentSet.add(mainPanel,BorderLayout.CENTER);
+  TagTree = mainImageDB.toTree();
+  contentSet.add(TagTree, BorderLayout.WEST);
 	contentSet.add(thumbPanel,BorderLayout.PAGE_END);
 
 	JPanel contentPane = new JPanel();
@@ -170,31 +172,25 @@ class GUI implements ActionListener, ComponentListener{
 	    ToolBar.bThumbsH.show();
 	    return;
         }
-	if(e.getActionCommand()=="AddTag"){
-	    String newTag = (String)JOptionPane.showInputDialog(w,"Please enter the tag you wish to create?","Create Tag",
-								JOptionPane.PLAIN_MESSAGE,SysIcon.Question.Icon,null,"");
-	    if ((newTag != null) && (newTag.length() > 0)) {
-                mainImageDB.addTag(newTag);
-		//mainImageDB.print();
-                return;
-            }
-	    //Was cancelled
-	    return;
+	if (e.getActionCommand() == "AddTag")
+  {
+    TagTree = mainImageDB.addTagFromTree(TagTree, w);
+    TagTree.repaint();
+    return;
 	}
-	if(e.getActionCommand()=="TagThis")
+	if (e.getActionCommand() == "TagThis")
   {
     Object[] AllTags = mainImageDB.getTagIDTitles();
     Object NewTag = JOptionPane.showInputDialog(w, "Which tag would you like to add to this image?", "Add Tag to image", 
               JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
-    if (newTag != null && newTag instanceof IDTitle)
+    if (NewTag != null && NewTag instanceof IDTitle)
     {
       IDTitle NewTagIDTitle = (IDTitle) NewTag;
-      mainImageDB.tagImage(state.imageIDs[state.currentI], newTagIDTitle.getID());
-      mainImageDB.print();
+      mainImageDB.tagImage(state.imageIDs[state.currentI], NewTagIDTitle.getID());
     }
     return;
 	}
-	if(e.getActionCommand()=="TagFilter"){
+	if (e.getActionCommand()=="TagFilter"){
 	    String[] foundTags = mainImageDB.getAllTagTitles();
 	    String[] tagFilters = new String[(foundTags.length + 1)];
 	    tagFilters[0] = "Show All Images";
