@@ -462,7 +462,7 @@ class ImageDatabase
   public JTree deleteTagFromTree(JTree TreeDelFrom)
   {
     DefaultMutableTreeNode NodeToDel;
-    TagNode NodeToDelObject;
+    TagNode NodeToDelObject = null;
     boolean IsRoot = false;
     // Find the currently selected node in the tree
     if (TreeDelFrom.getSelectionPath() == null)
