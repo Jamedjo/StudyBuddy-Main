@@ -31,6 +31,7 @@ class ProgramState{
 
     ProgramState(GUI parentGUI){
         //if savefile exists, LoadType.Load, else LoadType.Init
+        //use Settings object
 	LoadType lType = LoadType.Init;
 	ContructProgramState(lType,  parentGUI,""); //loadType should not be filter here
     }
@@ -50,6 +51,7 @@ class ProgramState{
 	    tempImageDB = new ImageDatabase("mainDB");
 	    //If there are no files you get loads of errors
 
+            //Adding an image returns the ImageID of that image.
 	    tempImageDB.addImage("Park","///\\\\\\img_2810b_small.jpg");
 	    //tempImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
 	    //tempImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
@@ -58,7 +60,7 @@ class ProgramState{
 	    tempImageDB.addImage("Speed","///\\\\\\img_2926_small.jpg");
 	    tempImageDB.addImage("Food","///\\\\\\img_F028c_small.jpg");
 	    tempImageDB.addImage("Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
-	    tempImageDB.addImage("Barbados","///\\\\\\jamaica1730homannsheirs.jpg");
+	    //tempImageDB.addImage("Large file- many MegaPixels","///\\\\\\jamaica1730homannsheirs.jpg");
 	    tempImageDB.addImage("Graph Notes for C/W","///\\\\\\DSA_7.bmp");
 	    tempImageDB.addImage("Barbados","///\\\\\\barbados01.jpg");
 	    //tempImageDB.addImage("Barbados","///\\\\\\barbados02.jpg");
