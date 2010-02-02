@@ -180,6 +180,11 @@ class ProgramState{
 	mainGUI.mainPanel.repaint();
 	mainGUI.thumbPanel.repaint();
     }
+    void offsetImage(int by){
+	currentI = relItoFixI(by);
+	mainGUI.mainPanel.repaint();
+	mainGUI.thumbPanel.repaint();
+    }
 
     int relItoFixI(int in){
 	int c;
