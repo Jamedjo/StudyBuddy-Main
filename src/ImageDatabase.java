@@ -457,6 +457,27 @@ class ImageDatabase
     }
     return TreeAddTo;
   }
+  
+  // Delete a tag from the database from a selection on a tag tree
+  public JTree removeTagFromTree(JTree TreeDelFrom)
+  {
+    DefaultMutableTreeNode NodeToDel;
+    TagNode NodeToDelObject;
+    boolean IsRoot = false;
+    // Find the currently selected node in the tree
+    if (TreeDelFrom.getSelectionPath() == null)
+      IsRoot = true;
+    else
+    {
+      NodeToDel = (DefaultMutableTreeNode)TreeDelFrom.getLastSelectedPathComponent();
+      NodeToDelObject = (TagNode)NodeToDel.getUserObject();
+      if (NodeToDelObject.getTagID().equals(-1))
+        IsRoot = true;
+    }
+    if (IsRoot == false)
+      deleteTag(NodeToDelObject.getTagID(), NodeToDelObject.toString());
+    return toTree();
+  }
 
   // Converts the imagedatabase to a tree and returns the tree
   public JTree toTree()
