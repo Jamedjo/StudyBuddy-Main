@@ -136,9 +136,9 @@ class ImageDatabase
   }
   
   // Delete a tag from the database (by fields)
-  int deleteTag(String TagID, String Title)
+  int deleteTag(String TagID)
   {
-    String[] RecordArray = {TagID, Title};
+    String[] RecordArray = {TagID, getTagTitleFromTagID(TagID)};
     return deleteTag(new Record(RecordArray));
   }
   
@@ -476,7 +476,10 @@ class ImageDatabase
         IsRoot = true;
     }
     if (IsRoot == false)
-      deleteTag(NodeToDelObject.getTagID(), NodeToDelObject.toString());
+    {
+      deleteTag(NodeToDelObject.getTagID());
+      System.out.println("deleteing tag with id: " + NodeToDelObject.getTagID() + "& name: " + NodeToDelObject.toString());
+    }
     return toTree();
   }
   
