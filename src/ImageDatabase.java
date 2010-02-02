@@ -147,9 +147,6 @@ class ImageDatabase
   {
     IndexedTable TagMatches;
     Enumeration TagRecords;
-    // Delete tag from tagtable
-    if (TagTable.deleteRecord(r) == -1)
-      return -1;
     // Get tag to image records including the tag and delete them
     TagMatches = ImageToTagTable.getRecords(r.getField(0), 1);
     TagRecords = TagMatches.elements();
@@ -174,6 +171,9 @@ class ImageDatabase
       if (ImageToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
         return -1;
     }
+    // Delete tag from tagtable
+    if (TagTable.deleteRecord(r) == -1)
+      return -1;
     return 1;
   }
   
@@ -243,7 +243,7 @@ class ImageDatabase
     IndexedTable Result;
     String[] TagIDs;
     // Get the TagIDs that are tagged with the TagID
-    TagIDs = TagToTagTable.getRecords(TagID, 0).getColArray(0);
+    TagIDs = TagToTagTable.getRecords(TagID, 1).getColArray(0);
     // Result is an indexed table in the format of ImageTable
     Result = new IndexedTable("Result_Table", TagTable.getHeader(), TagTable.getKeyFields());
     // For all the TagIDs find the complete tag record and add it to the result table
