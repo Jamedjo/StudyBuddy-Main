@@ -120,6 +120,7 @@ class GUI implements ActionListener, ComponentListener{
     	contentSet.setLayout(new BorderLayout());
 	contentSet.add(mainPanel,BorderLayout.CENTER);
   TagTree = mainImageDB.toTree();
+  TagTree.addTreeSelectionListener(new TagTreeListener(this));
   contentSet.add(TagTree, BorderLayout.WEST);
 	contentSet.add(thumbPanel,BorderLayout.PAGE_END);
 
@@ -183,32 +184,31 @@ class GUI implements ActionListener, ComponentListener{
     Object[] AllTags = mainImageDB.getTagIDTitles();
     Object NewTag = JOptionPane.showInputDialog(w, "Which tag would you like to add to this image?", "Add Tag to image", 
               JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
-    if (NewTag != null && NewTag instanceof IDTitle)
+    if ((NewTag != null) && (NewTag instanceof IDTitle))
     {
       IDTitle NewTagIDTitle = (IDTitle) NewTag;
       mainImageDB.tagImage(state.imageIDs[state.currentI], NewTagIDTitle.getID());
     }
     return;
 	}
-	if (e.getActionCommand()=="TagFilter"){
-	    String[] foundTags = mainImageDB.getAllTagTitles();
-	    String[] tagFilters = new String[(foundTags.length + 1)];
-	    tagFilters[0] = "Show All Images";
-	    System.arraycopy(foundTags,0,tagFilters,1,foundTags.length);
-
-	    String filterTag = (String)JOptionPane.showInputDialog(w,"Which tag do you want to search for?","Add Tag to image", 
-								   JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, tagFilters, "Show All Images");
-	    if ((filterTag != null) && (filterTag.length() > 0)) {
-		if(filterTag.equals("Show All Images")){
-		    state = new ProgramState(LoadType.Refresh,this);//flush first?
-		}
-		else {
-		    state = new ProgramState(LoadType.Filter,this,filterTag);//flush first?
-		}
-		//mainImageDB.print();
-                return;
-            }
-	    return;
+	if (e.getActionCommand() == "TagFilter")
+  {
+    Object[] AllTags = mainImageDB.getTagIDTitles();
+    Object[] TagFilters = new IDTitle[(AllTags.length + 1)];
+    TagFilters[0] = new IDTitle("-1", "Show All Images");
+    System.arraycopy(AllTags,0,TagFilters,1,AllTags.length);
+    
+    Object FilterTag = JOptionPane.showInputDialog(w,"Which tag do you want to search for?","Filter images", 
+                 JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, TagFilters, null);
+    if ((FilterTag != null) && (FilterTag instanceof IDTitle))
+    {
+      IDTitle FilterTagIDTitle = (IDTitle) FilterTag;
+      if (FilterTagIDTitle.getID().equals("-1"))
+        state = new ProgramState(LoadType.Refresh, this); //flush first?
+      else
+        state = new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()); //flush first?
+    }
+    return;
 	}
         if(e.getActionCommand()=="Exit") {
             System.exit(0);
