@@ -32,7 +32,7 @@ class ProgramState{
     ProgramState(GUI parentGUI){
         //if savefile exists, LoadType.Load, else LoadType.Init
         //use Settings object
-	LoadType lType = LoadType.Init;
+	LoadType lType = LoadType.Load;//Use above instead
 	ContructProgramState(lType,  parentGUI,""); //loadType should not be filter here
     }
     ProgramState(GUI parentGUI, String filterTag){
@@ -97,7 +97,7 @@ class ProgramState{
 	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
 	lastIndex = (imageIDs.length - 1);
-	if(loadType!=LoadType.Init){
+	if((loadType!=LoadType.Init) && (loadType!=LoadType.Load)){
 	    mainGUI.mainPanel.repaint();
 	    mainGUI.thumbPanel.repaint();
 	}
