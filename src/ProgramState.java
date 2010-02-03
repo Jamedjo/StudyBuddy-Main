@@ -87,7 +87,7 @@ class ProgramState{
 	case Filter:
 	    //Create image database by loading database
 	    currentFilter = filterTag;
-	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagTitle(filterTag);
+	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagID(filterTag); // Working on TagID not TagTitle
 	    break;
 	}
 	//if imageIDs.length==0
@@ -110,7 +110,7 @@ class ProgramState{
 	    mainGUI.mainImageDB.addImage("Title 1",f.getAbsolutePath());
 	}
 	try{
-	    if(currentFilter.equals("Show All Images")){
+	    if(currentFilter.equals("-1")){ // "-1" is now show all (working on TagID rather than Tag Title)
 		mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
 		//Sets image to last image
 		//mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
@@ -132,7 +132,7 @@ class ProgramState{
     void importImage(String absolutePath){//should make a file and call importImages(new File[])
 	isLocked = true;
 	mainGUI.mainImageDB.addImage("Title 1",absolutePath);
-	if(currentFilter.equals("Show All Images")){
+	if(currentFilter.equals("-1")){ // "-1" means show all (using TagID not Tag Title)
 	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
 	    if(lastIndex != (imageIDs.length - 1)) lastIndex = imageIDs.length - 1;
 	    else return; //If there are no more images than before import, then failure
