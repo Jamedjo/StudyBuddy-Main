@@ -3,24 +3,20 @@ import javax.imageio.ImageReader;
 import java.util.Iterator;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Dimension;
-import java.net.URL;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.io.File;
 import javax.imageio.ImageIO;
-import java.net.MalformedURLException;
 import java.io.IOException;
 //import javax.swing.ImageIcon;
 import java.awt.RenderingHints;
 //import javax.swing.JOptionPane;
+import java.net.URISyntaxException;
 import java.util.Calendar;
 
 //Library of code under lib/
 //Various image utilities. needed as default image reader could not read thumbnails from exif
 import org.apache.sanselan.*;
-import org.apache.sanselan.common.IImageMetadata;
-import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 
 
 //use jpeg thumbs where availiable
@@ -78,7 +74,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	try{
 	    if(inputPath.startsWith("///\\\\\\")){
 		tempPath = inputPath.substring(6);
-		absolutePath = (GUI.class.getResource(tempPath)).getFile();//could be null
+		absolutePath = (GUI.class.getResource(tempPath)).toURI().getPath();//could be null
 		//absolutePath = "etc/img/"+tempPath;//for use with jar files.
 		if(absolutePath==null){
 		    absolutePath=tempPath;
@@ -90,9 +86,12 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 		tempPath = inputPath;
 		pathFile = new File(inputPath);	  
 	    }
-	}catch (NullPointerException e) {
+	}catch (URISyntaxException e){
+            pathFile = null;
+	    System.err.println("Couldn't load image from " + tempPath + "\nError was- " + e.toString());
+        }catch (NullPointerException e) {
 	    pathFile = null;
-	    System.err.println("Couldn't load image from file " + tempPath + "\nError was: " + e.toString());
+	    System.err.println("Couldn't load image from file " + tempPath + "\nError was:- " + e.toString());
 	}
 	
 	
