@@ -452,13 +452,13 @@ class ImageDatabase
           NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
           // If root node selected then add to just root node
           NodeAddToObject = (IDTitle)NodeAddTo.getUserObject();
-          if (NodeAddToObject.getID().equals(-1))
+          if (NodeAddToObject.getID().equals("-1"))
             JustRoot = true;
           if (JustRoot == false)
           tagTag(AddResult, NodeAddToObject.getID());
         }
         NodeToAdd = new DefaultMutableTreeNode(new IDTitle(AddResult, NewTag));
-        Model =(DefaultTreeModel)TreeAddTo.getModel();
+        Model = (DefaultTreeModel)TreeAddTo.getModel();
         if (JustRoot == false)
           Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
         NodeAddTo = (DefaultMutableTreeNode) TreeAddTo.getModel().getRoot();
