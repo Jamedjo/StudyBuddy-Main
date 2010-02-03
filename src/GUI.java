@@ -120,9 +120,12 @@ class GUI implements ActionListener, ComponentListener{
         //TagTree.setMinimumSize(new Dimension(150,0));
         TagTree.addTreeSelectionListener(new TagTreeListener(this));
 
+        JScrollPane mainScrollPane = new JScrollPane(mainPanel);
+        //mainScrollPane.setBackground(Color.darkGray);
+
         JPanel contentSet = new JPanel();
     	contentSet.setLayout(new BorderLayout());
-	contentSet.add(mainPanel,BorderLayout.CENTER);
+	contentSet.add(mainScrollPane,BorderLayout.CENTER);
 	contentSet.add(thumbPanel,BorderLayout.PAGE_END);
         
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,contentSet);
