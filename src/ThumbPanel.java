@@ -52,7 +52,7 @@ class ThumbButton extends JPanel{
 
 }
 
-class ThumbPanel extends JPanel {
+class ThumbPanel extends JPanel{
     Dimension gridSize;
     int boardW,boardH;
     int boardW_start = 550;
@@ -75,6 +75,7 @@ class ThumbPanel extends JPanel {
     JPanel buildThumbHolders(){
         int sizeW = squareSize + 6;
         noTiles = (boardW-(boardW % sizeW)) / sizeW; //removes remainder to ensure int
+       //**// System.out.println("now showing "+noTiles+" thumbnails");
 
         thumbnails = new ThumbButton[noTiles];
         JPanel centrePan = new JPanel();
@@ -96,8 +97,10 @@ class ThumbPanel extends JPanel {
     void onResize(){
 	//boardW = getParent().getWidth();
 	//boardH = getParent().getHeight();
-	boardW = getWidth();
-	boardH = getHeight();
+        System.out.println("resized");
+	boardW = this.getWidth();
+	boardH = this.getHeight();
+
 
         this.remove(0);
         this.add(buildThumbHolders(),BorderLayout.CENTER);

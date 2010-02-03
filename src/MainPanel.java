@@ -20,7 +20,6 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
 
-        addMouseMotionListener(this);
     }
 
     void onResize() {

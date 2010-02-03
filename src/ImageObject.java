@@ -175,7 +175,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	    reader.dispose();
 	    inputStream.close();
 
-	    if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
+	    //**//if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
 	    //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
 	    //Bheight = reader.getHeight(0);
 	} catch (IOException e) {
@@ -247,7 +247,7 @@ long start = Calendar.getInstance().getTimeInMillis();
 //ImageIO.setUseCache(true);
 //ImageIO.setCacheDirectory(File);
             bImage = ImageIO.read(pathFile);
-System.out.println("Loading image "+absolutePath+"\n      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to read image to memory");
+//**//System.out.println("Loading image "+absolutePath+"\n      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to read image to memory");
 start = Calendar.getInstance().getTimeInMillis();
 
 	    if(size==ImgSize.Screen||size==ImgSize.ThumbFull){//&& not thumb only (as this would be extra work)
@@ -256,7 +256,7 @@ start = Calendar.getInstance().getTimeInMillis();
 	    }
 	    else currentLarge = ImgSize.Max;
 	    bThumb =  makeThumb(bImage);
-System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to process image");
+//**//System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to process image");
 	    setVars();
         } catch (IOException e) {
 	    System.err.println("Error loading image " + absolutePath + "\nError was: " + e.toString());

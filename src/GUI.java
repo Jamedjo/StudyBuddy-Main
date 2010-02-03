@@ -103,7 +103,6 @@ class GUI implements ActionListener, ComponentListener{
 
 
 	mainPanel = new MainPanel(this);
-	mainPanel.addComponentListener(this);
 	//mainPanel.add(mainPhoto);
 
 	thumbPanel = new ThumbPanel(this);
@@ -139,6 +138,8 @@ class GUI implements ActionListener, ComponentListener{
         //contentPane.add(boardScroll, BorderLayout.CENTER);
 	contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
 	contentPane.add(toolbarMain, BorderLayout.PAGE_START);
+
+	contentPane.addComponentListener(this);
         w.setContentPane(contentPane);
         w.pack();
     }
@@ -237,10 +238,11 @@ class GUI implements ActionListener, ComponentListener{
 
     public void componentResized(ComponentEvent e) {
 	// if(e.getSource()==boardScroll) {
-	if(e.getSource()==mainPanel) {
+	//if(e.getSource()==mainPanel) {
+        System.out.println(e.paramString());
             mainPanel.onResize();
 	    thumbPanel.onResize();
-        }
+        //}
 	// 	if(e.getSource()==w){
 	// 	    int newWidth = w.getWidth();
 	// 	    int newHeight = w.getHeight();
