@@ -278,9 +278,6 @@ class ImageDatabase
   String[] getImageIDsFromTagID(String TagID)
   {
     IndexedTable TempTable = getImagesFromTagID(TagID);
-    if (TempTable.getNumRecords() == 0)
-      return null;
-    else
       return TempTable.getColArray(0);
   }
   
