@@ -2,7 +2,7 @@ import java.net.URL;
 import javax.swing.ImageIcon;
 
 public enum SysIcon{
-    Logo("logo.gif"),
+    Logo("logo.png"),
     Question("question.gif"),
     Error("error.gif"),
     Info("info.gif"),
