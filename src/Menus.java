@@ -15,8 +15,8 @@ enum ToolBar{
 	bZoomFit("Zoom: Fit",		"ZoomFit",false),
 	bZoomMax("Zoom: 100%",		"Zoom100"),
 	bAddTag("Add Tag",			"AddTag"),
-	bTagThis("Tag This Image",		"TagThis"),
-	bTagFilter("Filter By Tag",		"TagFilter");
+	bTagThis("Tag This Image",		"TagThis");//,
+	//bTagFilter("Filter By Tag",		"TagFilter");
 
     JButton button;
     ToolBar(String label,String command){

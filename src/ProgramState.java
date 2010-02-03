@@ -32,7 +32,7 @@ class ProgramState{
     ProgramState(GUI parentGUI){
         //if savefile exists, LoadType.Load, else LoadType.Init
         //use Settings object
-	LoadType lType = LoadType.Load;//Use above instead
+	LoadType lType = LoadType.Init;//Use above instead
 	ContructProgramState(lType,  parentGUI,""); //loadType should not be filter here
     }
     ProgramState(GUI parentGUI, String filterTag){
@@ -47,34 +47,49 @@ class ProgramState{
 	mainGUI = parentGUI;
 	switch (loadType){
 	case Init:
-            ImageDatabase tempImageDB;
-	    tempImageDB = new ImageDatabase("mainDB");
+            ImageDatabase tempDB;
+	    tempDB = new ImageDatabase("mainDB");
 	    //If there are no files you get loads of errors
-
+            String barbTagID = tempDB.addTag("Barbados");
+            String notesTagID = tempDB.addTag("Notes");
+            String palmTagID = tempDB.addTag("Palm Tree");
+            tempDB.tagTag(palmTagID, barbTagID);
+            
             //Adding an image returns the ImageID of that image.
-	    tempImageDB.addImage("Park","///\\\\\\img_2810b_small.jpg");
-	    //tempImageDB.addImage("Creates error- not found","///\\\\\\img_monkeys_small.jpg");
-	    //tempImageDB.addImage("Creates Error- not an image","///\\\\\\NotAnImage.txt");
-	    tempImageDB.addImage("Igloo in Bristol","///\\\\\\img_6088b_small.jpg");
-	    tempImageDB.addImage("Pink","///\\\\\\img_5672bp_small.jpg");
-	    tempImageDB.addImage("Speed","///\\\\\\img_2926_small.jpg");
-	    tempImageDB.addImage("Food","///\\\\\\img_F028c_small.jpg");
-	    tempImageDB.addImage("Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
-	    //tempImageDB.addImage("Large file- many MegaPixels","///\\\\\\jamaica1730homannsheirs.jpg");
-	    tempImageDB.addImage("Graph Notes for C/W","///\\\\\\DSA_7.bmp");
-	    tempImageDB.addImage("Barbados","///\\\\\\barbados01.jpg");
-	    //tempImageDB.addImage("Barbados","///\\\\\\barbados02.jpg");
-	    //tempImageDB.addImage("Barbados","///\\\\\\barbados03.jpg");
-	    tempImageDB.addImage("Barbados","///\\\\\\barbados04.jpg");
-	    tempImageDB.addImage("Barbados","///\\\\\\barbados05.jpg");
-	    //tempImageDB.addImage("Barbados","///\\\\\\barbados06.jpg");
-	    tempImageDB.addImage("Barbados","///\\\\\\barbados07.jpg");
-	    tempImageDB.addImage("Barbados","///\\\\\\barbados08.jpg");
-	    tempImageDB.addImage("Barbados","///\\\\\\barbados09.jpg");
-	    //tempImageDB.addImage("Barbados","///\\\\\\barbados10.jpg");
-	    tempImageDB.addImage("Barbados","///\\\\\\barbados-08-046-733284.jpg");
+	    addI(tempDB,"Park","///\\\\\\img_2810b_small.jpg");
+	    //addI(tempImageDB,"Creates error- not found","///\\\\\\img_monkeys_small.jpg");
+	    //addI(tempImageDB,"Creates Error- not an image","///\\\\\\NotAnImage.txt");
+	    addI(tempDB,"Igloo in Bristol","///\\\\\\img_6088b_small.jpg");
+	    addI(tempDB,"Pink","///\\\\\\img_5672bp_small.jpg");
+	    addI(tempDB,"Speed","///\\\\\\img_2926_small.jpg");
+	    addI(tempDB,"Food","///\\\\\\img_F028c_small.jpg");
+	    addI(tempDB,"Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
+	    //addI(tempImageDB,"Large file- many MegaPixels","///\\\\\\jamaica1730homannsheirs.jpg");
+	    addI(tempDB,"Graph Notes for C/W","///\\\\\\DSA_7.bmp");
 
-            tempImageDB.save(saveFileName);
+
+	    addI(tempDB,"Barbados","///\\\\\\barbados01.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados04.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados05.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados07.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados08.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados09.jpg");
+            String[] iDs = tempDB.getPossibleIDs("Barbados");
+            for (String imageID : iDs){
+                tempDB.tagImage(imageID, palmTagID);
+            }
+
+
+	    addI(tempDB,"Barbados","///\\\\\\barbados02.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados03.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados06.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados10.jpg");
+	    addI(tempDB,"Barbados","///\\\\\\barbados-08-046-733284.jpg");
+            
+            tempDB.tagTag(tempDB.getTagIDFromTagTitle("Data Structures&Algorithms note 1") , tempDB.getTagIDFromTagTitle("Notes"));
+            tempDB.tagTag(tempDB.getTagIDFromTagTitle("Graph Notes for C/W") , tempDB.getTagIDFromTagTitle("Notes"));
+
+            tempDB.save(saveFileName);
 	case Load:
 	    mainGUI.mainImageDB = new ImageDatabase("mainDB",saveFileName);
 	    //no break as image list must still be passed from DB
@@ -101,6 +116,11 @@ class ProgramState{
 	    mainGUI.mainPanel.repaint();
 	    mainGUI.thumbPanel.repaint();
 	}
+    }
+    
+    void addI(ImageDatabase DB,String title,String filename){
+        if(DB.getTagIDFromTagTitle(title)==null) DB.addTag(title);
+        DB.tagImage(DB.addImage(title, filename), DB.getTagIDFromTagTitle(title));
     }
 
     void importImages(File[] files){

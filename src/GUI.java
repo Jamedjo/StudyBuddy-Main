@@ -120,7 +120,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         TagTree.addTreeSelectionListener(new TagTreeListener(this));
 
         JScrollPane mainScrollPane = new JScrollPane(mainPanel);
-        //mainScrollPane.getViewport().setBackground(Color.darkGray);
+        mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
         mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
 
         JPanel contentSet = new JPanel();
