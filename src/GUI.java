@@ -117,7 +117,7 @@ class GUI implements ActionListener, ComponentListener{
 	//boardScroll.addComponentListener(this);
 
         TagTree = mainImageDB.toTree();
-        TagTree.setPreferredSize(new Dimension(100, 400));
+        //TagTree.setMinimumSize(new Dimension(150,0));
         TagTree.addTreeSelectionListener(new TagTreeListener(this));
 
         JPanel contentSet = new JPanel();
@@ -127,6 +127,8 @@ class GUI implements ActionListener, ComponentListener{
         
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,contentSet);
         splitpane.setOneTouchExpandable(true);
+        splitpane.setDividerLocation(150 + splitpane.getInsets().left);
+
 
 	JPanel contentPane = new JPanel();
     	contentPane.setLayout(new BorderLayout());
