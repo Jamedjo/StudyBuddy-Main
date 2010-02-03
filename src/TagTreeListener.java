@@ -10,13 +10,13 @@ class TagTreeListener implements TreeSelectionListener
   
   TagTreeListener(GUI NewMainGUI)
   {
-    MainGUI = MainGUI;
+    MainGUI = NewMainGUI;
   }
   
   public void valueChanged(TreeSelectionEvent Event)
   {
     DefaultMutableTreeNode CurrentNode = (DefaultMutableTreeNode)MainGUI.TagTree.getLastSelectedPathComponent();
-    IDTitle NodeObject;
+    IDTitle NodeObject = null;
     if (CurrentNode != null)
     {
       NodeObject = (IDTitle)CurrentNode.getUserObject();
