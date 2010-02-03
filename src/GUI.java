@@ -120,6 +120,7 @@ class GUI implements ActionListener, ComponentListener{
     	contentSet.setLayout(new BorderLayout());
 	contentSet.add(mainPanel,BorderLayout.CENTER);
   TagTree = mainImageDB.toTree();
+  TagTree.setPreferredSize(new Dimension(100, 400));
   TagTree.addTreeSelectionListener(new TagTreeListener(this));
   contentSet.add(TagTree, BorderLayout.WEST);
 	contentSet.add(thumbPanel,BorderLayout.PAGE_END);
