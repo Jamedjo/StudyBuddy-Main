@@ -20,15 +20,15 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         boardH = boardH_start;
         setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
-//        setAutoscrolls(true); //enable synthetic drag events
-//        addMouseMotionListener(this); //handle mouse drags
+        setAutoscrolls(true); //enable synthetic drag events
+        addMouseMotionListener(this); //handle mouse drags
     }
 
     void onResize() {
         //boardW = getParent().getWidth();
         //boardH = getParent().getHeight();
         if(!isZoomed) {
-            this.setPreferredSize(new Dimension(this.getParent().getWidth(),this.getParent().getHeight()));
+            this.setPreferredSize(new Dimension(this.getParent().getParent().getWidth() - 3,this.getParent().getParent().getHeight() - 3 ));
             //**//System.out.println("klj"+this.getParent().getWidth());
         } else {
             this.setPreferredSize(ImageObject.useMaxMax(mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig(),this.getParent().getWidth(),this.getParent().getHeight()));

@@ -159,8 +159,8 @@ enum TagMenu{
 enum ViewMenu{
     NextImage("Next Image",KeyEvent.VK_N,KeyEvent.VK_RIGHT,0,"Next"),
 	PrevImage("Previous Image",KeyEvent.VK_P,KeyEvent.VK_LEFT,0,"Prev"),
-	ShowThumbs("Show Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsS"),
-	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH",false),
+	ShowThumbs("Show Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsS",false),
+	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH"),
 	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ZoomFit"),
 	ZoomTo100("Zoom: 100%",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"Zoom100",false);
     

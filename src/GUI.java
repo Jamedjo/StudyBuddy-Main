@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import java.io.*;
 import javax.swing.JOptionPane.*;
+//import javax.swing.ScrollPaneLayout;
 
 //We should use javadoc.
 
@@ -131,6 +132,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,contentSet);
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(150 + splitpane.getInsets().left);
+        //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
 
 	JPanel contentPane = new JPanel();
@@ -164,6 +166,8 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 	    ViewMenu.HideThumbs.hide();
 	    ToolBar.bThumbsS.show();
 	    ToolBar.bThumbsH.hide();
+
+            mainPanel.onResize();
 	    if(e.getActionCommand()=="ThumbsH") return;
         }
         if(e.getActionCommand()=="ZoomFit"||e.getActionCommand()=="mRestart") {
@@ -200,13 +204,15 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
             state.prevImage();
 	    return;
         }
-        if(e.getActionCommand()=="ThumbsS") {
+        if(e.getActionCommand()=="ThumbsS") {// or restart?
 	    thumbPanel.setVisible(true);
 	    
 	    ViewMenu.ShowThumbs.hide();	    
 	    ViewMenu.HideThumbs.show();
 	    ToolBar.bThumbsS.hide();	    
 	    ToolBar.bThumbsH.show();
+
+            mainPanel.onResize();
 	    return;
         }
 	if (e.getActionCommand() == "AddTag")
