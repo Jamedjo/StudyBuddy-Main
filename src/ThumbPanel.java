@@ -97,7 +97,6 @@ class ThumbPanel extends JPanel{
     void onResize(){
 	//boardW = getParent().getWidth();
 	//boardH = getParent().getHeight();
-        System.out.println("resized");
 	boardW = this.getWidth();
 	boardH = this.getHeight();
 

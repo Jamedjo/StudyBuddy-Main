@@ -16,7 +16,7 @@ import javax.swing.JOptionPane.*;
 //and allows for the worker to be cancelled if it is too slow.
 
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
-class GUI implements ActionListener, ComponentListener{
+class GUI implements ActionListener, ComponentListener,WindowStateListener {
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
@@ -121,6 +121,7 @@ class GUI implements ActionListener, ComponentListener{
 
         JScrollPane mainScrollPane = new JScrollPane(mainPanel);
         //mainScrollPane.setBackground(Color.darkGray);
+        mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
 
         JPanel contentSet = new JPanel();
     	contentSet.setLayout(new BorderLayout());
@@ -141,7 +142,10 @@ class GUI implements ActionListener, ComponentListener{
 
 	contentPane.addComponentListener(this);
         w.setContentPane(contentPane);
+        w.addWindowStateListener(this);
         w.pack();
+            mainPanel.onResize();
+	    thumbPanel.onResize();
     }
     
     public void actionPerformed(ActionEvent e){
@@ -155,12 +159,34 @@ class GUI implements ActionListener, ComponentListener{
 
         if(e.getActionCommand()=="ThumbsH"||e.getActionCommand()=="mRestart") {
 	    thumbPanel.setVisible(false);
-	    
-	    ViewMenu.ShowThumbs.show();	    
+
+	    ViewMenu.ShowThumbs.show();
 	    ViewMenu.HideThumbs.hide();
-	    ToolBar.bThumbsS.show();	    
+	    ToolBar.bThumbsS.show();
 	    ToolBar.bThumbsH.hide();
 	    if(e.getActionCommand()=="ThumbsH") return;
+        }
+        if(e.getActionCommand()=="ZoomFit"||e.getActionCommand()=="mRestart") {
+	    mainPanel.isZoomed = false;
+
+	    ViewMenu.ZoomTo100.show();
+	    ViewMenu.ZoomToFit.hide();
+	    ToolBar.bZoomMax.show();
+	    ToolBar.bZoomFit.hide();
+
+            mainPanel.onResize();
+	    if(e.getActionCommand()=="ZoomFit") return;
+        }
+        if(e.getActionCommand()=="Zoom100"||e.getActionCommand()=="mRestart") {
+	    mainPanel.isZoomed = true;
+
+	    ViewMenu.ZoomTo100.hide();
+	    ViewMenu.ZoomToFit.show();
+	    ToolBar.bZoomMax.hide();
+	    ToolBar.bZoomFit.show();
+            
+            mainPanel.onResize();
+	    if(e.getActionCommand()=="Zoom100") return;
         }
 	if(e.getActionCommand()=="mRestart") {
             quickRestart();
@@ -236,10 +262,15 @@ class GUI implements ActionListener, ComponentListener{
 	//+ ",\nwith source:\n\n " + e.getSource());
     }
 
+    public void windowStateChanged(WindowEvent e){
+            mainPanel.onResize();
+	    thumbPanel.onResize();
+    }
+
     public void componentResized(ComponentEvent e) {
 	// if(e.getSource()==boardScroll) {
 	//if(e.getSource()==mainPanel) {
-        System.out.println(e.paramString());
+        //**//System.out.println(e.paramString());
             mainPanel.onResize();
 	    thumbPanel.onResize();
         //}

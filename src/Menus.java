@@ -12,7 +12,8 @@ enum ToolBar{
 	bNext("Next",			"Next"),
 	bThumbsS("Show Thumbnails",		"ThumbsS",false),
 	bThumbsH("Hide Thumbnails",		"ThumbsH"),
-	//bZoom("Zoom",			"bZoom"),//ensure does not affect seperators
+	bZoomFit("Zoom: Fit",		"ZoomFit",false),
+	bZoomMax("Zoom: 100%",		"Zoom100"),
 	bAddTag("Add Tag",			"AddTag"),
 	bTagThis("Tag This Image",		"TagThis"),
 	bTagFilter("Filter By Tag",		"TagFilter");
@@ -48,7 +49,7 @@ enum ToolBar{
 
 	int i=0;
 	for (ToolBar b : ToolBar.values()){
-	    if(i==0||i==2||i==4){
+	    if(i==0||i==2||i==4||i==6){
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
 	    JButton bt = b.create(l);
@@ -159,7 +160,9 @@ enum ViewMenu{
     NextImage("Next Image",KeyEvent.VK_N,KeyEvent.VK_RIGHT,0,"Next"),
 	PrevImage("Previous Image",KeyEvent.VK_P,KeyEvent.VK_LEFT,0,"Prev"),
 	ShowThumbs("Show Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsS"),
-	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH",false);
+	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH",false),
+	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ZoomFit"),
+	ZoomTo100("Zoom: 100%",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"Zoom100",false);
     
     JMenuItem item;
     ViewMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){
@@ -192,7 +195,7 @@ enum ViewMenu{
 	menu.setMnemonic(KeyEvent.VK_V);
 	int i=0;
 	for (ViewMenu iTM : ViewMenu.values()){
-	    if(i==2){
+	    if(i==2||i==4){
 		menu.addSeparator();//add seperator before positions 2 in the menu
 	    }
 	    JMenuItem itm = iTM.create(l);

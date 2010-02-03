@@ -11,6 +11,7 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
     int boardW_start = 550;
     int boardH_start = 350;
     GUI mainGUI; //could be passed in contructor, it could be useful to know parent.
+    boolean isZoomed = false;
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -19,18 +20,25 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         boardH = boardH_start;
         setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
-
+//        setAutoscrolls(true); //enable synthetic drag events
+//        addMouseMotionListener(this); //handle mouse drags
     }
 
     void onResize() {
         //boardW = getParent().getWidth();
         //boardH = getParent().getHeight();
-        boardW = getWidth();
-        boardH = getHeight();
+        if(!isZoomed) {
+            this.setPreferredSize(new Dimension(this.getParent().getWidth(),this.getParent().getHeight()));
+            //**//System.out.println("klj"+this.getParent().getWidth());
+        } else {
+            this.setPreferredSize(new Dimension(mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig()));
+        }
+        this.revalidate();
+        getParent().validate();
+        boardW = this.getWidth();
+        boardH = this.getHeight();
+        getParent().repaint();
         this.repaint();
-        //this.setPreferredSize(new Dimension(boardW,boardH));
-        //this.revalidate();
-        //getParent().repaint();
     }
 
     //all scaling in terms of height. max size is 20 times minimum.
@@ -41,14 +49,20 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         Dimension useWH;
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        ImgSize cSize;
+        if(isZoomed) {
+            cSize = ImgSize.Max;
+            this.setPreferredSize(new Dimension(mainGUI.state.getCurrentImage().getWidthAndMakeBig(), mainGUI.state.getCurrentImage().getHeightAndMakeBig()));
+        }
+        else cSize = ImgSize.Screen;
         //Set dimensions
-        useWH = mainGUI.state.getRelImageWH(ImgSize.Screen, boardW, boardH, 0);
+        useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
         int leftOfset = (boardW - useWH.width) / 2;
         int topOfset = (boardH - useWH.height) / 2;
 
         //mainGUI.mainPhoto.setIcon(mainGUI.state.getCurrentImage().getIcon(ImgSize.Screen));
 
-        g2.drawImage(mainGUI.state.getBImageI(0, ImgSize.Screen), leftOfset, topOfset, useWH.width, useWH.height, this);
+        g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
     }
 
 

@@ -135,6 +135,18 @@ bImage=null;
 	//note that the bImage should now be set to null to clear memory
 	return Bheight;
     }
+    int getWidthAndMakeBig(){
+	if(Bheight!=null) return Bwidth;
+	getImage(ImgSize.Max);
+	//note that the bImage should now be set to null to clear memory
+	return Bwidth;
+    }
+    int getHeightAndMakeBig(){
+	if(Bheight!=null) return Bheight;
+	getImage(ImgSize.Max);
+	//note that the bImage should now be set to null to clear memory
+	return Bheight;
+    }
 
 void getThumbQuick(){
 long start = Calendar.getInstance().getTimeInMillis();
