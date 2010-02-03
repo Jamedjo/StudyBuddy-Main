@@ -390,4 +390,10 @@ Dimension outWH = new Dimension();
 	if(tempWH.width<inW) return tempWH;
 	return new Dimension(inW,inH);
     }
+    static Dimension useMaxMax(int inW, int inH, int maxW, int maxH){
+        int outW,outH;
+        outW = Math.max(inW, maxW);
+        outH = Math.max(inH,maxH);
+        return new Dimension(outW,outH);
+    }
 }

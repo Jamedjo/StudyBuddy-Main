@@ -172,18 +172,18 @@ class ProgramState{
 
     void nextImage() {
 	currentI = next(currentI);
-	mainGUI.mainPanel.repaint();
-	mainGUI.thumbPanel.repaint();
+	mainGUI.mainPanel.onResize();
+	mainGUI.thumbPanel.onResize();
     }
     void prevImage() {
 	currentI = prev(currentI);
-	mainGUI.mainPanel.repaint();
-	mainGUI.thumbPanel.repaint();
+	mainGUI.mainPanel.onResize();
+	mainGUI.thumbPanel.onResize();
     }
     void offsetImage(int by){
 	currentI = relItoFixI(by);
-	mainGUI.mainPanel.repaint();
-	mainGUI.thumbPanel.repaint();
+	mainGUI.mainPanel.onResize();
+	mainGUI.thumbPanel.onResize();
     }
 
     int relItoFixI(int in){

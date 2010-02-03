@@ -31,7 +31,7 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
             this.setPreferredSize(new Dimension(this.getParent().getWidth(),this.getParent().getHeight()));
             //**//System.out.println("klj"+this.getParent().getWidth());
         } else {
-            this.setPreferredSize(new Dimension(mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig()));
+            this.setPreferredSize(ImageObject.useMaxMax(mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig(),this.getParent().getWidth(),this.getParent().getHeight()));
         }
         this.revalidate();
         getParent().validate();
@@ -52,11 +52,13 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         ImgSize cSize;
         if(isZoomed) {
             cSize = ImgSize.Max;
-            this.setPreferredSize(new Dimension(mainGUI.state.getCurrentImage().getWidthAndMakeBig(), mainGUI.state.getCurrentImage().getHeightAndMakeBig()));
+            this.setPreferredSize(ImageObject.useMaxMax(mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig(),this.getParent().getWidth(),this.getParent().getHeight()));
+            useWH = mainGUI.state.getRelImageWH(cSize, mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig(), 0);
         }
-        else cSize = ImgSize.Screen;
-        //Set dimensions
-        useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
+        else {
+            cSize = ImgSize.Screen;
+        useWH = mainGUI.state.getRelImageWH(cSize,boardW,boardH,0);
+        }
         int leftOfset = (boardW - useWH.width) / 2;
         int topOfset = (boardH - useWH.height) / 2;
 
