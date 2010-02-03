@@ -12,7 +12,7 @@ class TagTreeListener implements TreeSelectionListener
 {
   GUI MainGUI;
   
-  TagTreeListener(TreeStuff NewMainGUI)
+  TagTreeListener(GUI NewMainGUI)
   {
     MainGUI = MainGUI;
   }
