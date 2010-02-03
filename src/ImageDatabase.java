@@ -435,7 +435,7 @@ class ImageDatabase
     DefaultMutableTreeNode NodeAddTo = null;
     DefaultMutableTreeNode NodeToAdd = null;
     IDTitle NodeAddToObject = null;
-    boolean JustRoot = false;
+    boolean AddToRoot = false;
     DefaultTreeModel Model;
     // Check user inputted tag name is valid
     if ((NewTag != null) && (NewTag.length() > 0))
@@ -446,22 +446,21 @@ class ImageDatabase
       {
         // Find the currently selected node in the tree
         if (TreeAddTo.getSelectionPath() == null)
-          JustRoot = true;
+          AddToRoot = true;
         else
         {
           NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
-          // If root node selected then add to just root node
+          // If root node selected then add to root node
           NodeAddToObject = (IDTitle)NodeAddTo.getUserObject();
           if (NodeAddToObject.getID().equals("-1"))
-            JustRoot = true;
-          if (JustRoot == false)
+            AddToRoot = true;
+          if (AddToRoot == false)
           tagTag(AddResult, NodeAddToObject.getID());
         }
+        if (AddToRoot == true)
+          NodeAddTo = (DefaultMutableTreeNode) TreeAddTo.getModel().getRoot();
         NodeToAdd = new DefaultMutableTreeNode(new IDTitle(AddResult, NewTag));
         Model = (DefaultTreeModel)TreeAddTo.getModel();
-        if (JustRoot == false)
-          Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
-        NodeAddTo = (DefaultMutableTreeNode) TreeAddTo.getModel().getRoot();
         Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
       }
     }
