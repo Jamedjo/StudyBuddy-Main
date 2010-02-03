@@ -10,8 +10,8 @@ import javax.swing.KeyStroke;
 enum ToolBar{
     bPrev("Prev",			"Prev"),
 	bNext("Next",			"Next"),
-	bThumbsS("Show Thumbnails",		"ThumbsS"),
-	bThumbsH("Hide Thumbnails",		"ThumbsH",false),
+	bThumbsS("Show Thumbnails",		"ThumbsS",false),
+	bThumbsH("Hide Thumbnails",		"ThumbsH"),
 	//bZoom("Zoom",			"bZoom"),//ensure does not affect seperators
 	bAddTag("Add Tag",			"AddTag"),
 	bTagThis("Tag This Image",		"TagThis"),

@@ -109,7 +109,7 @@ class GUI implements ActionListener, ComponentListener{
 	thumbPanel = new ThumbPanel(this);
 	//thumbPanel.addComponentListener(this);
 	thumbPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
-	thumbPanel.setVisible(false);
+	thumbPanel.setVisible(true);
 
 	toolbarMain = ToolBar.build((ActionListener)this);
 
@@ -120,18 +120,19 @@ class GUI implements ActionListener, ComponentListener{
         TagTree.setPreferredSize(new Dimension(100, 400));
         TagTree.addTreeSelectionListener(new TagTreeListener(this));
 
-        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,mainPanel);
-
         JPanel contentSet = new JPanel();
     	contentSet.setLayout(new BorderLayout());
-	contentSet.add(splitpane,BorderLayout.CENTER);
+	contentSet.add(mainPanel,BorderLayout.CENTER);
 	contentSet.add(thumbPanel,BorderLayout.PAGE_END);
+        
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,contentSet);
+        splitpane.setOneTouchExpandable(true);
 
 	JPanel contentPane = new JPanel();
     	contentPane.setLayout(new BorderLayout());
 
         //contentPane.add(boardScroll, BorderLayout.CENTER);
-	contentPane.add(contentSet, BorderLayout.CENTER);//contentPane.add(mainPanel);
+	contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
 	contentPane.add(toolbarMain, BorderLayout.PAGE_START);
         w.setContentPane(contentPane);
         w.pack();
