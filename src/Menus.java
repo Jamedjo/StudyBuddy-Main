@@ -15,8 +15,9 @@ enum ToolBar{
 	bZoomFit("Zoom: Fit",		"ZoomFit",false),
 	bZoomMax("Zoom: 100%",		"Zoom100"),
 	bAddTag("Add Tag",			"AddTag"),
-	bTagThis("Tag This Image",		"TagThis");//,
-	//bTagFilter("Filter By Tag",		"TagFilter");
+	bTagThis("Tag This Image",		"TagThis"),
+	//bTagFilter("Filter By Tag",		"TagFilter"),
+	bBlueDemo("Bluetooth",		"BlueT");
 
     JButton button;
     ToolBar(String label,String command){
@@ -49,7 +50,7 @@ enum ToolBar{
 
 	int i=0;
 	for (ToolBar b : ToolBar.values()){
-	    if(i==0||i==2||i==4||i==6){
+	    if(i==0||i==2||i==4||i==6||i==8){
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
 	    JButton bt = b.create(l);

@@ -220,9 +220,8 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     TagTree = mainImageDB.addTagFromTree(TagTree, w);
     TagTree.repaint();
     return;
-	}
-	if (e.getActionCommand() == "TagThis")
-  {
+	} //BlueT
+	if (e.getActionCommand() == "TagThis")  {
     Object[] AllTags = mainImageDB.getTagIDTitles();
     Object NewTag = JOptionPane.showInputDialog(w, "Which tag would you like to add to this image?", "Add Tag to image", 
               JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
@@ -233,6 +232,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     }
     return;
 	}
+
 	if (e.getActionCommand() == "TagFilter")
   {
     Object[] AllTags = mainImageDB.getTagIDTitles();
@@ -252,6 +252,35 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     }
     return;
 	}
+
+ try {
+    if (e.getActionCommand() == "BlueT") {
+        JOptionPane.showMessageDialog(w, "Click OK to procede with Bluetooh./nThis may take some time to respond", "Bluetooth", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
+
+        BlueDemo blD = BlueDemo.BlueTester();
+        Object[] DevIDs = blD.devicelist;
+        String DevString = (String) JOptionPane.showInputDialog(w, "Which device would you like to use?", "Bluetooth Devices Found",
+                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, DevIDs, null);
+        
+        int chosenDevId = -1;
+        for(int i=0;i<DevIDs.length;i++){
+            if(DevString.equals(DevIDs[i])) {
+                chosenDevId = i;
+                i=(Integer.MAX_VALUE-1);
+            }
+        }
+
+        String outcome="Device does not support sellected protocol";
+        if(BlueDemo.probeProtocol(blD, chosenDevId)) outcome="Device supports OBEX push" ;
+        JOptionPane.showMessageDialog(w,outcome, "Bluetooth service discovery", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
+
+        return;
+    }
+} catch (IOException er) {
+    er.printStackTrace();
+}
+
+
         if(e.getActionCommand()=="Exit") {
             System.exit(0);
         }
