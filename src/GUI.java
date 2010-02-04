@@ -32,7 +32,6 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
     JTree TagTree;
-    //JLabel mainPhoto;
 
     public static void main(String[] args){
         GUI mainGUI = new GUI();
@@ -96,15 +95,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 
     void quickRestart(){
 	state = new ProgramState(this);        
-
-	//mainPhoto = new JLabel();
-        //mainPhoto.setVerticalTextPosition(JLabel.BOTTOM);
-        //mainPhoto.setHorizontalTextPosition(JLabel.CENTER);
-        //mainPhoto.setHorizontalAlignment(JLabel.CENTER);
-
-
 	mainPanel = new MainPanel(this);
-	//mainPanel.add(mainPhoto);
 
 	thumbPanel = new ThumbPanel(this);
 	//thumbPanel.addComponentListener(this);
@@ -112,9 +103,6 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 	thumbPanel.setVisible(true);
 
 	toolbarMain = ToolBar.build((ActionListener)this);
-
-	//boardScroll = new JScrollPane(mainPanel);
-	//boardScroll.addComponentListener(this);
 
         TagTree = mainImageDB.toTree();
         //TagTree.setMinimumSize(new Dimension(150,0));
@@ -134,11 +122,9 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         splitpane.setDividerLocation(150 + splitpane.getInsets().left);
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
-
 	JPanel contentPane = new JPanel();
     	contentPane.setLayout(new BorderLayout());
 
-        //contentPane.add(boardScroll, BorderLayout.CENTER);
 	contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
 	contentPane.add(toolbarMain, BorderLayout.PAGE_START);
 
@@ -146,154 +132,41 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
         w.pack();
-            mainPanel.onResize();
-	    thumbPanel.onResize();
+        mainPanel.onResize();
+        thumbPanel.onResize();
     }
     
-    public void actionPerformed(ActionEvent e){
-	if(e.getActionCommand()=="mImport") {
-	    int wasGot = fileGetter.showOpenDialog(w);
-	    if(wasGot==JFileChooser.APPROVE_OPTION){
-		state.importImages(fileGetter.getSelectedFiles());
-	    }
-	    return;
-	}
-
-        if(e.getActionCommand()=="ThumbsH"||e.getActionCommand()=="mRestart") {
-	    thumbPanel.setVisible(false);
-
-	    ViewMenu.ShowThumbs.show();
-	    ViewMenu.HideThumbs.hide();
-	    ToolBar.bThumbsS.show();
-	    ToolBar.bThumbsH.hide();
-
-            mainPanel.onResize();
-	    if(e.getActionCommand()=="ThumbsH") return;
-        }
-        if(e.getActionCommand()=="ZoomFit"||e.getActionCommand()=="mRestart") {
-	    mainPanel.isZoomed = false;
-
-	    ViewMenu.ZoomTo100.show();
-	    ViewMenu.ZoomToFit.hide();
-	    ToolBar.bZoomMax.show();
-	    ToolBar.bZoomFit.hide();
-
-            mainPanel.onResize();
-	    if(e.getActionCommand()=="ZoomFit") return;
-        }
-        if(e.getActionCommand()=="Zoom100"||e.getActionCommand()=="mRestart") {
-	    mainPanel.isZoomed = true;
-
-	    ViewMenu.ZoomTo100.hide();
-	    ViewMenu.ZoomToFit.show();
-	    ToolBar.bZoomMax.hide();
-	    ToolBar.bZoomFit.show();
-            
-            mainPanel.onResize();
-	    if(e.getActionCommand()=="Zoom100") return;
-        }
-	if(e.getActionCommand()=="mRestart") {
+    public void actionPerformed(ActionEvent ae){
+        if(ae.getActionCommand()=="mRestart"){
+            toggleThumbs(true);
+	    toggleZoomed(true);
             quickRestart();
-	    return;
         }
-        if(e.getActionCommand()=="Next") {
-            state.nextImage();
-	    return;
+        else if(ae.getActionCommand()=="mImport") importDo();
+	else if(ae.getActionCommand()=="ThumbsS") toggleThumbs(true);
+        else if(ae.getActionCommand()=="ThumbsH") toggleThumbs(false);
+        else if(ae.getActionCommand()=="ZoomFit") toggleZoomed(true);
+	else if(ae.getActionCommand()=="Zoom100") toggleZoomed(false);
+        else if(ae.getActionCommand()=="Next") state.nextImage();
+        else if(ae.getActionCommand()=="Prev") state.prevImage();
+        else if (ae.getActionCommand() == "AddTag") {
+            TagTree = mainImageDB.addTagFromTree(TagTree, w);
+            TagTree.repaint();
         }
-        if(e.getActionCommand()=="Prev") {
-            state.prevImage();
-	    return;
-        }
-        if(e.getActionCommand()=="ThumbsS") {// or restart?
-	    thumbPanel.setVisible(true);
-	    
-	    ViewMenu.ShowThumbs.hide();	    
-	    ViewMenu.HideThumbs.show();
-	    ToolBar.bThumbsS.hide();	    
-	    ToolBar.bThumbsH.show();
-
-            mainPanel.onResize();
-	    return;
-        }
-	if (e.getActionCommand() == "AddTag")
-  {
-    TagTree = mainImageDB.addTagFromTree(TagTree, w);
-    TagTree.repaint();
-    return;
-	} //BlueT
-	if (e.getActionCommand() == "TagThis")  {
-    Object[] AllTags = mainImageDB.getTagIDTitles();
-    Object NewTag = JOptionPane.showInputDialog(w, "Which tag would you like to add to this image?", "Add Tag to image", 
-              JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
-    if ((NewTag != null) && (NewTag instanceof IDTitle))
-    {
-      IDTitle NewTagIDTitle = (IDTitle) NewTag;
-      mainImageDB.tagImage(state.imageIDs[state.currentI], NewTagIDTitle.getID());
-    }
-    return;
-	}
-
-	if (e.getActionCommand() == "TagFilter")
-  {
-    Object[] AllTags = mainImageDB.getTagIDTitles();
-    Object[] TagFilters = new IDTitle[(AllTags.length + 1)];
-    TagFilters[0] = new IDTitle("-1", "Show All Images");
-    System.arraycopy(AllTags,0,TagFilters,1,AllTags.length);
-    
-    Object FilterTag = JOptionPane.showInputDialog(w,"Which tag do you want to search for?","Filter images", 
-                 JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, TagFilters, null);
-    if ((FilterTag != null) && (FilterTag instanceof IDTitle))
-    {
-      IDTitle FilterTagIDTitle = (IDTitle) FilterTag;
-      if (FilterTagIDTitle.getID().equals("-1"))
-        state = new ProgramState(LoadType.Refresh, this); //flush first?
-      else
-        state = new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()); //flush first?
-    }
-    return;
-	}
-
- try {
-    if (e.getActionCommand() == "BlueT") {
-        JOptionPane.showMessageDialog(w, "Click OK to procede with Bluetooh./nThis may take some time to respond", "Bluetooth", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
-
-        BlueDemo blD = BlueDemo.BlueTester();
-        Object[] DevIDs = blD.devicelist;
-        String DevString = (String) JOptionPane.showInputDialog(w, "Which device would you like to use?", "Bluetooth Devices Found",
-                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, DevIDs, null);
-        
-        int chosenDevId = -1;
-        for(int i=0;i<DevIDs.length;i++){
-            if(DevString.equals(DevIDs[i])) {
-                chosenDevId = i;
-                i=(Integer.MAX_VALUE-1);
-            }
-        }
-
-        String outcome="Device does not support sellected protocol";
-        if(BlueDemo.probeProtocol(blD, chosenDevId)) outcome="Device supports OBEX push" ;
-        JOptionPane.showMessageDialog(w,outcome, "Bluetooth service discovery", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
-
-        return;
-    }
-} catch (IOException er) {
-    er.printStackTrace();
-}
-
-
-        if(e.getActionCommand()=="Exit") {
+        else if (ae.getActionCommand() == "TagThis") tagThis();
+        else if (ae.getActionCommand() == "TagFilter") tagFilter();
+        else if (ae.getActionCommand() == "BlueT") bluetoothDo();
+        else if (ae.getActionCommand() == "Exit") {
             System.exit(0);
         }
-        if(e.getActionCommand()=="Help") {
+        else if(ae.getActionCommand()=="Help") {
             //Not final help- needs improving
             JOptionPane.showMessageDialog(w,"Visit http://www.studybuddy.com for help and tutorials","Study Help",JOptionPane.INFORMATION_MESSAGE,SysIcon.Info.Icon);
-	    return;
-        }
-        if(e.getActionCommand()=="About") {
+	}
+        else if(ae.getActionCommand()=="About") {
             JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE,SysIcon.Help.Icon);
-	    return;
-        }
-	System.err.println("ActionEvent " + e.getActionCommand() + " was not dealt with,\nand had prameter string "+ e.paramString()); 
+	}
+	else System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string "+ ae.paramString());
 	//+ ",\nwith source:\n\n " + e.getSource());
     }
 
@@ -320,5 +193,90 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     public void componentHidden(ComponentEvent e){}
     public void componentMoved(ComponentEvent e){}
     public void componentShown(ComponentEvent e){}
-}
 
+    void toggleThumbs(boolean makeVisible){//true to show
+        thumbPanel.setVisible(makeVisible);
+
+        ViewMenu.ShowThumbs.setVisible(!makeVisible);
+        ViewMenu.HideThumbs.setVisible(makeVisible);
+        ToolBar.bThumbsS.setVisible(!makeVisible);
+        ToolBar.bThumbsH.setVisible(makeVisible);
+
+        mainPanel.onResize();
+    }
+    void toggleZoomed(boolean makeFit){//true to set zoom to fit
+        mainPanel.isZoomed = (!makeFit);
+
+        ViewMenu.ZoomToFit.setVisible(!makeFit);
+        ViewMenu.ZoomTo100.setVisible(makeFit);
+        ToolBar.bZoomFit.setVisible(!makeFit);
+        ToolBar.bZoomMax.setVisible(makeFit);
+
+        mainPanel.onResize();
+    }
+
+    void bluetoothDo() {
+        try {
+            String outcome = "Device does not support sellected protocol";
+
+            JOptionPane.showMessageDialog(w, "Click OK to procede with Bluetooh.\nThis may take some time to respond", "Bluetooth", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
+
+            BlueDemo blD = BlueDemo.BlueTester();
+            Object[] DevIDs = blD.devicelist;
+            if (DevIDs == null || DevIDs.length == 0) {
+                outcome = "No Bluetooth devices could be found,\nPlease ensure phone is on and near by.";
+            } else {
+                String DevString = (String) JOptionPane.showInputDialog(w, "Which device would you like to use?", "Bluetooth Devices Found",
+                        JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, DevIDs, null);
+
+                int chosenDevId = -1;
+                for (int i = 0; i < DevIDs.length; i++) {
+                    if (DevString.equals(DevIDs[i])) {
+                        chosenDevId = i;
+                        i = (Integer.MAX_VALUE - 1);
+                    }
+                }
+
+                if (BlueDemo.probeProtocol(blD, chosenDevId)) {
+                    outcome = "Device supports OBEX push";
+                }
+            }
+            JOptionPane.showMessageDialog(w, outcome, "Bluetooth service discovery", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
+        } catch (IOException er) {
+            er.printStackTrace();
+        }
+    }
+
+    void tagFilter() {
+        Object[] AllTags = mainImageDB.getTagIDTitles();
+        Object[] TagFilters = new IDTitle[(AllTags.length + 1)];
+        TagFilters[0] = new IDTitle("-1", "Show All Images");
+        System.arraycopy(AllTags, 0, TagFilters, 1, AllTags.length);
+
+        Object FilterTag = JOptionPane.showInputDialog(w, "Which tag do you want to search for?", "Filter images",
+                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, TagFilters, null);
+        if ((FilterTag != null) && (FilterTag instanceof IDTitle)) {
+            IDTitle FilterTagIDTitle = (IDTitle) FilterTag;
+            if (FilterTagIDTitle.getID().equals("-1")) {
+                state = new ProgramState(LoadType.Refresh, this); //flush first?
+            } else {
+                state = new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()); //flush first?
+            }
+        }
+    }
+    void tagThis() {
+        Object[] AllTags = mainImageDB.getTagIDTitles();
+        Object NewTag = JOptionPane.showInputDialog(w, "Which tag would you like to add to this image?", "Add Tag to image",
+                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
+        if ((NewTag != null) && (NewTag instanceof IDTitle)) {
+            IDTitle NewTagIDTitle = (IDTitle) NewTag;
+            mainImageDB.tagImage(state.imageIDs[state.currentI], NewTagIDTitle.getID());
+        }
+    }
+    void importDo(){
+        int wasGot = fileGetter.showOpenDialog(w);
+        if (wasGot == JFileChooser.APPROVE_OPTION) {
+            state.importImages(fileGetter.getSelectedFiles());
+        }
+    }
+}

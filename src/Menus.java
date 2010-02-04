@@ -38,6 +38,10 @@ enum ToolBar{
 	button.setVisible(true);
     }
 
+    void setVisible(boolean value){
+        button.setVisible(value);
+    }
+
     JButton create(ActionListener l){
 	button.addActionListener(l);
 	return button;
@@ -95,6 +99,10 @@ enum ImageMenu{
     //void show(){
     //item.setVisible(true);
     //}
+//    void setVisible(boolean value){
+//        item.setVisible(value);
+//    }
+
 
     JMenuItem create(ActionListener l){
 	item.addActionListener(l);
@@ -162,8 +170,8 @@ enum ViewMenu{
 	PrevImage("Previous Image",KeyEvent.VK_P,KeyEvent.VK_LEFT,0,"Prev"),
 	ShowThumbs("Show Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsS",false),
 	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH"),
-	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ZoomFit"),
-	ZoomTo100("Zoom: 100%",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"Zoom100",false);
+	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ZoomFit",false),
+	ZoomTo100("Zoom: 100%",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"Zoom100");
     
     JMenuItem item;
     ViewMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){
@@ -184,6 +192,9 @@ enum ViewMenu{
     }
     void show(){
 	item.setVisible(true);
+    }
+    void setVisible(boolean value){
+        item.setVisible(value);
     }
 
     JMenuItem create(ActionListener l){
