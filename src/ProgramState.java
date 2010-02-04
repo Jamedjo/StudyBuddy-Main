@@ -113,8 +113,8 @@ class ProgramState{
 	}
 	lastIndex = (imageIDs.length - 1);
 	if((loadType!=LoadType.Init) && (loadType!=LoadType.Load)){
-	    mainGUI.mainPanel.repaint();
-	    mainGUI.thumbPanel.repaint();
+	    mainGUI.mainPanel.onResize();
+	    mainGUI.thumbPanel.onResize();
 	}
     }
     

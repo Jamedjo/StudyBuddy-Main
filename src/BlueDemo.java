@@ -153,7 +153,11 @@ public class BlueDemo implements DiscoveryListener{
                         blSeDi.devicelist = new String[deviceCount];
 			for (int i = 0; i <deviceCount; i++) {
 				RemoteDevice remoteDevice=(RemoteDevice)vecDevices.elementAt(i);
-				blSeDi.devicelist[i]= ""+remoteDevice.getBluetoothAddress()+": "+remoteDevice.getFriendlyName(true);
+				try{
+                                blSeDi.devicelist[i]= ""+remoteDevice.getBluetoothAddress()+": "+remoteDevice.getFriendlyName(true);
+                                } catch (IOException e){
+                                    //
+                                }
 			}
 		}
                 return blSeDi;
