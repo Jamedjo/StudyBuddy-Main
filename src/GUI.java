@@ -136,46 +136,46 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         thumbPanel.onResize();
     }
     
-    public void actionPerformed(ActionEvent ae){
-        if(ae.getActionCommand()=="mRestart"){
+    @Override public void actionPerformed(ActionEvent ae){
+        if(ae.getActionCommand().equals("mRestart")){
             toggleThumbs(true);
 	    toggleZoomed(true);
             quickRestart();
         }
-        else if(ae.getActionCommand()=="mImport") importDo();
-	else if(ae.getActionCommand()=="ThumbsS") toggleThumbs(true);
-        else if(ae.getActionCommand()=="ThumbsH") toggleThumbs(false);
-        else if(ae.getActionCommand()=="ZoomFit") toggleZoomed(true);
-	else if(ae.getActionCommand()=="Zoom100") toggleZoomed(false);
-        else if(ae.getActionCommand()=="Next") state.nextImage();
-        else if(ae.getActionCommand()=="Prev") state.prevImage();
-        else if (ae.getActionCommand() == "AddTag") {
+        else if(ae.getActionCommand().equals("mImport")) importDo();
+	else if(ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
+        else if(ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
+        else if(ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
+	else if(ae.getActionCommand().equals("Zoom100")) toggleZoomed(false);
+        else if(ae.getActionCommand().equals("Next")) state.nextImage();
+        else if(ae.getActionCommand().equals("Prev")) state.prevImage();
+        else if (ae.getActionCommand().equals( "AddTag")) {
             TagTree = mainImageDB.addTagFromTree(TagTree, w);
             TagTree.repaint();
         }
-        else if (ae.getActionCommand() == "TagThis") tagThis();
-        else if (ae.getActionCommand() == "TagFilter") tagFilter();
-        else if (ae.getActionCommand() == "BlueT") bluetoothDo();
-        else if (ae.getActionCommand() == "Exit") {
+        else if (ae.getActionCommand().equals("TagThis")) tagThis();
+        else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
+        else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
+        else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
         }
-        else if(ae.getActionCommand()=="Help") {
+        else if(ae.getActionCommand().equals("Help")) {
             //Not final help- needs improving
             JOptionPane.showMessageDialog(w,"Visit http://www.studybuddy.com for help and tutorials","Study Help",JOptionPane.INFORMATION_MESSAGE,SysIcon.Info.Icon);
 	}
-        else if(ae.getActionCommand()=="About") {
+        else if(ae.getActionCommand().equals("About")) {
             JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE,SysIcon.Help.Icon);
 	}
 	else System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string "+ ae.paramString());
 	//+ ",\nwith source:\n\n " + e.getSource());
     }
 
-    public void windowStateChanged(WindowEvent e){
+    @Override public void windowStateChanged(WindowEvent e){
             mainPanel.onResize();
 	    thumbPanel.onResize();
     }
 
-    public void componentResized(ComponentEvent e) {
+    @Override public void componentResized(ComponentEvent e) {
 	// if(e.getSource()==boardScroll) {
 	//if(e.getSource()==mainPanel) {
         //**//System.out.println(e.paramString());
@@ -190,9 +190,9 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 	// 	    w.setSize(newWidth,newHeight);
 	// 	}
     }
-    public void componentHidden(ComponentEvent e){}
-    public void componentMoved(ComponentEvent e){}
-    public void componentShown(ComponentEvent e){}
+    @Override public void componentHidden(ComponentEvent e){}
+    @Override public void componentMoved(ComponentEvent e){}
+    @Override public void componentShown(ComponentEvent e){}
 
     void toggleThumbs(boolean makeVisible){//true to show
         thumbPanel.setVisible(makeVisible);
