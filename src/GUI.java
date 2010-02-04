@@ -32,6 +32,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
     JTree TagTree;
+    Thread slideThread;
 
     public static void main(String[] args){
         GUI mainGUI = new GUI();
@@ -52,6 +53,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         //while (true) {Thread.sleep(30);}
+        slideThread = new Thread(new SlideShow(this));
     }
     void buildFileGetter(){
 	fileGetter.addChoosableFileFilter( new javax.swing.filechooser.FileFilter(){
@@ -124,16 +126,15 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 
 	JPanel contentPane = new JPanel();
     	contentPane.setLayout(new BorderLayout());
-
 	contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
 	contentPane.add(toolbarMain, BorderLayout.PAGE_START);
 
-	contentPane.addComponentListener(this);
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
         w.pack();
         mainPanel.onResize();
         thumbPanel.onResize();
+	contentPane.addComponentListener(this);//don't want it to trigger while building
     }
     
     @Override public void actionPerformed(ActionEvent ae){
@@ -145,6 +146,8 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         else if(ae.getActionCommand().equals("mImport")) importDo();
 	else if(ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
         else if(ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
+	else if(ae.getActionCommand().equals("SlideP")) toggleSlide(true);
+        else if(ae.getActionCommand().equals("SlideS")) toggleSlide(false);
         else if(ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
 	else if(ae.getActionCommand().equals("Zoom100")) toggleZoomed(false);
         else if(ae.getActionCommand().equals("Next")) state.nextImage();
@@ -211,6 +214,21 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         ViewMenu.ZoomTo100.setVisible(makeFit);
         ToolBar.bZoomFit.setVisible(!makeFit);
         ToolBar.bZoomMax.setVisible(makeFit);
+
+        mainPanel.onResize();
+    }
+    void toggleSlide(boolean setPlaying){//true to start playing
+        if(setPlaying){
+            slideThread.start();
+        } else {
+            slideThread.interrupt();
+            slideThread = new Thread(new SlideShow(this));
+        }
+
+        ViewMenu.SlidePlay.setVisible(!setPlaying);
+        ViewMenu.SlideStop.setVisible(setPlaying);
+        ToolBar.bSlideP.setVisible(!setPlaying);
+        ToolBar.bSlideS.setVisible(setPlaying);
 
         mainPanel.onResize();
     }

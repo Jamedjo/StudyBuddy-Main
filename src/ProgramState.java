@@ -240,6 +240,10 @@ class ProgramState{
     }
 
     ImageObject getImageI(int i){
+        if(imageList.length<1){
+            System.err.println("Error: There are no images loaded under current search.\nEnsure filter has some images.");
+            return null;
+        }
 	return imageList[i];//will be changed later to keep track of images in memory
     }
 

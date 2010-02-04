@@ -10,6 +10,8 @@ import javax.swing.KeyStroke;
 enum ToolBar{
     bPrev("Prev",			"Prev"),
 	bNext("Next",			"Next"),
+	bSlideP("Slideshow play",		"SlideP"),
+	bSlideS("Slideshow stop",		"SlideS",false),
 	bThumbsS("Show Thumbnails",		"ThumbsS",false),
 	bThumbsH("Hide Thumbnails",		"ThumbsH"),
 	bZoomFit("Zoom: Fit",		"ZoomFit",false),
@@ -170,8 +172,10 @@ enum ViewMenu{
 	PrevImage("Previous Image",KeyEvent.VK_P,KeyEvent.VK_LEFT,0,"Prev"),
 	ShowThumbs("Show Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsS",false),
 	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH"),
-	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ZoomFit",false),
-	ZoomTo100("Zoom: 100%",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"Zoom100");
+	SlidePlay("Play Slideshow",KeyEvent.VK_S,KeyEvent.VK_SPACE,0,"SlideP",false),
+	SlideStop("Stop Slideshow",KeyEvent.VK_T,KeyEvent.VK_SPACE,0,"SlideS"),
+	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_Z,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ZoomFit",false),
+	ZoomTo100("Zoom: 100%",KeyEvent.VK_Z,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"Zoom100");
     
     JMenuItem item;
     ViewMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){
