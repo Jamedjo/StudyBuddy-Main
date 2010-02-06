@@ -174,8 +174,9 @@ enum ViewMenu{
 	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH"),
 	SlidePlay("Play Slideshow",KeyEvent.VK_S,KeyEvent.VK_SPACE,0,"SlideP",false),
 	SlideStop("Stop Slideshow",KeyEvent.VK_T,KeyEvent.VK_SPACE,0,"SlideS"),
-	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_Z,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ZoomFit",false),
-	ZoomTo100("Zoom: 100%",KeyEvent.VK_Z,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"Zoom100");
+	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_Z,KeyEvent.VK_Z,ActionEvent.ALT_MASK,"ZoomFit",false),
+	ZoomTo100("Zoom: 100%",KeyEvent.VK_Z,KeyEvent.VK_Z,ActionEvent.ALT_MASK,"Zoom100"),
+	ZoomToX("Zoom: Custom",KeyEvent.VK_C,KeyEvent.VK_Z,ActionEvent.SHIFT_MASK,"ZoomX");
     
     JMenuItem item;
     ViewMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){

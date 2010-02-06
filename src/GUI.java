@@ -33,14 +33,24 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     ImageDatabase mainImageDB;
     JTree TagTree;
     Thread slideThread;
+    JScrollPane mainScrollPane;
 
     public static void main(String[] args){
         GUI mainGUI = new GUI();
     }
 
+    void setTitle(){ setTitle(null);}
+    void setTitle(String suffix){
+        String prefix = "Study Buddy 0.7beta";
+        if(suffix==null) suffix = "";
+        else prefix = prefix.concat("- ");
+        w.setTitle(prefix+suffix);
+
+    }
+
     GUI(){
         w = new JFrame();
-        w.setTitle("Study Buddy 0.6beta");
+        setTitle();
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
 	buildMenuBar();
         w.setJMenuBar(menuBar);
@@ -110,8 +120,8 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         //TagTree.setMinimumSize(new Dimension(150,0));
         TagTree.addTreeSelectionListener(new TagTreeListener(this));
 
-        JScrollPane mainScrollPane = new JScrollPane(mainPanel);
-        mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
+        mainScrollPane = new JScrollPane(mainPanel);
+        mainScrollPane.getViewport().setBackground(Color.blue);//darkGray);//comment out to see scroll bar bug
         mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
 
         JPanel contentSet = new JPanel();
@@ -132,8 +142,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
         w.pack();
-        mainPanel.onResize();
-        thumbPanel.onResize();
+        state.imageChanged();
 	contentPane.addComponentListener(this);//don't want it to trigger while building
     }
     
@@ -150,6 +159,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         else if(ae.getActionCommand().equals("SlideS")) toggleSlide(false);
         else if(ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
 	else if(ae.getActionCommand().equals("Zoom100")) toggleZoomed(false);
+	else if(ae.getActionCommand().equals("ZoomX")) zoomBox();
         else if(ae.getActionCommand().equals("Next")) state.nextImage();
         else if(ae.getActionCommand().equals("Prev")) state.prevImage();
         else if (ae.getActionCommand().equals( "AddTag")) {
@@ -217,6 +227,28 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 
         mainPanel.onResize();
     }
+    void zoomBox(){
+        double percent = 100;
+        String[] options = {"Fit","25","50","75","100","200","500"};
+        String value = (String) JOptionPane.showInputDialog(w, "Enter percentage zoom:", "Set Zoom",
+                        JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, options, null);
+        if(value.toLowerCase().equals("Fit".toLowerCase())){
+            toggleZoomed(true);
+        }else {
+           percent = Double.parseDouble(value);
+        //catch num format exception
+           //deal with non number characters? e.g. '%'
+           // deal with blank input
+           //make editable
+        zoomTo(percent); 
+        }
+        
+    }
+    void zoomTo(double percent){
+        mainPanel.zoomMultiplier = (percent/100);
+        toggleZoomed(false);
+    }
+
     void toggleSlide(boolean setPlaying){//true to start playing
         if(setPlaying){
             slideThread.start();

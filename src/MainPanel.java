@@ -5,13 +5,14 @@ import javax.swing.JOptionPane.*;
 import java.awt.event.*;
 
 public class MainPanel extends JPanel implements Scrollable, MouseMotionListener {
-
+//parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
     Dimension gridSize;
     int boardW, boardH;
     int boardW_start = 550;
     int boardH_start = 350;
     GUI mainGUI; //could be passed in contructor, it could be useful to know parent.
     boolean isZoomed = false;
+    double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -19,19 +20,21 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         boardW = boardW_start;
         boardH = boardH_start;
         setPreferredSize(gridSize);
-        this.setBackground(Color.darkGray);
+        this.setBackground(Color.red);//darkGray);
         setAutoscrolls(true); //enable synthetic drag events
         addMouseMotionListener(this); //handle mouse drags
     }
 
     void onResize() {
+        System.out.println("Pw: "+this.getPreferredSize().width+"   Ph: "+this.getPreferredSize().height);
+            System.out.println("oldBw: "+boardW+"   oldBh: "+boardW);
         //boardW = getParent().getWidth();
         //boardH = getParent().getHeight();
-        if(!isZoomed) {
-            this.setPreferredSize(new Dimension(this.getParent().getParent().getWidth() - 3,this.getParent().getParent().getHeight() - 3 ));
-            //**//System.out.println("klj"+this.getParent().getWidth());
+        if( isZoomed ) {
+            this.setPreferredSize(ImageObject.useMaxMax((int)(mainGUI.state.getCurrentImage().getWidthAndMakeBig()*zoomMultiplier),(int)(mainGUI.state.getCurrentImage().getHeightAndMakeBig()*zoomMultiplier),this.getParent().getWidth(),this.getParent().getHeight()));
+            //((JScrollPane)(this.getParent().getParent())).scrollRectToVisible(new Rectangle(500,500,501,501));
         } else {
-            this.setPreferredSize(ImageObject.useMaxMax(mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig(),this.getParent().getWidth(),this.getParent().getHeight()));
+            this.setPreferredSize(new Dimension(mainGUI.mainScrollPane.getWidth() - 3,mainGUI.mainScrollPane.getHeight() - 3 ));
         }
         this.revalidate();
         getParent().validate();
@@ -39,6 +42,8 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         boardH = this.getHeight();
         getParent().repaint();
         this.repaint();
+        System.out.println("Pw: "+this.getPreferredSize().width+"   Ph: "+this.getPreferredSize().height);
+        System.out.println("Bw: "+boardW+"   Bh: "+boardW);
     }
 
     //all scaling in terms of height. max size is 20 times minimum.
@@ -52,12 +57,11 @@ public class MainPanel extends JPanel implements Scrollable, MouseMotionListener
         ImgSize cSize;
         if(isZoomed) {
             cSize = ImgSize.Max;
-            this.setPreferredSize(ImageObject.useMaxMax(mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig(),this.getParent().getWidth(),this.getParent().getHeight()));
-            useWH = mainGUI.state.getRelImageWH(cSize, mainGUI.state.getCurrentImage().getWidthAndMakeBig(),mainGUI.state.getCurrentImage().getHeightAndMakeBig(), 0);
-        }
-        else {
+            this.setPreferredSize(ImageObject.useMaxMax((int)(mainGUI.state.getCurrentImage().getWidthAndMakeBig()*zoomMultiplier),(int)(mainGUI.state.getCurrentImage().getHeightAndMakeBig()*zoomMultiplier),this.getParent().getWidth(),this.getParent().getHeight()));
+            useWH = mainGUI.state.getRelImageWH(cSize, (int)(mainGUI.state.getCurrentImage().getWidthAndMakeBig()*zoomMultiplier),(int)(mainGUI.state.getCurrentImage().getHeightAndMakeBig()*zoomMultiplier), 0);
+        } else {
             cSize = ImgSize.Screen;
-        useWH = mainGUI.state.getRelImageWH(cSize,boardW,boardH,0);
+            useWH = mainGUI.state.getRelImageWH(cSize,boardW,boardH,0);
         }
         int leftOfset = (boardW - useWH.width) / 2;
         int topOfset = (boardH - useWH.height) / 2;

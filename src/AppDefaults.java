@@ -6,9 +6,9 @@ enum AppDefaults {
     //date settings changed?
     //thumbnails directory
     //might change this to an array so a loop can be used to set values. Or an enum.
-    s1("testDefault1", "testval1"),
+    s1("importDirectory", "/importedimage/"),
     s2("testDefault2", "22222"),
-    s3("testDefault3", "/thumbnaildir/small/test/");//must deal with OS dependant path seperator
+    s3("thumbDir", "/thumbnails/");//must deal with OS dependant path seperator
 
 
     String key, value;
