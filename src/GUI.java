@@ -1,10 +1,10 @@
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import java.io.*;
-import javax.swing.JOptionPane.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 //import javax.swing.ScrollPaneLayout;
 
 //We should use javadoc.
@@ -12,11 +12,11 @@ import javax.swing.event.ChangeListener;
 //Refresh image feature?
 
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
-class GUI implements ActionListener, ComponentListener,WindowStateListener,ChangeListener {
+class GUI implements ActionListener, ComponentListener, WindowStateListener, ChangeListener {
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
-    JMenuItem  Options;
+    JMenuItem Options;
     JButton bSideBar;
     final JFileChooser fileGetter = new JFileChooser();
     MainPanel mainPanel;
@@ -33,77 +33,83 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
     JSlider zoomBar;
     //boolean isChangingState = false;
 
-    public static void main(String[] args){
+    public static void main(String[] args) {
         GUI mainGUI = new GUI();
     }
 
-    void setTitle(){ setTitle(null);}
-    void setTitle(String suffix){
+    void setTitle() {
+        setTitle(null);
+    }
+
+    void setTitle(String suffix) {
         String prefix = "Study Buddy 0.7beta";
-        if(suffix==null) suffix = "";
+        if (suffix == null) suffix = "";
         else prefix = prefix.concat("- ");
-        w.setTitle(prefix+suffix);
+        w.setTitle(prefix + suffix);
 
     }
 
-    GUI(){
+    GUI() {
         w = new JFrame();
         setTitle();
         w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
-	buildMenuBar();
+        buildMenuBar();
         w.setJMenuBar(menuBar);
         w.setLocationByPlatform(true);
         w.setIconImage(SysIcon.Logo.Icon.getImage());
-	//w.addComponentListener(this);
+        //w.addComponentListener(this);
         //w.setResizable(false);
-	buildFileGetter();
+        buildFileGetter();
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         //while (true) {Thread.sleep(30);}
         slideThread = new Thread(new SlideShow(this));
     }
-    void buildFileGetter(){
-	fileGetter.addChoosableFileFilter( new javax.swing.filechooser.FileFilter(){
-		public boolean accept(File f){
-		    if(f.isDirectory()) return true;
-		    String[] exts = {"jpeg","jpg","gif","bmp","png","tiff","tif","tga","pcx","xbm","svg"};
-		    String ext = null;
-		    String name = f.getName();
-		    int pos = name.lastIndexOf(".");
-		    if(pos>0 && pos<(name.length() - 1)){
-			ext = name.substring(pos+1).toLowerCase();
-			for(String imgExt : exts){
-			    if(ext.equals(imgExt)){
-				return true;
-			    }
-			}
-		    } 
-		    return false;
-		}
-		public String getDescription() {
-		    return "All Images";
-		}
-	    }
-	    );
-	fileGetter.setDialogTitle("Import Image");
-	fileGetter.setMultiSelectionEnabled(true);
+
+    void buildFileGetter() {
+        fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) return true;
+                String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg"};
+                String ext = null;
+                String name = f.getName();
+                int pos = name.lastIndexOf(".");
+                if (pos > 0 && pos < (name.length() - 1)) {
+                    ext = name.substring(pos + 1).toLowerCase();
+                    for (String imgExt : exts) {
+                        if (ext.equals(imgExt)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            public String getDescription() {
+                return "All Images";
+            }
+        }
+        );
+        fileGetter.setDialogTitle("Import Image");
+        fileGetter.setMultiSelectionEnabled(true);
 
     }
 
-    void buildMenuBar(){
+    void buildMenuBar() {
         menuBar = new JMenuBar();
-        imageMenu = ImageMenu.build((ActionListener)this);
-        tagMenu = TagMenu.build((ActionListener)this);
-        viewMenu = ViewMenu.build((ActionListener)this);
-        helpMenu = HelpMenu.build((ActionListener)this);
+        imageMenu = ImageMenu.build((ActionListener) this);
+        tagMenu = TagMenu.build((ActionListener) this);
+        viewMenu = ViewMenu.build((ActionListener) this);
+        helpMenu = HelpMenu.build((ActionListener) this);
         menuBar.add(imageMenu);
-	menuBar.add(viewMenu);
-	menuBar.add(tagMenu);
+        menuBar.add(viewMenu);
+        menuBar.add(tagMenu);
         menuBar.add(helpMenu);
     }
-    JSlider buildZoomBar(){
-        zoomBar = new JSlider(JSlider.HORIZONTAL,0,300,0);
+
+    JSlider buildZoomBar() {
+        zoomBar = new JSlider(JSlider.HORIZONTAL, 0, 300, 0);
         zoomBar.setMajorTickSpacing(100);
         zoomBar.setMinorTickSpacing(20);
         zoomBar.setPaintLabels(true);
@@ -112,15 +118,15 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
         return zoomBar;
     }
 
-    void quickRestart(){
-	state = new ProgramState(this);
-	mainPanel = new MainPanel(this);
+    void quickRestart() {
+        state = new ProgramState(this);
+        mainPanel = new MainPanel(this);
 
-	thumbPanel = new ThumbPanel(this);
-	//thumbPanel.addComponentListener(this);
-	thumbPanel.setVisible(true);
+        thumbPanel = new ThumbPanel(this);
+        //thumbPanel.addComponentListener(this);
+        thumbPanel.setVisible(true);
 
-	toolbarMain = ToolBar.build(this);
+        toolbarMain = ToolBar.build(this);
 
         TagTree = mainImageDB.toTree();
         //TagTree.setMinimumSize(new Dimension(150,0));
@@ -132,101 +138,103 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
         mainScrollPane.setWheelScrollingEnabled(false);
 
         imageAreas = new JPanel();
-    	imageAreas.setLayout(new BorderLayout());
-	imageAreas.add(mainScrollPane,BorderLayout.CENTER);
-	imageAreas.add(thumbPanel,BorderLayout.PAGE_END);
-        
-        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,imageAreas);
+        imageAreas.setLayout(new BorderLayout());
+        imageAreas.add(mainScrollPane, BorderLayout.CENTER);
+        imageAreas.add(thumbPanel, BorderLayout.PAGE_END);
+
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, TagTree, imageAreas);
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(150 + splitpane.getInsets().left);
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
-	JPanel contentPane = new JPanel();
-    	contentPane.setLayout(new BorderLayout());
-	contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
-	contentPane.add(toolbarMain, BorderLayout.PAGE_START);
+        JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
+        contentPane.add(toolbarMain, BorderLayout.PAGE_START);
 
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
         w.pack();
         state.imageChanged();
-	contentPane.addComponentListener(this);//don't want it to trigger while building
+        contentPane.addComponentListener(this);//don't want it to trigger while building
     }
-    
-    @Override public void actionPerformed(ActionEvent ae){
-        if(ae.getActionCommand().equals("mRestart")){
+
+    public void actionPerformed(ActionEvent ae) {
+        if (ae.getActionCommand().equals("mRestart")) {
             toggleThumbs(true);
-	    toggleZoomed(true);
+            toggleZoomed(true);
             quickRestart();
-        }
-        else if(ae.getActionCommand().equals("mImport")) importDo();
-	else if(ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
-        else if(ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
-	else if(ae.getActionCommand().equals("SlideP")) toggleSlide(true);
-        else if(ae.getActionCommand().equals("SlideS")) toggleSlide(false);
-        else if(ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
-	else if(ae.getActionCommand().equals("Zoom100")) zoomTo(100);
-	else if(ae.getActionCommand().equals("ZoomX")) zoomBox();
-        else if(ae.getActionCommand().equals("Next")) state.nextImage();
-        else if(ae.getActionCommand().equals("Prev")) state.prevImage();
-        else if (ae.getActionCommand().equals( "AddTag")) {
+        } else if (ae.getActionCommand().equals("mImport")) importDo();
+        else if (ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
+        else if (ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
+        else if (ae.getActionCommand().equals("SlideP")) toggleSlide(true);
+        else if (ae.getActionCommand().equals("SlideS")) toggleSlide(false);
+        else if (ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
+        else if (ae.getActionCommand().equals("Zoom100")) zoomTo(100);
+        else if (ae.getActionCommand().equals("ZoomX")) zoomBox();
+        else if (ae.getActionCommand().equals("Next")) state.nextImage();
+        else if (ae.getActionCommand().equals("Prev")) state.prevImage();
+        else if (ae.getActionCommand().equals("AddTag")) {
             TagTree = mainImageDB.addTagFromTree(TagTree, w);
             TagTree.repaint();
-        }
-        else if (ae.getActionCommand().equals("TagThis")) tagThis();
+        } else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
-        }
-        else if(ae.getActionCommand().equals("Help")) {
+        } else if (ae.getActionCommand().equals("Help")) {
             //Not final help- needs improving
-            JOptionPane.showMessageDialog(w,"Visit http://www.studybuddy.com for help and tutorials","Study Help",JOptionPane.INFORMATION_MESSAGE,SysIcon.Info.Icon);
-	}
-        else if(ae.getActionCommand().equals("About")) {
-            JOptionPane.showMessageDialog(w,"StudyBuddy by Team StudyBuddy","About StudyBuddy",JOptionPane.INFORMATION_MESSAGE,SysIcon.Help.Icon);
-	}
-	else System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string "+ ae.paramString());
-	//+ ",\nwith source:\n\n " + e.getSource());
+            JOptionPane.showMessageDialog(w, "Visit http://www.studybuddy.com for help and tutorials", "Study Help", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
+        } else if (ae.getActionCommand().equals("About")) {
+            JOptionPane.showMessageDialog(w, "StudyBuddy by Team StudyBuddy", "About StudyBuddy", JOptionPane.INFORMATION_MESSAGE, SysIcon.Help.Icon);
+        } else
+            System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());
+        //+ ",\nwith source:\n\n " + e.getSource());
     }
 
-    @Override public void windowStateChanged(WindowEvent e){
-            mainPanel.onResize();
-	    thumbPanel.onResize();
+    public void windowStateChanged(WindowEvent e) {
+        mainPanel.onResize();
+        thumbPanel.onResize();
     }
 
-    @Override public void componentResized(ComponentEvent e) {
-	// if(e.getSource()==boardScroll) {
-	//if(e.getSource()==mainPanel) {
+    public void componentResized(ComponentEvent e) {
+        // if(e.getSource()==boardScroll) {
+        //if(e.getSource()==mainPanel) {
         //**//System.out.println(e.paramString());
-            mainPanel.onResize();
-	    thumbPanel.onResize();
+        mainPanel.onResize();
+        thumbPanel.onResize();
         //}
-	// 	if(e.getSource()==w){
-	// 	    int newWidth = w.getWidth();
-	// 	    int newHeight = w.getHeight();
-	// 	    if(newWidth<200) newWidth = 200;
-	// 	    if(newHeight<200) newHeight = 200;
-	// 	    w.setSize(newWidth,newHeight);
-	// 	}
+        // 	if(e.getSource()==w){
+        // 	    int newWidth = w.getWidth();
+        // 	    int newHeight = w.getHeight();
+        // 	    if(newWidth<200) newWidth = 200;
+        // 	    if(newHeight<200) newHeight = 200;
+        // 	    w.setSize(newWidth,newHeight);
+        // 	}
     }
-    @Override public void componentHidden(ComponentEvent e){}
-    @Override public void componentMoved(ComponentEvent e){}
-    @Override public void componentShown(ComponentEvent e){}
 
-    @Override public void stateChanged(ChangeEvent e){
-        JSlider src = (JSlider)e.getSource();
-    if (!src.getValueIsAdjusting()) {
-        int zoom = (int)src.getValue();
-        if (zoom == 0) {
-            toggleZoomed(true);
-        } else {
-            zoomTo(zoom);
+    public void componentHidden(ComponentEvent e) {
+    }
+
+    public void componentMoved(ComponentEvent e) {
+    }
+
+    public void componentShown(ComponentEvent e) {
+    }
+
+    public void stateChanged(ChangeEvent e) {
+        JSlider src = (JSlider) e.getSource();
+        if (!src.getValueIsAdjusting()) {
+            int zoom = (int) src.getValue();
+            if (zoom == 0) {
+                toggleZoomed(true);
+            } else {
+                zoomTo(zoom);
+            }
         }
     }
-    }
 
-    void toggleThumbs(boolean makeVisible){//true to show
+    void toggleThumbs(boolean makeVisible) {//true to show
         thumbPanel.setVisible(makeVisible);
 
         ViewMenu.ShowThumbs.setVisible(!makeVisible);
@@ -236,15 +244,16 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
 
         mainPanel.onResize();
     }
-    void toggleZoomed(boolean makeFit){//true to set zoom to fit
+
+    void toggleZoomed(boolean makeFit) {//true to set zoom to fit
         mainPanel.isZoomed = (!makeFit);
-        if(makeFit){
+        if (makeFit) {
             zoomBar.setValueIsAdjusting(true);//dont want to fire event
             zoomBar.setValue(0);
             //zoomBar.setValueIsAdjusting(false);//Setting this false also fires event
-        } else{
+        } else {
             zoomBar.setValueIsAdjusting(true);//dont want to fire event though
-            zoomBar.setValue((int)(mainPanel.zoomMultiplier*100));
+            zoomBar.setValue((int) (mainPanel.zoomMultiplier * 100));
             //zoomBar.setValueIsAdjusting(false);//Setting this false also fires event
         }
 
@@ -255,30 +264,32 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
 
         mainPanel.onResize();
     }
-    void zoomBox(){
+
+    void zoomBox() {
         double percent = 100;
-        String[] options = {"Fit","25","50","75","100","200","500"};
+        String[] options = {"Fit", "25", "50", "75", "100", "200", "500"};
         String value = (String) JOptionPane.showInputDialog(w, "Enter percentage zoom:", "Set Zoom",
-                        JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, options, null);
-        if(value.toLowerCase().equals("Fit".toLowerCase())){
+                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, options, null);
+        if (value.toLowerCase().equals("Fit".toLowerCase())) {
             toggleZoomed(true);
-        }else {
-           percent = Double.parseDouble(value);
-        //catch num format exception
-           //deal with non number characters? e.g. '%'
-           // deal with blank input
-           //make editable
-        zoomTo(percent); 
+        } else {
+            percent = Double.parseDouble(value);
+            //catch num format exception
+            //deal with non number characters? e.g. '%'
+            // deal with blank input
+            //make editable
+            zoomTo(percent);
         }
-        
+
     }
-    void zoomTo(double percent){
-        mainPanel.zoomMultiplier = (percent/100);
+
+    void zoomTo(double percent) {
+        mainPanel.zoomMultiplier = (percent / 100);
         toggleZoomed(false);
     }
 
-    void toggleSlide(boolean setPlaying){//true to start playing
-        if(setPlaying){
+    void toggleSlide(boolean setPlaying) {//true to start playing
+        if (setPlaying) {
             slideThread.start();
         } else {
             slideThread.interrupt();
@@ -344,6 +355,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
             }
         }
     }
+
     void tagThis() {
         Object[] AllTags = mainImageDB.getTagIDTitles();
         Object NewTag = JOptionPane.showInputDialog(w, "Which tag would you like to add to this image?", "Add Tag to image",
@@ -353,7 +365,8 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
             mainImageDB.tagImage(state.getCurrentImageID(), NewTagIDTitle.getID());
         }
     }
-    void importDo(){
+
+    void importDo() {
         int wasGot = fileGetter.showOpenDialog(w);
         if (wasGot == JFileChooser.APPROVE_OPTION) {
             state.importImages(fileGetter.getSelectedFiles());
