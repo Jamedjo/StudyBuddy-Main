@@ -6,7 +6,7 @@ import javax.swing.JOptionPane.*;
 
 //Type of load ProgramState does. Respectivly:
 //(Creates new DB, loads DB from file, uses existing DB with filter, uses whole existing DB)
-enum LoadType{Init,Load,Filter,Refresh}
+enum LoadType{Init,Load,Filter,Refresh,LoadLast}
 
 //Should the program import pdfs? this would allow many more types of notes...
 //...but would be alot of work for us
@@ -32,28 +32,26 @@ class ProgramState{
 
     ProgramState(LoadType loadType, GUI parentGUI){
 	mainGUI = parentGUI;
-	ContructProgramState(loadType,  parentGUI,""); //loadType should not be filter here
+	ConstructProgramState(loadType,  parentGUI,""); //loadType should not be filter here
     }
 
     ProgramState(GUI parentGUI){
 	mainGUI = parentGUI;
         String temp;
-        LoadType lType;
         temp = mainGUI.settings.getSetting("databaseFilePathAndName");
-        if(temp==null) lType = LoadType.Init;
-        else lType = LoadType.Load;
-	ContructProgramState(lType,  parentGUI,""); //loadType should not be filter here
+        if(temp==null) ConstructProgramState(LoadType.Init,  parentGUI,"");
+        else ConstructProgramState(LoadType.LoadLast,  parentGUI,mainGUI.settings.getSetting("lastFilterUsed"));
     }
     ProgramState(GUI parentGUI, String filterTag){
 	mainGUI = parentGUI;
-	ContructProgramState(LoadType.Filter, parentGUI, filterTag);
+	ConstructProgramState(LoadType.Filter, parentGUI, filterTag);
     }
     ProgramState(LoadType loadType, GUI parentGUI, String filterTag){
 	mainGUI = parentGUI;
-	ContructProgramState(loadType, parentGUI, filterTag);
+	ConstructProgramState(loadType, parentGUI, filterTag);
     }
 
-    void ContructProgramState(LoadType loadType, GUI parentGUI, String filterTag){
+    void ConstructProgramState(LoadType loadType, GUI parentGUI, String filterTag){
         //mainGUI.isChangingState = true;
 	switch (loadType){
 	case Init:
@@ -67,13 +65,23 @@ class ProgramState{
 	    currentFilter = "Show All Images";
 	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
 	    break;
-
+        case LoadLast:
+            mainGUI.mainImageDB = new ImageDatabase("mainDB",mainGUI.settings.getSetting("databaseFilePathAndName"));
 	case Filter:
 	    //Create image database by loading database
+            if(filterTag==null) {
+                System.err.println("Error: Tried to filter by tag without a filter.");
+                ConstructProgramState(LoadType.Load, parentGUI, "");
+                return;
+            } else if (filterTag.equals("Show All Images")){
+                ConstructProgramState(LoadType.Refresh, parentGUI, filterTag);
+                return;
+            }
 	    currentFilter = filterTag;
 	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagID(filterTag); // Working on TagID not TagTitle
 	    break;
 	}
+        mainGUI.settings.setSettingAndSave("lastFilterUsed", currentFilter);
 	//if imageIDs.length==0
 	//then a file should be added first (Construct with Init&imports, then return;)
       	imageList = new ImageObject[imageIDs.length];

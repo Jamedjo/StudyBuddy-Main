@@ -58,7 +58,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     GUI() {
         w = new JFrame();
         setTitle();
-        w.setDefaultCloseOperation(w.EXIT_ON_CLOSE);
+        w.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         buildMenuBar();
         w.setJMenuBar(menuBar);
         w.setLocationByPlatform(true);

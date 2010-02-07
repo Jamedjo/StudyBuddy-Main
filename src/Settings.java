@@ -51,10 +51,10 @@ public class Settings {
         else {
             //System.out.println("Properties file already exists");
             setupJavaPropertiesObject();
-            setDefaults(); //if version is different (as this means new defaults may have been added)
-        }
 
-        
+            //if version is different reset defaults. This is as default settings may have changed causing incompatabilites.
+            if(!getSetting("appVersionLast").equals(AppDefaults.ver.value)) setDefaults(); 
+        }   
     }
 
     private void setupJavaPropertiesObject() {

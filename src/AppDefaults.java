@@ -3,20 +3,16 @@ import java.io.File;
 
 
 enum AppDefaults {
-
-    //study buddy version used? (if different reset defaults?
-    //seperate properties version, which should be incremented if defaults need to be reset?
     //date settings changed?
-    //thumbnails directory
-    //might change this to an array so a loop can be used to set values. Or an enum.
     s1("importPathExt", "importedimage"+File.separator),
     s2("slideShowTime", "2000"),
     //example s99("nestedDirectoryTest_PathExt","topDir"+File.separator+"subDir"+File.separator),//just using the subDir will not create the dir
-    s3("thumbnailPathExt", "thumbnails"+File.separator),//must deal with OS dependant path seperator
+    s3("thumbnailPathExt", "thumbnails"+File.separator),
     s4("databaseFileName","mainDB"),
     s5("databasePathExt","database"+File.separator),
-    s6("appVersionLast","0.7beta");
-
+    ver("appVersionLast","0.7beta_r155"),//change this whenever you change this enum.
+    s7("lastFilterUsed","Show All Images");
+    //use , to seperate but ; after last
 
     String key, value;
 
