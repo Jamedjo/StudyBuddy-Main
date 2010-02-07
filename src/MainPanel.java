@@ -20,7 +20,7 @@ public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListe
         boardW = boardW_start;
         boardH = boardH_start;
         setPreferredSize(gridSize);
-        this.setBackground(Color.red);//darkGray);
+        this.setBackground(Color.darkGray);
 //        setAutoscrolls(true); //enable synthetic drag events
 //        addMouseMotionListener(this); //handle mouse drags
     }
@@ -33,18 +33,21 @@ public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListe
             this.setPreferredSize(ImageObject.useMaxMax((int)(mainGUI.state.getCurrentImage().getWidthAndMakeBig()*zoomMultiplier),(int)(mainGUI.state.getCurrentImage().getHeightAndMakeBig()*zoomMultiplier),this.getParent().getWidth(),this.getParent().getHeight()));
             //((JScrollPane)(this.getParent().getParent())).scrollRectToVisible(new Rectangle(500,500,501,501));
         } else {
-            ((JViewport)getParent()).revalidate();
-        getParent().getParent().validate();
-            boardW = getParent().getWidth() - 3;
-            boardH = getParent().getHeight() - 3;
-            getParent().getParent().setPreferredSize(new Dimension(boardW,boardH ));
+            ((JViewport) getParent()).revalidate();
+            getParent().getParent().validate();
+            boardW = getParent().getParent().getWidth() - 3;
+            boardH = getParent().getParent().getHeight() - 3;
+            this.setPreferredSize(new Dimension(boardW, boardH));
         }
+        getParent().repaint();
         this.repaint();
         //boardW = this.getWidth();
         //boardH = this.getHeight();
         this.revalidate();
         getParent().validate();
-        getParent().repaint();
+        this.repaint();
+        this.revalidate();
+        getParent().validate();
         this.repaint();
         //System.out.println("Pref w: "+this.getPreferredSize().width+"   Pref h: "+this.getPreferredSize().height);
         //System.out.println("Brd w: "+boardW+"   Brd h: "+boardH);

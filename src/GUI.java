@@ -9,12 +9,6 @@ import javax.swing.JOptionPane.*;
 
 //Refresh image feature?
 
-//Program stucture needs to be redesigned to implement SwingWorker threads to load images
-//Each image will be published once loaded and the worker will be done when all are loaded
-//This prevents loading large images from freezing/crashing the program,
-//allows the GUI to load quicker at startup instead of waiting for all images to load
-//and allows for the worker to be cancelled if it is too slow.
-
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
 class GUI implements ActionListener, ComponentListener,WindowStateListener {
     JFrame w;
@@ -121,7 +115,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         TagTree.addTreeSelectionListener(new TagTreeListener(this));
 
         mainScrollPane = new JScrollPane(mainPanel);
-        mainScrollPane.getViewport().setBackground(Color.blue);//darkGray);//comment out to see scroll bar bug
+        mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
         mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
 
         imageAreas = new JPanel();
