@@ -9,10 +9,16 @@ import java.io.IOException;
 
 //We should use javadoc.
 
+
+//TODO: make amount scrolled by scroll wheel relative to current size.
+//At the moment it is linear i.e. zoooming out from 500% goes to
+//480% and zooming out from 40% goes to 20% both with same difference
+
 //Refresh image feature?
 
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
 class GUI implements ActionListener, ComponentListener, WindowStateListener, ChangeListener {
+    Settings settings;
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
@@ -58,13 +64,11 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         w.setLocationByPlatform(true);
         w.setIconImage(SysIcon.Logo.Icon.getImage());
         //w.addComponentListener(this);
-        //w.setResizable(false);
         buildFileGetter();
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
-        //while (true) {Thread.sleep(30);}
-        slideThread = new Thread(new SlideShow(this));
+        slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
     }
 
     void buildFileGetter() {
@@ -118,12 +122,12 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         return zoomBar;
     }
 
-    void quickRestart() {
-        state = new ProgramState(this);
-        mainPanel = new MainPanel(this);
+    void quickRestart(){
+        settings = new Settings();
+	state = new ProgramState(this);
+	mainPanel = new MainPanel(this);
 
         thumbPanel = new ThumbPanel(this);
-        //thumbPanel.addComponentListener(this);
         thumbPanel.setVisible(true);
 
         toolbarMain = ToolBar.build(this);
@@ -293,7 +297,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             slideThread.start();
         } else {
             slideThread.interrupt();
-            slideThread = new Thread(new SlideShow(this));
+            slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
         }
 
         ViewMenu.SlidePlay.setVisible(!setPlaying);

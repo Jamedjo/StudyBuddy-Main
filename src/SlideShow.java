@@ -9,15 +9,17 @@
  */
 public class SlideShow implements Runnable {
     GUI mainGUI;
+    int t;
     
-    SlideShow(GUI gui){
+    SlideShow(GUI gui,int time){
         mainGUI = gui;
+        t = time;
     }
 
     @Override public void run(){
         while(true){
             try{
-                Thread.sleep(2000);
+                Thread.sleep(t);
                 mainGUI.state.nextImage();
             } catch (InterruptedException e){
                 return;

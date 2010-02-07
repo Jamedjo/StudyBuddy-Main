@@ -61,7 +61,8 @@ public class InitDemoDB {
         String name;
         if (args.length!=1){
             System.out.println("Usage: java InitDemoDB databasename");
-            name = "savefile.txt";
+            Settings settings = new Settings();
+            name = settings.getSetting("homeDir")+settings.getSetting("databasePathExt")+settings.getSetting("databaseFileName");
         } else name = args[0];
         System.out.println("Using: "+name);
         initDB(name);

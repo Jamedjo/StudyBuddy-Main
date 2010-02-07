@@ -24,7 +24,6 @@ class ProgramState{
     int currentI = 0;//make private
     final GUI mainGUI;
     boolean isLocked = false;//Do not draw if locked.
-    final String saveFileName = "savefile.txt";
 
     // IMPORTANT NOTE: WHEN CONSTRUCTING NEW PROGRAM STATE. OTHER THREADS WILL SEE OLD STATE UNTIL CONTSRUCTOR RETURNS.
     // THIS MEANS METHODS CAN ACCIDENTALLY USE VALUES FROM THE OLD STATE.
@@ -38,9 +37,11 @@ class ProgramState{
 
     ProgramState(GUI parentGUI){
 	mainGUI = parentGUI;
-        //if savefile exists, LoadType.Load, else LoadType.Init
-        //use Settings object
-	LoadType lType = LoadType.Load;//Use above instead
+        String temp;
+        LoadType lType;
+        temp = mainGUI.settings.getSetting("databaseFilePathAndName");
+        if(temp==null) lType = LoadType.Init;
+        else lType = LoadType.Load;
 	ContructProgramState(lType,  parentGUI,""); //loadType should not be filter here
     }
     ProgramState(GUI parentGUI, String filterTag){
@@ -56,9 +57,10 @@ class ProgramState{
         //mainGUI.isChangingState = true;
 	switch (loadType){
 	case Init:
-            InitDemoDB.initDB(saveFileName);
+            mainGUI.settings.setSettingAndSave("databaseFilePathAndName", mainGUI.settings.getSetting("homeDir")+mainGUI.settings.getSetting("databasePathExt")+mainGUI.settings.getSetting("databaseFileName"));
+            InitDemoDB.initDB(mainGUI.settings.getSetting("databaseFilePathAndName"));
 	case Load:
-	    mainGUI.mainImageDB = new ImageDatabase("mainDB",saveFileName);
+	    mainGUI.mainImageDB = new ImageDatabase("mainDB",mainGUI.settings.getSetting("databaseFilePathAndName"));
 	    //no break as image list must still be passed from DB
 	case Refresh:
 	    //Create image database by loading database

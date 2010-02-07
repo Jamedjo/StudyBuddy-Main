@@ -22,7 +22,7 @@ class ImageDatabase
   private int NextImageID;
   private int NextTagID;
   
-  // Create an image database with the supplies name
+  // Create an image database with the supplied name
   ImageDatabase(String NewName)
   {
       Name = NewName;

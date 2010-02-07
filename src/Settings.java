@@ -16,7 +16,8 @@ public class Settings {
     Settings(){
         appPath = (System.getProperty("user.home"));
         if(isWindows()){
-            appPath = appPath + "\\Application Data\\StudyBuddy\\";//Windows uses backslash. Two needed as escape sequence
+            //appPath = appPath + "\\Application Data\\StudyBuddy\\";//Windows uses backslash. Two needed as escape sequence
+            appPath = System.getenv("APPDATA") + "\\StudyBuddy\\"; //Above invalid on non default systems (e.g. non english, vista, etc.)
         }
         else{
             appPath = appPath + "/.StudyBuddy/";//put back '.' could someone on linux test this?
@@ -24,7 +25,7 @@ public class Settings {
 
         File folder = new File(appPath);
         if (!folder.isDirectory()) {
-            System.err.println("path doesnt exist: "+appPath);
+            //System.err.println("path doesnt exist: "+appPath);
             //Make directory appPath
             boolean success = (new File(appPath)).mkdir();
             if(!success)
@@ -34,7 +35,7 @@ public class Settings {
 
         propFile = new File(appPath+propertiesFile);
         if (!propFile.exists()) {
-            System.err.println("properties files doesnt exist");
+            //System.err.println("properties files doesnt exist");
             //create propertiesFile file with default values as properties
             try{
                 propFile.createNewFile();
@@ -43,7 +44,7 @@ public class Settings {
                 setDefaults();
             }
             catch(Exception e){
-                System.err.println("File couldnt be created");
+                System.err.println("Properties file couldnt be created");
                 //Throw custom error?
             }
         }
@@ -97,9 +98,12 @@ public class Settings {
         }// catch (FileNotFoundException e){}
     }
 
-    //see http://java.sun.com/docs/books/tutorial/essential/environment/properties.html
+    //May return null: returns null if not found.
     public String getSetting(String settingName){
         return javaProperties.getProperty(settingName);
+    }
+    public int getSettingAsInt(String settingName){
+        return Integer.parseInt(javaProperties.getProperty(settingName));//catch error
     }
 
     //public boolean containsSetting(String settingName)
