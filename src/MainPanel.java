@@ -26,31 +26,19 @@ public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListe
     }
 
     void onResize() {
-        //System.out.println("old Pref w: "+this.getPreferredSize().width+"   old Pref h: "+this.getPreferredSize().height);
-            //System.out.println("old Brd w: "+boardW+"   old Brd h: "+boardH);
         if( isZoomed ) {
-            //use bordW&H instead
             this.setPreferredSize(ImageObject.useMaxMax((int)(mainGUI.state.getCurrentImage().getWidthAndMakeBig()*zoomMultiplier),(int)(mainGUI.state.getCurrentImage().getHeightAndMakeBig()*zoomMultiplier),this.getParent().getWidth(),this.getParent().getHeight()));
             //((JScrollPane)(this.getParent().getParent())).scrollRectToVisible(new Rectangle(500,500,501,501));
         } else {
-            ((JViewport) getParent()).revalidate();
-            getParent().getParent().validate();
-            boardW = getParent().getParent().getWidth() - 3;
-            boardH = getParent().getParent().getHeight() - 3;
+            mainGUI.imageAreas.validate();
+            boardW = mainGUI.mainScrollPane.getWidth() - 3;
+            boardH = mainGUI.mainScrollPane.getHeight() - 3;
             this.setPreferredSize(new Dimension(boardW, boardH));
         }
-        getParent().repaint();
-        this.repaint();
-        //boardW = this.getWidth();
-        //boardH = this.getHeight();
+        getParent().validate();
         this.revalidate();
         getParent().validate();
         this.repaint();
-        this.revalidate();
-        getParent().validate();
-        this.repaint();
-        //System.out.println("Pref w: "+this.getPreferredSize().width+"   Pref h: "+this.getPreferredSize().height);
-        //System.out.println("Brd w: "+boardW+"   Brd h: "+boardH);
     }
 
     //all scaling in terms of height. max size is 20 times minimum.
@@ -68,18 +56,14 @@ public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListe
             cSize = ImgSize.Max;
             this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), this.getParent().getWidth(), this.getParent().getHeight()));
             useWH = mainGUI.state.getRelImageWH(cSize, (int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), 0);
-            leftOfset = 0;//should improve on this so that image centres when zoom is small
-            topOfset = 0;
+            leftOfset = (this.getPreferredSize().width - useWH.width) / 2;
+            topOfset = (this.getPreferredSize().height - useWH.height) / 2;
         } else {
             cSize = ImgSize.Screen;
             useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
             leftOfset = (boardW - useWH.width) / 2;
             topOfset = (boardH - useWH.height) / 2;
         }
-        //boardW = this.getWidth();
-        //boardH = this.getHeight();
-
-        //mainGUI.mainPhoto.setIcon(mainGUI.state.getCurrentImage().getIcon(ImgSize.Screen));
 
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
     }
