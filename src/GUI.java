@@ -117,6 +117,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         mainScrollPane = new JScrollPane(mainPanel);
         mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
         mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
+        mainScrollPane.setWheelScrollingEnabled(false);
 
         imageAreas = new JPanel();
     	imageAreas.setLayout(new BorderLayout());
@@ -152,7 +153,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 	else if(ae.getActionCommand().equals("SlideP")) toggleSlide(true);
         else if(ae.getActionCommand().equals("SlideS")) toggleSlide(false);
         else if(ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
-	else if(ae.getActionCommand().equals("Zoom100")) toggleZoomed(false);
+	else if(ae.getActionCommand().equals("Zoom100")) zoomTo(100);
 	else if(ae.getActionCommand().equals("ZoomX")) zoomBox();
         else if(ae.getActionCommand().equals("Next")) state.nextImage();
         else if(ae.getActionCommand().equals("Prev")) state.prevImage();
