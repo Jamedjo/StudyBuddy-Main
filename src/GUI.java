@@ -102,9 +102,15 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
 	menuBar.add(tagMenu);
         menuBar.add(helpMenu);
     }
-//    void buildZoomBar(){
-//
-//    }
+    JSlider buildZoomBar(){
+        zoomBar = new JSlider(JSlider.HORIZONTAL,0,300,0);
+        zoomBar.setMajorTickSpacing(100);
+        zoomBar.setMinorTickSpacing(20);
+        zoomBar.setPaintLabels(true);
+        zoomBar.setPaintTicks(true);
+        zoomBar.addChangeListener(this);
+        return zoomBar;
+    }
 
     void quickRestart(){
 	state = new ProgramState(this);
@@ -232,6 +238,15 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener,Chang
     }
     void toggleZoomed(boolean makeFit){//true to set zoom to fit
         mainPanel.isZoomed = (!makeFit);
+        if(makeFit){
+            zoomBar.setValueIsAdjusting(true);//dont want to fire event
+            zoomBar.setValue(0);
+            //zoomBar.setValueIsAdjusting(false);//Setting this false also fires event
+        } else{
+            zoomBar.setValueIsAdjusting(true);//dont want to fire event though
+            zoomBar.setValue((int)(mainPanel.zoomMultiplier*100));
+            //zoomBar.setValueIsAdjusting(false);//Setting this false also fires event
+        }
 
         ViewMenu.ZoomToFit.setVisible(!makeFit);
         ViewMenu.ZoomTo100.setVisible(makeFit);

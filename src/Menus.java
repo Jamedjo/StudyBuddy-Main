@@ -5,21 +5,20 @@ import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
-import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 
 enum ToolBar{
     bPrev("Prev",			"Prev"),
 	bNext("Next",			"Next"),
-	bSlideP("Slideshow play",		"SlideP"),
-	bSlideS("Slideshow stop",		"SlideS",false),
-	bThumbsS("Show Thumbnails",		"ThumbsS",false),
-	bThumbsH("Hide Thumbnails",		"ThumbsH"),
-	bZoomFit("Zoom: Fit",		"ZoomFit",false),
+	bSlideP("Slideshow play",	"SlideP"),
+	bSlideS("Slideshow stop",	"SlideS"  ,false),
+	bThumbsS("Show Thumbnails",	"ThumbsS" ,false),
+	bThumbsH("Hide Thumbnails",	"ThumbsH"),
+	bZoomFit("Zoom: Fit     ",	"ZoomFit" ,false),
 	bZoomMax("Zoom: 100%",		"Zoom100"),
-	bAddTag("Add Tag",			"AddTag"),
-	bTagThis("Tag This Image",		"TagThis"),
-	//bTagFilter("Filter By Tag",		"TagFilter"),
+	bAddTag("Add Tag",		"AddTag"),
+	bTagThis("Tag This Image",	"TagThis"),
+	//bTagFilter("Filter By Tag",	"TagFilter"),
 	bBlueDemo("Bluetooth",		"BlueT");
 
     JButton button;
@@ -64,14 +63,7 @@ enum ToolBar{
 	    bar.add(bt);
 	    i++;
 	}
-
-        JSlider zoomBar = new JSlider(JSlider.HORIZONTAL,0,300,0);
-        zoomBar.setMajorTickSpacing(100);
-        zoomBar.setMinorTickSpacing(20);
-        zoomBar.setPaintLabels(true);
-        zoomBar.setPaintTicks(true);
-        zoomBar.addChangeListener(mainGUI);
-        bar.add(zoomBar);
+        bar.add(mainGUI.buildZoomBar());
 
         //workaround to prevent toolbar from steeling focus
 	for(i=0; i<bar.getComponentCount();i++){
