@@ -4,10 +4,12 @@ import javax.swing.*;
 import javax.swing.JOptionPane.*;
 import java.awt.event.*;
 
-public class MainPanel extends JPanel implements MouseWheelListener{//,Scrollable, MouseMotionListener {
+public class MainPanel extends JPanel implements MouseWheelListener {//,Scrollable, MouseMotionListener {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
+
     Dimension gridSize;
     int boardW, boardH;
+    Dimension useWH;
     final int boardW_start = 550;
     final int boardH_start = 350;
     final double wheelZoomIncrement = 0.2;//affect zoom by 20 percent on wheel rotate
@@ -29,9 +31,9 @@ public class MainPanel extends JPanel implements MouseWheelListener{//,Scrollabl
     }
 
     void onResize() {
-        if( isZoomed ) {
-            this.setPreferredSize(ImageObject.useMaxMax((int)(mainGUI.state.getCurrentImage().getWidthAndMakeBig()*zoomMultiplier),(int)(mainGUI.state.getCurrentImage().getHeightAndMakeBig()*zoomMultiplier),this.getParent().getWidth(),this.getParent().getHeight()));
-            //((JScrollPane)(this.getParent().getParent())).scrollRectToVisible(new Rectangle(500,500,501,501));
+        if ( isZoomed ) {
+            this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), this.getParent().getWidth(), this.getParent().getHeight()));
+            //mainGUI.mainScrollPane.scrollRectToVisible(new Rectangle(500,500,501,501));
         } else {
             mainGUI.imageAreas.validate();
             boardW = mainGUI.mainScrollPane.getWidth() - 3;
@@ -49,7 +51,6 @@ public class MainPanel extends JPanel implements MouseWheelListener{//,Scrollabl
         if (mainGUI.state.isLocked) {
             return;
         }
-        Dimension useWH;
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         ImgSize cSize;
@@ -71,13 +72,20 @@ public class MainPanel extends JPanel implements MouseWheelListener{//,Scrollabl
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
     }
 
-    @Override public void mouseWheelMoved(MouseWheelEvent e) {
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        if (!isZoomed) {
+            //get multiplier from fit so zoom doesnt jump
+            zoomMultiplier = ((double)useWH.width) / ((double)mainGUI.state.getCurrentImage().getWidthAndMakeBig());
+        }
         //System.out.println(e.toString());
         int xpos = e.getPoint().x;
         int ypos = e.getPoint().y;
         isZoomed = true;
         zoomMultiplier -= ((double) e.getWheelRotation()) * wheelZoomIncrement;
-        if(zoomMultiplier<minimumZoomLevel) zoomMultiplier = minimumZoomLevel;
+        if (zoomMultiplier < minimumZoomLevel) {
+            zoomMultiplier = minimumZoomLevel;
+        }
         mainGUI.toggleZoomed(false);
     }
 //    @Override public void mouseMoved(MouseEvent e) { }
@@ -86,8 +94,6 @@ public class MainPanel extends JPanel implements MouseWheelListener{//,Scrollabl
 //        Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
 //        scrollRectToVisible(r);
 //    }
-
-
 //    @Override public Dimension getPreferredScrollableViewportSize() {
 //        return this.getPreferredSize();
 //    }
