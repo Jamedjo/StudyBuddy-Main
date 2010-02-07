@@ -4,12 +4,13 @@ import javax.swing.*;
 import javax.swing.JOptionPane.*;
 import java.awt.event.*;
 
-public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListener {
+public class MainPanel extends JPanel implements MouseWheelListener{//,Scrollable, MouseMotionListener {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
     Dimension gridSize;
     int boardW, boardH;
-    int boardW_start = 550;
-    int boardH_start = 350;
+    final int boardW_start = 550;
+    final int boardH_start = 350;
+    final double wheelZoomIncrement = 0.2;//affect zoom by 20 percent on wheel rotate
     final GUI mainGUI;
     boolean isZoomed = false;
     double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
@@ -21,6 +22,7 @@ public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListe
         boardH = boardH_start;
         setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
+        this.addMouseWheelListener(this);
 //        setAutoscrolls(true); //enable synthetic drag events
 //        addMouseMotionListener(this); //handle mouse drags
     }
@@ -37,7 +39,7 @@ public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListe
         }
         getParent().validate();
         this.revalidate();
-        getParent().validate();
+        //getParent().validate();
         this.repaint();
     }
 
@@ -68,7 +70,14 @@ public class MainPanel extends JPanel{// implements Scrollable, MouseMotionListe
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
     }
 
-
+      @Override public void mouseWheelMoved(MouseWheelEvent e){
+          //System.out.println(e.toString());
+          int xpos = e.getPoint().x;
+          int ypos = e.getPoint().y;
+          isZoomed = true;
+          zoomMultiplier -= ((double)e.getWheelRotation()) * wheelZoomIncrement;
+          this.onResize();
+      }
 //    @Override public void mouseMoved(MouseEvent e) { }
 //    @Override public void mouseDragged(MouseEvent e) {
 //        //The user is dragging us, so scroll!
