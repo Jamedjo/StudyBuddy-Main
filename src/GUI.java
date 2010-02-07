@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.border.*;
 import java.io.*;
 import javax.swing.JOptionPane.*;
 //import javax.swing.ScrollPaneLayout;
@@ -28,12 +27,14 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
     JScrollPane boardScroll;
-    ProgramState state;
+    volatile ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
     JTree TagTree;
     Thread slideThread;
     JScrollPane mainScrollPane;
+    JPanel imageAreas;
+    //boolean isChangingState = false;
 
     public static void main(String[] args){
         GUI mainGUI = new GUI();
@@ -106,12 +107,11 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     }
 
     void quickRestart(){
-	state = new ProgramState(this);        
+	state = new ProgramState(this);
 	mainPanel = new MainPanel(this);
 
 	thumbPanel = new ThumbPanel(this);
 	//thumbPanel.addComponentListener(this);
-	thumbPanel.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
 	thumbPanel.setVisible(true);
 
 	toolbarMain = ToolBar.build((ActionListener)this);
@@ -124,12 +124,12 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
         mainScrollPane.getViewport().setBackground(Color.blue);//darkGray);//comment out to see scroll bar bug
         mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
 
-        JPanel contentSet = new JPanel();
-    	contentSet.setLayout(new BorderLayout());
-	contentSet.add(mainScrollPane,BorderLayout.CENTER);
-	contentSet.add(thumbPanel,BorderLayout.PAGE_END);
+        imageAreas = new JPanel();
+    	imageAreas.setLayout(new BorderLayout());
+	imageAreas.add(mainScrollPane,BorderLayout.CENTER);
+	imageAreas.add(thumbPanel,BorderLayout.PAGE_END);
         
-        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,contentSet);
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,TagTree,imageAreas);
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(150 + splitpane.getInsets().left);
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
@@ -309,8 +309,10 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
             IDTitle FilterTagIDTitle = (IDTitle) FilterTag;
             if (FilterTagIDTitle.getID().equals("-1")) {
                 state = new ProgramState(LoadType.Refresh, this); //flush first?
+                state.imageChanged();
             } else {
                 state = new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()); //flush first?
+                state.imageChanged();
             }
         }
     }
@@ -320,7 +322,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
                 JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
         if ((NewTag != null) && (NewTag instanceof IDTitle)) {
             IDTitle NewTagIDTitle = (IDTitle) NewTag;
-            mainImageDB.tagImage(state.imageIDs[state.currentI], NewTagIDTitle.getID());
+            mainImageDB.tagImage(state.getCurrentImageID(), NewTagIDTitle.getID());
         }
     }
     void importDo(){

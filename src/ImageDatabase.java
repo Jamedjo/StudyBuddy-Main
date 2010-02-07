@@ -2,12 +2,14 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import javax.swing.JTree;
+
+//Anything involving swing should be moved to seperate class
+// javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeSelectionModel;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
+//import javax.swing.event.TreeSelectionEvent;
+//import javax.swing.event.TreeSelectionListener;
 import javax.swing.*;
 
 class ImageDatabase

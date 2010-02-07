@@ -17,34 +17,43 @@ enum LoadType{Init,Load,Filter,Refresh}
 //Previous image and 3 next images should be kept, others flushed.
 class ProgramState{
     private ImageObject[] imageList;
-    String[] imageIDs;
+    private String[] imageIDs;
     int lastIndex; //Must be updated when number of images changes
     String currentFilter;
+    int numberOfImages;
     int currentI = 0;//make private
-    GUI mainGUI;
+    final GUI mainGUI;
     boolean isLocked = false;//Do not draw if locked.
     final String saveFileName = "savefile.txt";
 
+    // IMPORTANT NOTE: WHEN CONSTRUCTING NEW PROGRAM STATE. OTHER THREADS WILL SEE OLD STATE UNTIL CONTSRUCTOR RETURNS.
+    // THIS MEANS METHODS CAN ACCIDENTALLY USE VALUES FROM THE OLD STATE.
+    // BE CAREFULL TO CHECK STATE IS 'CHANGING' WHEN USING ITS VALUES
+    // CALL mainGUI.state.imageChanged after constructing a ne state
+
     ProgramState(LoadType loadType, GUI parentGUI){
+	mainGUI = parentGUI;
 	ContructProgramState(loadType,  parentGUI,""); //loadType should not be filter here
     }
 
     ProgramState(GUI parentGUI){
+	mainGUI = parentGUI;
         //if savefile exists, LoadType.Load, else LoadType.Init
         //use Settings object
 	LoadType lType = LoadType.Load;//Use above instead
 	ContructProgramState(lType,  parentGUI,""); //loadType should not be filter here
     }
     ProgramState(GUI parentGUI, String filterTag){
+	mainGUI = parentGUI;
 	ContructProgramState(LoadType.Filter, parentGUI, filterTag);
     }
     ProgramState(LoadType loadType, GUI parentGUI, String filterTag){
+	mainGUI = parentGUI;
 	ContructProgramState(loadType, parentGUI, filterTag);
     }
 
     void ContructProgramState(LoadType loadType, GUI parentGUI, String filterTag){
-
-	mainGUI = parentGUI;
+        //mainGUI.isChangingState = true;
 	switch (loadType){
 	case Init:
             InitDemoDB.initDB(saveFileName);
@@ -66,16 +75,19 @@ class ProgramState{
 	//if imageIDs.length==0
 	//then a file should be added first (Construct with Init&imports, then return;)
       	imageList = new ImageObject[imageIDs.length];
+        numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
 	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
 	lastIndex = (imageIDs.length - 1);
 
+        //mainGUI.isChangingState = false; //Set false before calling imageChanged thumbPanel.onResize() waits for this to be false
         //Needed as GUI components not cfreated yet
-	if((loadType!=LoadType.Init) && (loadType!=LoadType.Load)){
-            imageChanged();
-	}
+	//if((loadType!=LoadType.Init) && (loadType!=LoadType.Load)){
+            //imageChanged();//Will cause deadlock or bugs if uncommented. Call after constructing
+	//}
     }
+
 
     void importImages(File[] files){
 	isLocked = true;
@@ -86,6 +98,7 @@ class ProgramState{
 	try{
 	    if(currentFilter.equals("-1")){ // "-1" is now show all (working on TagID rather than Tag Title)
 		mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
+                mainGUI.state.imageChanged();
 		//Sets image to last image
 		//mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
 		//Sets current image to first loaded image.
@@ -94,6 +107,7 @@ class ProgramState{
 	    }
 	    else {
 		mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
+                mainGUI.state.imageChanged();
 	    }
 	} catch(java.lang.OutOfMemoryError e){
             JOptionPane.showMessageDialog(mainGUI.w,"Out of memory","Fatal Error",JOptionPane.ERROR_MESSAGE);
@@ -117,6 +131,7 @@ class ProgramState{
 	}
 	else {
 	    mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
+            mainGUI.state.imageChanged();
 	    safelyDestruct();
 	}
 	isLocked = false;
@@ -181,6 +196,9 @@ class ProgramState{
     // Must be edited so empty DB/imageList does not cause error
     ImageObject getCurrentImage(){
 	return imageList[currentI];
+    }
+    String getCurrentImageID(){
+	return imageIDs[currentI];
     }
 
     Dimension getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){

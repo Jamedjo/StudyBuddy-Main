@@ -6,25 +6,27 @@ import javax.swing.*;
 
 class TagTreeListener implements TreeSelectionListener
 {
-  GUI MainGUI;
+  GUI mainGUI;
   
   TagTreeListener(GUI NewMainGUI)
   {
-    MainGUI = NewMainGUI;
+    mainGUI = NewMainGUI;
   }
   
   public void valueChanged(TreeSelectionEvent Event)
   {
-    DefaultMutableTreeNode CurrentNode = (DefaultMutableTreeNode)MainGUI.TagTree.getLastSelectedPathComponent();
+    DefaultMutableTreeNode CurrentNode = (DefaultMutableTreeNode)mainGUI.TagTree.getLastSelectedPathComponent();
     IDTitle NodeObject = null;
     if (CurrentNode != null)
     {
-      NodeObject = (IDTitle)CurrentNode.getUserObject();
-      if (NodeObject.getID().equals("-1"))
-		    MainGUI.state = new ProgramState(LoadType.Refresh, MainGUI);
-      else
-		    MainGUI.state = new ProgramState(LoadType.Filter, MainGUI, NodeObject.getID());
-		}
-  }
-
+      NodeObject = (IDTitle) CurrentNode.getUserObject();
+            if (NodeObject.getID().equals("-1")) {
+                mainGUI.state = new ProgramState(LoadType.Refresh, mainGUI);
+                mainGUI.state.imageChanged();
+            } else {
+                mainGUI.state = new ProgramState(LoadType.Filter, mainGUI, NodeObject.getID());
+                mainGUI.state.imageChanged();
+            }
+        }
+    }
 }
