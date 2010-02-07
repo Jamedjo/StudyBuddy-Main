@@ -3,6 +3,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.io.*;
 import javax.swing.JOptionPane.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 //import javax.swing.ScrollPaneLayout;
 
 //We should use javadoc.
@@ -10,7 +12,7 @@ import javax.swing.JOptionPane.*;
 //Refresh image feature?
 
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
-class GUI implements ActionListener, ComponentListener,WindowStateListener {
+class GUI implements ActionListener, ComponentListener,WindowStateListener,ChangeListener {
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
@@ -28,6 +30,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     Thread slideThread;
     JScrollPane mainScrollPane;
     JPanel imageAreas;
+    JSlider zoomBar;
     //boolean isChangingState = false;
 
     public static void main(String[] args){
@@ -99,6 +102,9 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 	menuBar.add(tagMenu);
         menuBar.add(helpMenu);
     }
+//    void buildZoomBar(){
+//
+//    }
 
     void quickRestart(){
 	state = new ProgramState(this);
@@ -108,7 +114,7 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
 	//thumbPanel.addComponentListener(this);
 	thumbPanel.setVisible(true);
 
-	toolbarMain = ToolBar.build((ActionListener)this);
+	toolbarMain = ToolBar.build(this);
 
         TagTree = mainImageDB.toTree();
         //TagTree.setMinimumSize(new Dimension(150,0));
@@ -201,6 +207,18 @@ class GUI implements ActionListener, ComponentListener,WindowStateListener {
     @Override public void componentHidden(ComponentEvent e){}
     @Override public void componentMoved(ComponentEvent e){}
     @Override public void componentShown(ComponentEvent e){}
+
+    @Override public void stateChanged(ChangeEvent e){
+        JSlider src = (JSlider)e.getSource();
+    if (!src.getValueIsAdjusting()) {
+        int zoom = (int)src.getValue();
+        if (zoom == 0) {
+            toggleZoomed(true);
+        } else {
+            zoomTo(zoom);
+        }
+    }
+    }
 
     void toggleThumbs(boolean makeVisible){//true to show
         thumbPanel.setVisible(makeVisible);

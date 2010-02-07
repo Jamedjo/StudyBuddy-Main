@@ -4,6 +4,8 @@ import javax.swing.JOptionPane.*;
 import javax.swing.BoxLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 //import javax.swing.border.EtchedBorder;
 
 
@@ -55,7 +57,7 @@ class ThumbButton extends JPanel{
 
 }
 
-class ThumbPanel extends JPanel{
+class ThumbPanel extends JPanel implements MouseWheelListener{
     Dimension gridSize;
     int boardW,boardH;
     int boardW_start = 550;
@@ -75,6 +77,7 @@ class ThumbPanel extends JPanel{
         this.setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
         boardW = boardW_start;
+        this.addMouseWheelListener(this);
         //this.add(buildThumbHolders(),BorderLayout.WEST);
         this.validate();
     }
@@ -129,5 +132,9 @@ class ThumbPanel extends JPanel{
 	//getParent().repaint();
 
         
+    }
+
+    @Override public void mouseWheelMoved(MouseWheelEvent e){
+        mainGUI.state.offsetImage(-e.getWheelRotation());//not sure which direction is better
     }
 }

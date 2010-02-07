@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JSlider;
 import javax.swing.KeyStroke;
 
 enum ToolBar{
@@ -49,7 +50,7 @@ enum ToolBar{
 	return button;
     }
 
-    static JToolBar build(ActionListener l){
+    static JToolBar build(GUI mainGUI){
 
 	JToolBar bar = new JToolBar("StudyBuddy Toolbar");
 	bar.setFocusable(false);
@@ -59,12 +60,20 @@ enum ToolBar{
 	    if(i==0||i==2||i==4||i==6||i==8){
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
-	    JButton bt = b.create(l);
+	    JButton bt = b.create((ActionListener)mainGUI);
 	    bar.add(bt);
 	    i++;
 	}
 
-	//workaround to prevent toolbar from steeling focus
+        JSlider zoomBar = new JSlider(JSlider.HORIZONTAL,0,300,0);
+        zoomBar.setMajorTickSpacing(100);
+        zoomBar.setMinorTickSpacing(20);
+        zoomBar.setPaintLabels(true);
+        zoomBar.setPaintTicks(true);
+        zoomBar.addChangeListener(mainGUI);
+        bar.add(zoomBar);
+
+        //workaround to prevent toolbar from steeling focus
 	for(i=0; i<bar.getComponentCount();i++){
 	    if(bar.getComponent(i) instanceof JButton){
 		((JButton)bar.getComponent(i)).setFocusable(false);
@@ -172,8 +181,8 @@ enum ViewMenu{
 	PrevImage("Previous Image",KeyEvent.VK_P,KeyEvent.VK_LEFT,0,"Prev"),
 	ShowThumbs("Show Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsS",false),
 	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH"),
-	SlidePlay("Play Slideshow",KeyEvent.VK_S,KeyEvent.VK_SPACE,0,"SlideP",false),
-	SlideStop("Stop Slideshow",KeyEvent.VK_T,KeyEvent.VK_SPACE,0,"SlideS"),
+	SlidePlay("Play Slideshow",KeyEvent.VK_S,KeyEvent.VK_SPACE,0,"SlideP"),
+	SlideStop("Stop Slideshow",KeyEvent.VK_T,KeyEvent.VK_SPACE,0,"SlideS",false),
 	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_Z,KeyEvent.VK_Z,ActionEvent.ALT_MASK,"ZoomFit",false),
 	ZoomTo100("Zoom: 100%",KeyEvent.VK_Z,KeyEvent.VK_Z,ActionEvent.ALT_MASK,"Zoom100"),
 	ZoomToX("Zoom: Custom",KeyEvent.VK_C,KeyEvent.VK_Z,ActionEvent.SHIFT_MASK,"ZoomX");
