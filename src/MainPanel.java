@@ -33,7 +33,6 @@ public class MainPanel extends JPanel implements MouseWheelListener {//,Scrollab
     void onResize() {
         if ( isZoomed ) {
             this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), this.getParent().getWidth(), this.getParent().getHeight()));
-            //mainGUI.mainScrollPane.scrollRectToVisible(new Rectangle(500,500,501,501));
         } else {
             mainGUI.imageAreas.validate();
             boardW = mainGUI.mainScrollPane.getWidth() - 3;
@@ -87,6 +86,7 @@ public class MainPanel extends JPanel implements MouseWheelListener {//,Scrollab
             zoomMultiplier = minimumZoomLevel;
         }
         mainGUI.toggleZoomed(false);
+        this.scrollRectToVisible(new Rectangle(xpos,ypos,xpos+1,ypos+1));//improve this to improve zoom.
     }
 //    @Override public void mouseMoved(MouseEvent e) { }
 //    @Override public void mouseDragged(MouseEvent e) {
