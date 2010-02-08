@@ -11,7 +11,8 @@ enum AppDefaults {
     s4("databaseFileName","mainDB"),
     s5("databasePathExt","database"+File.separator),
     ver("appVersionLast","0.7beta_r155"),//change this whenever you change this enum.
-    s7("lastFilterUsed","Show All Images");
+    s7("lastFilterUsed","Show All Images"),
+    s8("lastCurrentI","0");
     //use , to seperate but ; after last
 
     String key, value;

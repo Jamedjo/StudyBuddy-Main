@@ -67,6 +67,7 @@ class ProgramState{
 	    break;
         case LoadLast:
             mainGUI.mainImageDB = new ImageDatabase("mainDB",mainGUI.settings.getSetting("databaseFilePathAndName"));
+            //change currentI by maingGUI.settings.getSetting("LastCurrentI") but be careful of null, etc.
 	case Filter:
 	    //Create image database by loading database
             if(filterTag==null) {
