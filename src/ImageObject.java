@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.awt.Graphics2D;
 import java.io.File;
+import java.io.RandomAccessFile;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 //import javax.swing.ImageIcon;
@@ -18,6 +19,9 @@ import java.util.Calendar;
 //Various image utilities. needed as default image reader could not read thumbnails from exif
 import org.apache.sanselan.*;
 
+//Use imageID for name for now but change to random key from DB.
+//In thumbfile, store imageID,modified date,path,filesize and a quick checksum.
+//Only load thumb if all same.
 
 //use jpeg thumbs where availiable
 
@@ -65,12 +69,14 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     static final int thumbMaxH = 200;
     boolean isQuickThumb = false;
     ImgSize currentLarge;//The size of the large bImage (Max or Screen)
-    //String imageID;
+    String imageID;
     //String title,filename,comments?
 
 
-    ImageObject(String inputPath){
+    ImageObject(String inputPath,String currentID){
 	String tempPath = "";
+        imageID = currentID;
+        System.out.println("Image:"+imageID+" has inPath: "+inputPath);
 	try{
 	    if(inputPath.startsWith("///\\\\\\")){
 		tempPath = inputPath.substring(6);
@@ -104,11 +110,11 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	initVars();
     }
 
-    ImageObject(File inFile){
-	pathFile = inFile;
-	pathFile.getAbsolutePath();
-	initVars();
-    }
+//    ImageObject(File inFile){
+//	pathFile = inFile;
+//	pathFile.getAbsolutePath();
+//	initVars();
+//    }
 
     void initVars(){
 	//java.awt.Toolkit toolkit = java.awt.Toolkit.getDefaultToolkit();
@@ -175,7 +181,8 @@ start = Calendar.getInstance().getTimeInMillis();
 	    Iterator readers = ImageIO.getImageReadersBySuffix(ext);
 	    ImageReader reader = (ImageReader)readers.next();
 if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println("next reader");}
-	    ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
+	    //ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
+            ImageInputStream inputStream = ImageIO.createImageInputStream(new RandomAccessFile(pathFile,"r"));
 	    reader.setInput(inputStream,false);
 	    ImageReadParam readParam = reader.getDefaultReadParam();
 	    //readParam.setSourceProgressivePasses(0,1);
@@ -186,7 +193,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	    reader.dispose();
 	    inputStream.close();
 
-	    //**//if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
+	    if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
 	    //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
 	    //Bheight = reader.getHeight(0);
 	} catch (IOException e) {
@@ -243,7 +250,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     //BufferedImage extractIcon(...)
 
     BufferedImage getImage(ImgSize size){
-	//System.out.println("Image requested: " + absolutePath + " at size " + size);
+	System.out.println("Image requested: " + absolutePath + " at size " + size);
 	//gets thumbnail or full image
 	if(size.isThumb()&&bThumb!=null) return bThumb;
 	if(size==currentLarge&&bImage!=null) return bImage;//If there is an image which matches size
@@ -253,22 +260,28 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	    if(bThumb!=null) return bThumb;
 //should now add rendering the thumb properly to a task list for another thread
 	}
+        System.out.print("...");
         try {
 long start = Calendar.getInstance().getTimeInMillis();
 //ImageIO.setUseCache(true);
-//ImageIO.setCacheDirectory(File);
+//ImageIO.setCacheDirectory(pathFile);
             bImage = ImageIO.read(pathFile);
-//**//System.out.println("Loading image "+absolutePath+"\n      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to read image to memory");
+System.out.println("Loading image "+absolutePath+"\n      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to read image to memory");
 start = Calendar.getInstance().getTimeInMillis();
 
 	    if(size==ImgSize.Screen||size==ImgSize.ThumbFull){//&& not thumb only (as this would be extra work)
 		bImage = makeScreenImg(bImage);
 		currentLarge = ImgSize.Screen;
 	    }
-	    else currentLarge = ImgSize.Max;
+	    else {currentLarge = ImgSize.Max;}
+
+System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to process image");
+start = Calendar.getInstance().getTimeInMillis();
 	    bThumb =  makeThumb(bImage);
-//**//System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to process image");
+            System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to process thumbnail");
 	    setVars();
+System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to get width,height&orientation");
+start = Calendar.getInstance().getTimeInMillis();
         } catch (IOException e) {
 	    System.err.println("Error loading image " + absolutePath + "\nError was: " + e.toString());
 	    setToXasFileNotFound();

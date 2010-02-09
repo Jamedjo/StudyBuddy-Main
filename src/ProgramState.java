@@ -2,6 +2,8 @@ import java.awt.image.*;
 import java.awt.*;
 import javax.swing.*;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import javax.swing.JOptionPane.*;
 
 //Type of load ProgramState does. Respectivly:
@@ -88,7 +90,7 @@ class ProgramState{
       	imageList = new ImageObject[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i]);
 	}
 	lastIndex = (imageIDs.length - 1);
 
@@ -99,54 +101,51 @@ class ProgramState{
 	//}
     }
 
-
-    void importImages(File[] files){
-	isLocked = true;
-	for(File f : files){
-	    //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
-	    mainGUI.mainImageDB.addImage("Title 1",f.getAbsolutePath());
-	}
-	try{
-	    if(currentFilter.equals("-1")){ // "-1" is now show all (working on TagID rather than Tag Title)
-		mainGUI.state = new ProgramState(LoadType.Refresh,mainGUI);
-                mainGUI.state.imageChanged();
-		//Sets image to last image
-		//mainGUI.state.currentI = mainGUI.state.imageIDs.length - 1;
-		//Sets current image to first loaded image.
-		//mainGUI.state.currentI = this.lastIndex + 1;//Bad code as if load fails the this is out of bounds
-		//Will be replaced by feeding lastIndex+1 into constructor above
-	    }
-	    else {
-		mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
-                mainGUI.state.imageChanged();
-	    }
-	} catch(java.lang.OutOfMemoryError e){
-            JOptionPane.showMessageDialog(mainGUI.w,"Out of memory","Fatal Error",JOptionPane.ERROR_MESSAGE);
-	} finally {
-	    isLocked = false;
-	    safelyDestruct();
-	}
-    }
-
-    void importImage(String absolutePath){//should make a file and call importImages(new File[])
-	isLocked = true;
-	mainGUI.mainImageDB.addImage("Title 1",absolutePath);
-	if(currentFilter.equals("-1")){ // "-1" means show all (using TagID not Tag Title)
-	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
-	    if(lastIndex != (imageIDs.length - 1)) lastIndex = imageIDs.length - 1;
-	    else return; //If there are no more images than before import, then failure
-	    currentI = lastIndex;
-	    imageList[lastIndex] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[lastIndex]));
-	    mainGUI.mainPanel.repaint();
-	    mainGUI.thumbPanel.repaint();
-	}
-	else {
-	    mainGUI.state = new ProgramState(LoadType.Filter,mainGUI,currentFilter);
+    void importImages(File[] files) {
+        isLocked = true;
+        try {
+            if (currentFilter.equals("Show All Images")) { //WRONG???-> // "-1" is now show all (working on TagID rather than Tag Title)
+                ArrayList<String> tempImageIDs = new ArrayList<String>(Arrays.asList(imageIDs));
+                ArrayList<ImageObject> tempImageList = new ArrayList<ImageObject>(Arrays.asList(imageList));
+                for (File f : files) {
+                    //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
+                    String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
+                    if (currentImID != null) {
+                        tempImageIDs.add(currentImID);
+                        //tempImageList.add(new ImageObject(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
+                        tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID));
+                    }
+                }
+                imageIDs = new String[tempImageIDs.size()];
+                tempImageIDs.toArray(imageIDs);
+                imageList = new ImageObject[tempImageList.size()];
+                tempImageList.toArray(imageList);
+                if (lastIndex >= (imageIDs.length - 1)) {
+                    //Print error loading images?
+                    return; //If there are no more images than before import, then failure
+                }
+                currentI = lastIndex + 1;
+                lastIndex = imageIDs.length - 1;
+                numberOfImages = imageList.length;
+            } else {
+                for (File f : files) {
+                    //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
+                    mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
+                }
+                mainGUI.state = new ProgramState(LoadType.Filter, mainGUI, currentFilter);
+            }
             mainGUI.state.imageChanged();
-	    safelyDestruct();
-	}
-	isLocked = false;
+        } catch (java.lang.OutOfMemoryError e) {
+            JOptionPane.showMessageDialog(mainGUI.w, "Out of memory", "Fatal Error", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            isLocked = false;
+            if (this != mainGUI.state) {
+                safelyDestruct();
+            }
+        }
     }
+
+//    void importImage(String absolutePath){}//should make a file and call importImages(new File[])
 
     //flushes all images and thumbs
     void safelyDestruct(){
@@ -234,11 +233,16 @@ class ProgramState{
     }
 
     BufferedImage getBImageI(int relativeImage, ImgSize size){
+        //If getting thumb for an upcoming image, get the full image too.
 	if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
 	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
-	for(int i=4;i<lastIndex;i++){
-	    imageList[relItoFixI(relativeImage)].flush();
-	}
+
+        //removes from memory all images except next four.
+        if(size.isLarge()){
+            for(int i=4;i<lastIndex;i++){
+                imageList[relItoFixI(i+relativeImage)].flush();
+            }
+        }
 	return returnImage;
     }
 }
