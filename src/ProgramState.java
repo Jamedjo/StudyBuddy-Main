@@ -255,8 +255,8 @@ class ProgramState{
     }
 
     BufferedImage getBImageI(int relativeImage, ImgSize size){
-        //If getting thumb for an upcoming image, get the full image too.
-	if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
+            //If getting thumb for an upcoming image, get the full image too.
+            //if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
 	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
 
         //removes from memory all images except next four.

@@ -19,10 +19,6 @@ import java.util.Calendar;
 //Various image utilities. needed as default image reader could not read thumbnails from exif
 import org.apache.sanselan.*;
 
-//Use imageID for name for now but change to random key from DB.
-//In thumbfile, store imageID,modified date,path,filesize and a quick checksum.
-//Only load thumb if all same.
-
 //use jpeg thumbs where availiable
 
 //BufferedImage takes 4MB per megapixel, so a 5megaPixel file is 20MB of java heap memory. On some VMs 64MB is max heap.
@@ -255,7 +251,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     //BufferedImage extractIcon(...)
 
     BufferedImage getImage(ImgSize size) {
-        System.out.println("Image requested: " + absolutePath + " at size " + size);
+        //**//System.out.println("Image requested: " + absolutePath + " at size " + size);
         //gets thumbnail or full image
         if (size.isThumb() && bThumb != null) {
             return bThumb;
@@ -264,6 +260,10 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             return bImage;//If there is an image which matches size
         }	//Build large icon and small icon, return relevent.
         if (size == ImgSize.Thumb) {//If thumbfull do long way
+            getThumbIfCached();
+            if (bThumb != null) {
+                return bThumb;
+            }
             getThumbQuick();
             if (bThumb != null) {
                 return bThumb;
@@ -342,13 +342,31 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
         bThumb = tempimage;
         saveThumbToFile();
     }
+
+    //Use imageID for name for now but change to include random key from DB.
+    //In also use imageID,modified date,path,filesize to create quick pseudo checksum.
+    //Only load thumb if all same.
+    String getSaveEncoding(){
+        return imageID+"_thumb.jpg";
+    }
     
     void saveThumbToFile(){
         try{
-            File thumbfile = new File(thumbPath,imageID+"_thumb.jpg");
-            ImageIO.write(bThumb,"jpg",thumbfile);
+            File thumbfile = new File(thumbPath,getSaveEncoding());
+            ImageIO.write(bThumb,"jpg",thumbfile);//should use same format as file
         } catch (IOException e){
             System.err.println("Error creating thumbnail for image: "+absolutePath);
+        }
+    }
+
+    void getThumbIfCached() {
+        File checkFile = new File(thumbPath, getSaveEncoding());
+        if (checkFile.exists()) {
+            try {
+                bThumb = ImageIO.read(checkFile);
+            } catch (IOException e) {
+                System.err.println("Error opening thumbnail " + checkFile + "\nError was: " + e.toString());
+            }
         }
     }
 

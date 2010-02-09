@@ -4,13 +4,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 //Anything involving swing should be moved to seperate class
-// javax.swing.JTree;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeSelectionModel;
-//import javax.swing.event.TreeSelectionEvent;
-//import javax.swing.event.TreeSelectionListener;
-import javax.swing.*;
 
 class ImageDatabase
 {
@@ -401,7 +399,7 @@ class ImageDatabase
   }
   
   // Adds all tags tagged by a node to that node (in a tree)
-  private DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,IDTitle> PathTags)
+  DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,IDTitle> PathTags)
   {
     String[] TagIDs;
     DefaultMutableTreeNode TempTreeNode;
@@ -470,7 +468,7 @@ class ImageDatabase
   }
   
   // Delete a tag from the database from a selection on a tag tree
-  public JTree deleteTagFromTree(JTree TreeDelFrom)
+  public JTree deleteTagFromTree(JTree TreeDelFrom,GUI theGUI)
   {
     DefaultMutableTreeNode NodeToDel;
     IDTitle NodeToDelObject = null;
@@ -487,18 +485,9 @@ class ImageDatabase
     }
     if (IsRoot == false)
       deleteTag(NodeToDelObject.getID());
-    return toTree();
+    return new TagTree(this,theGUI);
   }
   
-  // Converts the imagedatabase to a tree and returns the tree
-  public JTree toTree()
-  {
-    JTree Result;
-    DefaultMutableTreeNode RootNode = new DefaultMutableTreeNode(new IDTitle("-1", "All Tags"));
-    RootNode = addTreeTags(RootNode, new Hashtable<String,IDTitle>());
-    Result = new JTree(RootNode);
-    Result.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-    return Result;
-  }
+
 
 }

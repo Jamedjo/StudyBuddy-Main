@@ -34,7 +34,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     volatile ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
-    JTree TagTree;
+    JTree tagTree;
     Thread slideThread;
     JScrollPane mainScrollPane;
     JPanel imageAreas;
@@ -138,7 +138,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     void quickRestart(){
         settings = new Settings();
         thumbPath = new File(settings.getSetting("homeDir") + settings.getSetting("thumbnailPathExt"));
-	state = new ProgramState(this);
+	state = new ProgramState(this);//Also initializes mainImageDB
 	mainPanel = new MainPanel(this);
 
         thumbPanel = new ThumbPanel(this);
@@ -146,9 +146,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
         toolbarMain = ToolBar.build(this);
 
-        TagTree = mainImageDB.toTree();
+        tagTree = new TagTree(mainImageDB,this);
         //TagTree.setMinimumSize(new Dimension(150,0));
-        TagTree.addTreeSelectionListener(new TagTreeListener(this));
 
         mainScrollPane = new JScrollPane(mainPanel);
         mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
@@ -160,7 +159,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         imageAreas.add(mainScrollPane, BorderLayout.CENTER);
         imageAreas.add(thumbPanel, BorderLayout.PAGE_END);
 
-        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, TagTree, imageAreas);
+        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tagTree, imageAreas);
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(150 + splitpane.getInsets().left);
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
@@ -194,8 +193,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("Next")) state.nextImage();
         else if (ae.getActionCommand().equals("Prev")) state.prevImage();
         else if (ae.getActionCommand().equals("AddTag")) {
-            TagTree = mainImageDB.addTagFromTree(TagTree, w);
-            TagTree.repaint();
+            tagTree = mainImageDB.addTagFromTree(tagTree, w);
+            tagTree.repaint();
         } else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
