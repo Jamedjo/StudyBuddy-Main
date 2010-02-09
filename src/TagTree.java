@@ -9,20 +9,18 @@ public class TagTree extends JTree implements TreeSelectionListener {
     ImageDatabase mainImageDB;
     GUI mainGUI;
 
-  TagTree(ImageDatabase mainDB,GUI gui){
-      super(mainDB.addTreeTags(new DefaultMutableTreeNode(new IDTitle("-1", "All Tags")), new Hashtable<String,IDTitle>()));
-      mainGUI = gui;
-    this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-    this.addTreeSelectionListener(this);
-  }
+    TagTree(ImageDatabase mainDB, GUI gui) {
+        super(gui.addTreeTags(new DefaultMutableTreeNode(new IDTitle("-1", "All Tags")), new Hashtable<String, IDTitle>()));
+        mainGUI = gui;
+        this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        this.addTreeSelectionListener(this);
+    }
 
-    public void valueChanged(TreeSelectionEvent Event)
-  {
-    DefaultMutableTreeNode CurrentNode = (DefaultMutableTreeNode)this.getLastSelectedPathComponent();
-    IDTitle NodeObject = null;
-    if (CurrentNode != null)
-    {
-      NodeObject = (IDTitle) CurrentNode.getUserObject();
+    public void valueChanged(TreeSelectionEvent Event) {
+        DefaultMutableTreeNode CurrentNode = (DefaultMutableTreeNode) this.getLastSelectedPathComponent();
+        IDTitle NodeObject = null;
+        if (CurrentNode != null) {
+            NodeObject = (IDTitle) CurrentNode.getUserObject();
             if (NodeObject.getID().equals("-1")) {
                 mainGUI.state = new ProgramState(LoadType.Refresh, mainGUI);
                 mainGUI.state.imageChanged();

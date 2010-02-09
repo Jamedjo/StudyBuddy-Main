@@ -1,11 +1,6 @@
 import java.io.*;
 import java.util.Enumeration;
 import java.util.ArrayList;
-import java.util.Hashtable;
-
-//Anything involving swing should be moved to seperate class
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 class ImageDatabase
 {
@@ -395,58 +390,4 @@ class ImageDatabase
     return ImageTable.getColArray(2);
   }
   
-  // Adds all tags tagged by a node to that node (in a tree)
-  DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,IDTitle> PathTags)
-  {
-    String[] TagIDs;
-    DefaultMutableTreeNode TempTreeNode;
-    IDTitle TempIDTitle;
-    // Gets a list of tags tagged with this tag (or all if root node)
-    TempIDTitle = (IDTitle) NodeAddTo.getUserObject();
-    if (TempIDTitle.getID().equals("-1"))
-      TagIDs = getAllTagIDs();
-    else
-      TagIDs = getTagIDsFromTagID(TempIDTitle.getID());
-    // For all of those tags, add them to the node as branches and recurse
-    if (TagIDs != null)
-      for (int i=0; i<TagIDs.length; i++)
-      {
-        if (PathTags.containsKey(TagIDs[i]) == false)
-        {
-          TempIDTitle = new IDTitle(TagIDs[i], getTagTitleFromTagID(TagIDs[i]));
-          TempTreeNode = new DefaultMutableTreeNode(TempIDTitle);
-          PathTags.put(TagIDs[i], TempIDTitle);
-          TempTreeNode = addTreeTags(TempTreeNode, PathTags);
-          PathTags.remove(TagIDs[i]);
-          NodeAddTo.add(TempTreeNode);
-        }
-      }
-    return NodeAddTo;
-  }
-
-
-  
-  // Delete a tag from the database from a selection on a tag tree
-  public JTree deleteTagFromTree(JTree TreeDelFrom,GUI theGUI)
-  {
-    DefaultMutableTreeNode NodeToDel;
-    IDTitle NodeToDelObject = null;
-    boolean IsRoot = false;
-    // Find the currently selected node in the tree
-    if (TreeDelFrom.getSelectionPath() == null)
-      IsRoot = true;
-    else
-    {
-      NodeToDel = (DefaultMutableTreeNode)TreeDelFrom.getLastSelectedPathComponent();
-      NodeToDelObject = (IDTitle)NodeToDel.getUserObject();
-      if (NodeToDelObject.getID().equals("-1"))
-        IsRoot = true;
-    }
-    if (IsRoot == false)
-      deleteTag(NodeToDelObject.getID());
-    return new TagTree(this,theGUI);
-  }
-  
-
-
 }

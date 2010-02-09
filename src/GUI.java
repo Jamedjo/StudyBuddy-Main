@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Hashtable;
 import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -436,4 +437,53 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
         tagTree.repaint();
     }
+
+      // Delete a tag from the database from a selection on a tag tree
+    void deleteTagFromTree() {
+        DefaultMutableTreeNode NodeToDel;
+        IDTitle NodeToDelObject = null;
+        boolean IsRoot = false;
+        // Find the currently selected node in the tree
+        if (tagTree.getSelectionPath() == null) {
+            IsRoot = true;
+        } else {
+            NodeToDel = (DefaultMutableTreeNode) tagTree.getLastSelectedPathComponent();
+            NodeToDelObject = (IDTitle) NodeToDel.getUserObject();
+            if (NodeToDelObject.getID().equals("-1")) {
+                IsRoot = true;
+            }
+        }
+        if (IsRoot == false) {
+            mainImageDB.deleteTag(NodeToDelObject.getID());
+        }
+    }
+
+      // Adds all tags tagged by a node to that node (in a tree)
+  DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,IDTitle> PathTags)
+  {
+    String[] TagIDs;
+    DefaultMutableTreeNode TempTreeNode;
+    IDTitle TempIDTitle;
+    // Gets a list of tags tagged with this tag (or all if root node)
+    TempIDTitle = (IDTitle) NodeAddTo.getUserObject();
+    if (TempIDTitle.getID().equals("-1"))
+      TagIDs = mainImageDB.getAllTagIDs();
+    else
+      TagIDs = mainImageDB.getTagIDsFromTagID(TempIDTitle.getID());
+    // For all of those tags, add them to the node as branches and recurse
+    if (TagIDs != null)
+      for (int i=0; i<TagIDs.length; i++)
+      {
+        if (PathTags.containsKey(TagIDs[i]) == false)
+        {
+          TempIDTitle = new IDTitle(TagIDs[i], mainImageDB.getTagTitleFromTagID(TagIDs[i]));
+          TempTreeNode = new DefaultMutableTreeNode(TempIDTitle);
+          PathTags.put(TagIDs[i], TempIDTitle);
+          TempTreeNode = addTreeTags(TempTreeNode, PathTags);
+          PathTags.remove(TagIDs[i]);
+          NodeAddTo.add(TempTreeNode);
+        }
+      }
+    return NodeAddTo;
+  }
 }
