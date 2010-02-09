@@ -13,6 +13,7 @@ public class TagTree extends JTree implements TreeSelectionListener {
         super(gui.addTreeTags(new DefaultMutableTreeNode(new IDTitle("-1", "All Tags")), new Hashtable<String, IDTitle>()));
         mainGUI = gui;
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+        this.setFocusable(false);//Prevents other keyboard actions in rest of GUI. May be able to allow up/down only here.
         this.addTreeSelectionListener(this);
     }
 

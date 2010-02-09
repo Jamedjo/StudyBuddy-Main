@@ -1,6 +1,7 @@
 import java.io.*;
 import java.util.Enumeration;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 class ImageDatabase
 {
@@ -271,6 +272,20 @@ class ImageDatabase
   {
     IndexedTable TempTable = getImagesFromTagID(TagID);
       return TempTable.getColArray(0);
+  }
+
+  // Get an array of image IDs tagged with the tag
+  // Also include any images tagged with an ID tagged by this tag.
+  // Should change to hashtable or somthing is used instead of array list.
+  //This is so we can check if each image is already going to be returned to prevent duplicates
+  String[] getImageIDsFromTagIDRecursively(String TagID) {
+        IndexedTable tempTable = getImagesFromTagID(TagID);
+       String[] tempTagTable = getTagIDsFromTagID(TagID);
+       ArrayList<String> imagesSoFar = new ArrayList<String>(Arrays.asList(tempTable.getColArray(0)));
+if(tempTagTable!=null)       for(String tag: tempTagTable){
+           imagesSoFar.addAll(Arrays.asList(getImageIDsFromTagIDRecursively(tag)));
+       }
+        return imagesSoFar.toArray(new String[imagesSoFar.size()]);
   }
   
   // Get an array of tag IDs tagged with the tag

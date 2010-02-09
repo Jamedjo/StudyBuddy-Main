@@ -127,6 +127,7 @@ enum ImageMenu{
 enum TagMenu{
     AddTag("Create new tag",KeyEvent.VK_N,-1,-1,"AddTag"),
 	TagThis("Tag this Image",KeyEvent.VK_T,KeyEvent.VK_T,0,"TagThis"),
+	TagTag("Tag a Tag",KeyEvent.VK_A,-1,-1,"TagTag"),
 	TagFilter("Filter Images by Tag",KeyEvent.VK_F,-1,-1,"TagFilter");
     
     JMenuItem item;

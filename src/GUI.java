@@ -134,6 +134,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         zoomBar.setMinorTickSpacing(20);
         zoomBar.setPaintLabels(true);
         zoomBar.setPaintTicks(true);
+        zoomBar.setFocusable(false);//Otherwise arrows zoom when they shouldn't
         zoomBar.addChangeListener(this);
         return zoomBar;
     }
@@ -195,10 +196,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("ZoomX")) zoomBox();
         else if (ae.getActionCommand().equals("Next")) state.nextImage();
         else if (ae.getActionCommand().equals("Prev")) state.prevImage();
-        else if (ae.getActionCommand().equals("AddTag")) {
-            addTagFromTree();
-        } else if (ae.getActionCommand().equals("TagThis")) tagThis();
+        else if (ae.getActionCommand().equals("AddTag")) addTagFromTree();
+        else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
+        else if (ae.getActionCommand().equals("TagTag")) tagTag();
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
@@ -385,6 +386,18 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             mainImageDB.tagImage(state.getCurrentImageID(), NewTagIDTitle.getID());
         }
     }
+    void tagTag() {
+        Object[] AllTags = mainImageDB.getTagIDTitles();
+        Object ChildTag = JOptionPane.showInputDialog(w, "Which tag would tag?", "Pick Child Tag",
+                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
+        Object ParentTag = JOptionPane.showInputDialog(w, "Which tag use as parent?", "Pick Parent Tag",
+                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
+        if ((ChildTag != null) && (ChildTag instanceof IDTitle) && (ParentTag != null) && (ParentTag instanceof IDTitle)) {
+            String ParentTagID = ((IDTitle) ParentTag).getID();
+            String ChildTagID= ((IDTitle) ChildTag).getID();
+            if(!ParentTagID.equals(ChildTagID)) mainImageDB.tagTag(ChildTagID,ParentTagID);
+        }
+    }
 
     void importDo() {
         int wasGot = fileGetter.showOpenDialog(w);
@@ -473,6 +486,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     // For all of those tags, add them to the node as branches and recurse
     if (TagIDs != null)
       for (int i=0; i<TagIDs.length; i++)
+      //for (int i=TagIDs.length-1; i>=0; i--)//Reverse add
       {
         if (PathTags.containsKey(TagIDs[i]) == false)
         {
