@@ -6,6 +6,8 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 //import javax.swing.ScrollPaneLayout;
 
 //We should use javadoc.
@@ -193,8 +195,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("Next")) state.nextImage();
         else if (ae.getActionCommand().equals("Prev")) state.prevImage();
         else if (ae.getActionCommand().equals("AddTag")) {
-            tagTree = mainImageDB.addTagFromTree(tagTree, w);
-            tagTree.repaint();
+            addTagFromTree();
         } else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
@@ -395,5 +396,44 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         if (wasGot == JFileChooser.APPROVE_OPTION) {
             state.importImages(folderGetter.getSelectedFiles());
         }
+    }
+
+    // Add a tag to the database from a selection on a tag tree
+    void addTagFromTree() {
+        String NewTag = (String) JOptionPane.showInputDialog(w, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");
+        String AddResult;
+        DefaultMutableTreeNode NodeAddTo = null;
+        DefaultMutableTreeNode NodeToAdd = null;
+        IDTitle NodeAddToObject = null;
+        boolean AddToRoot = false;
+        DefaultTreeModel Model;
+        // Check user inputted tag name is valid
+        if ((NewTag != null) && (NewTag.length() > 0)) {
+            // Add the new tag into the tag table
+            AddResult = mainImageDB.addTag(NewTag);
+            if (AddResult != null) {
+                // Find the currently selected node in the tree
+                if (tagTree.getSelectionPath() == null) {
+                    AddToRoot = true;
+                } else {
+                    NodeAddTo = (DefaultMutableTreeNode) tagTree.getLastSelectedPathComponent();
+                    // If root node selected then add to root node
+                    NodeAddToObject = (IDTitle) NodeAddTo.getUserObject();
+                    if (NodeAddToObject.getID().equals("-1")) {
+                        AddToRoot = true;
+                    }
+                    if (AddToRoot == false) {
+                        mainImageDB.tagTag(AddResult, NodeAddToObject.getID());
+                    }
+                }
+                if (AddToRoot == true) {
+                    NodeAddTo = (DefaultMutableTreeNode) tagTree.getModel().getRoot();
+                }
+                NodeToAdd = new DefaultMutableTreeNode(new IDTitle(AddResult, NewTag));
+                Model = (DefaultTreeModel) tagTree.getModel();
+                Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
+            }
+        }
+        tagTree.repaint();
     }
 }

@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 //Anything involving swing should be moved to seperate class
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 class ImageDatabase
@@ -427,45 +424,7 @@ class ImageDatabase
     return NodeAddTo;
   }
 
-  // Add a tag to the database from a selection on a tag tree
-  public JTree addTagFromTree(JTree TreeAddTo, JFrame Window)
-  {
-    String NewTag = (String)JOptionPane.showInputDialog(Window, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");
-    String AddResult;
-    DefaultMutableTreeNode NodeAddTo = null;
-    DefaultMutableTreeNode NodeToAdd = null;
-    IDTitle NodeAddToObject = null;
-    boolean AddToRoot = false;
-    DefaultTreeModel Model;
-    // Check user inputted tag name is valid
-    if ((NewTag != null) && (NewTag.length() > 0))
-    {
-      // Add the new tag into the tag table
-      AddResult = addTag(NewTag);
-      if (AddResult != null)
-      {
-        // Find the currently selected node in the tree
-        if (TreeAddTo.getSelectionPath() == null)
-          AddToRoot = true;
-        else
-        {
-          NodeAddTo = (DefaultMutableTreeNode)TreeAddTo.getLastSelectedPathComponent();
-          // If root node selected then add to root node
-          NodeAddToObject = (IDTitle)NodeAddTo.getUserObject();
-          if (NodeAddToObject.getID().equals("-1"))
-            AddToRoot = true;
-          if (AddToRoot == false)
-          tagTag(AddResult, NodeAddToObject.getID());
-        }
-        if (AddToRoot == true)
-          NodeAddTo = (DefaultMutableTreeNode) TreeAddTo.getModel().getRoot();
-        NodeToAdd = new DefaultMutableTreeNode(new IDTitle(AddResult, NewTag));
-        Model = (DefaultTreeModel)TreeAddTo.getModel();
-        Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
-      }
-    }
-    return TreeAddTo;
-  }
+
   
   // Delete a tag from the database from a selection on a tag tree
   public JTree deleteTagFromTree(JTree TreeDelFrom,GUI theGUI)

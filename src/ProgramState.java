@@ -208,6 +208,7 @@ class ProgramState{
         mainGUI.setTitle("Image: "+(currentI+1));
         mainGUI.mainPanel.onResize();
 	mainGUI.thumbPanel.onResize();
+        //mainGUI.tagTree.repaint();
     }
 
     int relItoFixI(int in){
