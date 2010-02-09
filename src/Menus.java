@@ -77,11 +77,10 @@ enum ToolBar{
 }
 
 enum ImageMenu{
-    mImport("Import Image",KeyEvent.VK_I,KeyEvent.VK_I, ActionEvent.CTRL_MASK,"mImport"),
-	//mImportImages
-	//mImportDirectory
-	mRestart("Restart Viewer",KeyEvent.VK_R,KeyEvent.VK_N,  ActionEvent.CTRL_MASK,"mRestart"),
-	mExit("Exit",KeyEvent.VK_X,KeyEvent.VK_W, ActionEvent.CTRL_MASK,"Exit");
+    mImport("Import Image(s)",KeyEvent.VK_I,KeyEvent.VK_I, ActionEvent.CTRL_MASK,"mImport"),
+    mImportD("Import Folder",KeyEvent.VK_F,KeyEvent.VK_I, ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK,"mImportD"),
+    mRestart("Restart Viewer",KeyEvent.VK_R,KeyEvent.VK_N,  ActionEvent.CTRL_MASK,"mRestart"),
+    mExit("Exit",KeyEvent.VK_X,KeyEvent.VK_W, ActionEvent.CTRL_MASK,"Exit");
     
     JMenuItem item;
     ImageMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){

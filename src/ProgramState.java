@@ -107,14 +107,36 @@ class ProgramState{
             if (currentFilter.equals("Show All Images")) { //WRONG???-> // "-1" is now show all (working on TagID rather than Tag Title)
                 ArrayList<String> tempImageIDs = new ArrayList<String>(Arrays.asList(imageIDs));
                 ArrayList<ImageObject> tempImageList = new ArrayList<ImageObject>(Arrays.asList(imageList));
+                ArrayList<File> foldersList = new ArrayList<File>();
                 for (File f : files) {
-                    //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
-                    String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
+                    if(f.isDirectory()) foldersList.add(f);
+                    else{
+                        //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
+                        String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
+                        if (currentImID != null) {
+                            tempImageIDs.add(currentImID);
+                            //tempImageList.add(new ImageObject(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
+                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID));
+                        }
+                    }
+                }
+                for(File dir: foldersList.toArray(new File[0])){
+                    File[] children = dir.listFiles(new FileFilter() {
+                        public boolean accept(File g) {
+                            if (g.isDirectory()) {
+                                return false;
+                            }
+                            return mainGUI.isImage(g);
+                        }
+                    });
+                    for (File c : children) {
+                    if(c.isDirectory()) foldersList.add(c);
+                    String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());
                     if (currentImID != null) {
                         tempImageIDs.add(currentImID);
-                        //tempImageList.add(new ImageObject(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
-                        tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID));
+                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID));
                     }
+                }
                 }
                 imageIDs = new String[tempImageIDs.size()];
                 tempImageIDs.toArray(imageIDs);

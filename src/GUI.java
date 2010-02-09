@@ -25,6 +25,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JMenuItem Options;
     JButton bSideBar;
     final JFileChooser fileGetter = new JFileChooser();
+    final JFileChooser folderGetter = new JFileChooser();
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
@@ -65,17 +66,15 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         w.setIconImage(SysIcon.Logo.Icon.getImage());
         //w.addComponentListener(this);
         buildFileGetter();
+        buildFolderGetter();
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
     }
 
-    void buildFileGetter() {
-        fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
-            public boolean accept(File f) {
-                if (f.isDirectory()) return true;
-                String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg"};
+    boolean isImage(File f){
+        String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg"};
                 String ext = null;
                 String name = f.getName();
                 int pos = name.lastIndexOf(".");
@@ -88,16 +87,27 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                     }
                 }
                 return false;
-            }
+    }
 
+    void buildFileGetter() {
+        fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;
+                }
+                return isImage(f);
+            }
             public String getDescription() {
                 return "All Images";
             }
-        }
-        );
+        });
         fileGetter.setDialogTitle("Import Image");
         fileGetter.setMultiSelectionEnabled(true);
-
+    }
+    void buildFolderGetter() {
+        folderGetter.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        folderGetter.setDialogTitle("Import Folder(s)");
+        folderGetter.setMultiSelectionEnabled(true);
     }
 
     void buildMenuBar() {
@@ -169,6 +179,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             toggleZoomed(true);
             quickRestart();
         } else if (ae.getActionCommand().equals("mImport")) importDo();
+        else if (ae.getActionCommand().equals("mImportD")) importDirDo();
         else if (ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
         else if (ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
         else if (ae.getActionCommand().equals("SlideP")) toggleSlide(true);
@@ -374,6 +385,12 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         int wasGot = fileGetter.showOpenDialog(w);
         if (wasGot == JFileChooser.APPROVE_OPTION) {
             state.importImages(fileGetter.getSelectedFiles());
+        }
+    }
+    void importDirDo() {
+        int wasGot = folderGetter.showOpenDialog(w);
+        if (wasGot == JFileChooser.APPROVE_OPTION) {
+            state.importImages(folderGetter.getSelectedFiles());
         }
     }
 }
