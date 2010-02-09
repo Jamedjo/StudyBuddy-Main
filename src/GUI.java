@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 //import javax.swing.ScrollPaneLayout;
 
 //We should use javadoc.
@@ -38,6 +39,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JScrollPane mainScrollPane;
     JPanel imageAreas;
     JSlider zoomBar;
+    File thumbPath;
     //boolean isChangingState = false;
 
     public static void main(String[] args) {
@@ -74,7 +76,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     boolean isImage(File f){
-        String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg"};
+        String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
+        //String[] readerNames = ImageIO.getReaderFormatNames();
                 String ext = null;
                 String name = f.getName();
                 int pos = name.lastIndexOf(".");
@@ -134,6 +137,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
     void quickRestart(){
         settings = new Settings();
+        thumbPath = new File(settings.getSetting("homeDir") + settings.getSetting("thumbnailPathExt"));
 	state = new ProgramState(this);
 	mainPanel = new MainPanel(this);
 

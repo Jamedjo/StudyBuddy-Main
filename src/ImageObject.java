@@ -49,7 +49,7 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
     public String toString(){
 	switch (this){
 	case Thumb: return "ThumbOnly";
-	case ThumbFull: return "Thumb";//ThumbFull requests size Thumb, but not clearing the full image as it may be used later
+	case ThumbFull: return "ThumbFull";//ThumbFull requests size Thumb, but not clearing the full image as it may be used later
 	case Screen: return "Screen";
 	default: return "Max";//Max is not yet implemented.
 	}
@@ -61,6 +61,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
     String absolutePath;//Kept for error messages. Likely to be similar to pathFile.toString()
     File pathFile = null;
+    File thumbPath = null;
     Orientation iOri;
     private Integer Bwidth = null;
     private Integer Bheight = null;//make private- external programs do not know if initialized
@@ -73,9 +74,10 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     //String title,filename,comments?
 
 
-    ImageObject(String inputPath,String currentID){
+    ImageObject(String inputPath,String currentID,File thumbnailPath){
 	String tempPath = "";
         imageID = currentID;
+        thumbPath = thumbnailPath;
         System.out.println("Image:"+imageID+" has inPath: "+inputPath);
 	try{
 	    if(inputPath.startsWith("///\\\\\\")){
@@ -193,7 +195,8 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	    reader.dispose();
 	    inputStream.close();
 
-	    if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
+	    //if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
+            if(bThumb!=null) {System.out.println("        -sampled every "+sampleFactor+" pixels from "+Bwidth+"x"+Bheight+" in "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds"); isQuickThumb = true;}
 	    //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
 	    //Bheight = reader.getHeight(0);
 	} catch (IOException e) {
@@ -208,6 +211,8 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	//int thumbailIndex = 0;
 	//BufferedImage bi;
 	//bi = reader.readThumbnail(imageIndex, thumbnailIndex);
+
+        if(bThumb!=null) saveThumbToFile();
 }
 
     //gets files dimension and thumbnail without loading it to memory
@@ -249,77 +254,102 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 
     //BufferedImage extractIcon(...)
 
-    BufferedImage getImage(ImgSize size){
-	System.out.println("Image requested: " + absolutePath + " at size " + size);
-	//gets thumbnail or full image
-	if(size.isThumb()&&bThumb!=null) return bThumb;
-	if(size==currentLarge&&bImage!=null) return bImage;//If there is an image which matches size
-	//Build large icon and small icon, return relevent.
-	if(size.isThumb()) {
-	    getThumbQuick();
-	    if(bThumb!=null) return bThumb;
+    BufferedImage getImage(ImgSize size) {
+        System.out.println("Image requested: " + absolutePath + " at size " + size);
+        //gets thumbnail or full image
+        if (size.isThumb() && bThumb != null) {
+            return bThumb;
+        }
+        if (size == currentLarge && bImage != null) {
+            return bImage;//If there is an image which matches size
+        }	//Build large icon and small icon, return relevent.
+        if (size == ImgSize.Thumb) {//If thumbfull do long way
+            getThumbQuick();
+            if (bThumb != null) {
+                return bThumb;
+            }
 //should now add rendering the thumb properly to a task list for another thread
-	}
+        }
         System.out.print("...");
         try {
-long start = Calendar.getInstance().getTimeInMillis();
+            long start = Calendar.getInstance().getTimeInMillis();
 //ImageIO.setUseCache(true);
 //ImageIO.setCacheDirectory(pathFile);
             bImage = ImageIO.read(pathFile);
-System.out.println("Loading image "+absolutePath+"\n      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to read image to memory");
-start = Calendar.getInstance().getTimeInMillis();
+            System.out.println("Loading image " + absolutePath + "\n      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to read image to memory");
+            start = Calendar.getInstance().getTimeInMillis();
 
-	    if(size==ImgSize.Screen||size==ImgSize.ThumbFull){//&& not thumb only (as this would be extra work)
-		bImage = makeScreenImg(bImage);
-		currentLarge = ImgSize.Screen;
-	    }
-	    else {currentLarge = ImgSize.Max;}
+            if ((size == ImgSize.Screen) || (size == ImgSize.ThumbFull)) {//&& not thumb only (as this would be extra work)
+                bImage = makeScreenImg(bImage);
+                currentLarge = ImgSize.Screen;
+            } else {
+                currentLarge = ImgSize.Max;
+            }
 
-System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to process image");
-start = Calendar.getInstance().getTimeInMillis();
-	    bThumb =  makeThumb(bImage);
-            System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to process thumbnail");
-	    setVars();
-System.out.println("      -Took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to get width,height&orientation");
-start = Calendar.getInstance().getTimeInMillis();
+            System.out.println("      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to process image");
+            makeThumb(bImage);
+            start = Calendar.getInstance().getTimeInMillis();
+            setVars();
+            System.out.println("      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to get width,height&orientation");
+            start = Calendar.getInstance().getTimeInMillis();
         } catch (IOException e) {
-	    System.err.println("Error loading image " + absolutePath + "\nError was: " + e.toString());
-	    setToXasFileNotFound();
-	    //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
+            System.err.println("Error loading image " + absolutePath + "\nError was: " + e.toString());
+            setToXasFileNotFound();
+            //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
         } catch (IllegalArgumentException e) {
-	    System.err.println("Image file " + absolutePath + " could not be found " + "\nError was: " + e.toString());
-	    setToXasFileNotFound();
-	} catch (NullPointerException e) {
-	    System.err.println("Could not load image from file " + absolutePath + "\nError was: " + e.toString());
-	    setToXasFileNotFound();
-	} catch(java.lang.OutOfMemoryError e){
-	    System.err.println("Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
-	}
-	if(bImage==null) return null;//if big is null, so is thumb.
-	if(size.isLarge()) return bImage;
-	System.out.println("Made thumb for "+absolutePath);
-	if(size==ImgSize.ThumbFull) return bThumb;
-	else{
-	    //as only thumb needed, clear bImage
-	    bImage = null;
-	    return bThumb;
-	}
+            System.err.println("Image file " + absolutePath + " could not be found " + "\nError was: " + e.toString());
+            setToXasFileNotFound();
+        } catch (NullPointerException e) {
+            System.err.println("Could not load image from file " + absolutePath + "\nError was: " + e.toString());
+            setToXasFileNotFound();
+        } catch (java.lang.OutOfMemoryError e) {
+            System.err.println("Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
+        }
+        if (bImage == null) {
+            return null;//if big is null, so is thumb.
+        }
+        if (size.isLarge()) {
+            return bImage;
+        }
+        //**//System.out.println("Made thumb for "+absolutePath);
+        if (size == ImgSize.ThumbFull) {
+            return bThumb;
+        } else {
+            //as only thumb needed, clear bImage
+            bImage = null;
+            return bThumb;
+        }
     }
 
-    BufferedImage makeThumb(BufferedImage bigImg){//quick one image read to bimage
-	Dimension iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),thumbMaxW,thumbMaxH);
-	if(!(iconWH.width<bigImg.getWidth())) return bigImg;
+    void makeThumb(BufferedImage bigImg){//quick one image read to bimage
+	long start = Calendar.getInstance().getTimeInMillis();
+            Dimension iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),thumbMaxW,thumbMaxH);
+	if(!(iconWH.width<bigImg.getWidth())) {
+            bThumb = bigImg;
+            return;
+        }
 
 	//Image tempimage = bigIcon.getImage();
-	BufferedImage tempimage =bigImg;
+	BufferedImage tempimage =(new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR));
 
-        Graphics2D g2 = (new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR)).createGraphics();//TYPE_INT_RGB
-        //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+        Graphics2D g2 = tempimage.createGraphics();//TYPE_INT_RGB
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-        g2.drawImage(tempimage, 0, 0, iconWH.width,iconWH.height, null);
+        g2.drawImage(bigImg, 0, 0, iconWH.width,iconWH.height, null);
         g2.dispose();
-	return tempimage;	
+        System.out.println("  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
+        bThumb = tempimage;
+        saveThumbToFile();
+    }
+    
+    void saveThumbToFile(){
+        try{
+            File thumbfile = new File(thumbPath,imageID+"_thumb.jpg");
+            ImageIO.write(bThumb,"jpg",thumbfile);
+        } catch (IOException e){
+            System.err.println("Error creating thumbnail for image: "+absolutePath);
+        }
     }
 
     //could merge two functions
@@ -327,13 +357,13 @@ start = Calendar.getInstance().getTimeInMillis();
 	Dimension iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),screenWidth,screenHeight);
 	if(!(iconWH.width<bigImg.getWidth())) return bigImg;
 	//Image tempimage = bigIcon.getImage();
-	BufferedImage tempimage =bigImg;
+	BufferedImage tempimage =(new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR));
 
-        Graphics2D g2 = (new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR)).createGraphics();//TYPE_INT_RGB takes 4bytes, this takes 3. Less memory used
+        Graphics2D g2 = tempimage.createGraphics();//TYPE_INT_RGB takes 4bytes, this takes 3. Less memory used
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);//might not be avaliable on all systems // might not have spelt biquibic right
         //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.drawImage(tempimage, 0, 0, iconWH.width,iconWH.height, null);
+        g2.drawImage(bigImg, 0, 0, iconWH.width,iconWH.height, null);
         g2.dispose();
 
 	return tempimage;	

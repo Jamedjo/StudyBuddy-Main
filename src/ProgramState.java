@@ -90,7 +90,7 @@ class ProgramState{
       	imageList = new ImageObject[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i]);
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI.thumbPath);
 	}
 	lastIndex = (imageIDs.length - 1);
 
@@ -116,7 +116,7 @@ class ProgramState{
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
                             //tempImageList.add(new ImageObject(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
-                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID));
+                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID, mainGUI.thumbPath));
                         }
                     }
                 }
@@ -134,7 +134,7 @@ class ProgramState{
                     String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());
                     if (currentImID != null) {
                         tempImageIDs.add(currentImID);
-                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID));
+                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID,mainGUI.thumbPath));
                     }
                 }
                 }
