@@ -6,9 +6,7 @@ import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
-import javax.imageio.ImageIO;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 //import javax.swing.ScrollPaneLayout;
 
 //We should use javadoc.
@@ -37,7 +35,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     volatile ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
-    JTree tagTree;
+    TagTree tagTree;
     Thread slideThread;
     JScrollPane mainScrollPane;
     JPanel imageAreas;
@@ -152,6 +150,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
         tagTree = new TagTree(mainImageDB,this);
         //TagTree.setMinimumSize(new Dimension(150,0));
+        //Put tagTree in a scrollPane for when more tags exist than it can vertically handle.
 
         mainScrollPane = new JScrollPane(mainPanel);
         mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
@@ -196,7 +195,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("ZoomX")) zoomBox();
         else if (ae.getActionCommand().equals("Next")) state.nextImage();
         else if (ae.getActionCommand().equals("Prev")) state.prevImage();
-        else if (ae.getActionCommand().equals("AddTag")) addTagFromTree();
+        else if (ae.getActionCommand().equals("AddTag")) addTag();
         else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) tagTag();
@@ -412,43 +411,18 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
     }
 
-    // Add a tag to the database from a selection on a tag tree
-    void addTagFromTree() {
-        String NewTag = (String) JOptionPane.showInputDialog(w, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");
-        String AddResult;
-        DefaultMutableTreeNode NodeAddTo = null;
-        DefaultMutableTreeNode NodeToAdd = null;
-        IDTitle NodeAddToObject = null;
-        boolean AddToRoot = false;
-        DefaultTreeModel Model;
+    // Add a tag to the database and update tree
+    void addTag() {
+        String newTag = (String) JOptionPane.showInputDialog(w, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");
+        String newTagID;
         // Check user inputted tag name is valid
-        if ((NewTag != null) && (NewTag.length() > 0)) {
+        if ((newTag != null) && (newTag.length() > 0)) {
             // Add the new tag into the tag table
-            AddResult = mainImageDB.addTag(NewTag);
-            if (AddResult != null) {
-                // Find the currently selected node in the tree
-                if (tagTree.getSelectionPath() == null) {
-                    AddToRoot = true;
-                } else {
-                    NodeAddTo = (DefaultMutableTreeNode) tagTree.getLastSelectedPathComponent();
-                    // If root node selected then add to root node
-                    NodeAddToObject = (IDTitle) NodeAddTo.getUserObject();
-                    if (NodeAddToObject.getID().equals("-1")) {
-                        AddToRoot = true;
-                    }
-                    if (AddToRoot == false) {
-                        mainImageDB.tagTag(AddResult, NodeAddToObject.getID());
-                    }
-                }
-                if (AddToRoot == true) {
-                    NodeAddTo = (DefaultMutableTreeNode) tagTree.getModel().getRoot();
-                }
-                NodeToAdd = new DefaultMutableTreeNode(new IDTitle(AddResult, NewTag));
-                Model = (DefaultTreeModel) tagTree.getModel();
-                Model.insertNodeInto(NodeToAdd, NodeAddTo, NodeAddTo.getChildCount());
+            newTagID = mainImageDB.addTag(newTag);
+            if (newTagID != null) {
+                tagTree.addTagToTree(newTagID,newTag);
             }
         }
-        tagTree.repaint();
     }
 
       // Delete a tag from the database from a selection on a tag tree
@@ -471,33 +445,5 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
     }
 
-      // Adds all tags tagged by a node to that node (in a tree)
-  DefaultMutableTreeNode addTreeTags(DefaultMutableTreeNode NodeAddTo, Hashtable<String,IDTitle> PathTags)
-  {
-    String[] TagIDs;
-    DefaultMutableTreeNode TempTreeNode;
-    IDTitle TempIDTitle;
-    // Gets a list of tags tagged with this tag (or all if root node)
-    TempIDTitle = (IDTitle) NodeAddTo.getUserObject();
-    if (TempIDTitle.getID().equals("-1"))
-      TagIDs = mainImageDB.getAllTagIDs();
-    else
-      TagIDs = mainImageDB.getTagIDsFromTagID(TempIDTitle.getID());
-    // For all of those tags, add them to the node as branches and recurse
-    if (TagIDs != null)
-      for (int i=0; i<TagIDs.length; i++)
-      //for (int i=TagIDs.length-1; i>=0; i--)//Reverse add
-      {
-        if (PathTags.containsKey(TagIDs[i]) == false)
-        {
-          TempIDTitle = new IDTitle(TagIDs[i], mainImageDB.getTagTitleFromTagID(TagIDs[i]));
-          TempTreeNode = new DefaultMutableTreeNode(TempIDTitle);
-          PathTags.put(TagIDs[i], TempIDTitle);
-          TempTreeNode = addTreeTags(TempTreeNode, PathTags);
-          PathTags.remove(TagIDs[i]);
-          NodeAddTo.add(TempTreeNode);
-        }
-      }
-    return NodeAddTo;
-  }
+  
 }
