@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.Hashtable;
 import javax.swing.tree.DefaultMutableTreeNode;
 //import javax.swing.ScrollPaneLayout;
 

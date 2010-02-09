@@ -1,28 +1,57 @@
-
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Hashtable;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreeSelectionModel;
 
-public class TagTree extends JTree implements TreeSelectionListener {//Will implement ActionListener for JPopupMenu
-
+public class TagTree extends JTree implements TreeSelectionListener,ActionListener{
     ImageDatabase mainImageDB;
     GUI mainGUI;
     DefaultMutableTreeNode treeNode;
+    JPopupMenu rightClickMenu = new JPopupMenu();
+    JMenuItem mTagThis;
+    int lastX,lastY;
 
     TagTree(ImageDatabase mainDB, GUI gui) {
         super(new DefaultTreeModel(new DefaultMutableTreeNode(), false));
         mainGUI = gui;
         mainImageDB = mainDB;
+        //last x any y = 0; ?
         treeNode = new DefaultMutableTreeNode(new IDTitle("-1", "All Tags"));
         ((DefaultTreeModel) this.getModel()).setRoot(treeNode);
         addTreeTags(treeNode, new Hashtable<String, IDTitle>());
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.setFocusable(false);//Prevents other keyboard actions in rest of GUI. May be able to allow up/down only here.
+        this.expandRow(0);
         this.addTreeSelectionListener(this);
+        this.addMouseListener(
+                new MouseAdapter() {
+                    // Also for mouse pressed? different platforms/os trigger popups differently
+                    public void mouseReleased(MouseEvent e) {
+                        if (e.isPopupTrigger()) {
+                            lastX=e.getX();
+                            lastY=e.getY();
+                            rightClickMenu.show((JComponent) e.getSource(), e.getX(), e.getY());
+                        }
+                    }
+                });
+
+
+        mTagThis = new JMenuItem("Tag current image with this");
+        mTagThis.addActionListener(this);
+        mTagThis.setActionCommand("rTagThis");
+        rightClickMenu.add(mTagThis);
+
     }
 
     public void valueChanged(TreeSelectionEvent Event) {
@@ -37,6 +66,16 @@ public class TagTree extends JTree implements TreeSelectionListener {//Will impl
                 mainGUI.state = new ProgramState(LoadType.Filter, mainGUI, NodeObject.getID());
                 mainGUI.state.imageChanged();
             }
+        }
+    }
+
+public void actionPerformed(ActionEvent ae) {//ensue x and y are from first click and not menu click
+        if (ae.getActionCommand().equals("rTagThis")){
+            IDTitle idT =(IDTitle)((DefaultMutableTreeNode)this.getPathForLocation(lastX,lastY).getLastPathComponent()).getUserObject();
+            mainImageDB.tagImage(mainGUI.state.getCurrentImageID(), idT.getID());
+        }
+        else {
+            System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());
         }
     }
 
