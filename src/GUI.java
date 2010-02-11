@@ -153,6 +153,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
         mainScrollPane = new JScrollPane(mainPanel);
         mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
+        //mainScrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
         mainScrollPane.setWheelScrollingEnabled(false);
 

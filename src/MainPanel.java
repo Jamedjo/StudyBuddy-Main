@@ -3,6 +3,7 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.JOptionPane.*;
 import java.awt.event.*;
+import java.awt.Cursor;
 
 public class MainPanel extends JPanel implements MouseWheelListener, MouseListener, MouseMotionListener {//,Scrollable {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
@@ -18,6 +19,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     boolean isZoomed = false;
     double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
     private int lastX,lastY;
+    Cursor openHand = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
+    Cursor closedHand = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
+    Cursor plainCursor = Cursor.getDefaultCursor();
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -34,11 +38,17 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     void onResize() {
         if ( isZoomed ) {
             this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), this.getParent().getWidth(), this.getParent().getHeight()));
+            if(this.getPreferredSize().width>getParent().getParent().getWidth()||this.getPreferredSize().height>getParent().getParent().getHeight()) {
+                this.setCursor(openHand);
+            } else {
+                this.setCursor(plainCursor);
+            }
         } else {
             mainGUI.imageAreas.validate();
             boardW = mainGUI.mainScrollPane.getWidth() - 3;
             boardH = mainGUI.mainScrollPane.getHeight() - 3;
             this.setPreferredSize(new Dimension(boardW, boardH));
+            this.setCursor(Cursor.getDefaultCursor());
         }
         getParent().validate();
         this.revalidate();
@@ -68,7 +78,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             leftOfset = (boardW - useWH.width) / 2;
             topOfset = (boardH - useWH.height) / 2;
         }
-
+        //Image offScreenImage = createImage(useWH.width,useWH.height);
+        //Graphics2D gOffScr = (Graphics2D) offScreenImage.getGraphics();
+        //gOffScr.drawImage(mainGUI.state.getBImageI(0, cSize), 0, 0, useWH.width, useWH.height, this);
+        //g2.drawImage(offScreenImage,leftOfset,topOfset, this);
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
     }
 
@@ -101,10 +114,17 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         lastY = e.getY();        
     }
     public void mousePressed(MouseEvent e){
+        if (this.getCursor().equals(openHand)){
+            this.setCursor(closedHand);
+        }
         lastX = e.getX();
         lastY = e.getY();
     }
-    public void mouseReleased(MouseEvent e){ }
+    public void mouseReleased(MouseEvent e){
+        if (this.getCursor().equals(closedHand)){
+            this.setCursor(openHand);
+        }
+    }
     public void mouseClicked(MouseEvent e){ }
     public void mouseEntered(MouseEvent e){ }
     public void mouseExited(MouseEvent e){ }
