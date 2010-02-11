@@ -4,7 +4,7 @@ import javax.swing.*;
 import javax.swing.JOptionPane.*;
 import java.awt.event.*;
 
-public class MainPanel extends JPanel implements MouseWheelListener {//,Scrollable, MouseMotionListener {
+public class MainPanel extends JPanel implements MouseWheelListener, MouseListener, MouseMotionListener {//,Scrollable {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
 
     Dimension gridSize;
@@ -17,6 +17,7 @@ public class MainPanel extends JPanel implements MouseWheelListener {//,Scrollab
     final GUI mainGUI;
     boolean isZoomed = false;
     double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
+    private int lastX,lastY;
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -26,8 +27,8 @@ public class MainPanel extends JPanel implements MouseWheelListener {//,Scrollab
         setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
         this.addMouseWheelListener(this);
-//        setAutoscrolls(true); //enable synthetic drag events
-//        addMouseMotionListener(this); //handle mouse drags
+        this.addMouseMotionListener(this);
+        this.addMouseListener(this);
     }
 
     void onResize() {
@@ -86,14 +87,28 @@ public class MainPanel extends JPanel implements MouseWheelListener {//,Scrollab
             zoomMultiplier = minimumZoomLevel;
         }
         mainGUI.toggleZoomed(false);
-        this.scrollRectToVisible(new Rectangle(xpos,ypos,xpos+1,ypos+1));//improve this to improve zoom.
+        System.out.println(xpos+","+ypos);
+        //this.scrollRectToVisible(new Rectangle(xpos,ypos,this.getParent().getWidth(),this.getParent().getHeight()));//improve this to improve zoom.
+        ((JViewport)this.getParent()).setViewPosition(new Point(xpos,ypos));
     }
-//    @Override public void mouseMoved(MouseEvent e) { }
-//    @Override public void mouseDragged(MouseEvent e) {
-//        //The user is dragging us, so scroll!
-//        Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
-//        scrollRectToVisible(r);
-//    }
+    @Override public void mouseMoved(MouseEvent e) { }
+    @Override public void mouseDragged(MouseEvent e) {
+        //The user is dragging us, so scroll!
+        Rectangle r = ((JViewport)this.getParent()).getViewRect();
+        r.translate(lastX-e.getX(),lastY-e.getY());
+        scrollRectToVisible(r);
+        lastX = e.getX();
+        lastY = e.getY();        
+    }
+    public void mousePressed(MouseEvent e){
+        lastX = e.getX();
+        lastY = e.getY();
+    }
+    public void mouseReleased(MouseEvent e){ }
+    public void mouseClicked(MouseEvent e){ }
+    public void mouseEntered(MouseEvent e){ }
+    public void mouseExited(MouseEvent e){ }
+
 //    @Override public Dimension getPreferredScrollableViewportSize() {
 //        return this.getPreferredSize();
 //    }

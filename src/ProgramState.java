@@ -99,6 +99,10 @@ class ProgramState{
 	//if((loadType!=LoadType.Init) && (loadType!=LoadType.Load)){
             //imageChanged();//Will cause deadlock or bugs if uncommented. Call after constructing
 	//}
+    if(imageList.length<1){
+            System.err.println("Error: There are no images loaded under current search.\nEnsure filter has some images.");
+            ConstructProgramState(LoadType.Refresh,parentGUI,"Show All Images");
+        }
     }
 
     void importImages(File[] files) {
