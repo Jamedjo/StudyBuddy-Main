@@ -96,26 +96,30 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 //        gOffScr.dispose();
 //        g2.drawImage(offScreenImage,leftOfset,topOfset, this);
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
-		DrawLinkBoxes(g2,leftOfset, topOfset, true, true);
+		DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, zoomMultiplier, true, true);
     }
 	
 	// Retreive the boxes for notes and links and draw them on the image
-	private void DrawLinkBoxes(Graphics2D DrawWhere, int XOffset, int YOffset, boolean Notes, boolean ImageLinks)
+	private void DrawLinkBoxes(Graphics2D DrawWhere, GUI TheGUI, int XOffset, int YOffset, double Scale, boolean Notes, boolean ImageLinks)
 	{
 		Rectangle[] Links;
-		String CurrentImageID = mainGUI.state.getCurrentImageID();
+		String CurrentImageID = TheGUI.state.getCurrentImageID();
+		System.out.println(zoomMultiplier);
 		if (CurrentImageID != null)
 		{
 			if (Notes == true)
 			{
-				Links = mainGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
+				Links = TheGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, XOffset, YOffset, Scale);
 				if (Links != null)
+				{
+					System.out.println(Links[0]);
 					for(int i=0; i<Links.length; i++)
 						DrawWhere.draw(Links[i]);
+				}
 			}
 			if (ImageLinks == true)
 			{
-				Links = mainGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
+				Links = TheGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, XOffset, YOffset, Scale);
 				if (Links != null)
 					for(int i=0; i<Links.length; i++)
 						DrawWhere.draw(Links[i]);
@@ -170,9 +174,37 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         lastDrag = Calendar.getInstance().getTimeInMillis();
     }
     public void mouseReleased(MouseEvent e){
+		int leftOfset=0;
+		int topOfset=0;
         if (this.getCursor().equals(closedHand)){
             this.setCursor(openHand);
         }
+		if (mainGUI.state.noteRect == true || mainGUI.state.linkRect == true)
+		{
+			if (isZoomed)
+			{
+				leftOfset = (this.getPreferredSize().width - useWH.width) / 2;
+				topOfset = (this.getPreferredSize().height - useWH.height) / 2;
+			}
+			else 
+			{
+				leftOfset = (boardW - useWH.width) / 2;
+				topOfset = (boardH - useWH.height) / 2;
+			}
+		}
+		if (mainGUI.state.noteRect == true)
+		{
+			
+			mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", (int) ((lastX/zoomMultiplier)-leftOfset), (int) ((lastY/zoomMultiplier)-topOfset), (int) ((e.getX()-lastX)/zoomMultiplier), (int) ((e.getY()-lastY)/zoomMultiplier));
+			mainGUI.state.noteRect = false;
+			this.repaint();
+		}
+		if (mainGUI.state.linkRect == true)
+		{
+			mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", lastX-leftOfset, lastY-topOfset, e.getX()-lastX, e.getY()-lastY);
+			mainGUI.state.linkRect = false;
+			this.repaint();
+		}
     }
     public void mouseClicked(MouseEvent e){ }
     public void mouseEntered(MouseEvent e){ }
