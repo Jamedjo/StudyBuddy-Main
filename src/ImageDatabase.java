@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.awt.Rectangle;
 
 class ImageDatabase
 {
@@ -37,11 +38,11 @@ class ImageDatabase
       boolean[] TagToTagKeys = {true, true};
       TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader), TagToTagKeys);
 	  
-	  String[] ImageToImageHeader = {"FromImageID", "ToImageID", "TopX", "TopY", "BottomX", "BottomY"};
+	  String[] ImageToImageHeader = {"FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
       boolean[] ImageToImageKeys = {true, true, false, false, false, false};
       ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
 	  
-	  String[] ImageToNoteHeader = {"ImageID", "Note", "TopX", "TopY", "BottomX", "BottomY"};
+	  String[] ImageToNoteHeader = {"ImageID", "Note", "X", "Y", "Width", "Height"};
       boolean[] ImageToNoteKeys = {true, false, true, true, true, true};
       ImageToImageTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
   }
@@ -109,7 +110,7 @@ class ImageDatabase
 	  }	
 	  catch(Exception TheError)
 	  {
-		String[] ImageToImageHeader = {"FromImageID", "ToImageID", "TopX", "TopY", "BottomX", "BottomY"};
+		String[] ImageToImageHeader = {"FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
 		boolean[] ImageToImageKeys = {true, true, false, false, false, false};
 		ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
 	  }
@@ -119,9 +120,9 @@ class ImageDatabase
 	  }	
 	  catch(Exception TheError)
 	  {
-		String[] ImageToNoteHeader = {"ImageID", "Note", "TopX", "TopY", "BottomX", "BottomY"};
+		String[] ImageToNoteHeader = {"ImageID", "Note", "X", "Y", "Width", "Height"};
 		boolean[] ImageToNoteKeys = {true, false, true, true, true, true};
-		ImageToImageTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
+		ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
 	  }
   }
   
@@ -225,9 +226,9 @@ class ImageDatabase
   }
   
   // Delete an ImageToImage link from the database (by fields)
-  int deleteLink(String FromImageID, String ToImageID, int TopX, int TopY, int BottomY, int BottomX)
+  int deleteLink(String FromImageID, String ToImageID, int X, int Y, int Height, int Width)
   {
-    String[] RecordArray = {ToImageID, FromImageID, Integer.toString(TopX), Integer.toString(TopY), Integer.toString(BottomX), Integer.toString(BottomY)};
+    String[] RecordArray = {ToImageID, FromImageID, Integer.toString(X), Integer.toString(Y), Integer.toString(Height), Integer.toString(Width)};
     return deleteLink(new Record(RecordArray));
   }
   
@@ -335,10 +336,21 @@ class ImageDatabase
       }
   }
   
-  // Link an area of an image to another image
-  int linkImage(String ToImageID, String FromImageID, int TopX, int TopY, int BottomX, int BottomY)
+  // Link an area of an image to a note
+  int addImageNote(String ImageID, String Note, int X, int Y, int Width, int Height)
   {
-    String[] RecordString = {ToImageID, FromImageID, Integer.toString(TopX), Integer.toString(TopY), Integer.toString(BottomX), Integer.toString(BottomY)};
+    String[] RecordString = {ImageID, Note, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
+    if (ImageTable.getRecord(ImageID, 0) == null)
+      return 0;
+    else
+      ImageToNoteTable.addRecord(new Record(RecordString));
+      return 1;
+  }
+  
+  // Link an area of an image to another image
+  int linkImage(String ToImageID, String FromImageID, int X, int Y, int Width, int Height)
+  {
+    String[] RecordString = {ToImageID, FromImageID, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
     if (ImageTable.getRecord(ToImageID, 0) == null)
       return 0;
     else
@@ -365,6 +377,66 @@ class ImageDatabase
         TagToTagTable.addRecord(new Record(RecordString));
           return 1;
       }
+  }
+  
+  // Produce a sub table of Notes for a certain ImageID
+  IndexedTable getNotesFromImageID(String ImageID)
+  {
+	return ImageToNoteTable.getRecords(ImageID, 0);
+  }
+  
+  // Produce a sub table of links for a certain ImageID
+  IndexedTable getLinksFromImageID(String ImageID)
+  {
+	return ImageToImageTable.getRecords(ImageID, 0);
+  }
+  
+  // Produce a sub table of Notes for a certain ImageID
+  Rectangle[] getNoteRectanglesFromImageID(String ImageID, int XOffset, int YOffset)
+  {
+	IndexedTable TempTable = ImageToNoteTable.getRecords(ImageID, 0);
+	Enumeration Records;
+	Record TempRecord;
+	Rectangle[] Result;
+	int i=0;
+	if (TempTable.getNumRecords() == 0)
+		return null;
+	else
+	{
+		Result = new Rectangle[TempTable.getNumRecords()];
+		Records = TempTable.elements();
+		while(Records.hasMoreElements())
+		{
+		  TempRecord = (Record) Records.nextElement();
+		  Result[i] = new Rectangle(XOffset + Integer.parseInt(TempRecord.getField(0)), YOffset + Integer.parseInt(TempRecord.getField(1)), Integer.parseInt(TempRecord.getField(2)), Integer.parseInt(TempRecord.getField(3)));
+		  i++;
+		}
+		return Result;
+	}
+  }
+  
+  // Produce a sub table of links for a certain ImageID
+  Rectangle[] getLinkRectanglesFromImageID(String ImageID, int XOffset, int YOffset)
+  {
+	IndexedTable TempTable = ImageToImageTable.getRecords(ImageID, 0);
+	Enumeration Records;
+	Record TempRecord;
+	Rectangle[] Result;
+	int i=0;
+	if (TempTable.getNumRecords() == 0)
+		return null;
+	else
+	{
+		Result = new Rectangle[TempTable.getNumRecords()];
+		Records = TempTable.elements();
+		while(Records.hasMoreElements())
+		{
+		  TempRecord = (Record) Records.nextElement();
+		  Result[i] = new Rectangle(XOffset + Integer.parseInt(TempRecord.getField(0)), YOffset + Integer.parseInt(TempRecord.getField(1)), Integer.parseInt(TempRecord.getField(2)), Integer.parseInt(TempRecord.getField(3)));
+		  i++;
+		}
+		return Result;
+	}
   }
   
   // Produce a sub table of Images that are tagged with the TagID
@@ -422,21 +494,48 @@ class ImageDatabase
   String[] getImageIDsFromTagID(String TagID)
   {
     IndexedTable TempTable = getImagesFromTagID(TagID);
-      return TempTable.getColArray(0);
+    return TempTable.getColArray(0);
   }
 
   // Get an array of image IDs tagged with the tag
   // Also include any images tagged with an ID tagged by this tag.
   // Should change to hashtable or somthing is used instead of array list.
   //This is so we can check if each image is already going to be returned to prevent duplicates
-  String[] getImageIDsFromTagIDRecursively(String TagID) {
-        IndexedTable tempTable = getImagesFromTagID(TagID);
-       String[] tempTagTable = getTagIDsFromTagID(TagID);
-       ArrayList<String> imagesSoFar = new ArrayList<String>(Arrays.asList(tempTable.getColArray(0)));
-if(tempTagTable!=null)       for(String tag: tempTagTable){
-           imagesSoFar.addAll(Arrays.asList(getImageIDsFromTagIDRecursively(tag)));
-       }
-        return imagesSoFar.toArray(new String[imagesSoFar.size()]);
+  String[] getImageIDsFromTagIDRecursively(String TagID)
+  {
+    IndexedTable tempTable = getImagesFromTagID(TagID);
+    String[] tempTagTable = getTagIDsFromTagID(TagID);
+    ArrayList<String> imagesSoFar = new ArrayList<String>(Arrays.asList(tempTable.getColArray(0)));
+	if(tempTagTable!=null)
+	  for(String tag: tempTagTable)
+	  {
+        imagesSoFar.addAll(Arrays.asList(getImageIDsFromTagIDRecursively(tag)));
+      }
+    return imagesSoFar.toArray(new String[imagesSoFar.size()]);
+  }
+  
+  // Returns a table of images tagged with the tag, includes children
+  IndexedTable getImagesFromTagIDChildren(String TagID)
+  {
+	IndexedTable TempImageTable;
+	Enumeration TempImages;
+	IndexedTable ResultTable = getImagesFromTagID(TagID);
+	String[] TaggedTags = getTagIDsFromTagID(TagID);
+	if (TagTable != null)
+		for(int i=0; i<TaggedTags.length; i++)
+		{
+			TempImageTable = getImagesFromTagID(TaggedTags[i]);
+			TempImages = TempImageTable.elements();
+			while (TempImages.hasMoreElements())
+				ResultTable.addRecord((Record) TempImages.nextElement());
+		}
+	return ResultTable;
+  }
+  
+  // Returns an array of ImageIDs tagged with the tag, includes children
+  String[] getImageIDsFromTagIDChildren(String TagID)
+  {
+	return getImagesFromTagIDChildren(TagID).getColArray(0);
   }
   
   // Get an array of tag IDs tagged with the tag
@@ -508,13 +607,13 @@ if(tempTagTable!=null)       for(String tag: tempTagTable){
     return Result;
   }
   
-  // Get an array of IDTitles of all tags
+  // Get an array of TagIDs of all tags
   String[] getAllTagIDs()
   {
     return TagTable.getColArray(0);
   }
   
-  // Get an array of all the tag Titles
+  // Get an array of all the tag Titles (shouldnt be used - title not key field - titles not unique)
   String[] getAllTagTitles()
   {
     return TagTable.getColArray(1);
@@ -549,6 +648,7 @@ if(tempTagTable!=null)       for(String tag: tempTagTable){
     else
       return FoundRecord;
   }
+  
   
   // Get an array of all the image filenames
   String[] getAllFilenames()

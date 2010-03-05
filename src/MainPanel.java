@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.JOptionPane.*;
 import java.awt.event.*;
 import java.awt.Cursor;
+import java.awt.Rectangle;
 
 public class MainPanel extends JPanel implements MouseWheelListener, MouseListener, MouseMotionListener {//,Scrollable {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
@@ -83,7 +84,32 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         //gOffScr.drawImage(mainGUI.state.getBImageI(0, cSize), 0, 0, useWH.width, useWH.height, this);
         //g2.drawImage(offScreenImage,leftOfset,topOfset, this);
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
+		DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, true, true);
     }
+	
+	// Retreive the boxes for notes and links and draw them on the image
+	private void DrawLinkBoxes(Graphics2D DrawWhere, GUI TheGUI, int XOffset, int YOffset, boolean Notes, boolean ImageLinks)
+	{
+		Rectangle[] Links;
+		String CurrentImageID = TheGUI.state.getCurrentImageID();
+		if (CurrentImageID != null)
+		{
+			if (Notes == true)
+			{
+				Links = TheGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
+				if (Links != null)
+					for(int i=0; i<Links.length; i++)
+						DrawWhere.draw(Links[i]);
+			}
+			if (ImageLinks == true)
+			{
+				Links = TheGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
+				if (Links != null)
+					for(int i=0; i<Links.length; i++)
+						DrawWhere.draw(Links[i]);
+			}
+		}
+	}
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
