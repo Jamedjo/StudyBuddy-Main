@@ -392,7 +392,7 @@ class ImageDatabase
   }
   
   // Produce a sub table of Notes for a certain ImageID
-  Rectangle[] getNoteRectanglesFromImageID(String ImageID, int XOffset, int YOffset)
+  Rectangle[] getNoteRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
 	IndexedTable TempTable = ImageToNoteTable.getRecords(ImageID, 0);
 	Enumeration Records;
@@ -408,7 +408,7 @@ class ImageDatabase
 		while(Records.hasMoreElements())
 		{
 		  TempRecord = (Record) Records.nextElement();
-		  Result[i] = new Rectangle(XOffset + Integer.parseInt(TempRecord.getField(0)), YOffset + Integer.parseInt(TempRecord.getField(1)), Integer.parseInt(TempRecord.getField(2)), Integer.parseInt(TempRecord.getField(3)));
+		  Result[i] = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
 		  i++;
 		}
 		return Result;
@@ -416,7 +416,7 @@ class ImageDatabase
   }
   
   // Produce a sub table of links for a certain ImageID
-  Rectangle[] getLinkRectanglesFromImageID(String ImageID, int XOffset, int YOffset)
+  Rectangle[] getLinkRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
 	IndexedTable TempTable = ImageToImageTable.getRecords(ImageID, 0);
 	Enumeration Records;
@@ -432,7 +432,7 @@ class ImageDatabase
 		while(Records.hasMoreElements())
 		{
 		  TempRecord = (Record) Records.nextElement();
-		  Result[i] = new Rectangle(XOffset + Integer.parseInt(TempRecord.getField(0)), YOffset + Integer.parseInt(TempRecord.getField(1)), Integer.parseInt(TempRecord.getField(2)), Integer.parseInt(TempRecord.getField(3)));
+		  Result[i] = new Rectangle(XOffset + Integer.parseInt(TempRecord.getField(2)), YOffset + Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)));
 		  i++;
 		}
 		return Result;
