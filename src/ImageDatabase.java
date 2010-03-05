@@ -9,6 +9,8 @@ class ImageDatabase
   private IndexedTable TagTable;
   private IndexedTable ImageToTagTable;
   private IndexedTable TagToTagTable;
+  private IndexedTable ImageToImageTable;
+  private IndexedTable ImageToNoteTable;
   private String Name;
   private int NextImageID;
   private int NextTagID;
@@ -34,6 +36,14 @@ class ImageDatabase
       String[] TagToTagHeader = {"TagID", "TagID"};
       boolean[] TagToTagKeys = {true, true};
       TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader), TagToTagKeys);
+	  
+	  String[] ImageToImageHeader = {"FromImageID", "ToImageID", "TopX", "TopY", "BottomX", "BottomY"};
+      boolean[] ImageToImageKeys = {true, true, false, false, false, false};
+      ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
+	  
+	  String[] ImageToNoteHeader = {"ImageID", "Note", "TopX", "TopY", "BottomX", "BottomY"};
+      boolean[] ImageToNoteKeys = {true, false, true, true, true, true};
+      ImageToImageTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
   }
   
   // Loads the image database from the files it's stored in
@@ -49,12 +59,70 @@ class ImageDatabase
       }
       catch (Exception TheError)
       {
-        throw new Error(TheError);    
-      } 
-      ImageTable = new IndexedTable(Filename + "_ImageTable");
-      TagTable = new IndexedTable(Filename + "_TagTable");
-      ImageToTagTable = new IndexedTable(Filename + "_ImageToTagTable");
-      TagToTagTable = new IndexedTable(Filename + "_TagToTagTable");
+        Name = NewName;
+		NextTagID = 0;
+		NextImageID = 0;   
+      }
+	  try
+	  {
+		ImageTable = new IndexedTable(Filename + "_ImageTable");
+	  }	
+	  catch(Exception TheError)
+	  {
+		String[] ImageHeader = {"ImageID", "Title", "Filename"};
+		boolean[] ImageKeys = {true, false, false};
+		ImageTable = new IndexedTable("ImageTable", new Record(ImageHeader), ImageKeys);
+	  }
+	  try
+	  {
+		TagTable = new IndexedTable(Filename + "_TagTable");
+	  }	
+	  catch(Exception TheError)
+	  {
+		String[] TagHeader = {"TagID", "Title"};
+		boolean[] TagKeys = {true, false, false};
+		TagTable = new IndexedTable("TagTable", new Record(TagHeader), TagKeys);
+	  }
+	  try
+	  {
+		ImageToTagTable = new IndexedTable(Filename + "_ImageToTagTable");
+	  }	
+	  catch(Exception TheError)
+	  {
+		String[] ImageToTagHeader = {"ImageID", "TagID"};
+		boolean[] ImageToTagKeys = {true, true};
+		ImageToTagTable = new IndexedTable("ImageToTagTable", new Record(ImageToTagHeader), ImageToTagKeys);
+	  }
+	  try
+	  {
+		TagToTagTable = new IndexedTable(Filename + "_TagToTagTable");
+	  }	
+	  catch(Exception TheError)
+	  {
+		String[] TagToTagHeader = {"TagID", "TagID"};
+		boolean[] TagToTagKeys = {true, true};
+		TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader), TagToTagKeys);
+	  }
+	  try
+	  {
+		ImageToImageTable = new IndexedTable(Filename + "_ImageToImageTable");
+	  }	
+	  catch(Exception TheError)
+	  {
+		String[] ImageToImageHeader = {"FromImageID", "ToImageID", "TopX", "TopY", "BottomX", "BottomY"};
+		boolean[] ImageToImageKeys = {true, true, false, false, false, false};
+		ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
+	  }
+	  try
+	  {
+		ImageToNoteTable = new IndexedTable(Filename + "_ImageToNoteTable");
+	  }	
+	  catch(Exception TheError)
+	  {
+		String[] ImageToNoteHeader = {"ImageID", "Note", "TopX", "TopY", "BottomX", "BottomY"};
+		boolean[] ImageToNoteKeys = {true, false, true, true, true, true};
+		ImageToImageTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
+	  }
   }
   
   String getName() { return Name; }
@@ -62,6 +130,7 @@ class ImageDatabase
   IndexedTable getTagTable() { return TagTable; }
   IndexedTable getImageToTagTable() { return ImageToTagTable; }
   IndexedTable getTagToTagTable() { return TagToTagTable; }
+  IndexedTable getImageToImageTable() { return ImageToImageTable; }
   
   // Prints out a representation of the different tables
   void print()
@@ -70,6 +139,7 @@ class ImageDatabase
       System.out.println(TagTable.toString());
       System.out.println(ImageToTagTable.toString());
       System.out.println(TagToTagTable.toString());
+      System.out.println(ImageToImageTable.toString());
   }
   
   // Save the entire database to the desired filename
@@ -91,6 +161,7 @@ class ImageDatabase
     TagTable.save(Filename + "_TagTable");
     ImageToTagTable.save(Filename + "_ImageToTagTable");
     TagToTagTable.save(Filename + "_TagToTagTable");
+	ImageToImageTable.save(Filename + "_ImageToImageTable");
   }
   
   // Add a new image to the database
@@ -114,18 +185,82 @@ class ImageDatabase
   // Delete an image from the database (by record)
   int deleteImage(Record r)
   {
-    IndexedTable TagMatches;
-    Enumeration TagRecords;
-    if (ImageTable.deleteRecord(r) == -1)
-      return -1;
-    TagMatches = ImageToTagTable.getRecords(r.getField(0), 0);
-    TagRecords = TagMatches.elements();
-    while (TagRecords.hasMoreElements())
+    IndexedTable Matches;
+    Enumeration Records;	
+	// Delete ImageToTag records containing the image
+    Matches = ImageToTagTable.getRecords(r.getField(0), 0);
+    Records = Matches.elements();
+    while (Records.hasMoreElements())
     {
-      if (ImageToTagTable.deleteRecord((Record)TagRecords.nextElement()) == -1)
+      if (ImageToTagTable.deleteRecord((Record)Records.nextElement()) == -1)
         return -1;
     }
+	// Delete ImageToImage records containing the image
+	Matches = ImageToImageTable.getRecords(r.getField(0),0);
+	Records = Matches.elements();
+	while (Records.hasMoreElements())
+    {
+      if (ImageToImageTable.deleteRecord((Record)Records.nextElement()) == -1)
+        return -1;
+    }
+	Matches = ImageToImageTable.getRecords(r.getField(0),1);
+	Records = Matches.elements();
+	while (Records.hasMoreElements())
+    {
+      if (ImageToImageTable.deleteRecord((Record)Records.nextElement()) == -1)
+        return -1;
+    }
+	//Delete ImageToNote records containing the image
+	Matches = ImageToNoteTable.getRecords(r.getField(0),0);
+	Records = Matches.elements();
+	while (Records.hasMoreElements())
+    {
+      if (ImageToNoteTable.deleteRecord((Record)Records.nextElement()) == -1)
+        return -1;
+    }
+	// Delete the image record from the image table
+	if (ImageTable.deleteRecord(r) == -1)
+      return -1;
     return 1;
+  }
+  
+  // Delete an ImageToImage link from the database (by fields)
+  int deleteLink(String FromImageID, String ToImageID, int TopX, int TopY, int BottomY, int BottomX)
+  {
+    String[] RecordArray = {ToImageID, FromImageID, Integer.toString(TopX), Integer.toString(TopY), Integer.toString(BottomX), Integer.toString(BottomY)};
+    return deleteLink(new Record(RecordArray));
+  }
+  
+  // Delete an ImageToImage link from the database (by record)
+  int deleteLink(Record r)
+  {
+    return ImageToImageTable.deleteRecord(r);
+  }
+  
+  // Delete an ImageToTag link from the database (by fields)
+  int deleteImageTag(String ImageID, String TagID)
+  {
+    String[] RecordArray = {ImageID, ImageID};
+    return deleteImageTag(new Record(RecordArray));
+  }
+  
+  // Delete an ImageToTag link from the database (by record)
+  int deleteImageTag(Record r)
+  {
+    return ImageToTagTable.deleteRecord(r);
+  }
+  
+  // Delete an TagToTag link from the database (by fields)
+  int deleteTagTag(String ImageID, String TagID)
+  {
+    String[] RecordArray = {ImageID, ImageID};
+    return deleteTagTag(new Record(RecordArray));
+  }
+  
+  // Delete an TagToTag link from the database (by record)
+  int deleteTagTag(Record r)
+  {
+    return TagToTagTable.deleteRecord(r);
   }
   
   // Delete a tag from the database (by fields)
@@ -196,6 +331,22 @@ class ImageDatabase
       else
       {
         ImageToTagTable.addRecord(new Record(RecordString));
+        return 1;
+      }
+  }
+  
+  // Link an area of an image to another image
+  int linkImage(String ToImageID, String FromImageID, int TopX, int TopY, int BottomX, int BottomY)
+  {
+    String[] RecordString = {ToImageID, FromImageID, Integer.toString(TopX), Integer.toString(TopY), Integer.toString(BottomX), Integer.toString(BottomY)};
+    if (ImageTable.getRecord(ToImageID, 0) == null)
+      return 0;
+    else
+      if (ImageTable.getRecord(FromImageID, 0) == null)
+        return -1;
+      else
+      {
+        ImageToImageTable.addRecord(new Record(RecordString));
         return 1;
       }
   }

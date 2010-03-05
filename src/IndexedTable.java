@@ -17,12 +17,19 @@ class IndexedTable
   }
   
   // Create a new indexed table from file
-  IndexedTable(String Filename)
+  IndexedTable(String Filename) throws Exception
   {
-      MainTable = new Table(Filename);
-      Indexes = new Index[MainTable.getNumFields()];
-      for (int i = 0; i < MainTable.getNumFields(); i ++)
-        Indexes[i] = new Index(Filename + "_index_" + i, Filename + "_index_" + i);
+      try
+	  {
+		  MainTable = new Table(Filename);
+		  Indexes = new Index[MainTable.getNumFields()];
+		  for (int i = 0; i < MainTable.getNumFields(); i ++)
+			Indexes[i] = new Index(Filename + "_index_" + i, Filename + "_index_" + i);
+	  }
+	  catch(Exception TheError)
+	  {
+		throw new Exception();
+	  }
   }
   
   int getNumRecords() { return MainTable.getNumRecords(); }

@@ -16,7 +16,7 @@ class Index
   }
   
   // Create an index from a file
-  Index(String Filename, String NewName)
+  Index(String Filename, String NewName) throws Exception
   {
     Records = new Hashtable<String,ArrayList<String>>();
     ArrayList<String> KeyList;
@@ -45,10 +45,9 @@ class Index
           IndexKey = FileUtils.unEscape(IndexKey);
       } 
     }
-    // Catch exceptions from file handling and throw an error
-    catch (Exception TheError)
+    catch(Exception TheError)
     {
-      throw new Error(TheError);    
+      throw new Exception();    
     }
   }
   

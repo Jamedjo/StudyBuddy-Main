@@ -41,7 +41,7 @@ class Table
     }
     
     // Creates new table from a file
-    Table(String Filename)
+    Table(String Filename) throws Exception
     {
       String[] TempArray;
       BufferedReader FileInput;
@@ -82,7 +82,7 @@ class Table
       // Catch exceptions from file handling and throw an error
       catch (Exception TheError)
       {
-        throw new Error(TheError);    
+        throw new Exception();    
       }   
     }
     
