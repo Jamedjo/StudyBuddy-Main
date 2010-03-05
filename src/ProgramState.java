@@ -26,6 +26,8 @@ class ProgramState{
     int currentI = 0;//make private
     final GUI mainGUI;
     boolean isLocked = false;//Do not draw if locked.
+	boolean noteRect = false;
+	boolean linkRect = false;
 
     // IMPORTANT NOTE: WHEN CONSTRUCTING NEW PROGRAM STATE. OTHER THREADS WILL SEE OLD STATE UNTIL CONTSRUCTOR RETURNS.
     // THIS MEANS METHODS CAN ACCIDENTALLY USE VALUES FROM THE OLD STATE.
