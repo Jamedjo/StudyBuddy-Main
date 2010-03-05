@@ -1,9 +1,11 @@
+
 import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import javax.swing.ImageIcon;
 
-public enum SysIcon{
+public enum SysIcon {
+
     Logo("logo.png"),
     Question("question.gif"),
     Error("error.gif"),
@@ -21,36 +23,34 @@ public enum SysIcon{
     AddTag("oxygen/list-add-3.png"),
     TagThis("oxygen/document-edit.png"),
     BlueTooth("oxygen/phone-3.png");
-
     ImageIcon Icon;
     URL imgURL;
 
-    SysIcon(String path){
-	imgURL = getRes(path);
+    SysIcon(String path) {
+        imgURL = getRes(path);
         boolean failed = true;
         if (imgURL != null) {
-            try{
-            if((new File(GUI.class.getResource(path).toURI())).isFile()){
-            Icon = new ImageIcon(imgURL);
-            failed = false;
-            } else if(path.equals("logo.png")){
-                Icon = new ImageIcon(); //Create empty icon if logo missing so GUI still loads.
-                failed = false;
-            }
-            } catch (URISyntaxException e){
+            try {
+                if ((new File(GUI.class.getResource(path).toURI())).isFile()) {
+                    Icon = new ImageIcon(imgURL);
+                    failed = false;
+                } else if (path.equals("logo.png")) {
+                    Icon = new ImageIcon(); //Create empty icon if logo missing so GUI still loads.
+                    failed = false;
+                }
+            } catch (URISyntaxException e) {
                 System.out.println(e);
             }
         }
-        if (failed){
+        if (failed) {
             System.err.println("Error creating icon: " + path);
             Icon = null;
         }
     }
 
     //needed due to bug in old versions of JVM
-    static URL getRes(String path){
-	URL tempURL = SysIcon.class.getResource(path);
-	return tempURL;
+    static URL getRes(String path) {
+        URL tempURL = SysIcon.class.getResource(path);
+        return tempURL;
     }
-
 }

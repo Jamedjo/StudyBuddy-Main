@@ -74,7 +74,7 @@ enum ToolBar{
 
 	int i=0;
 	for (ToolBar b : ToolBar.values()){
-	    if(i==0||i==4||i==7||i==9||i==11|i==12){
+	    if(i==0||i==4||i==7||i==9||i==11||i==12){
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
 	    JButton bt = b.create((ActionListener)mainGUI);
