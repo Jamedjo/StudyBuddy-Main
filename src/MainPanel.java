@@ -148,20 +148,23 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     }
     @Override public void mouseMoved(MouseEvent e) { }
     @Override public void mouseDragged(MouseEvent e) {
-        //The user is dragging us, so scroll!
-        Rectangle r = ((JViewport)this.getParent()).getViewRect();
-        tranX +=lastX-e.getX();
-        tranY +=lastY-e.getY();
-//        if((Calendar.getInstance().getTimeInMillis()-lastDrag)>=40){
-        //System.out.println("translate:"+tranX+"x"+tranY);
-            r.translate(tranX,tranY);
-            tranX =0;
-            tranY=0;
-            lastDrag = Calendar.getInstance().getTimeInMillis();
-//        } else System.out.println("dropped drag" +tranX);
-        scrollRectToVisible(r);
-        lastX = e.getX();
-        lastY = e.getY();
+        if (mainGUI.state.noteRect == false && mainGUI.state.linkRect == false)
+		{
+			//The user is dragging us, so scroll!
+			Rectangle r = ((JViewport)this.getParent()).getViewRect();
+			tranX +=lastX-e.getX();
+			tranY +=lastY-e.getY();
+	//        if((Calendar.getInstance().getTimeInMillis()-lastDrag)>=40){
+			//System.out.println("translate:"+tranX+"x"+tranY);
+				r.translate(tranX,tranY);
+				tranX =0;
+				tranY=0;
+				lastDrag = Calendar.getInstance().getTimeInMillis();
+	//        } else System.out.println("dropped drag" +tranX);
+			scrollRectToVisible(r);
+			lastX = e.getX();
+			lastY = e.getY();
+		}
     }
     public void mousePressed(MouseEvent e){
         if (this.getCursor().equals(openHand)){
