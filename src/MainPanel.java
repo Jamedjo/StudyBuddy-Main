@@ -4,6 +4,7 @@ import javax.swing.*;
 import javax.swing.JOptionPane.*;
 import java.awt.event.*;
 import java.awt.Cursor;
+import java.util.Calendar;
 import java.awt.Rectangle;
 
 public class MainPanel extends JPanel implements MouseWheelListener, MouseListener, MouseMotionListener {//,Scrollable {
@@ -23,6 +24,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     Cursor openHand = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     Cursor closedHand = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
     Cursor plainCursor = Cursor.getDefaultCursor();
+    int tranX =0;
+    int tranY =0;
+    long lastDrag;
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -79,31 +83,39 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             leftOfset = (boardW - useWH.width) / 2;
             topOfset = (boardH - useWH.height) / 2;
         }
-        //Image offScreenImage = createImage(useWH.width,useWH.height);
-        //Graphics2D gOffScr = (Graphics2D) offScreenImage.getGraphics();
-        //gOffScr.drawImage(mainGUI.state.getBImageI(0, cSize), 0, 0, useWH.width, useWH.height, this);
-        //g2.drawImage(offScreenImage,leftOfset,topOfset, this);
+//        Image offScreenImage = createImage(useWH.width,useWH.height);
+//        Graphics2D gOffScr = (Graphics2D) offScreenImage.getGraphics();
+//        gOffScr.setColor(Color.red);
+//        gOffScr.fillRect(0,0,useWH.width,useWH.height);
+//        int drawX,drawY,drawW,drawH;
+//        drawX=((JViewport)this.getParent()).getViewRect().x;
+//        drawY=((JViewport)this.getParent()).getViewRect().y;
+//        drawW=((JViewport)this.getParent()).getViewRect().width;
+//        drawH=((JViewport)this.getParent()).getViewRect().height;
+//        gOffScr.drawImage(mainGUI.state.getBImageI(0, cSize).getSubimage(drawX,drawY,drawW,drawH), drawX, drawY, drawW, drawH, this);
+//        gOffScr.dispose();
+//        g2.drawImage(offScreenImage,leftOfset,topOfset, this);
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
-		DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, true, true);
+		DrawLinkBoxes(g2,leftOfset, topOfset, true, true);
     }
 	
 	// Retreive the boxes for notes and links and draw them on the image
-	private void DrawLinkBoxes(Graphics2D DrawWhere, GUI TheGUI, int XOffset, int YOffset, boolean Notes, boolean ImageLinks)
+	private void DrawLinkBoxes(Graphics2D DrawWhere, int XOffset, int YOffset, boolean Notes, boolean ImageLinks)
 	{
 		Rectangle[] Links;
-		String CurrentImageID = TheGUI.state.getCurrentImageID();
+		String CurrentImageID = mainGUI.state.getCurrentImageID();
 		if (CurrentImageID != null)
 		{
 			if (Notes == true)
 			{
-				Links = TheGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
+				Links = mainGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
 				if (Links != null)
 					for(int i=0; i<Links.length; i++)
 						DrawWhere.draw(Links[i]);
 			}
 			if (ImageLinks == true)
 			{
-				Links = TheGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
+				Links = mainGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, XOffset, YOffset);
 				if (Links != null)
 					for(int i=0; i<Links.length; i++)
 						DrawWhere.draw(Links[i]);
@@ -134,10 +146,18 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     @Override public void mouseDragged(MouseEvent e) {
         //The user is dragging us, so scroll!
         Rectangle r = ((JViewport)this.getParent()).getViewRect();
-        r.translate(lastX-e.getX(),lastY-e.getY());
+        tranX +=lastX-e.getX();
+        tranY +=lastY-e.getY();
+//        if((Calendar.getInstance().getTimeInMillis()-lastDrag)>=40){
+        //System.out.println("translate:"+tranX+"x"+tranY);
+            r.translate(tranX,tranY);
+            tranX =0;
+            tranY=0;
+            lastDrag = Calendar.getInstance().getTimeInMillis();
+//        } else System.out.println("dropped drag" +tranX);
         scrollRectToVisible(r);
         lastX = e.getX();
-        lastY = e.getY();        
+        lastY = e.getY();
     }
     public void mousePressed(MouseEvent e){
         if (this.getCursor().equals(openHand)){
@@ -145,6 +165,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
         lastX = e.getX();
         lastY = e.getY();
+        tranX = 0;
+        tranY = 0;
+        lastDrag = Calendar.getInstance().getTimeInMillis();
     }
     public void mouseReleased(MouseEvent e){
         if (this.getCursor().equals(closedHand)){
