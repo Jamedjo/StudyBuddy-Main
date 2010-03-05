@@ -37,6 +37,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     TagTree tagTree;
     Thread slideThread;
     JScrollPane mainScrollPane;
+    JSplitPane splitpane;
     JPanel imageAreas;
     JSlider zoomBar;
     File thumbPath;
@@ -162,7 +163,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         imageAreas.add(mainScrollPane, BorderLayout.CENTER);
         imageAreas.add(thumbPanel, BorderLayout.PAGE_END);
 
-        JSplitPane splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tagTree, imageAreas);
+        splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tagTree, imageAreas);
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(150 + splitpane.getInsets().left);
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
@@ -188,6 +189,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("mImportD")) importDirDo();
         else if (ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
         else if (ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
+        else if (ae.getActionCommand().equals("TagTree")) toggleTagTree();
         else if (ae.getActionCommand().equals("SlideP")) toggleSlide(true);
         else if (ae.getActionCommand().equals("SlideS")) toggleSlide(false);
         else if (ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
@@ -262,6 +264,15 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         ToolBar.bThumbsS.setVisible(!makeVisible);
         ToolBar.bThumbsH.setVisible(makeVisible);
 
+        mainPanel.onResize();
+    }
+    void toggleTagTree() {//true to show
+        //boolean makeVisible =
+        if (splitpane.getDividerLocation() <2) {
+            splitpane.setDividerLocation(splitpane.getLastDividerLocation());
+        } else {
+            splitpane.setDividerLocation(1);
+        }
         mainPanel.onResize();
     }
 

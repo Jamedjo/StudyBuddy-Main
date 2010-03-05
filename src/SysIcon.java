@@ -1,3 +1,5 @@
+import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import javax.swing.ImageIcon;
 
@@ -5,18 +7,43 @@ public enum SysIcon{
     Logo("logo.png"),
     Question("question.gif"),
     Error("error.gif"),
-    Info("info.gif"),
-    Help("help.gif");
+    Info("oxygen/dialog-information-3.png"),//info.gif"),
+    Help("help.gif"),
+    Prev("oxygen/go-previous-6.png"),
+    Next("oxygen/go-next-6.png"),
+    Play("oxygen/media-playback-start-6.png"),
+    Stop("oxygen/media-playback-stop-6.png"),
+    HideThumbs("oxygen/view-right-close.png"),
+    ShowThumbs("oxygen/folder-image.png"),
+    JTree("oxygen/view-sidetree-4.png"),
+    Zoom100("oxygen/zoom-original-4.png"),
+    ZoomFit("oxygen/zoom-fit-best-4.png"),
+    AddTag("oxygen/list-add-3.png"),
+    TagThis("oxygen/document-edit.png"),
+    BlueTooth("oxygen/phone-3.png");
 
     ImageIcon Icon;
     URL imgURL;
 
     SysIcon(String path){
 	imgURL = getRes(path);
+        boolean failed = true;
         if (imgURL != null) {
+            try{
+            if((new File(GUI.class.getResource(path).toURI())).isFile()){
             Icon = new ImageIcon(imgURL);
-        } else {
+            failed = false;
+            } else if(path.equals("logo.png")){
+                Icon = new ImageIcon(); //Create empty icon if logo missing so GUI still loads.
+                failed = false;
+            }
+            } catch (URISyntaxException e){
+                System.out.println(e);
+            }
+        }
+        if (failed){
             System.err.println("Error creating icon: " + path);
+            Icon = null;
         }
     }
 

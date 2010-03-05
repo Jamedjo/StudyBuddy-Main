@@ -3,33 +3,51 @@ import javax.swing.JToolBar;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.border.EtchedBorder;
 
 enum ToolBar{
-    bPrev("Prev",			"Prev"),
-	bNext("Next",			"Next"),
-	bSlideP("Slideshow play",	"SlideP"),
-	bSlideS("Slideshow stop",	"SlideS"  ,false),
-	bThumbsS("Show Thumbnails",	"ThumbsS" ,false),
-	bThumbsH("Hide Thumbnails",	"ThumbsH"),
-	bZoomFit("Zoom: Fit     ",	"ZoomFit" ,false),
-	bZoomMax("Zoom: 100%",		"Zoom100"),
-	bAddTag("Add Tag",		"AddTag"),
-	bTagThis("Tag This Image",	"TagThis"),
-	//bTagFilter("Filter By Tag",	"TagFilter"),
-	bBlueDemo("Bluetooth",		"BlueT");
+    bPrev("Prev",			"Prev",SysIcon.Prev.Icon),
+	bNext("Next",			"Next",SysIcon.Next.Icon),
+	bSlideP("Slideshow play",	"SlideP",SysIcon.Play.Icon),
+	bSlideS("Slideshow stop",	"SlideS",SysIcon.Stop.Icon  ,false),
+	bThumbsS("Show Thumbnails",	"ThumbsS",SysIcon.ShowThumbs.Icon ,false),
+	bThumbsH("Hide Thumbnails",	"ThumbsH",SysIcon.HideThumbs.Icon),
+	TagTree("Show/Hide Tag Tree",	"TagTree",SysIcon.JTree.Icon),
+	bZoomFit("Zoom: Fit     ",	"ZoomFit",SysIcon.ZoomFit.Icon ,false),
+	bZoomMax("Zoom: 100%",		"Zoom100",SysIcon.Zoom100.Icon),
+	bAddTag("Add Tag",		"AddTag",SysIcon.AddTag.Icon),
+	bTagThis("Tag This Image",	"TagThis",SysIcon.TagThis.Icon),
+	//bTagFilter("Filter By Tag",	"TagFilter",SysIcon.TagFilter.Icon),
+	bBlueDemo("Bluetooth",		"BlueT",SysIcon.BlueTooth.Icon);
 
     JButton button;
-    ToolBar(String label,String command){
-        button = new JButton(label);
-	button.setActionCommand(command);
-        //button.setToolTipText(toolTipText);
+
+    ToolBar(String label, String command, ImageIcon icon, boolean visible) {
+        if (icon != null) {
+            button = new JButton(icon);
+            button.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+            button.setToolTipText(label);
+            //button.set text to hidden;
+        }
+        else{
+            button = new JButton(label);
+        }
+        button.setActionCommand(command);
+        button.setVisible(visible);
     }
-    ToolBar(String label, String command, boolean visible){
-	this(label,command);
-	button.setVisible(visible);
+    ToolBar(String label, String command) {
+        this(label, command, true);
+    }
+    ToolBar(String label, String command, boolean visible) {
+        this(label, command, null, visible);
+    }
+    ToolBar(String label, String command, ImageIcon icon) {
+        this(label, command, icon, true);
     }
 
     void hide(){
@@ -56,7 +74,7 @@ enum ToolBar{
 
 	int i=0;
 	for (ToolBar b : ToolBar.values()){
-	    if(i==0||i==2||i==4||i==6||i==8){
+	    if(i==0||i==4||i==7||i==9||i==11|i==12){
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
 	    JButton bt = b.create((ActionListener)mainGUI);
