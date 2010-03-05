@@ -521,7 +521,7 @@ class ImageDatabase
 	Enumeration TempImages;
 	IndexedTable ResultTable = getImagesFromTagID(TagID);
 	String[] TaggedTags = getTagIDsFromTagID(TagID);
-	if (TagTable != null)
+	if (TaggedTags != null)
 		for(int i=0; i<TaggedTags.length; i++)
 		{
 			TempImageTable = getImagesFromTagID(TaggedTags[i]);

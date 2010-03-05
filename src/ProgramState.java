@@ -81,7 +81,7 @@ class ProgramState{
                 return;
             }
 	    currentFilter = filterTag;
-	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagIDRecursively(filterTag); // Working on TagID not TagTitle
+	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagIDChildren(filterTag); // Working on TagID not TagTitle
 	    break;
 	}
         mainGUI.settings.setSettingAndSave("lastFilterUsed", currentFilter);
