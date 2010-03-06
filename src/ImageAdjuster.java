@@ -1,7 +1,29 @@
-public class ImageAdjuster extends javax.swing.JFrame {
+public class ImageAdjuster extends javax.swing.JDialog {
+    private int brightness = 50;
+    private int contrast = 50;
+    private boolean inverted = false;
+    //private boolean brightUsed = true;
+    //private boolean contrastUsed = true;
 
-    /** Creates new form ImageAdjuster */
-    public ImageAdjuster() {
+    int getBrightness(){
+        //if(brightUsed)
+            return brightness;
+        //return 50;
+    }
+    int getContrast(){
+        //if(contrastUsed)
+            return contrast;
+        //return 50;
+    }
+    boolean isInverted(){
+        return inverted;
+    }
+
+    //Should pause slideshow?
+
+    /** Creates new form ImageAdjusterB */
+    public ImageAdjuster(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
         initComponents();
     }
 
@@ -14,23 +36,61 @@ public class ImageAdjuster extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        brightEnableBox = new javax.swing.JCheckBox();
-        brightSlider = new javax.swing.JSlider();
         jPanel2 = new javax.swing.JPanel();
         contrastEnableBox = new javax.swing.JCheckBox();
         contrastSlider = new javax.swing.JSlider();
+        jPanel1 = new javax.swing.JPanel();
+        brightEnableBox = new javax.swing.JCheckBox();
+        brightSlider = new javax.swing.JSlider();
         jPanel3 = new javax.swing.JPanel();
-        InvertEnableBox = new javax.swing.JCheckBox();
-        okButton = new javax.swing.JButton();
+        invertEnableBox = new javax.swing.JCheckBox();
         cancelButton = new javax.swing.JButton();
+        okButton = new javax.swing.JButton();
 
         setTitle("Adjust Image");
         setLocationByPlatform(true);
+        setModal(true);
         setResizable(false);
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Contrast"));
+
+        contrastEnableBox.setSelected(true);
+        contrastEnableBox.setText("Enabled");
+        contrastEnableBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                contrastEnableBoxActionPerformed(evt);
+            }
+        });
+
+        contrastSlider.setMajorTickSpacing(25);
+        contrastSlider.setMinorTickSpacing(5);
+        contrastSlider.setPaintLabels(true);
+        contrastSlider.setPaintTicks(true);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(contrastEnableBox)
+                .addGap(18, 18, 18)
+                .addComponent(contrastSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
+                .addComponent(contrastSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(29, 29, 29))
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(contrastEnableBox))
+        );
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Brightness"));
 
+        brightEnableBox.setSelected(true);
         brightEnableBox.setText("Enabled");
         brightEnableBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -63,42 +123,12 @@ public class ImageAdjuster extends javax.swing.JFrame {
                 .addContainerGap())
         );
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Contrast"));
-
-        contrastEnableBox.setText("Enabled");
-
-        contrastSlider.setMajorTickSpacing(25);
-        contrastSlider.setMinorTickSpacing(5);
-        contrastSlider.setPaintLabels(true);
-        contrastSlider.setPaintTicks(true);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(contrastEnableBox)
-                .addGap(18, 18, 18)
-                .addComponent(contrastSlider, javax.swing.GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
-                .addContainerGap())
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addComponent(contrastSlider, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGap(29, 29, 29))
-            .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(contrastEnableBox))
-        );
-
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("Invert"));
 
-        InvertEnableBox.setText("Invert Colours");
-        InvertEnableBox.addActionListener(new java.awt.event.ActionListener() {
+        invertEnableBox.setText("Invert Colours");
+        invertEnableBox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                InvertEnableBoxActionPerformed(evt);
+                invertEnableBoxActionPerformed(evt);
             }
         });
 
@@ -108,28 +138,28 @@ public class ImageAdjuster extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(InvertEnableBox)
+                .addComponent(invertEnableBox)
                 .addContainerGap(267, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(InvertEnableBox)
+                .addComponent(invertEnableBox)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
-
-        okButton.setText("Ok");
-        okButton.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                okButtonActionPerformed(evt);
-            }
-        });
 
         cancelButton.setText("Cancel");
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
+            }
+        });
+
+        okButton.setText("Ok");
+        okButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                okButtonActionPerformed(evt);
             }
         });
 
@@ -158,7 +188,7 @@ public class ImageAdjuster extends javax.swing.JFrame {
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 17, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(okButton)
                     .addComponent(cancelButton))
@@ -170,23 +200,36 @@ public class ImageAdjuster extends javax.swing.JFrame {
 
     private void brightEnableBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_brightEnableBoxActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_brightEnableBoxActionPerformed
+        brightSlider.setEnabled(brightEnableBox.isSelected());
+        if(!brightEnableBox.isSelected()) brightSlider.setValue(50);
+}//GEN-LAST:event_brightEnableBoxActionPerformed
 
-    private void InvertEnableBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_InvertEnableBoxActionPerformed
+    private void invertEnableBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_invertEnableBoxActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_InvertEnableBoxActionPerformed
+}//GEN-LAST:event_invertEnableBoxActionPerformed
+
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        //Revert slider positions etc? or Set them when reopened?
+        setVisible(false);
+}//GEN-LAST:event_cancelButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
         // TODO add your handling code here:
-//        if(brightEnbaledBox) send bright slider value;
-//        if(contrastEnbaledBox) send contrast slider value;
-//        if(invertEnbaledBox) send is inverted;
-         setVisible(false);
-    }//GEN-LAST:event_okButtonActionPerformed
-
-    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        //if(brightEnableBox.isSelected())
+            brightness = brightSlider.getValue();
+        //else brightness = 50;
+        //if(contrastEnableBox.isSelected())
+            contrast = contrastSlider.getValue();
+        //else contrast = 50;
+        inverted = invertEnableBox.isSelected();
         setVisible(false);
-    }//GEN-LAST:event_cancelButtonActionPerformed
+}//GEN-LAST:event_okButtonActionPerformed
+
+    private void contrastEnableBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_contrastEnableBoxActionPerformed
+        // TODO add your handling code here:
+        contrastSlider.setEnabled(contrastEnableBox.isSelected());
+        if(!contrastEnableBox.isSelected()) contrastSlider.setValue(50);
+    }//GEN-LAST:event_contrastEnableBoxActionPerformed
 
     /**
     * @param args the command line arguments
@@ -194,18 +237,24 @@ public class ImageAdjuster extends javax.swing.JFrame {
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new ImageAdjuster().setVisible(true);
+                ImageAdjuster dialog = new ImageAdjuster(new javax.swing.JFrame(), true);
+                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    public void windowClosing(java.awt.event.WindowEvent e) {
+                        System.exit(0);
+                    }
+                });
+                dialog.setVisible(true);
             }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox InvertEnableBox;
     private javax.swing.JCheckBox brightEnableBox;
     private javax.swing.JSlider brightSlider;
     private javax.swing.JButton cancelButton;
     private javax.swing.JCheckBox contrastEnableBox;
     private javax.swing.JSlider contrastSlider;
+    private javax.swing.JCheckBox invertEnableBox;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;

@@ -59,7 +59,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         getParent().validate();
         this.revalidate();
         //getParent().validate();
-        getParent().repaint();
+        repaint();
     }
 
     //all scaling in terms of height. max size is 20 times minimum.
@@ -97,7 +97,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 //        gOffScr.dispose();
 //        g2.drawImage(offScreenImage,leftOfset,topOfset, this);
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
-		DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, zoomMultiplier, true, true);
+        DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, zoomMultiplier, true, true);
     }
 	
 	// Retreive the boxes for notes and links and draw them on the image
@@ -166,6 +166,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 			lastX = e.getX();
 			lastY = e.getY();
 		}
+
+        getParent().repaint();
     }
     public void mousePressed(MouseEvent e){
         if (this.getCursor().equals(openHand)){

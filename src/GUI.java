@@ -177,6 +177,11 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
         mainScrollPane = new JScrollPane(mainPanel);
         mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
+        mainScrollPane.getViewport().addChangeListener(new ChangeListener(){
+            public void stateChanged(ChangeEvent e){
+                mainScrollPane.getViewport().repaint();
+            }
+        });
         //mainScrollPane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE);
         mainScrollPane.setPreferredSize(mainPanel.getPreferredSize());
         mainScrollPane.setWheelScrollingEnabled(false);
@@ -208,8 +213,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
         contentPane.add(toolbarMain, BorderLayout.PAGE_START);
 
-        adjuster = new ImageAdjuster();
-        adjuster.setLocationRelativeTo(w);
+        adjuster = new ImageAdjuster(w,true);
 
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
@@ -346,17 +350,18 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         String[] options = {"Fit", "25", "50", "75", "100", "200", "500"};
         String value = (String) JOptionPane.showInputDialog(w, "Enter percentage zoom:", "Set Zoom",
                 JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, options, null);
-        if (value.toLowerCase().equals("Fit".toLowerCase())) {
-            toggleZoomed(true);
-        } else {
-            percent = Double.parseDouble(value);
-            //catch num format exception
-            //deal with non number characters? e.g. '%'
-            // deal with blank input
-            //make editable
-            zoomTo(percent);
+        if (value!=null){
+            if (value.toLowerCase().equals("Fit".toLowerCase())) {
+                toggleZoomed(true);
+            } else {
+                percent = Double.parseDouble(value);
+                //catch num format exception
+                //deal with non number characters? e.g. '%'
+                // deal with blank input
+                //make editable
+                zoomTo(percent);
+            }
         }
-
     }
 
     void zoomTo(double percent) {
