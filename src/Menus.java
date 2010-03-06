@@ -13,46 +13,31 @@ import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 
 enum ToolBar{
-    // Seperator Position 0
-    mImport("Import Image",		"mImport",SysIcon.Import.Icon),
-    // Seperator Position 1
-    mImportD("Import Directory",	"mImportD",SysIcon.ImportDir.Icon),
-    // Seperator Position 2
-    bPrev("Prev",			"Prev",SysIcon.Prev.Icon),
-    // Seperator Position 3
-	bNext("Next",			"Next",SysIcon.Next.Icon),
-    // Seperator Position 4
-	bSlideP("Slideshow play",	"SlideP",SysIcon.Play.Icon),
-    // Seperator Position 5
-	bSlideS("Slideshow stop",	"SlideS",SysIcon.Stop.Icon  ,false),
-    // Seperator Position 6
-	bThumbsS("Show Thumbnails",	"ThumbsS",SysIcon.Thumbs.Icon ,false),
-    // Seperator Position 7
-	bThumbsH("Hide Thumbnails",	"ThumbsH",SysIcon.Thumbs.Icon),
-    // Seperator Position 8
-	bTagTree("Show/Hide Tag Tree",	"TagTree",SysIcon.JTree.Icon),
-    // Seperator Position 9
-	bZoomFit("Zoom: Fit     ",	"ZoomFit",SysIcon.ZoomFit.Icon ,false),
-    // Seperator Position 10
-	bZoomMax("Zoom: 100%",		"Zoom100",SysIcon.Zoom100.Icon),
-    // Seperator Position 11
-	bAddTag("Create Tag",		"AddTag",SysIcon.AddTag.Icon),
-    // Seperator Position 12
-	bTagThis("Tag This Image",	"TagThis",SysIcon.TagThis.Icon),
-    // Seperator Position 13
-	bTagTag("Tag A Tag",            "TagTag",SysIcon.TagTag.Icon),
-    // Seperator Position 14
-	bTagFilter("Filter By Tag",	"TagFilter",SysIcon.TagFilter.Icon),
-    // Seperator Position 15
-	bAdjustImage("Adjust Image Colours","AdjustImage",SysIcon.Adjust.Icon),
-    // Seperator Position 16
-	bBlueDemo("Bluetooth",		"BlueT",SysIcon.BlueTooth.Icon);
-    // Seperator Position 17
+    mImport(false,"Import Image",	"mImport", SysIcon.Import.Icon),
+    mImportD(false, "Import Directory", "mImportD", SysIcon.ImportDir.Icon),
+    bPrev(true, "Prev", "Prev", SysIcon.Prev.Icon),
+    bNext(false, "Next", "Next", SysIcon.Next.Icon),
+    bSlideP(false, "Slideshow play", "SlideP", SysIcon.Play.Icon),
+    bSlideS(false, "Slideshow stop", "SlideS", SysIcon.Stop.Icon, false),
+    bThumbsS(true, "Show Thumbnails", "ThumbsS", SysIcon.Thumbs.Icon, false),
+    bThumbsH(false, "Hide Thumbnails", "ThumbsH", SysIcon.Thumbs.Icon),
+    bTagTree(false, "Show/Hide Tag Tree", "TagTree", SysIcon.JTree.Icon),
+    bAddTag(true, "Create Tag", "AddTag", SysIcon.AddTag.Icon),
+    bTagThis(false, "Tag This Image", "TagThis", SysIcon.TagThis.Icon),
+    bTagTag(false, "Tag A Tag", "TagTag", SysIcon.TagTag.Icon),
+    bTagFilter(false, "Filter By Tag", "TagFilter", SysIcon.TagFilter.Icon),
+    bAdjustImage(true, "Adjust Image Colours", "AdjustImage", SysIcon.Adjust.Icon),
+    bBlueDemo(true, "Bluetooth", "BlueT", SysIcon.BlueTooth.Icon),
+    bZoomToX(true, "Zoom Dialog", "ZoomX", SysIcon.ZoomToX.Icon),
+    bZoomFit(false, "Zoom: Fit     ", "ZoomFit", SysIcon.ZoomFit.Icon, false),
+    bZoomMax(false, "Zoom: 100%", "Zoom100", SysIcon.Zoom100.Icon);
 
     JButton button;
-    static final Integer[] sliderPositions = {0,2,6,11,15,16,17};
+    boolean isSeperatorHere;
+    static final boolean putSeperatorAtEnd = false;
 
-    ToolBar(String label, String command, ImageIcon icon, boolean visible) {
+    ToolBar(boolean isNewGroup,String label, String command, ImageIcon icon, boolean visible) {
+        isSeperatorHere = isNewGroup;
         if (icon != null) {
             button = new JButton(icon);
             button.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
@@ -65,14 +50,14 @@ enum ToolBar{
         button.setActionCommand(command);
         button.setVisible(visible);
     }
-    ToolBar(String label, String command) {
-        this(label, command, true);
+    ToolBar(boolean isNewGroup,String label, String command) {
+        this(isNewGroup,label, command, true);
     }
-    ToolBar(String label, String command, boolean visible) {
-        this(label, command, null, visible);
+    ToolBar(boolean isNewGroup,String label, String command, boolean visible) {
+        this(isNewGroup,label, command, null, visible);
     }
-    ToolBar(String label, String command, ImageIcon icon) {
-        this(label, command, icon, true);
+    ToolBar(boolean isNewGroup,String label, String command, ImageIcon icon) {
+        this(isNewGroup,label, command, icon, true);
     }
 
     void hide(){
@@ -93,20 +78,21 @@ enum ToolBar{
     }
 
     static JToolBar build(GUI mainGUI){
-
 	JToolBar bar = new JToolBar("StudyBuddy Toolbar");
 	bar.setFocusable(false);
 
 	int i=0;
-        List<Integer> sPositions = Arrays.asList(sliderPositions);
 	for (ToolBar b : ToolBar.values()){
-	    if(sPositions.contains(i) ){//i==0||i==4||i==7||i==9||i==11||i==12){
+	    JButton bt = b.create((ActionListener)mainGUI);
+	    if(b.isSeperatorHere){
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
-	    JButton bt = b.create((ActionListener)mainGUI);
 	    bar.add(bt);
 	    i++;
 	}
+        if (putSeperatorAtEnd) {
+            bar.addSeparator();
+        }
         bar.add(mainGUI.buildZoomBar());
 
         //workaround to prevent toolbar from steeling focus
