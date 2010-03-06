@@ -18,15 +18,12 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     final double wheelZoomIncrement = 0.2;//affect zoom by 20 percent on wheel rotate
     final double minimumZoomLevel = 0.025; //minium zoom so image does not dissapear of negative zoom
     final GUI mainGUI;
-    boolean isZoomed = false;
-    double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
-    int pressX,pressY;
+    private boolean bIsZoomed = false;
+    private double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
+    int pressX,pressY,nowX,nowY;
     Cursor openHand = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     Cursor closedHand = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
     Cursor plainCursor = Cursor.getDefaultCursor();
-    int nowX =0;
-    int nowY =0;
-    long lastDrag;
     Thread dragThread;
     final int dragPeriod = 40;// 25fps is equivalent to every 40ms
 
@@ -43,10 +40,43 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         dragThread = new Thread(new DragUpdate(this,dragPeriod));
     }
 
+    boolean isZoomed(){
+        return bIsZoomed;
+    }
+    double getZoomMult(){
+        return zoomMultiplier;
+    }
+    void setZoomMult(double newZoomMultipler){
+        zoomMultiplier = newZoomMultipler;
+        if (getZoomMult() < minimumZoomLevel) {
+            zoomMultiplier = minimumZoomLevel;
+        }
+    }
+    boolean isZoomFit(){
+        return (!bIsZoomed);
+    }
+    void setZoomed(boolean isZoomed){
+        bIsZoomed = isZoomed;
+        if(isZoomFit()){
+            //fixFitZoomMultiplier();
+            onResize();
+        }
+    }
+    void fixFitZoomMultiplier(){
+        //if(useWH==null){
+            useWH = mainGUI.state.getRelImageWH(ImgSize.Screen, boardW, boardH, 0);
+        //}
+        //Potentially inefficient as forces full size image to load
+        System.out.println("old zoomMultiplier- " + getZoomMult());
+        setZoomMult((double)((double) useWH.width) / ((double) mainGUI.state.getCurrentImage().getWidthAndMakeBig()));
+        System.out.println("new zoomMultiplier- " + getZoomMult());
+        System.out.println("boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
+    }
+
     void onResize() {
         //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
-        if ( isZoomed ) {
-            this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), this.getParent().getWidth(), this.getParent().getHeight()));
+        if ( isZoomed() ) {
+            this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * getZoomMult()), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             if(this.getPreferredSize().width>getParent().getParent().getWidth()||this.getPreferredSize().height>getParent().getParent().getHeight()) {
                 this.setCursor(openHand);
             } else {
@@ -64,6 +94,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.revalidate();
         //getParent().validate();
         repaint();
+        if(isZoomFit()){
+        fixFitZoomMultiplier();
+        }
         //if (oldScr!=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible()) System.out.println("Horizontal Scroll bar toggled");
     }
 
@@ -77,10 +110,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         ImgSize cSize;
         int leftOfset;
         int topOfset;
-        if (isZoomed) {
+        if (isZoomed()) {
             cSize = ImgSize.Max;
-            this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), this.getParent().getWidth(), this.getParent().getHeight()));
-            useWH = mainGUI.state.getRelImageWH(cSize, (int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), 0);
+            this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * getZoomMult()), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            useWH = mainGUI.state.getRelImageWH(cSize, (int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * getZoomMult()), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * getZoomMult()), 0);
             leftOfset = (this.getPreferredSize().width - useWH.width) / 2;
             topOfset = (this.getPreferredSize().height - useWH.height) / 2;
         } else {
@@ -102,7 +135,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 //        gOffScr.dispose();
 //        g2.drawImage(offScreenImage,leftOfset,topOfset, this);
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
-        DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, zoomMultiplier, true, true);
+        DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, getZoomMult(), true, true);
     }
 	
 	// Retreive the boxes for notes and links and draw them on the image
@@ -110,7 +143,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 	{
 		Rectangle[] Links;
 		String CurrentImageID = TheGUI.state.getCurrentImageID();
-		System.out.println("zoomMultiplier- "+zoomMultiplier);
+		System.out.println("zoomMultiplier- "+getZoomMult());
 		if (CurrentImageID != null)
 		{
 			if (Notes == true)
@@ -135,18 +168,15 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-        if (!isZoomed) {
+        if (isZoomFit()) {
             //get multiplier from fit so zoom doesnt jump
-            zoomMultiplier = ((double)useWH.width) / ((double)mainGUI.state.getCurrentImage().getWidthAndMakeBig());
+            setZoomMult(((double)useWH.width) / ((double)mainGUI.state.getCurrentImage().getWidthAndMakeBig()));
         }
         //System.out.println(e.toString());
         int xpos = e.getPoint().x;
         int ypos = e.getPoint().y;
-        isZoomed = true;
-        zoomMultiplier -= ((double) e.getWheelRotation()) * wheelZoomIncrement;
-        if (zoomMultiplier < minimumZoomLevel) {
-            zoomMultiplier = minimumZoomLevel;
-        }
+        setZoomed(true);
+        setZoomMult(getZoomMult()-((double) e.getWheelRotation()) * wheelZoomIncrement);
         mainGUI.toggleZoomed(false);
         System.out.println(xpos+","+ypos);
         //this.scrollRectToVisible(new Rectangle(xpos,ypos,this.getParent().getWidth(),this.getParent().getHeight()));//improve this to improve zoom.
@@ -189,7 +219,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
 		if (mainGUI.state.noteRect == true || mainGUI.state.linkRect == true)
 		{
-			if (isZoomed)
+			if (isZoomed())
 			{
 				leftOfset = (this.getPreferredSize().width - useWH.width) / 2;
 				topOfset = (this.getPreferredSize().height - useWH.height) / 2;
@@ -203,7 +233,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 		if (mainGUI.state.noteRect == true)
 		{
 			
-			mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", (int) ((nowX/zoomMultiplier)-leftOfset), (int) ((nowY/zoomMultiplier)-topOfset), (int) ((e.getX()-nowX)/zoomMultiplier), (int) ((e.getY()-nowY)/zoomMultiplier));
+			mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", (int) ((nowX/getZoomMult())-leftOfset), (int) ((nowY/getZoomMult())-topOfset), (int) ((e.getX()-nowX)/getZoomMult()), (int) ((e.getY()-nowY)/getZoomMult()));
 			mainGUI.state.noteRect = false;
 			this.repaint();
 		}

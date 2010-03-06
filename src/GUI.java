@@ -289,6 +289,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     public void stateChanged(ChangeEvent e) {
+        //ZoomBar
         JSlider src = (JSlider) e.getSource();
         if (!src.getValueIsAdjusting()) {
             int zoom = (int) src.getValue();
@@ -326,14 +327,14 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void toggleZoomed(boolean makeFit) {//true to set zoom to fit
-        mainPanel.isZoomed = (!makeFit);
+        mainPanel.setZoomed(!makeFit);
         if (makeFit) {
             zoomBar.setValueIsAdjusting(true);//dont want to fire event
             zoomBar.setValue(0);
             //zoomBar.setValueIsAdjusting(false);//Setting this false also fires event
         } else {
             zoomBar.setValueIsAdjusting(true);//dont want to fire event though
-            zoomBar.setValue((int) (mainPanel.zoomMultiplier * 100));
+            zoomBar.setValue((int) (mainPanel.getZoomMult() * 100));
             //zoomBar.setValueIsAdjusting(false);//Setting this false also fires event
         }
 
@@ -365,7 +366,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void zoomTo(double percent) {
-        mainPanel.zoomMultiplier = (percent / 100);
+        mainPanel.setZoomMult(percent / 100);
         toggleZoomed(false);
     }
 

@@ -22,6 +22,8 @@ public class DragUpdate implements Runnable {
             } catch (InterruptedException e){
                 return;
                 //remember when you 'stop' thread, to create a new one to allow thread to be started again
+            } catch (Exception e){
+                System.out.println("Caught drag error:\n"+e);
             }
         }
     }
