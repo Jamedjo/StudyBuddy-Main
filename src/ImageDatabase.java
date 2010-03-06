@@ -386,12 +386,12 @@ class ImageDatabase
   }
   
   // Produce a sub table of links for a certain ImageID
-  IndexedTable getLinksFromImageID(String ImageID)
+  IndexedTable getLinksFromImageIDPoint(String ImageID)
   {
 	return ImageToImageTable.getRecords(ImageID, 0);
   }
   
-  // Produce a sub table of Notes for a certain ImageID
+  // Produce the rectangles of note links for a certain ImageID
   Rectangle[] getNoteRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
 	IndexedTable TempTable = ImageToNoteTable.getRecords(ImageID, 0);
@@ -415,7 +415,7 @@ class ImageDatabase
 	}
   }
   
-  // Produce a sub table of links for a certain ImageID
+  // Produce the rectangles of image links for a certain ImageID
   Rectangle[] getLinkRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
 	IndexedTable TempTable = ImageToImageTable.getRecords(ImageID, 0);
@@ -432,11 +432,61 @@ class ImageDatabase
 		while(Records.hasMoreElements())
 		{
 		  TempRecord = (Record) Records.nextElement();
-		  Result[i] = new Rectangle(XOffset + Integer.parseInt(TempRecord.getField(2)), YOffset + Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)));
+		  Result[i] = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
 		  i++;
 		}
 		return Result;
 	}
+  }
+  
+  // Produce the notes for a certain point in an image
+  IndexedTable getNotesFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
+  {
+	Enumeration Records;
+	Record TempRecord;
+	Rectangle TempRectangle;
+	IndexedTable ImageNotes = ImageToNoteTable.getRecords(ImageID, 0);
+	IndexedTable PointNotes = new IndexedTable("Result", ImageToNoteTable.getHeader(), ImageToNoteTable.getKeyFields());
+	Records = ImageNotes.elements();
+	while(Records.hasMoreElements())
+	{
+		TempRecord = (Record) Records.nextElement();
+		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
+		if (TempRectangle.contains(X, Y))
+			PointNotes.addRecord(TempRecord);
+	}
+	return PointNotes;
+  }
+  
+  // Produce an array of String that describe the point in the image
+  String[] getNoteStringsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
+  {
+	return getNotesFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(1);
+  }
+  
+  // Produce the links for a certain point in an image
+  IndexedTable getLinksFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
+  {
+	Enumeration Records;
+	Record TempRecord;
+	Rectangle TempRectangle;
+	IndexedTable ImageLinks = ImageToImageTable.getRecords(ImageID, 0);
+	IndexedTable PointLinks = new IndexedTable("Result", ImageToImageTable.getHeader(), ImageToImageTable.getKeyFields());
+	Records = ImageLinks.elements();
+	while(Records.hasMoreElements())
+	{
+		TempRecord = (Record) Records.nextElement();
+		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
+		if (TempRectangle.contains(X, Y))
+			PointLinks.addRecord(TempRecord);
+	}
+	return PointLinks;
+  }
+  
+  // Produce an array of imageIDs pointed to by the point in the image
+  String[] getImageIDsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
+  {
+	return getLinksFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(1);
   }
   
   // Produce a sub table of Images that are tagged with the TagID
