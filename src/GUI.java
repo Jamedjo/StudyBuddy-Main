@@ -266,7 +266,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     public void componentResized(ComponentEvent e) {
         // if(e.getSource()==boardScroll) {
         //if(e.getSource()==mainPanel) {
-        //**//System.out.println(e.paramString());
+        //**//System.err.println(e.paramString());
         mainPanel.onResize();
         thumbPanel.onResize();
         //}

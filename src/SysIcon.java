@@ -46,7 +46,7 @@ public enum SysIcon {
                     failed = false;
                 }
             } catch (URISyntaxException e) {
-                System.out.println(e);
+                System.err.println(e);
             }
         }
         if (failed) {

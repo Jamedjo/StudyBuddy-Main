@@ -20,13 +20,15 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     final GUI mainGUI;
     boolean isZoomed = false;
     double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
-    private int lastX,lastY;
+    int pressX,pressY;
     Cursor openHand = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR);
     Cursor closedHand = Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR);
     Cursor plainCursor = Cursor.getDefaultCursor();
-    int tranX =0;
-    int tranY =0;
+    int nowX =0;
+    int nowY =0;
     long lastDrag;
+    Thread dragThread;
+    final int dragPeriod = 40;// 25fps is equivalent to every 40ms
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -38,9 +40,11 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.addMouseWheelListener(this);
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
+        dragThread = new Thread(new DragUpdate(this,dragPeriod));
     }
 
     void onResize() {
+        //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
         if ( isZoomed ) {
             this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * zoomMultiplier), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * zoomMultiplier), this.getParent().getWidth(), this.getParent().getHeight()));
             if(this.getPreferredSize().width>getParent().getParent().getWidth()||this.getPreferredSize().height>getParent().getParent().getHeight()) {
@@ -60,6 +64,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.revalidate();
         //getParent().validate();
         repaint();
+        //if (oldScr!=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible()) System.out.println("Horizontal Scroll bar toggled");
     }
 
     //all scaling in terms of height. max size is 20 times minimum.
@@ -105,7 +110,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 	{
 		Rectangle[] Links;
 		String CurrentImageID = TheGUI.state.getCurrentImageID();
-		System.out.println(zoomMultiplier);
+		System.out.println("zoomMultiplier- "+zoomMultiplier);
 		if (CurrentImageID != null)
 		{
 			if (Notes == true)
@@ -113,7 +118,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 				Links = TheGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, XOffset, YOffset, Scale);
 				if (Links != null)
 				{
-					System.out.println(Links[0]);
+					System.out.println("Links[0]- "+Links[0]);
 					for(int i=0; i<Links.length; i++)
 						DrawWhere.draw(Links[i]);
 				}
@@ -148,38 +153,35 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         ((JViewport)this.getParent()).setViewPosition(new Point(xpos,ypos));
     }
     @Override public void mouseMoved(MouseEvent e) { }
+    public void mousePressed(MouseEvent e){
+        if (getCursor().equals(openHand)){
+            setCursor(closedHand);
+        }
+        pressX = e.getX();
+        pressY = e.getY();
+        nowX = pressX;
+        nowY = pressY;
+        //lastDrag = Calendar.getInstance().getTimeInMillis();
+        dragThread.start();
+    }
     @Override public void mouseDragged(MouseEvent e) {
-        if (mainGUI.state.noteRect == false && mainGUI.state.linkRect == false)
+                if (mainGUI.state.noteRect == false && mainGUI.state.linkRect == false)
 		{
-			//The user is dragging us, so scroll!
-			Rectangle r = ((JViewport)this.getParent()).getViewRect();
-			tranX +=lastX-e.getX();
-			tranY +=lastY-e.getY();
-	//        if((Calendar.getInstance().getTimeInMillis()-lastDrag)>=40){
-			//System.out.println("translate:"+tranX+"x"+tranY);
-				r.translate(tranX,tranY);
-				tranX =0;
-				tranY=0;
-				lastDrag = Calendar.getInstance().getTimeInMillis();
-	//        } else System.out.println("dropped drag" +tranX);
-			scrollRectToVisible(r);
-			lastX = e.getX();
-			lastY = e.getY();
-		}
+			nowX =e.getX();
+			nowY =e.getY();
+			//lastX = e.getX();
+			//lastY = e.getY();
+	        //if((Calendar.getInstance().getTimeInMillis()-lastDrag)>=40){
 
+				//lastDrag = Calendar.getInstance().getTimeInMillis();
+	        //} else System.out.println("At("+e.getX()+"x"+e.getY()+")   "+"dropped drag: " +tranX+"x"+tranY);
+			
+		}
         getParent().repaint();
     }
-    public void mousePressed(MouseEvent e){
-        if (this.getCursor().equals(openHand)){
-            this.setCursor(closedHand);
-        }
-        lastX = e.getX();
-        lastY = e.getY();
-        tranX = 0;
-        tranY = 0;
-        lastDrag = Calendar.getInstance().getTimeInMillis();
-    }
     public void mouseReleased(MouseEvent e){
+        dragThread.interrupt();
+        dragThread = new Thread(new DragUpdate(this,dragPeriod));
 		int leftOfset=0;
 		int topOfset=0;
         if (this.getCursor().equals(closedHand)){
@@ -201,13 +203,13 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 		if (mainGUI.state.noteRect == true)
 		{
 			
-			mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", (int) ((lastX/zoomMultiplier)-leftOfset), (int) ((lastY/zoomMultiplier)-topOfset), (int) ((e.getX()-lastX)/zoomMultiplier), (int) ((e.getY()-lastY)/zoomMultiplier));
+			mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", (int) ((nowX/zoomMultiplier)-leftOfset), (int) ((nowY/zoomMultiplier)-topOfset), (int) ((e.getX()-nowX)/zoomMultiplier), (int) ((e.getY()-nowY)/zoomMultiplier));
 			mainGUI.state.noteRect = false;
 			this.repaint();
 		}
 		if (mainGUI.state.linkRect == true)
 		{
-			mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", lastX-leftOfset, lastY-topOfset, e.getX()-lastX, e.getY()-lastY);
+			mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", nowX-leftOfset, nowY-topOfset, e.getX()-nowX, e.getY()-nowY);
 			mainGUI.state.linkRect = false;
 			this.repaint();
 		}
