@@ -22,7 +22,8 @@ public enum SysIcon {
     ZoomFit("oxygen/zoom-fit-best-4.png"),
     AddTag("oxygen/list-add-3.png"),
     TagThis("oxygen/document-edit.png"),
-    BlueTooth("oxygen/phone-3.png");
+    BlueTooth("oxygen/preferences-system-bluetooth.png"),//phone-3.png"),
+    Adjust("oxygen/color-fill.png");
     ImageIcon Icon;
     URL imgURL;
 

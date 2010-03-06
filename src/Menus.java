@@ -23,6 +23,7 @@ enum ToolBar{
 	bAddTag("Add Tag",		"AddTag",SysIcon.AddTag.Icon),
 	bTagThis("Tag This Image",	"TagThis",SysIcon.TagThis.Icon),
 	//bTagFilter("Filter By Tag",	"TagFilter",SysIcon.TagFilter.Icon),
+	adjustImage("Adjust Image Colours","AdjustImage",SysIcon.Adjust.Icon),
 	bBlueDemo("Bluetooth",		"BlueT",SysIcon.BlueTooth.Icon);
 
     JButton button;

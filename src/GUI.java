@@ -31,6 +31,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
     JScrollPane boardScroll;
+    ImageAdjuster adjuster;
     volatile ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
@@ -173,6 +174,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
         contentPane.add(toolbarMain, BorderLayout.PAGE_START);
 
+        adjuster = new ImageAdjuster();
+        adjuster.setLocationRelativeTo(w);
+
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
         w.pack();
@@ -202,6 +206,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) tagTag();
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
+        else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
         } else if (ae.getActionCommand().equals("Help")) {
@@ -456,5 +461,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
     }
 
+    void showImageAdjuster(){
+        adjuster.setVisible(true);
+    }
   
 }
