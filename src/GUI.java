@@ -195,14 +195,15 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(tagTreeStartSize + splitpane.getInsets().left);
         splitpane.addPropertyChangeListener(new PropertyChangeListener() {
-
             public void propertyChange(PropertyChangeEvent evt) {
-                if(evt.getPropertyName().toLowerCase().equals("dividerlocation")){
-                    if(splitpane.getDividerLocation()>tagTreeMaxSize) splitpane.setDividerLocation(tagTreeMaxSize);
-                }
-                if (mainPanel.isValid()) {
-                    mainPanel.onResize();
-                    thumbPanel.onResize();
+                if(splitpane.isValid()){
+                    if(evt.getPropertyName().toLowerCase().equals("dividerlocation")){
+                        if(splitpane.getDividerLocation()>tagTreeMaxSize) splitpane.setDividerLocation(tagTreeMaxSize);
+                    }
+                    if (mainPanel.isValid()) {
+                        mainPanel.onResize();
+                        thumbPanel.onResize();
+                    }
                 }
             }
         });
@@ -243,6 +244,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) tagTag();
+        else if (ae.getActionCommand().equals("DragPan")) mainPanel.setCursorMode(DragMode.Drag);
+        else if (ae.getActionCommand().equals("DragLink")) mainPanel.setCursorMode(DragMode.Link);
+        else if (ae.getActionCommand().equals("DragNote")) mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
         else if (ae.getActionCommand().equals("Exit")) {

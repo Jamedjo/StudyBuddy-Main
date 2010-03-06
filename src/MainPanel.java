@@ -220,7 +220,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     @Override public void mouseMoved(MouseEvent e) { }
 
     public void mousePressed(MouseEvent e) {
-        mousePressed = false;
+        mousePressed = true;
         updateCursor();
         pressX = e.getX();
         pressY = e.getY();
