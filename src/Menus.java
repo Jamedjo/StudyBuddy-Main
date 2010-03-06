@@ -3,6 +3,8 @@ import javax.swing.JToolBar;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JMenu;
@@ -11,22 +13,44 @@ import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 
 enum ToolBar{
+    // Seperator Position 0
+    mImport("Import Image",		"mImport",SysIcon.Import.Icon),
+    // Seperator Position 1
+    mImportD("Import Directory",	"mImportD",SysIcon.ImportDir.Icon),
+    // Seperator Position 2
     bPrev("Prev",			"Prev",SysIcon.Prev.Icon),
+    // Seperator Position 3
 	bNext("Next",			"Next",SysIcon.Next.Icon),
+    // Seperator Position 4
 	bSlideP("Slideshow play",	"SlideP",SysIcon.Play.Icon),
+    // Seperator Position 5
 	bSlideS("Slideshow stop",	"SlideS",SysIcon.Stop.Icon  ,false),
-	bThumbsS("Show Thumbnails",	"ThumbsS",SysIcon.ShowThumbs.Icon ,false),
-	bThumbsH("Hide Thumbnails",	"ThumbsH",SysIcon.HideThumbs.Icon),
-	TagTree("Show/Hide Tag Tree",	"TagTree",SysIcon.JTree.Icon),
+    // Seperator Position 6
+	bThumbsS("Show Thumbnails",	"ThumbsS",SysIcon.Thumbs.Icon ,false),
+    // Seperator Position 7
+	bThumbsH("Hide Thumbnails",	"ThumbsH",SysIcon.Thumbs.Icon),
+    // Seperator Position 8
+	bTagTree("Show/Hide Tag Tree",	"TagTree",SysIcon.JTree.Icon),
+    // Seperator Position 9
 	bZoomFit("Zoom: Fit     ",	"ZoomFit",SysIcon.ZoomFit.Icon ,false),
+    // Seperator Position 10
 	bZoomMax("Zoom: 100%",		"Zoom100",SysIcon.Zoom100.Icon),
-	bAddTag("Add Tag",		"AddTag",SysIcon.AddTag.Icon),
+    // Seperator Position 11
+	bAddTag("Create Tag",		"AddTag",SysIcon.AddTag.Icon),
+    // Seperator Position 12
 	bTagThis("Tag This Image",	"TagThis",SysIcon.TagThis.Icon),
-	//bTagFilter("Filter By Tag",	"TagFilter",SysIcon.TagFilter.Icon),
-	adjustImage("Adjust Image Colours","AdjustImage",SysIcon.Adjust.Icon),
+    // Seperator Position 13
+	bTagTag("Tag A Tag",            "TagTag",SysIcon.TagTag.Icon),
+    // Seperator Position 14
+	bTagFilter("Filter By Tag",	"TagFilter",SysIcon.TagFilter.Icon),
+    // Seperator Position 15
+	bAdjustImage("Adjust Image Colours","AdjustImage",SysIcon.Adjust.Icon),
+    // Seperator Position 16
 	bBlueDemo("Bluetooth",		"BlueT",SysIcon.BlueTooth.Icon);
+    // Seperator Position 17
 
     JButton button;
+    static final Integer[] sliderPositions = {0,2,6,11,15,16,17};
 
     ToolBar(String label, String command, ImageIcon icon, boolean visible) {
         if (icon != null) {
@@ -74,8 +98,9 @@ enum ToolBar{
 	bar.setFocusable(false);
 
 	int i=0;
+        List<Integer> sPositions = Arrays.asList(sliderPositions);
 	for (ToolBar b : ToolBar.values()){
-	    if(i==0||i==4||i==7||i==9||i==11||i==12){
+	    if(sPositions.contains(i) ){//i==0||i==4||i==7||i==9||i==11||i==12){
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
 	    JButton bt = b.create((ActionListener)mainGUI);

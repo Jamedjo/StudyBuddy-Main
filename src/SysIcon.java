@@ -15,15 +15,20 @@ public enum SysIcon {
     Next("oxygen/go-next-6.png"),
     Play("oxygen/media-playback-start-6.png"),
     Stop("oxygen/media-playback-stop-6.png"),
-    HideThumbs("oxygen/view-right-close.png"),
-    ShowThumbs("oxygen/folder-image.png"),
+//    HideThumbs("oxygen/view-right-close.png"),
+//    ShowThumbs("oxygen/folder-image.png"),
+    Thumbs("oxygen/view-list-icons.png"),
     JTree("oxygen/view-sidetree-4.png"),
     Zoom100("oxygen/zoom-original-4.png"),
     ZoomFit("oxygen/zoom-fit-best-4.png"),
-    AddTag("oxygen/list-add-3.png"),
-    TagThis("oxygen/document-edit.png"),
+    AddTag("oxygen/document-edit.png"),
+    TagThis("oxygen/list-add-3.png"),
+    TagTag("oxygen/feed-subscribe.png"),
+    TagFilter("oxygen/edit-find-6.png"),
     BlueTooth("oxygen/preferences-system-bluetooth.png"),//phone-3.png"),
-    Adjust("oxygen/color-fill.png");
+    Adjust("oxygen/color-fill.png"),
+    Import("oxygen/application-x-egon.png"),
+    ImportDir("oxygen/folder-image.png"); 
     ImageIcon Icon;
     URL imgURL;
 
