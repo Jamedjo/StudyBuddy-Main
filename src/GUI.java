@@ -1,10 +1,27 @@
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowStateListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
 import javax.swing.tree.DefaultMutableTreeNode;
 //import javax.swing.ScrollPaneLayout;
 
@@ -53,7 +70,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void setTitle(String suffix) {
-        String prefix = "Study Buddy 0.7beta";
+        String prefix = "Study Buddy 0.8beta";
         if (suffix == null) suffix = "";
         else prefix = prefix.concat("- ");
         w.setTitle(prefix + suffix);

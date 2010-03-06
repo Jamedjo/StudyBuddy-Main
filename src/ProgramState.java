@@ -1,9 +1,10 @@
-import java.awt.image.*;
-import java.awt.*;
-import javax.swing.*;
-import java.io.*;
+import java.awt.Dimension;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import javax.swing.JOptionPane;
 import javax.swing.JOptionPane.*;
 
 //Type of load ProgramState does. Respectivly:

@@ -3,8 +3,6 @@ import javax.swing.JToolBar;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
-import java.util.Arrays;
-import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JMenu;
@@ -13,7 +11,7 @@ import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 
 enum ToolBar{
-    mImport(false,"Import Image",	"mImport", SysIcon.Import.Icon),
+    mImport(false,"Import Image","mImport", SysIcon.Import.Icon),
     mImportD(false, "Import Directory", "mImportD", SysIcon.ImportDir.Icon),
     bPrev(true, "Prev", "Prev", SysIcon.Prev.Icon),
     bNext(false, "Next", "Next", SysIcon.Next.Icon),

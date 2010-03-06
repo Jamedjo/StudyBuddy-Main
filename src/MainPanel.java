@@ -49,7 +49,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
                 this.setCursor(plainCursor);
             }
         } else {
-            mainGUI.imageAreas.validate();
+            mainGUI.imageAreas.getParent().validate();
+            //mainGUI.imageAreas.validate();
             boardW = mainGUI.mainScrollPane.getWidth() - 3;
             boardH = mainGUI.mainScrollPane.getHeight() - 3;
             this.setPreferredSize(new Dimension(boardW, boardH));
@@ -58,7 +59,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         getParent().validate();
         this.revalidate();
         //getParent().validate();
-        this.repaint();
+        getParent().repaint();
     }
 
     //all scaling in terms of height. max size is 20 times minimum.
