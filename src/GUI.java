@@ -1,3 +1,4 @@
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
@@ -6,6 +7,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowStateListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.io.File;
@@ -59,6 +62,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JPanel imageAreas;
     JSlider zoomBar;
     File thumbPath;
+    final int tagTreeStartSize = 150;
+    final int tagTreeMaxSize = 350;
     //boolean isChangingState = false;
 
     public static void main(String[] args) {
@@ -97,18 +102,18 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     boolean isImage(File f){
         String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
         //String[] readerNames = ImageIO.getReaderFormatNames();
-                String ext = null;
-                String name = f.getName();
-                int pos = name.lastIndexOf(".");
-                if (pos > 0 && pos < (name.length() - 1)) {
-                    ext = name.substring(pos + 1).toLowerCase();
-                    for (String imgExt : exts) {
-                        if (ext.equals(imgExt)) {
-                            return true;
-                        }
-                    }
+        String ext = null;
+        String name = f.getName();
+        int pos = name.lastIndexOf(".");
+        if (pos > 0 && pos < (name.length() - 1)) {
+            ext = name.substring(pos + 1).toLowerCase();
+            for (String imgExt : exts) {
+                if (ext.equals(imgExt)) {
+                    return true;
                 }
-                return false;
+            }
+        }
+        return false;
     }
 
     void buildFileGetter() {
@@ -158,8 +163,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     void quickRestart(){
         settings = new Settings();
         thumbPath = new File(settings.getSetting("homeDir") + settings.getSetting("thumbnailPathExt"));
-	state = new ProgramState(this);//Also initializes mainImageDB
-	mainPanel = new MainPanel(this);
+        state = new ProgramState(this);//Also initializes mainImageDB
+        mainPanel = new MainPanel(this);
 
         thumbPanel = new ThumbPanel(this);
         thumbPanel.setVisible(true);
@@ -183,7 +188,19 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
         splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tagTree, imageAreas);
         splitpane.setOneTouchExpandable(true);
-        splitpane.setDividerLocation(150 + splitpane.getInsets().left);
+        splitpane.setDividerLocation(tagTreeStartSize + splitpane.getInsets().left);
+        splitpane.addPropertyChangeListener(new PropertyChangeListener() {
+
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().toLowerCase().equals("dividerlocation")){
+                    if(splitpane.getDividerLocation()>tagTreeMaxSize) splitpane.setDividerLocation(tagTreeMaxSize);
+                }
+                if (mainPanel.isValid()) {
+                    mainPanel.onResize();
+                    thumbPanel.onResize();
+                }
+            }
+        });
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
         JPanel contentPane = new JPanel();
@@ -231,8 +248,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             JOptionPane.showMessageDialog(w, "Visit http://www.studybuddy.com for help and tutorials", "Study Help", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
         } else if (ae.getActionCommand().equals("About")) {
             JOptionPane.showMessageDialog(w, "StudyBuddy by Team StudyBuddy", "About StudyBuddy", JOptionPane.INFORMATION_MESSAGE, SysIcon.Help.Icon);
-        } else
+        } else{
             System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());
+        }
         //+ ",\nwith source:\n\n " + e.getSource());
     }
 
@@ -290,12 +308,17 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
     void toggleTagTree() {//true to show
         //boolean makeVisible =
-        if (splitpane.getDividerLocation() <2) {
-            splitpane.setDividerLocation(splitpane.getLastDividerLocation());
+        if (splitpane.getDividerLocation() < 2) {
+            int x = splitpane.getLastDividerLocation();
+            if (x < 50) {
+                x = tagTreeStartSize;
+            }
+            splitpane.setDividerLocation(x);
         } else {
             splitpane.setDividerLocation(1);
         }
         mainPanel.onResize();
+        thumbPanel.onResize();
     }
 
     void toggleZoomed(boolean makeFit) {//true to set zoom to fit
@@ -458,7 +481,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
     }
 
-      // Delete a tag from the database from a selection on a tag tree
+    // Delete a tag from the database from a selection on a tag tree
     void deleteTagFromTree() {
         DefaultMutableTreeNode NodeToDel;
         IDTitle NodeToDelObject = null;
@@ -481,5 +504,5 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     void showImageAdjuster(){
         adjuster.setVisible(true);
     }
-  
+
 }
