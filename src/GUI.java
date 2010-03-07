@@ -227,7 +227,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         adjuster = new ImageAdjuster(w,true);
         adjuster.addChangeListeners( new ChangeListener(){
             public void stateChanged(ChangeEvent e){
-                System.out.println("stateChanged");
                 state.getCurrentImage().brightness = adjuster.getCurrentSliderBright();
                 state.getCurrentImage().contrast = adjuster.getCurrentSliderContrast();
                 state.getCurrentImage().isInverted = adjuster.getCurrentInvertBox();
@@ -268,6 +267,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("DragNote")) mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
+        else if (ae.getActionCommand().equals("ExportCurrentImg")) state.getCurrentImage().saveFullToPath("D:\\save.jpg");
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
         } else if (ae.getActionCommand().equals("Help")) {

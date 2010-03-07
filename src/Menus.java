@@ -13,6 +13,7 @@ import javax.swing.border.EtchedBorder;
 enum ToolBar{
     mImport(false,"Import Image","mImport", SysIcon.Import.Icon),
     mImportD(false, "Import Directory", "mImportD", SysIcon.ImportDir.Icon),
+    mExprtImg(false, "Export Current Image", "ExportCurrentImg", SysIcon.Export.Icon),
     bPrev(true, "Prev", "Prev", SysIcon.Prev.Icon),
     bNext(false, "Next", "Next", SysIcon.Next.Icon),
     bSlideP(false, "Slideshow play", "SlideP", SysIcon.Play.Icon),

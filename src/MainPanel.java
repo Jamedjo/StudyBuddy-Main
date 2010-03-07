@@ -101,10 +101,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             useWH = mainGUI.state.getRelImageWH(ImgSize.Screen, boardW, boardH, 0);
         //}
         //Potentially inefficient as forces full size image to load
-        System.out.println("old zoomMultiplier- " + getZoomMult());
+        //System.out.println("old zoomMultiplier- " + getZoomMult());
         setZoomMult((double)((double) useWH.width) / ((double) mainGUI.state.getCurrentImage().getWidthAndMakeBig()));
-        System.out.println("new zoomMultiplier- " + getZoomMult());
-        System.out.println("boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
+        //System.out.println("new zoomMultiplier- " + getZoomMult());
+        //System.out.println("boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
     }
 
     void onResize() {

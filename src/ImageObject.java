@@ -370,13 +370,21 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     String getSaveEncoding(){
         return imageID+"_thumb.jpg";
     }
-    
+
     void saveThumbToFile(){
         try{
             File thumbfile = new File(thumbPath,getSaveEncoding());
             ImageIO.write(bThumb,"jpg",thumbfile);//should use same format as file
         } catch (IOException e){
             System.err.println("Error creating thumbnail for image: "+absolutePath);
+        }
+    }
+    void saveFullToPath(String path){
+        try{
+            File f = new File(path);
+            ImageIO.write(localGetBufImage(),"jpg",f);//should use same format as file
+        } catch (IOException e){
+            System.err.println("Error creating saving image: "+absolutePath+"\nTo path: "+path);
         }
     }
 
@@ -440,9 +448,11 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             if(bImageFilt==null) bImageFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);
         }
         RenderingHints hints = null;
+        float scaleBase = 1.0f;
+        if(isInverted) scaleBase = -1.0f;
         float offset = (brightness-50f)*5.10f;
-        float scale = 1.0f+(contrast-50f)/50f;
-        if(isInverted) scale = (-scale);
+        if(isInverted) offset = 255f-offset;
+        float scale = scaleBase+(contrast-50f)/50f;
         BufferedImageOp op = new RescaleOp(scale,offset,hints);
         if(isThumb){
         op.filter(srcImg,bThumbFilt);
