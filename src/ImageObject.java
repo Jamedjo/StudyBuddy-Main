@@ -12,6 +12,8 @@ import java.io.IOException;
 //import javax.swing.ImageIcon;
 import java.awt.RenderingHints;
 //import javax.swing.JOptionPane;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.RescaleOp;
 import java.net.URISyntaxException;
 import java.util.Calendar;
 
@@ -55,6 +57,10 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
 class ImageObject { //could be updated to take a File instead, or a javase7 path
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
+    private BufferedImage bImageFilt = null;
+    private BufferedImage bThumbFilt = null;
+    private boolean isFiltered = false;
+    private final int imgType = BufferedImage.TYPE_3BYTE_BGR;
     String absolutePath;//Kept for error messages. Likely to be similar to pathFile.toString()
     File pathFile = null;
     File thumbPath = null;
@@ -67,8 +73,10 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     boolean isQuickThumb = false;
     ImgSize currentLarge;//The size of the large bImage (Max or Screen)
     String imageID;
+    int brightness = 50;
+    int contrast = 50;
+    boolean isInverted = false;
     //String title,filename,comments?
-
 
     ImageObject(String inputPath,String currentID,File thumbnailPath){
 	String tempPath = "";
@@ -123,9 +131,17 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	manualReadImage();
     }
 
-void flush(){//called externally
-bImage=null;
-}
+    void flush() {//called externally
+        bImage = null;
+    }
+    private BufferedImage localGetBufImage(){
+        if(isFiltered) return bImageFilt;
+        return bImage;
+    }
+    private BufferedImage localGetBufThumb(){
+        if(isFiltered) return bThumbFilt;
+        return bThumb;
+    }
 
     int getWidthAndMake(){
 	if(Bheight!=null) return Bwidth;
@@ -254,19 +270,19 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
         //**//System.out.println("Image requested: " + absolutePath + " at size " + size);
         //gets thumbnail or full image
         if (size.isThumb() && bThumb != null) {
-            return bThumb;
+            return localGetBufThumb();
         }
         if (size == currentLarge && bImage != null) {
-            return bImage;//If there is an image which matches size
+            return localGetBufImage();//If there is an image which matches size
         }	//Build large icon and small icon, return relevent.
         if (size == ImgSize.Thumb) {//If thumbfull do long way
             getThumbIfCached();
             if (bThumb != null) {
-                return bThumb;
+                return localGetBufThumb();
             }
             getThumbQuick();
             if (bThumb != null) {
-                return bThumb;
+                return localGetBufThumb();
             }
 //should now add rendering the thumb properly to a task list for another thread
         }
@@ -309,15 +325,15 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             return null;//if big is null, so is thumb.
         }
         if (size.isLarge()) {
-            return bImage;
+            return localGetBufImage();
         }
         //**//System.out.println("Made thumb for "+absolutePath);
         if (size == ImgSize.ThumbFull) {
-            return bThumb;
+            return localGetBufThumb();
         } else {
             //as only thumb needed, clear bImage
             bImage = null;
-            return bThumb;
+            return localGetBufThumb();
         }
     }
 
@@ -330,7 +346,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
         }
 
 	//Image tempimage = bigIcon.getImage();
-	BufferedImage tempimage =(new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR));
+	BufferedImage tempimage =(new BufferedImage(iconWH.width,iconWH.height,imgType));
 
         Graphics2D g2 = tempimage.createGraphics();//TYPE_INT_RGB
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -375,7 +391,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	Dimension iconWH = scaleDownToMax(bigImg.getWidth(),bigImg.getHeight(),screenWidth,screenHeight);
 	if(!(iconWH.width<bigImg.getWidth())) return bigImg;
 	//Image tempimage = bigIcon.getImage();
-	BufferedImage tempimage =(new BufferedImage(iconWH.width,iconWH.height,BufferedImage.TYPE_3BYTE_BGR));
+	BufferedImage tempimage =(new BufferedImage(iconWH.width,iconWH.height,imgType));
 
         Graphics2D g2 = tempimage.createGraphics();//TYPE_INT_RGB takes 4bytes, this takes 3. Less memory used
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -395,6 +411,37 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	else iOri = Orientation.Portrait;
     }
 
+    void filterImage(){
+        isFiltered = true;
+        filterBufImage(true);
+        filterBufImage(false);
+    }
+    private void filterBufImage(boolean isThumb){
+        BufferedImage srcImg;
+        if(isThumb){
+            srcImg=bThumb;
+        BufferedImage destImg=bThumbFilt;
+        } else{
+            srcImg=bImage;
+        BufferedImage destImg=bImageFilt;
+        }
+        if(srcImg==null){
+            return;//should change to a call which sets it up.
+        }
+        if(isThumb){
+            if(bThumbFilt==null) bThumbFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);
+        } else{
+            if(bImageFilt==null) bImageFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);
+        }
+        RenderingHints hints = null;
+        float offset = 1.0f;//+(brightness-50)/100;
+        float scale = 1.0f;//+(contrast-50)/1000;
+        BufferedImageOp op = new RescaleOp(scale,offset,hints);
+        if(isThumb){
+        op.filter(srcImg,bThumbFilt);
+        } else op.filter(srcImg,bImageFilt);
+    }
+
     void setToXasFileNotFound(){
 	//set image to error icon
 	//improvement: set the buffered image to a java graphics drawn X icon
@@ -411,12 +458,15 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     void clearMem(){
 	//clears the full size image.
 	bImage = null;
+        bImageFilt=null;
 	//bThumb = null;
     }
 
     void destroy(){
 	bImage = null;
 	bThumb = null;
+        bImageFilt=null;
+        bThumbFilt=null;
 	pathFile = null;
 	absolutePath = null;
     }

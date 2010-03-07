@@ -13,6 +13,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.io.File;
 import java.io.IOException;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -171,12 +172,20 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         thumbPanel.setVisible(true);
 
         toolbarMain = ToolBar.build(this);
+        toolbarMain.addPropertyChangeListener(new PropertyChangeListener() {
+            public void propertyChange(PropertyChangeEvent evt) {
+                if(evt.getPropertyName().toLowerCase().equals("orientation")){
+                    zoomBar.setOrientation((Integer)(evt.getNewValue()));
+                }
+            }
+        });
 
         tagTree = new TagTree(mainImageDB,this);
         //TagTree.setMinimumSize(new Dimension(150,0));
         //Put tagTree in a scrollPane for when more tags exist than it can vertically handle.
 
         mainScrollPane = new JScrollPane(mainPanel);
+        //mainScrollPane.setBorder(BorderFactory.createEmptyBorder());
         mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
         mainScrollPane.getViewport().addChangeListener(new ChangeListener(){
             public void stateChanged(ChangeEvent e){
@@ -513,7 +522,17 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void showImageAdjuster(){
-        adjuster.setVisible(true);
+        adjuster.popup();
+        int oldBr = state.getCurrentImage().brightness;
+        int oldCr = state.getCurrentImage().contrast;
+        boolean oldInv = state.getCurrentImage().isInverted;
+        state.getCurrentImage().brightness = adjuster.getBrightness();
+        state.getCurrentImage().contrast = adjuster.getContrast();
+        state.getCurrentImage().isInverted = adjuster.isInverted();
+        if(adjuster.shouldReset()){
+            state.imageColoursReset();
+        } else if((state.getCurrentImage().brightness !=oldBr)||(state.getCurrentImage().contrast!=oldCr)||(state.getCurrentImage().isInverted!=oldInv)){
+            state.imageColoursUpdated();
+        }
     }
-
 }

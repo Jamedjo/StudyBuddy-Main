@@ -139,10 +139,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             topOffset = (this.getPreferredSize().height - useWH.height) / 2;
         } else {
             leftOffset = (boardW - useWH.width) / 2;
-            topOffset = (boardH - useWH.height) / 2;
+            topOffset = (boardH - useWH.height) / 2;// plus 2 due to weird borders
         }
     }
-
+    
     //all scaling in terms of height. max size is 20 times minimum.
     @Override public void paintComponent(java.awt.Graphics g) {
         if (mainGUI.state.isLocked) {

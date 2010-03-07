@@ -59,7 +59,7 @@ class ProgramState{
 	switch (loadType){
 	case Init:
             mainGUI.settings.setSettingAndSave("databaseFilePathAndName", mainGUI.settings.getSetting("homeDir")+mainGUI.settings.getSetting("databasePathExt")+mainGUI.settings.getSetting("databaseFileName"));
-            InitDemoDB.initDB(mainGUI.settings.getSetting("databaseFilePathAndName"));
+            InitDemoDB.initDB(mainGUI.settings.getSetting("databaseFilePathAndName"));//Resets database
 	case Load:
 	    mainGUI.mainImageDB = new ImageDatabase("mainDB",mainGUI.settings.getSetting("databaseFilePathAndName"));
 	    //no break as image list must still be passed from DB
@@ -272,5 +272,14 @@ class ProgramState{
             }
         }
 	return returnImage;
+    }
+
+    void imageColoursReset(){
+        imageColoursUpdated();//TODO: Should reset image insterad
+    }
+    void imageColoursUpdated(){
+        getCurrentImage().filterImage();
+        mainGUI.mainPanel.repaint();
+        mainGUI.thumbPanel.repaint();
     }
 }
