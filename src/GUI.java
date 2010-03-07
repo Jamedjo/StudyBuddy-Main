@@ -48,6 +48,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JButton bSideBar;
     final JFileChooser fileGetter = new JFileChooser();
     final JFileChooser folderGetter = new JFileChooser();
+    final JFileChooser jpgExporter = new JFileChooser();
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
@@ -94,6 +95,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         //w.addComponentListener(this);
         buildFileGetter();
         buildFolderGetter();
+        buildJpgExporter();
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
@@ -136,6 +138,24 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         folderGetter.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         folderGetter.setDialogTitle("Import Folder(s)");
         folderGetter.setMultiSelectionEnabled(true);
+    }
+    void buildJpgExporter() {
+        jpgExporter.setFileSelectionMode(JFileChooser.SAVE_DIALOG);
+        fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
+            public boolean accept(File f) {
+                if (f.isDirectory()) {
+                    return true;//Still want to show directories to browse
+                }
+                if(f.toString().toLowerCase().endsWith(".jpg")||f.toString().toLowerCase().endsWith(".jpeg")) return true;
+                return false;
+            }
+            public String getDescription() {
+                return "Jpg File";
+            }
+        });
+        jpgExporter.setDialogTitle("Export Image as JPG");
+        jpgExporter.setSelectedFile(new File("image.jpg"));
+        jpgExporter.setMultiSelectionEnabled(false);
     }
 
     void buildMenuBar() {
@@ -267,7 +287,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("DragNote")) mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
-        else if (ae.getActionCommand().equals("ExportCurrentImg")) state.getCurrentImage().saveFullToPath("D:\\save.jpg");
+        else if (ae.getActionCommand().equals("ExportCurrentImg")) exportCurrentImage();
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
         } else if (ae.getActionCommand().equals("Help")) {
@@ -483,6 +503,12 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
     }
 
+    void exportCurrentImage() {
+        int destReady = fileGetter.showOpenDialog(w);
+        if (destReady == JFileChooser.APPROVE_OPTION) {
+            state.getCurrentImage().saveFullToPath(((fileGetter.getSelectedFiles())[0]).toString());
+        }
+    }
     void importDo() {
         int wasGot = fileGetter.showOpenDialog(w);
         if (wasGot == JFileChooser.APPROVE_OPTION) {
