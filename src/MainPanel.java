@@ -22,7 +22,6 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     private boolean bIsZoomed = false;
     private double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
     int pressX,pressY,nowX,nowY;
-    //Cursor plainCursor = Cursor.getDefaultCursor();
     Thread dragThread;
     final int dragPeriod = 40;// 25fps is equivalent to every 40ms
     private DragMode dragMode;//Change if zoomed in by default
@@ -210,7 +209,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         int xpos = e.getPoint().x;
         int ypos = e.getPoint().y;
         setZoomed(true);
-        setZoomMult(getZoomMult()-((double) e.getWheelRotation()) * wheelZoomIncrement);
+        setZoomMult(getZoomMult()*(1-(((double) e.getWheelRotation()) * wheelZoomIncrement)));
         mainGUI.toggleZoomed(false);
         double zoomFactor = getZoomMult()/oldZoom;
         int newX = (int)(xpos*zoomFactor);
@@ -257,7 +256,6 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     public void mouseClicked(MouseEvent e){ }
     public void mouseEntered(MouseEvent e){ }
     public void mouseExited(MouseEvent e){ }
-
 
     Rectangle getBoxFromPress(int currentMouseX, int currentMouseY,boolean useScale) {
         double scale = 1;
