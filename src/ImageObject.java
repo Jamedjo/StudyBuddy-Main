@@ -425,7 +425,10 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     }
 
     void filterImage(){
-        if((contrast==50)&&(brightness==50)&&(!isInverted)) return;
+        if((contrast==50)&&(brightness==50)&&(!isInverted)) {
+            isFiltered = false;
+            return;
+        }
         isFiltered = true;
         filterBufImage(true);
         filterBufImage(false);
@@ -448,11 +451,12 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             if(bImageFilt==null) bImageFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);
         }
         RenderingHints hints = null;
-        float scaleBase = 1.0f;
-        if(isInverted) scaleBase = -1.0f;
         float offset = (brightness-50f)*5.10f;
-        if(isInverted) offset = 255f-offset;
-        float scale = scaleBase+(contrast-50f)/50f;
+        float scale = 1.0f+(contrast-50f)/50f;
+        if(isInverted){
+            offset = 255f-offset;
+            scale = (-scale);
+        }
         BufferedImageOp op = new RescaleOp(scale,offset,hints);
         if(isThumb){
         op.filter(srcImg,bThumbFilt);
