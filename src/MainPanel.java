@@ -175,7 +175,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
                 linksRect = mainGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, leftOffset, topOffset, getZoomMult());
                 if (linksRect != null) {
                     for (int i = 0; i < linksRect.length; i++) {
-                        System.out.println("Notes[i]- " + linksRect[i]);
+                        //System.out.println("Notes[i]- " + linksRect[i]);
                         g2.draw(linksRect[i]);
                     }
                 }
@@ -185,7 +185,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
                 linksRect = mainGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, leftOffset, topOffset, getZoomMult());
                 if (linksRect != null) {
                     for (int j = 0; j < linksRect.length; j++) {
-                        System.out.println("Links[j]- " + linksRect[j]);
+                        //System.out.println("Links[j]- " + linksRect[j]);
                         g2.draw(linksRect[j]);
                     }
                 }
@@ -200,19 +200,24 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
+        double oldZoom = getZoomMult();
         if (isZoomFit()) {
             //get multiplier from fit so zoom doesnt jump
             setZoomMult(((double)useWH.width) / ((double)mainGUI.state.getCurrentImage().getWidthAndMakeBig()));
         }
-        //System.out.println(e.toString());
+        //Does not look at offsets as these imply image is not enlarged in that dimension.
+        //If the image is zoomed out and has offsets then no need to change JViewport position
         int xpos = e.getPoint().x;
         int ypos = e.getPoint().y;
         setZoomed(true);
         setZoomMult(getZoomMult()-((double) e.getWheelRotation()) * wheelZoomIncrement);
         mainGUI.toggleZoomed(false);
-        System.out.println(xpos+","+ypos);
-        //this.scrollRectToVisible(new Rectangle(xpos,ypos,this.getParent().getWidth(),this.getParent().getHeight()));//improve this to improve zoom.
-        ((JViewport)this.getParent()).setViewPosition(new Point(xpos,ypos));
+        double zoomFactor = getZoomMult()/oldZoom;
+        int newX = (int)(xpos*zoomFactor);
+        int newY = (int)(ypos*zoomFactor);
+        Rectangle r = ((JViewport) this.getParent()).getViewRect();
+        r.translate(newX-xpos,newY-ypos);
+        this.scrollRectToVisible(r);
     }
     @Override public void mouseMoved(MouseEvent e) { }
 
