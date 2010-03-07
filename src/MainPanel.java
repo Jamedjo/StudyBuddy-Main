@@ -267,15 +267,12 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         // x and y values scaled apropriately, and tranlated if image is centred on mainPanel.
         double scaledXstart, scaledYstart, scaledXstop, scaledYstop;
         scaledXstart = (pressX - xTranslate) / scale;
-        scaledYstart = (pressY - topOffset) / scale;
+        scaledYstart = (pressY - yTranslate) / scale;
         scaledXstop = (currentMouseX - xTranslate) / scale;
-        scaledYstop = (currentMouseY - topOffset) / scale;
+        scaledYstop = (currentMouseY - yTranslate) / scale;
 
         int boxWidth, boxHeight, boxXleft, boxYtop;
         boxWidth = (int) Math.abs(scaledXstart - scaledXstop);
-        if(boxWidth>0){
-            int x = 9;
-        }
         boxHeight = (int) Math.abs(scaledYstart - scaledYstop);
         boxXleft = (int) Math.min(scaledXstart, scaledXstop);
         boxYtop = (int) Math.min(scaledYstart, scaledYstop);
