@@ -31,6 +31,8 @@ public enum SysIcon {
     DragLink("oxygen/insert-link-2.png"),
     BlueTooth("oxygen/preferences-system-bluetooth.png"),//phone-3.png"),
     Adjust("oxygen/color-fill.png"),
+    LinkCursor("oxygen/quickopen.png"),
+    NoteCursor("oxygen/transform-crop.png"),
     Import("oxygen/application-x-egon.png"),
     ImportDir("oxygen/folder-image.png"); 
     ImageIcon Icon;

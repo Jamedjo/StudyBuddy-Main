@@ -25,7 +25,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     //Cursor plainCursor = Cursor.getDefaultCursor();
     Thread dragThread;
     final int dragPeriod = 40;// 25fps is equivalent to every 40ms
-    private DragMode dragMode = DragMode.None;//Change if zoomed in by default
+    private DragMode dragMode;//Change if zoomed in by default
     boolean mousePressed = false;
 
     MainPanel(GUI parentGUI) {
@@ -239,19 +239,17 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     public void mouseReleased(MouseEvent e){
         dragThread.interrupt();
         dragThread = new Thread(new DragUpdate(this, dragPeriod));
-        int leftOfset = 0;
-        int topOfset = 0;
         mousePressed = false;
         updateCursor();
         if (getCursorMode() == DragMode.Note) {
             setOfsets();
             mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", (int) ((nowX / getZoomMult()) - leftOfset), (int) ((nowY / getZoomMult()) - topOfset), (int) ((e.getX() - nowX) / getZoomMult()), (int) ((e.getY() - nowY) / getZoomMult()));
-            setCursorMode(DragMode.Drag);
+            setCursorMode(getCurrentDrag());
             this.repaint();
         }else if (getCursorMode() == DragMode.Link) {
             setOfsets();
             mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", nowX - leftOfset, nowY - topOfset, e.getX() - nowX, e.getY() - nowY);
-            setCursorMode(DragMode.Drag);
+            setCursorMode(getCurrentDrag());
             this.repaint();
         }
     }

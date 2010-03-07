@@ -165,6 +165,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         thumbPath = new File(settings.getSetting("homeDir") + settings.getSetting("thumbnailPathExt"));
         state = new ProgramState(this);//Also initializes mainImageDB
         mainPanel = new MainPanel(this);
+        mainPanel.setCursorMode(DragMode.None);
 
         thumbPanel = new ThumbPanel(this);
         thumbPanel.setVisible(true);
