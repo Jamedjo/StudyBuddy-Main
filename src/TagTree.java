@@ -26,11 +26,9 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
         mainGUI = gui;
         mainImageDB = mainDB;
         //last x any y = 0; ?
-        treeNode = new DefaultMutableTreeNode(new IDTitle("-1", "All Tags"));
-        ((DefaultTreeModel) this.getModel()).setRoot(treeNode);
-        addTreeTags(treeNode, new Hashtable<String, IDTitle>());
         this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
         this.setFocusable(false);//Prevents other keyboard actions in rest of GUI. May be able to allow up/down only here.
+        updateTags();
         this.expandRow(0);
         this.addTreeSelectionListener(this);
         this.addMouseListener(
@@ -53,6 +51,11 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
     }
 
     public void updateTags(){
+        treeNode = new DefaultMutableTreeNode(new IDTitle("-1", "All Tags"));
+        ((DefaultTreeModel) this.getModel()).setRoot(treeNode);
+        addTreeTags(treeNode, new Hashtable<String, IDTitle>());
+        this.expandRow(0);
+        // TODO: before update, check for expanded rows and remember them?
         this.repaint();
     }
 
