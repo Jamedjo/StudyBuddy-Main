@@ -39,6 +39,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
         dragThread = new Thread(new DragUpdate(this,dragPeriod));
+        mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", 0, 0, 300, 200);
+        mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", 300, 200, 100, 100);
     }
     DragMode getCursorMode(){
         return dragMode;
@@ -132,7 +134,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         //if (oldScr!=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible()) System.out.println("Horizontal Scroll bar toggled");
     }
 
-    void setOfsets() {
+    void setOffsets() {
         if (isZoomed()) {
             leftOfset = (this.getPreferredSize().width - useWH.width) / 2;
             topOfset = (this.getPreferredSize().height - useWH.height) / 2;
@@ -158,7 +160,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             cSize = ImgSize.Screen;
             useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
         }
-        setOfsets();
+        setOffsets();
 //        Image offScreenImage = createImage(useWH.width,useWH.height);
 //        Graphics2D gOffScr = (Graphics2D) offScreenImage.getGraphics();
 //        gOffScr.setColor(Color.red);
@@ -172,11 +174,15 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 //        gOffScr.dispose();
 //        g2.drawImage(offScreenImage,leftOfset,topOfset, this);
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
-        DrawLinkBoxes(g2, mainGUI, leftOfset, topOfset, getZoomMult(), true, true);
+        DrawLinkBoxes(g2, true, true);
     }
 	
     // Retreive the boxes for notes and links and draw them on the image
-    private void DrawLinkBoxes(Graphics2D DrawWhere, GUI TheGUI, int XOffset, int YOffset, double Scale, boolean Notes, boolean ImageLinks) {
+    private void DrawLinkBoxes(Graphics2D DrawWhere, boolean Notes, boolean ImageLinks) {
+        GUI TheGUI = mainGUI;
+        double Scale= getZoomMult();
+        int XOffset = leftOfset;
+        int YOffset = topOfset;
         Rectangle[] Links;
         String CurrentImageID = TheGUI.state.getCurrentImageID();
         System.out.println("zoomMultiplier- " + getZoomMult());
@@ -241,14 +247,25 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         dragThread = new Thread(new DragUpdate(this, dragPeriod));
         mousePressed = false;
         updateCursor();
-        if (getCursorMode() == DragMode.Note) {
-            setOfsets();
-            mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", (int) ((nowX / getZoomMult()) - leftOfset), (int) ((nowY / getZoomMult()) - topOfset), (int) ((e.getX() - nowX) / getZoomMult()), (int) ((e.getY() - nowY) / getZoomMult()));
-            setCursorMode(getCurrentDrag());
-            this.repaint();
-        }else if (getCursorMode() == DragMode.Link) {
-            setOfsets();
-            mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", nowX - leftOfset, nowY - topOfset, e.getX() - nowX, e.getY() - nowY);
+        DragMode mode = getCursorMode();
+        if ((mode == DragMode.Note) || (mode == DragMode.Link)) {
+            setOffsets();
+            // x and y values scaled apropriately, and then transformed relative to viewport
+            double scaledXstart, scaledYstart, scaledXstop, scaledYstop;
+            scaledXstart = (pressX  - leftOfset)/ getZoomMult();
+            scaledYstart = (pressY  - topOfset)/ getZoomMult();
+            scaledXstop = (e.getX()  - leftOfset)/ getZoomMult();
+            scaledYstop = (e.getY()  - topOfset)/ getZoomMult();
+            int boxWidth,boxHeight,boxXleft,boxYtop;
+            boxWidth = (int) Math.abs(scaledXstart-scaledXstop);
+            boxHeight = (int)Math.abs(scaledYstart-scaledYstop);
+            boxXleft = (int) Math.min(scaledXstart, scaledXstop);
+            boxYtop  = (int) Math.min(scaledYstart, scaledYstop);
+            if (mode == DragMode.Note) {
+                mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", boxXleft, boxYtop ,boxWidth ,boxHeight);
+            } else if (mode == DragMode.Link) {
+                mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", boxXleft, boxYtop, boxWidth,boxHeight);
+            }
             setCursorMode(getCurrentDrag());
             this.repaint();
         }

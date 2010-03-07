@@ -398,6 +398,7 @@ class ImageDatabase
 	Enumeration Records;
 	Record TempRecord;
 	Rectangle[] Result;
+        int outX,outY,outW,outH;
 	int i=0;
 	if (TempTable.getNumRecords() == 0)
 		return null;
@@ -408,7 +409,11 @@ class ImageDatabase
 		while(Records.hasMoreElements())
 		{
 		  TempRecord = (Record) Records.nextElement();
-		  Result[i] = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
+                  outX = (int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2))));
+                  outY = (int) (YOffset + (Scale*Integer.parseInt(TempRecord.getField(3))));
+                  outW = (int) (Scale*Integer.parseInt(TempRecord.getField(4)));
+                  outH = (int) (Scale*Integer.parseInt(TempRecord.getField(5)));
+                  Result[i] = new Rectangle(outX , outY, outW, outH);
 		  i++;
 		}
 		return Result;

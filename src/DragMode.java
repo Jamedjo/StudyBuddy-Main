@@ -5,7 +5,6 @@ import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
-import javax.swing.ImageIcon;
 
 public enum DragMode {
     //Mode(hoverCursor,clickCursor),
