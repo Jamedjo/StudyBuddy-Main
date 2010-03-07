@@ -14,8 +14,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     Dimension useWH;
     final int boardW_start = 550;
     final int boardH_start = 350;
-    int leftOfset;
-    int topOfset;
+    int leftOffset;
+    int topOffset;
     final double wheelZoomIncrement = 0.2;//affect zoom by 20 percent on wheel rotate
     final double minimumZoomLevel = 0.025; //minium zoom so image does not dissapear of negative zoom
     final GUI mainGUI;
@@ -39,8 +39,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
         dragThread = new Thread(new DragUpdate(this,dragPeriod));
-        mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", 0, 0, 300, 200);
-        mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", 300, 200, 100, 100);
+        mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "This is a test Note!!!", 0, 0, 300, 200);
+        mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID()+1,mainGUI.state.getCurrentImageID(), 300, 200, 100, 100);
     }
     DragMode getCursorMode(){
         return dragMode;
@@ -136,11 +136,11 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 
     void setOffsets() {
         if (isZoomed()) {
-            leftOfset = (this.getPreferredSize().width - useWH.width) / 2;
-            topOfset = (this.getPreferredSize().height - useWH.height) / 2;
+            leftOffset = (this.getPreferredSize().width - useWH.width) / 2;
+            topOffset = (this.getPreferredSize().height - useWH.height) / 2;
         } else {
-            leftOfset = (boardW - useWH.width) / 2;
-            topOfset = (boardH - useWH.height) / 2;
+            leftOffset = (boardW - useWH.width) / 2;
+            topOffset = (boardH - useWH.height) / 2;
         }
     }
 
@@ -161,48 +161,39 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
-//        Image offScreenImage = createImage(useWH.width,useWH.height);
-//        Graphics2D gOffScr = (Graphics2D) offScreenImage.getGraphics();
-//        gOffScr.setColor(Color.red);
-//        gOffScr.fillRect(0,0,useWH.width,useWH.height);
-//        int drawX,drawY,drawW,drawH;
-//        drawX=((JViewport)this.getParent()).getViewRect().x;
-//        drawY=((JViewport)this.getParent()).getViewRect().y;
-//        drawW=((JViewport)this.getParent()).getViewRect().width;
-//        drawH=((JViewport)this.getParent()).getViewRect().height;
-//        gOffScr.drawImage(mainGUI.state.getBImageI(0, cSize).getSubimage(drawX,drawY,drawW,drawH), drawX, drawY, drawW, drawH, this);
-//        gOffScr.dispose();
-//        g2.drawImage(offScreenImage,leftOfset,topOfset, this);
-        g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOfset, topOfset, useWH.width, useWH.height, this);
-        DrawLinkBoxes(g2, true, true);
+        g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOffset, topOffset, useWH.width, useWH.height, this);
+        drawLinkBoxes(g2, true, true);
     }
 	
     // Retreive the boxes for notes and links and draw them on the image
-    private void DrawLinkBoxes(Graphics2D DrawWhere, boolean Notes, boolean ImageLinks) {
-        GUI TheGUI = mainGUI;
-        double Scale= getZoomMult();
-        int XOffset = leftOfset;
-        int YOffset = topOfset;
-        Rectangle[] Links;
-        String CurrentImageID = TheGUI.state.getCurrentImageID();
-        System.out.println("zoomMultiplier- " + getZoomMult());
+    private void drawLinkBoxes(Graphics2D g2, boolean showNotes, boolean showImageLinks) {
+        Rectangle[] linksRect;
+        String CurrentImageID = mainGUI.state.getCurrentImageID();
+        //System.out.println("zoomMultiplier- " + getZoomMult());
         if (CurrentImageID != null) {
-            if (Notes == true) {
-                Links = TheGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, XOffset, YOffset, Scale);
-                if (Links != null) {
-                    System.out.println("Links[0]- " + Links[0]);
-                    for (int i = 0; i < Links.length; i++) {
-                        DrawWhere.draw(Links[i]);
+            if (showNotes) {
+                linksRect = mainGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, leftOffset, topOffset, getZoomMult());
+                if (linksRect != null) {
+                    for (int i = 0; i < linksRect.length; i++) {
+                        System.out.println("Notes[i]- " + linksRect[i]);
+                        g2.draw(linksRect[i]);
                     }
                 }
+                linksRect = null;
             }
-            if (ImageLinks == true) {
-                Links = TheGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, XOffset, YOffset, Scale);
-                if (Links != null) {
-                    for (int i = 0; i < Links.length; i++) {
-                        DrawWhere.draw(Links[i]);
+            if (showImageLinks) {
+                linksRect = mainGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, leftOffset, topOffset, getZoomMult());
+                if (linksRect != null) {
+                    for (int j = 0; j < linksRect.length; j++) {
+                        System.out.println("Links[j]- " + linksRect[j]);
+                        g2.draw(linksRect[j]);
                     }
                 }
+                linksRect = null;
+            }
+            //If dragging rectagle in relevent mode, draw it.
+            if(mousePressed&&(getCursorMode()==DragMode.Link||getCursorMode()==DragMode.Note)){
+                g2.draw(getBoxFromPress(nowX,nowY,false));
             }
         }
     }
@@ -232,15 +223,13 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         pressY = e.getY();
         nowX = pressX;
         nowY = pressY;
-        //lastDrag = Calendar.getInstance().getTimeInMillis();
         dragThread.start();
     }
     @Override public void mouseDragged(MouseEvent e) {
-        if (getCursorMode() == DragMode.Drag) {
-            nowX = e.getX();
-            nowY = e.getY();
-        }
+        nowX = e.getX();
+        nowY = e.getY();
         getParent().repaint();
+        repaint();
     }
     public void mouseReleased(MouseEvent e){
         dragThread.interrupt();
@@ -250,21 +239,11 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         DragMode mode = getCursorMode();
         if ((mode == DragMode.Note) || (mode == DragMode.Link)) {
             setOffsets();
-            // x and y values scaled apropriately, and then transformed relative to viewport
-            double scaledXstart, scaledYstart, scaledXstop, scaledYstop;
-            scaledXstart = (pressX  - leftOfset)/ getZoomMult();
-            scaledYstart = (pressY  - topOfset)/ getZoomMult();
-            scaledXstop = (e.getX()  - leftOfset)/ getZoomMult();
-            scaledYstop = (e.getY()  - topOfset)/ getZoomMult();
-            int boxWidth,boxHeight,boxXleft,boxYtop;
-            boxWidth = (int) Math.abs(scaledXstart-scaledXstop);
-            boxHeight = (int)Math.abs(scaledYstart-scaledYstop);
-            boxXleft = (int) Math.min(scaledXstart, scaledXstop);
-            boxYtop  = (int) Math.min(scaledYstart, scaledYstop);
+            Rectangle rec = getBoxFromPress(e.getX(),e.getY(),true);
             if (mode == DragMode.Note) {
-                mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", boxXleft, boxYtop ,boxWidth ,boxHeight);
+                mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", rec.x, rec.y ,rec.width ,rec.height);
             } else if (mode == DragMode.Link) {
-                mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", boxXleft, boxYtop, boxWidth,boxHeight);
+                mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", rec.x, rec.y, rec.width,rec.height);
             }
             setCursorMode(getCurrentDrag());
             this.repaint();
@@ -273,4 +252,34 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     public void mouseClicked(MouseEvent e){ }
     public void mouseEntered(MouseEvent e){ }
     public void mouseExited(MouseEvent e){ }
+
+
+    Rectangle getBoxFromPress(int currentMouseX, int currentMouseY,boolean useScale) {
+        double scale = 1;
+        int xTranslate = 0;
+        int yTranslate = 0;
+
+        if (useScale){
+            scale = getZoomMult();
+            xTranslate = leftOffset;
+            yTranslate = topOffset;
+        }
+        // x and y values scaled apropriately, and tranlated if image is centred on mainPanel.
+        double scaledXstart, scaledYstart, scaledXstop, scaledYstop;
+        scaledXstart = (pressX - xTranslate) / scale;
+        scaledYstart = (pressY - topOffset) / scale;
+        scaledXstop = (currentMouseX - xTranslate) / scale;
+        scaledYstop = (currentMouseY - topOffset) / scale;
+
+        int boxWidth, boxHeight, boxXleft, boxYtop;
+        boxWidth = (int) Math.abs(scaledXstart - scaledXstop);
+        if(boxWidth>0){
+            int x = 9;
+        }
+        boxHeight = (int) Math.abs(scaledYstart - scaledYstop);
+        boxXleft = (int) Math.min(scaledXstart, scaledXstop);
+        boxYtop = (int) Math.min(scaledYstart, scaledYstop);
+
+        return new Rectangle(boxXleft, boxYtop, boxWidth, boxHeight);
+    }
 }

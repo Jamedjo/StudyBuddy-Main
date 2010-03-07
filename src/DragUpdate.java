@@ -16,13 +16,15 @@ public class DragUpdate implements Runnable {
             try{
                 Thread.sleep(t);
                 //The user is dragging us, so scroll!
-		Rectangle r = ((JViewport)mainPanel.getParent()).getViewRect();
-                    r.translate(mainPanel.pressX-mainPanel.nowX, mainPanel.pressY-mainPanel.nowY);//TODO: ensure not translating out of range.
+                if(mainPanel.getCursorMode() == DragMode.Drag) {
+                    Rectangle r = ((JViewport) mainPanel.getParent()).getViewRect();
+                    r.translate(mainPanel.pressX - mainPanel.nowX, mainPanel.pressY - mainPanel.nowY);//TODO: ensure not translating out of range.
                     mainPanel.scrollRectToVisible(r);
-            } catch (InterruptedException e){
+                }
+            } catch (InterruptedException e) {
                 return;
                 //remember when you 'stop' thread, to create a new one to allow thread to be started again
-            } catch (Exception e){
+            } catch (Exception e) {
                 System.out.println("Caught drag error:\n"+e);
             }
         }
