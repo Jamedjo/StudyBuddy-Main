@@ -50,7 +50,10 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
         mTagThis.addActionListener(this);
         mTagThis.setActionCommand("rTagThis");
         rightClickMenu.add(mTagThis);
+    }
 
+    public void updateTags(){
+        this.repaint();
     }
 
     public void valueChanged(TreeSelectionEvent Event) {

@@ -54,6 +54,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JToolBar toolbarMain;
     JScrollPane boardScroll;
     ImageAdjuster adjuster;
+    TagTagger tagTagger;
     volatile ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
@@ -253,6 +254,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                 state.imageColoursUpdated();
             }
         });
+
+        tagTagger = new TagTagger(w,true);
 
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
@@ -479,6 +482,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                 state.imageChanged();
             }
         }
+        tagTree.updateTags();
     }
 
     void tagThis() {
@@ -489,18 +493,22 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             IDTitle NewTagIDTitle = (IDTitle) NewTag;
             mainImageDB.tagImage(state.getCurrentImageID(), NewTagIDTitle.getID());
         }
+        tagTree.updateTags();
     }
     void tagTag() {
-        Object[] AllTags = mainImageDB.getTagIDTitles();
-        Object ChildTag = JOptionPane.showInputDialog(w, "Which tag would tag?", "Pick Child Tag",
-                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
-        Object ParentTag = JOptionPane.showInputDialog(w, "Which tag use as parent?", "Pick Parent Tag",
-                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
-        if ((ChildTag != null) && (ChildTag instanceof IDTitle) && (ParentTag != null) && (ParentTag instanceof IDTitle)) {
-            String ParentTagID = ((IDTitle) ParentTag).getID();
-            String ChildTagID= ((IDTitle) ChildTag).getID();
-            if(!ParentTagID.equals(ChildTagID)) mainImageDB.tagTag(ChildTagID,ParentTagID);
+        tagTagger.loadAllTags(mainImageDB.getTagIDTitles());
+        tagTagger.setVisible(true);
+        if(tagTagger.getReturnStatus()==TagTagger.RET_OK){
+            Object ChildTag = tagTagger.getChildT();
+            Object ParentTag = tagTagger.getParentT();
+            if ((ChildTag != null) && (ChildTag instanceof IDTitle) && (ParentTag != null) && (ParentTag instanceof IDTitle)) {
+                String ParentTagID = ((IDTitle) ParentTag).getID();
+                String ChildTagID= ((IDTitle) ChildTag).getID();
+                if(!ParentTagID.equals(ChildTagID)) mainImageDB.tagTag(ChildTagID,ParentTagID);
+
+            }
         }
+        tagTree.updateTags();
     }
 
     void exportCurrentImage() {
@@ -534,6 +542,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                 tagTree.addTagToTree(newTagID,newTag);
             }
         }
+        tagTree.updateTags();
     }
 
     // Delete a tag from the database from a selection on a tag tree
@@ -554,6 +563,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         if (IsRoot == false) {
             mainImageDB.deleteTag(NodeToDelObject.getID());
         }
+        tagTree.updateTags();
     }
 
     void showImageAdjuster(){
