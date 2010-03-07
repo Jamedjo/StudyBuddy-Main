@@ -275,7 +275,11 @@ class ProgramState{
     }
 
     void imageColoursReset(){
-        imageColoursUpdated();//TODO: Should reset image insterad
+        getCurrentImage().brightness = 50;
+        getCurrentImage().contrast = 50;
+        getCurrentImage().isInverted = false;
+        getCurrentImage().setFiltered(false);
+        imageColoursUpdated();
     }
     void imageColoursUpdated(){
         getCurrentImage().filterImage();

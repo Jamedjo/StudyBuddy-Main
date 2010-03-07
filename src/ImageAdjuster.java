@@ -1,3 +1,6 @@
+
+import javax.swing.event.ChangeListener;
+
 public class ImageAdjuster extends javax.swing.JDialog {
     private int brightness = 50;
     private int contrast = 50;
@@ -6,17 +9,23 @@ public class ImageAdjuster extends javax.swing.JDialog {
     //private boolean brightUsed = true;
     //private boolean contrastUsed = true;
 
-    void popup(){
+    void popupReset(){
         popup(brightSlider.isEnabled(),50,contrastSlider.isEnabled(),50,false);
     }
-    void popup(boolean brightEnable, int bright, boolean contrEnable, int contrst, boolean invert){
+    void popup(){
+        resetPressed = false;
         setVisible(true);
+    }
+    void popup(int bright,int contrst,boolean invert){
+        popup(true,bright,true,contrst,invert);
+    }
+    void popup(boolean brightEnable, int bright, boolean contrEnable, int contrst, boolean invert){
+        popup();
         brightSlider.setEnabled(brightEnable);
         brightSlider.setValue(bright);
         contrastSlider.setEnabled(contrEnable);
         contrastSlider.setValue(contrst);
         invertEnableBox.setSelected(invert);
-        resetPressed = false;
     }
     boolean shouldReset(){
         return resetPressed;
@@ -217,13 +226,11 @@ public class ImageAdjuster extends javax.swing.JDialog {
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cancelButton)
-                            .addComponent(okButton))
-                        .addGap(24, 24, 24))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(cancelButton)
+                        .addComponent(okButton))
                     .addComponent(resetButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(24, Short.MAX_VALUE))
         );
 
         pack();
@@ -245,17 +252,20 @@ public class ImageAdjuster extends javax.swing.JDialog {
 }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        // TODO add your handling code here:
-        //if(brightEnableBox.isSelected())
-            brightness = brightSlider.getValue();
-        //else brightness = 50;
-        //if(contrastEnableBox.isSelected())
-            contrast = contrastSlider.getValue();
-        //else contrast = 50;
+        brightness = brightSlider.getValue();
+        contrast = contrastSlider.getValue();
         inverted = invertEnableBox.isSelected();
         setVisible(false);
 }//GEN-LAST:event_okButtonActionPerformed
-
+public int getCurrentSliderBright(){
+    return brightSlider.getValue();
+}
+public int getCurrentSliderContrast(){
+    return contrastSlider.getValue();
+}
+public boolean getCurrentInvertBox(){
+    return invertEnableBox.isSelected();
+}
     private void contrastEnableBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_contrastEnableBoxActionPerformed
         // TODO add your handling code here:
         contrastSlider.setEnabled(contrastEnableBox.isSelected());
@@ -263,6 +273,11 @@ public class ImageAdjuster extends javax.swing.JDialog {
     }//GEN-LAST:event_contrastEnableBoxActionPerformed
 
     private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
+        brightSlider.setEnabled(true);
+        contrastSlider.setEnabled(true);
+        brightSlider.setValue(50);
+        contrastSlider.setValue(50);
+        invertEnableBox.setSelected(false);
         resetPressed = true;
         cancelButtonActionPerformed(evt);
     }//GEN-LAST:event_resetButtonActionPerformed
@@ -282,6 +297,13 @@ public class ImageAdjuster extends javax.swing.JDialog {
                 dialog.setVisible(true);
             }
         });
+    }
+    void addChangeListeners(ChangeListener l){
+        brightSlider.addChangeListener(l);
+        contrastSlider.addChangeListener(l);
+        invertEnableBox.addChangeListener(l);
+        contrastEnableBox.addChangeListener(l);
+        brightEnableBox.addChangeListener(l);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

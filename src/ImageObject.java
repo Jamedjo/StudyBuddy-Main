@@ -60,7 +60,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     private BufferedImage bImageFilt = null;
     private BufferedImage bThumbFilt = null;
     private boolean isFiltered = false;
-    private final int imgType = BufferedImage.TYPE_3BYTE_BGR;
+    private final int imgType = BufferedImage.TYPE_INT_RGB;
     String absolutePath;//Kept for error messages. Likely to be similar to pathFile.toString()
     File pathFile = null;
     File thumbPath = null;
@@ -130,7 +130,12 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	screenHeight = scrD.height;
 	manualReadImage();
     }
-
+    boolean isFiltered(){
+        return isFiltered;
+    }
+    void setFiltered(boolean newBool){
+        isFiltered = newBool;
+    }
     void flush() {//called externally
         bImage = null;
     }
@@ -412,6 +417,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     }
 
     void filterImage(){
+        if((contrast==50)&&(brightness==50)&&(!isInverted)) return;
         isFiltered = true;
         filterBufImage(true);
         filterBufImage(false);
@@ -434,8 +440,9 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             if(bImageFilt==null) bImageFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);
         }
         RenderingHints hints = null;
-        float offset = 1.0f;//+(brightness-50)/100;
-        float scale = 1.0f;//+(contrast-50)/1000;
+        float offset = (brightness-50f)*5.10f;
+        float scale = 1.0f+(contrast-50f)/50f;
+        if(isInverted) scale = (-scale);
         BufferedImageOp op = new RescaleOp(scale,offset,hints);
         if(isThumb){
         op.filter(srcImg,bThumbFilt);

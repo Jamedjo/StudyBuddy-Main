@@ -225,6 +225,15 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         contentPane.add(toolbarMain, BorderLayout.PAGE_START);
 
         adjuster = new ImageAdjuster(w,true);
+        adjuster.addChangeListeners( new ChangeListener(){
+            public void stateChanged(ChangeEvent e){
+                System.out.println("stateChanged");
+                state.getCurrentImage().brightness = adjuster.getCurrentSliderBright();
+                state.getCurrentImage().contrast = adjuster.getCurrentSliderContrast();
+                state.getCurrentImage().isInverted = adjuster.getCurrentInvertBox();
+                state.imageColoursUpdated();
+            }
+        });
 
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
@@ -522,17 +531,17 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void showImageAdjuster(){
+//        int oldBr = state.getCurrentImage().brightness;
+//        int oldCr = state.getCurrentImage().contrast;
+//        boolean oldInv = state.getCurrentImage().isInverted;
         adjuster.popup();
-        int oldBr = state.getCurrentImage().brightness;
-        int oldCr = state.getCurrentImage().contrast;
-        boolean oldInv = state.getCurrentImage().isInverted;
         state.getCurrentImage().brightness = adjuster.getBrightness();
         state.getCurrentImage().contrast = adjuster.getContrast();
         state.getCurrentImage().isInverted = adjuster.isInverted();
         if(adjuster.shouldReset()){
             state.imageColoursReset();
-        } else if((state.getCurrentImage().brightness !=oldBr)||(state.getCurrentImage().contrast!=oldCr)||(state.getCurrentImage().isInverted!=oldInv)){
-            state.imageColoursUpdated();
-        }
+        }// else if((state.getCurrentImage().brightness !=oldBr)||(state.getCurrentImage().contrast!=oldCr)||(state.getCurrentImage().isInverted!=oldInv)){
+            state.imageColoursUpdated();//Now always needed as preview may have changed values
+        //}
     }
 }
