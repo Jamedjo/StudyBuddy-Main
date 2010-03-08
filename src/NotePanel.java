@@ -74,8 +74,17 @@ class NotePanel extends JPanel
 	void RemoveNote(SingleNote NoteToRemove)
 	{
 		this.remove(NoteToRemove);
-		this.validate();
-		this.repaint();
+		if (this.getComponentCount() == 0)
+		{
+			MainGUI.contentPane.remove(MainGUI.notePane);
+			MainGUI.contentPane.validate();
+			MainGUI.mainPanel.onResize();
+		}
+		else
+		{
+			this.validate();
+			this.repaint();
+		}
 	}
 	
 	boolean isEmpty() { return Empty; }

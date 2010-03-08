@@ -246,8 +246,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             }
         });
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		notePane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        
+		notePane = new JScrollPane();
 		contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
