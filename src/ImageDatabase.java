@@ -239,8 +239,11 @@ class ImageDatabase
   // Delete an ImageToImage link from the database (by fields)
   int deleteLink(String LinkID)
   {
-    String[] RecordArray = {LinkID, null, null, null, null, null, null};
-    return deleteLink(new Record(RecordArray));
+    Record TempRecord = ImageToImageTable.getRecord(LinkID, 0);
+	if (TempRecord == null)
+		return -1;
+	else
+		return deleteLink(TempRecord);
   }
   
   // Delete an ImageToImage link from the database (by record)
@@ -252,8 +255,11 @@ class ImageDatabase
   // Delete an ImageToNote link from the database (by fields)
   int deleteNote(String NoteID)
   {
-    String[] RecordArray = {NoteID, null, null, null, null, null, null};
-    return deleteNote(new Record(RecordArray));
+    Record TempRecord = ImageToNoteTable.getRecord(NoteID, 0);
+	if (TempRecord == null)
+		return -1;
+	else
+		return deleteNote(TempRecord);
   }
   
   // Delete an ImageToImage link from the database (by record)
@@ -491,11 +497,7 @@ class ImageDatabase
 		TempRecord = (Record) Records.nextElement();
 		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(4)))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))), (int) (Scale*Integer.parseInt(TempRecord.getField(6))));
 		if (TempRectangle.contains(X, Y))
-		{
 			PointNotes.addRecord(TempRecord);
-			System.out.println("inside note");
-		}
-			
 	}
 	return PointNotes;
   }
