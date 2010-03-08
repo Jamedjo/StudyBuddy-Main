@@ -163,6 +163,7 @@ class ImageDatabase
       System.out.println(ImageToTagTable.toString());
       System.out.println(TagToTagTable.toString());
       System.out.println(ImageToImageTable.toString());
+      System.out.println(ImageToNoteTable.toString());
   }
   
   // Save the entire database to the desired filename
@@ -443,20 +444,26 @@ class ImageDatabase
   }
   
   // Link an area of an image to another image
-  int linkImage(String ToImageID, String FromImageID, int X, int Y, int Width, int Height)
+  String linkImage(String ToImageID, String FromImageID, int X, int Y, int Width, int Height)
   {
     String[] RecordString = {Integer.toString(NextLinkID), ToImageID, FromImageID, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
     NextLinkID++;
 	if (ImageTable.getRecord(ToImageID, 0) == null)
-      return 0;
+      return null;
     else
       if (ImageTable.getRecord(FromImageID, 0) == null)
-        return -1;
+        return null;
       else
       {
         ImageToImageTable.addRecord(new Record(RecordString));
-        return 1;
+        return Integer.toString(NextLinkID-1);
       }
+  }
+  
+  // Link an area of an image to another image
+  Record getLink(String LinkID)
+  {
+    return ImageToImageTable.getRecord(LinkID, 0);
   }
   
   // Link a tag with another tag, tagee is tagged with tagger
@@ -519,7 +526,7 @@ class ImageDatabase
   // Produce the rectangles of image links for a certain ImageID
   Rectangle[] getLinkRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
-	IndexedTable TempTable = ImageToImageTable.getRecords(ImageID, 0);
+	IndexedTable TempTable = ImageToImageTable.getRecords(ImageID, 1);
 	Enumeration Records;
 	Record TempRecord;
 	Rectangle[] Result;

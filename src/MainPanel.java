@@ -255,7 +255,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             if (mode == DragMode.Note) {
                 mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", rec.x, rec.y ,rec.width ,rec.height);
             } else if (mode == DragMode.Link) {
-                mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), "", rec.x, rec.y, rec.width,rec.height);
+				mainGUI.state.setSelectingImage(true);
+                mainGUI.state.setDummyLinkID(mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), mainGUI.state.getCurrentImageID(), rec.x, rec.y, rec.width,rec.height));
+				JOptionPane.showMessageDialog(mainGUI.w, "Navigate to the image to link to and repress the link button");
             }
             setCursorMode(getCurrentDrag());
             this.repaint();
@@ -265,6 +267,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 	{
 		NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.state.getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
 		String[] LinkedImageIDs = mainGUI.mainImageDB.getImageIDsFromImagePoint(mainGUI.state.getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
+		String TempString = "";
 		if (PointNotes.isEmpty() == false)
 		{
 			mainGUI.contentPane.remove(mainGUI.notePane);
@@ -279,6 +282,15 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 			mainGUI.contentPane.remove(mainGUI.notePane);
 			mainGUI.contentPane.validate();
 			mainGUI.mainPanel.onResize();
+		}
+		if (LinkedImageIDs.length > 0)
+		{
+			TempString = TempString + LinkedImageIDs[0]; 
+			for (int i=1; i< LinkedImageIDs.length; i++)
+			{
+				TempString = TempString + "," + LinkedImageIDs[i];
+			}
+			JOptionPane.showMessageDialog(mainGUI.w, "Links to images " + TempString);
 		}
 	}
     public void mouseEntered(MouseEvent e){ }

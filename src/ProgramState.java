@@ -29,6 +29,8 @@ class ProgramState{
     int currentI = 0;//make private
     final GUI mainGUI;
     boolean isLocked = false;//Do not draw if locked.
+	boolean SelectingImage = false; // For selecting an image link
+	String DummyLinkID;
 
     // IMPORTANT NOTE: WHEN CONSTRUCTING NEW PROGRAM STATE. OTHER THREADS WILL SEE OLD STATE UNTIL CONTSRUCTOR RETURNS.
     // THIS MEANS METHODS CAN ACCIDENTALLY USE VALUES FROM THE OLD STATE.
@@ -244,6 +246,12 @@ class ProgramState{
     String getCurrentImageID(){
 	return imageIDs[currentI];
     }
+	
+	void setSelectingImage(boolean IsSelecting) { SelectingImage = IsSelecting; }
+	boolean getSelectingImage() { return SelectingImage; }
+	void setDummyLinkID(String LinkID) { DummyLinkID = LinkID; }
+	String getDummyLinkID() { return DummyLinkID; }
+	
 
     Dimension getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
 	int imageIndex = relItoFixI(relativeImage);

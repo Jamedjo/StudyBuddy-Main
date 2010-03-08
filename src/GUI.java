@@ -316,7 +316,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) tagTag();
         else if (ae.getActionCommand().equals("DragPan")) mainPanel.setCursorMode(mainPanel.getCurrentDrag());
-        else if (ae.getActionCommand().equals("DragLink")) mainPanel.setCursorMode(DragMode.Link);
+        else if (ae.getActionCommand().equals("DragLink")) dragLink();
         else if (ae.getActionCommand().equals("DragNote")) mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
@@ -334,6 +334,27 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
         //+ ",\nwith source:\n\n " + e.getSource());
     }
+	
+	void dragLink()
+	{
+		Record TempRecord;
+		String DummyLinkID;
+		if (state.getSelectingImage())
+		{
+			DummyLinkID = state.getDummyLinkID();
+			TempRecord = mainImageDB.getLink(DummyLinkID);
+			mainImageDB.deleteLink(DummyLinkID);
+			mainImageDB.linkImage(TempRecord.getField(1), state.getCurrentImageID(), Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)), Integer.parseInt(TempRecord.getField(6)));
+			JOptionPane.showMessageDialog(w, "Images Linked!");
+			mainPanel.repaint();
+			state.setSelectingImage(false);
+		}
+		else
+		{
+			mainPanel.setCursorMode(DragMode.Link);
+		}
+	
+	}
 
     public void windowStateChanged(WindowEvent e) {
         mainPanel.onResize();
