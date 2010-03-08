@@ -8,9 +8,9 @@ enum AppDefaults {
     s2("slideShowTime", "2000"),
     //example s99("nestedDirectoryTest_PathExt","topDir"+File.separator+"subDir"+File.separator),//just using the subDir will not create the dir
     s3("thumbnailPathExt", "thumbnails"+File.separator),
-    s4("databaseFileName","mainDB"),
+    DBname("databaseFileName","gammaDB"),
     s5("databasePathExt","database"+File.separator),
-    ver("appVersionLast","0.9gamma_r223"),//change this whenever you change this enum.
+    ver("appVersionLast","0.9gamma_r228"),//change this whenever you change this enum.
     s7("lastFilterUsed","Show All Images"),
     s8("lastCurrentI","0"),
     s9("showLinks","true"),

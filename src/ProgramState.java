@@ -43,7 +43,7 @@ class ProgramState{
     ProgramState(GUI parentGUI){
 	mainGUI = parentGUI;
         String temp;
-        temp = mainGUI.settings.getSetting("databaseFilePathAndName");
+        temp =null;// mainGUI.settings.getSetting("databaseFilePathAndName");
         if(temp==null) ConstructProgramState(LoadType.Init,  parentGUI,"");
         else ConstructProgramState(LoadType.LoadLast,  parentGUI,mainGUI.settings.getSetting("lastFilterUsed"));
     }
@@ -55,15 +55,17 @@ class ProgramState{
 	mainGUI = parentGUI;
 	ConstructProgramState(loadType, parentGUI, filterTag);
     }
-
+    String getSetting(String name){
+        return mainGUI.settings.getSetting(name);
+    }
     void ConstructProgramState(LoadType loadType, GUI parentGUI, String filterTag){
         //mainGUI.isChangingState = true;
 	switch (loadType){
 	case Init:
-            mainGUI.settings.setSettingAndSave("databaseFilePathAndName", mainGUI.settings.getSetting("homeDir")+mainGUI.settings.getSetting("databasePathExt")+mainGUI.settings.getSetting("databaseFileName"));
+            mainGUI.settings.setSettingAndSave("databaseFilePathAndName", getSetting("homeDir")+getSetting("databasePathExt")+getSetting("databaseFileName"));
             InitDemoDB.initDB(mainGUI.settings.getSetting("databaseFilePathAndName"));//Resets database
 	case Load:
-	    mainGUI.mainImageDB = new ImageDatabase("mainDB",mainGUI.settings.getSetting("databaseFilePathAndName"));
+	    mainGUI.mainImageDB = new ImageDatabase(getSetting("databaseFileName"),getSetting("databaseFilePathAndName"));
 	    //no break as image list must still be passed from DB
 	case Refresh:
 	    //Create image database by loading database
@@ -71,7 +73,7 @@ class ProgramState{
 	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
 	    break;
         case LoadLast:
-            mainGUI.mainImageDB = new ImageDatabase("mainDB",mainGUI.settings.getSetting("databaseFilePathAndName"));
+            mainGUI.mainImageDB = new ImageDatabase(getSetting("databaseFileName"),getSetting("databaseFilePathAndName"));
             //change currentI by maingGUI.settings.getSetting("LastCurrentI") but be careful of null, etc.
 	case Filter:
 	    //Create image database by loading database

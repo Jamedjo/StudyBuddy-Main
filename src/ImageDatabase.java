@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 
 class ImageDatabase
 {
+  Log log = new Log();
   private IndexedTable ImageTable;
   private IndexedTable TagTable;
   private IndexedTable ImageToTagTable;
@@ -26,31 +27,51 @@ class ImageDatabase
       NextImageID = 0;
 	  NextNoteID = 0;
 	  NextLinkID = 0;
-      String[] ImageHeader = {"ImageID", "Title", "Filename"};
-      boolean[] ImageKeys = {true, false, false};
-      ImageTable = new IndexedTable("ImageTable", new Record(ImageHeader), ImageKeys);
-      
-      String[] TagHeader = {"TagID", "Title"};
-      boolean[] TagKeys = {true, false, false};
-      TagTable = new IndexedTable("TagTable", new Record(TagHeader), TagKeys);
-      
-      String[] ImageToTagHeader = {"ImageID", "TagID"};
-      boolean[] ImageToTagKeys = {true, true};
-      ImageToTagTable = new IndexedTable("ImageToTagTable", new Record(ImageToTagHeader), ImageToTagKeys);
-      
-      String[] TagToTagHeader = {"TagID", "TagID"};
-      boolean[] TagToTagKeys = {true, true};
-      TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader), TagToTagKeys);
-	  
-	  String[] ImageToImageHeader = {"LinkID", "FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
-      boolean[] ImageToImageKeys = {true, false, false, false, false, false, false};
-      ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
-	  
-	  String[] ImageToNoteHeader = {"NoteID", "ImageID", "Note", "X", "Y", "Width", "Height"};
-      boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
-      ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
+          
+          BuildImageTable();
+          BuildTagTable();
+          BuildImageToTagTable();
+          BuildTagToTagTable();
+          BuildImageToImageTable();
+          BuildImageToNoteTable();
   }
-  
+
+  private void BuildImageTable() {
+        String[] ImageHeader = {"ImageID", "Title", "Filename"};
+        boolean[] ImageKeys = {true, false, false};
+        ImageTable = new IndexedTable("ImageTable", new Record(ImageHeader), ImageKeys);
+    }
+
+    private void BuildTagTable() {
+        String[] TagHeader = {"TagID", "Title"};
+        boolean[] TagKeys = {true, false, false};
+        TagTable = new IndexedTable("TagTable", new Record(TagHeader), TagKeys);
+    }
+
+    private void BuildImageToTagTable() {
+        String[] ImageToTagHeader = {"ImageID", "TagID"};
+        boolean[] ImageToTagKeys = {true, true};
+        ImageToTagTable = new IndexedTable("ImageToTagTable", new Record(ImageToTagHeader), ImageToTagKeys);
+    }
+
+    private void BuildTagToTagTable() {
+        String[] TagToTagHeader = {"TagID", "TagID"};
+        boolean[] TagToTagKeys = {true, true};
+        TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader), TagToTagKeys);
+    }
+
+    private void BuildImageToImageTable() {
+        String[] ImageToImageHeader = {"LinkID", "FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
+        boolean[] ImageToImageKeys = {true, false, false, false, false, false, false};
+        ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
+    }
+
+    private void BuildImageToNoteTable() {
+        String[] ImageToNoteHeader = {"NoteID", "ImageID", "Note", "X", "Y", "Width", "Height"};
+        boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
+        ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
+    }
+
   // Loads the image database from the files it's stored in
   ImageDatabase(String NewName, String Filename)
   {
@@ -66,72 +87,49 @@ class ImageDatabase
       }
       catch (Exception TheError)
       {
-        Name = NewName;
-		NextTagID = 0;
-		NextImageID = 0;
-	    NextNoteID = 0;
-	    NextLinkID = 0;		
+          log.print(LogType.DebugError, "Error Parsing int from file");
+          Name = NewName;
+          NextTagID = 0;
+          NextImageID = 0;
+          NextNoteID = 0;
+          NextLinkID = 0;
       }
-	  try
-	  {
-		ImageTable = new IndexedTable(Filename + "_ImageTable");
-	  }	
-	  catch(Exception TheError)
-	  {
-		String[] ImageHeader = {"ImageID", "Title", "Filename"};
-		boolean[] ImageKeys = {true, false, false};
-		ImageTable = new IndexedTable("ImageTable", new Record(ImageHeader), ImageKeys);
-	  }
-	  try
-	  {
-		TagTable = new IndexedTable(Filename + "_TagTable");
-	  }	
-	  catch(Exception TheError)
-	  {
-		String[] TagHeader = {"TagID", "Title"};
-		boolean[] TagKeys = {true, false, false};
-		TagTable = new IndexedTable("TagTable", new Record(TagHeader), TagKeys);
-	  }
-	  try
-	  {
-		ImageToTagTable = new IndexedTable(Filename + "_ImageToTagTable");
-	  }	
-	  catch(Exception TheError)
-	  {
-		String[] ImageToTagHeader = {"ImageID", "TagID"};
-		boolean[] ImageToTagKeys = {true, true};
-		ImageToTagTable = new IndexedTable("ImageToTagTable", new Record(ImageToTagHeader), ImageToTagKeys);
-	  }
-	  try
-	  {
-		TagToTagTable = new IndexedTable(Filename + "_TagToTagTable");
-	  }	
-	  catch(Exception TheError)
-	  {
-		String[] TagToTagHeader = {"TagID", "TagID"};
-		boolean[] TagToTagKeys = {true, true};
-		TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader), TagToTagKeys);
-	  }
-	  try
-	  {
-		ImageToImageTable = new IndexedTable(Filename + "_ImageToImageTable");
-	  }	
-	  catch(Exception TheError)
-	  {
-		String[] ImageToImageHeader = {"LinkID", "FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
-		boolean[] ImageToImageKeys = {true, false, false, false, false, false, false};
-		ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
-	  }
-	  try
-	  {
-		ImageToNoteTable = new IndexedTable(Filename + "_ImageToNoteTable");
-	  }	
-	  catch(Exception TheError)
-	  {
-		String[] ImageToNoteHeader = {"NoteID", "ImageID", "Note", "X", "Y", "Width", "Height"};
-		boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
-		ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
-	  }
+      try {
+          ImageTable = new IndexedTable(Filename + "_ImageTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load ImageTable");
+          BuildImageTable();
+      }
+      try {
+          TagTable = new IndexedTable(Filename + "_TagTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load TagTable");
+          BuildTagTable();
+      }
+      try {
+          ImageToTagTable = new IndexedTable(Filename + "_ImageToTagTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load ImageToTagTable");
+          BuildImageToTagTable();
+      }
+      try {
+          TagToTagTable = new IndexedTable(Filename + "_TagToTagTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load TagToTagTable");
+          BuildImageToTagTable();
+      }
+      try {
+          ImageToImageTable = new IndexedTable(Filename + "_ImageToImageTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load ImageToImageTable");
+          BuildImageToImageTable();
+      }
+      try {
+          ImageToNoteTable = new IndexedTable(Filename + "_ImageToNoteTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load ImageToNoteTable");
+          BuildImageToNoteTable();
+      }
   }
   
   String getName() { return Name; }
