@@ -127,7 +127,7 @@ class ImageDatabase
       try {
           ImageToNoteTable = new IndexedTable(Filename + "_ImageToNoteTable");
       } catch (Exception TheError) {
-          log.print(LogType.DebugError, "Unable to load ImageToNoteTable");
+          log.print(LogType.DebugError, "Unable to load ImageToNoteTable: "+TheError.toString());
           BuildImageToNoteTable();
       }
   }
@@ -171,7 +171,8 @@ class ImageDatabase
     TagTable.save(Filename + "_TagTable");
     ImageToTagTable.save(Filename + "_ImageToTagTable");
     TagToTagTable.save(Filename + "_TagToTagTable");
-	ImageToImageTable.save(Filename + "_ImageToImageTable");
+    ImageToImageTable.save(Filename + "_ImageToImageTable");
+    ImageToNoteTable.save(Filename + "_ImageToNoteTable");
   }
   
   // Add a new image to the database

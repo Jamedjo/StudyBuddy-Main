@@ -20,7 +20,7 @@ public class InitDemoDB {
 //	    addI(tempDB,"Igloo in Bristol","///\\\\\\img_6088b_small.jpg");
 //	    addI(tempDB,"Pink","///\\\\\\img_5672bp_small.jpg");
 //	    addI(tempDB,"Speed","///\\\\\\img_2926_small.jpg");
-//	    addI(tempDB,"Pineapple png","///\\\\\\pineapple.png");
+	    addI(tempDB,"Pineapple png","///\\\\\\pineapple.png");
 //	    addI(tempDB,"Food","///\\\\\\img_F028c_small.jpg");
 //	    addI(tempDB,"Data Structures&Algorithms note 1","///\\\\\\DSA_1.bmp");
 //	    //addI(tempImageDB,"Large file- many MegaPixels","///\\\\\\jamaica1730homannsheirs.jpg");

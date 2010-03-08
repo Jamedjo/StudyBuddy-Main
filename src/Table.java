@@ -80,10 +80,16 @@ class Table
         }
       }
       // Catch exceptions from file handling and throw an error
-      catch (Exception TheError)
-      {
-        throw new Exception();    
-      }   
+//       catch(FileNotFoundError TheError){
+//          throw TheError;
+//      }
+      catch (IOException TheError){
+        throw TheError;
+      }
+//      catch
+//      {
+//        throw new Exception();
+//      } 
     }
     
     // Convert the table to a formatted string

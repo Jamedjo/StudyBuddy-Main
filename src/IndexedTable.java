@@ -28,7 +28,7 @@ class IndexedTable
 	  }
 	  catch(Exception TheError)
 	  {
-		throw new Exception();
+		throw new Exception("Error Creating IndexedTable",TheError.getCause());
 	  }
   }
   
