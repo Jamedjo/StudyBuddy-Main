@@ -107,7 +107,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
-        slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
+        //slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
     }
 
     boolean isImage(File f){
@@ -452,10 +452,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
     void toggleSlide(boolean setPlaying) {//true to start playing
         if (setPlaying) {
+            slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
             slideThread.start();
         } else {
             slideThread.interrupt();
-            slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
         }
 
         ViewMenu.SlidePlay.setVisible(!setPlaying);

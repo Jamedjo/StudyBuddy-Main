@@ -15,6 +15,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpringLayout;
@@ -22,21 +23,23 @@ import javax.swing.SpringLayout;
 enum OptionType{
     CheckBox,
     Slider,
+    Spinner,
     TextBox,
     Default;
 }
 
 enum  UserOptions{//Need to add option for default options
-    //Name(Label,Type,SettingName),
-    SlideshowTime("Slideshow Time",OptionType.TextBox,"slideShowTime"),
+    //Name(Label,Type,SettingName,factor),
+    SlideshowTime("Slideshow Time",OptionType.Spinner,"slideShowTime",1000),
     showLinks("Show Links",OptionType.CheckBox,"showLinks"),
     showNotes("Show Notes",OptionType.CheckBox,"showNotes"),
     SliderExample("Slider Example",OptionType.Slider),
     TextBoxExample("TextBox Example");
+    private OptionType type;
+    private JComponent component;
     private String text;
     private String settingName;
-    private JComponent component;
-    private OptionType type;
+    private int factor;
 
     UserOptions(String label){
         this(label, OptionType.Default);
@@ -45,18 +48,26 @@ enum  UserOptions{//Need to add option for default options
         this(label, t,"");
     }
     UserOptions(String label, OptionType t, String setting){
-        build(label,t,setting);
+        this(label,t,setting,1);
+    }
+    UserOptions(String label, OptionType t, String setting,int factor){
+        build(label,t,setting,factor);
     }
 
-    private void build(String label,OptionType t,String setting){
+    private void build(String label,OptionType t,String setting,int f){
         if(label.equals("")) label = toString();
         text = label;
         type = t;
         settingName = setting;
+        factor = f;
 
         switch(type){
             case CheckBox:
                 component = new JCheckBox();
+                break;
+            case Spinner:
+                component = new JSpinner();
+                ((JSpinner)component).setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(0), Integer.valueOf(0), null, Integer.valueOf(1)));
                 break;
             case Slider:
                 component = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
@@ -73,15 +84,21 @@ enum  UserOptions{//Need to add option for default options
 
     void initValue(Settings settings){
         if(settingName==null||settingName.equals("")) return;
+        int iVal;
+        Boolean bVal;
         switch(type){
             case CheckBox:
-                Boolean bVal = settings.getSettingAsBooleanObject(settingName);
+                bVal = settings.getSettingAsBooleanObject(settingName);
                 if (bVal == null) return;
                 if(bVal.booleanValue()==false) ((JCheckBox)component).setSelected(false);
                 else if(bVal.booleanValue()==true) ((JCheckBox)component).setSelected(true);
                 break;
+            case Spinner:
+                iVal = settings.getSettingAsInt(settingName) / factor;
+                ((JSpinner) component).setValue(iVal);
+                break;
             case Slider:
-                int iVal = settings.getSettingAsInt(settingName);
+                iVal = settings.getSettingAsInt(settingName) / factor;
                 ((JSlider) component).setValue(iVal);
                 break;
             case TextBox:
@@ -111,8 +128,11 @@ enum  UserOptions{//Need to add option for default options
             case CheckBox:
                 temp = (new Boolean(((JCheckBox)component).isSelected())).toString();
                 break;
+            case Spinner:
+                temp = Integer.valueOf(((Integer)((JSpinner)component).getValue()) * factor).toString();
+                break;
             case Slider:
-                temp = ((Integer)((JSlider)component).getValue()).toString();
+                temp = ((Integer)(((JSlider)component).getValue() * factor)).toString();
                 break;
             case TextBox:
             default:
