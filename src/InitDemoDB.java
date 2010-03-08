@@ -1,12 +1,7 @@
 /*
  * Running this class should move images to userdir
  * and add them to the DB with some tags.
- * Not runing this file before running GUI should result in app with no images.
- */
-
-/**
- *
- * @author Student
+ * Not runing this file before running GUI could result in app with no images.
  */
 public class InitDemoDB {
     static void initDB(String name){
@@ -48,7 +43,9 @@ public class InitDemoDB {
 	    addI(tempDB,"Barbados","///\\\\\\barbados03.jpg");
 	    addI(tempDB,"Barbados","///\\\\\\barbados06.jpg");
 	    addI(tempDB,"Barbados","///\\\\\\barbados10.jpg");
-	    addI(tempDB,"Barbados","///\\\\\\barbados-08-046-733284.jpg");
+	    String anID = addI(tempDB,"Barbados","///\\\\\\barbados-08-046-733284.jpg");
+
+            tempDB.addImageNote(anID, "This is a test Note!!!\nIts Multilined.", 300, 300, 250, 200);
 
             tempDB.tagTag(tempDB.getTagIDFromTagTitle("Data Structures&Algorithms note 1") , tempDB.getTagIDFromTagTitle("Notes"));
             tempDB.tagTag(tempDB.getTagIDFromTagTitle("Graph Notes for C/W") , tempDB.getTagIDFromTagTitle("Notes"));
@@ -68,8 +65,10 @@ public class InitDemoDB {
         initDB(name);
     }
 
-    static void addI(ImageDatabase DB,String title,String filename){
+    static String addI(ImageDatabase DB,String title,String filename){
         if(DB.getTagIDFromTagTitle(title)==null) DB.addTag(title);
-        DB.tagImage(DB.addImage(title, filename), DB.getTagIDFromTagTitle(title));
+        String id = DB.addImage(title, filename);
+        DB.tagImage(id, DB.getTagIDFromTagTitle(title));
+        return id;
     }
 }

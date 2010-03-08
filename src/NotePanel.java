@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.GridLayout;
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 class NotePanel extends JPanel
 {
@@ -69,6 +70,7 @@ class NotePanel extends JPanel
 		{
 			this.add(new SingleNote(PointNotes[i]));
 		}
+                //setMinimumSize(new Dimension(200,200));
 	}
 	
 	void RemoveNote(SingleNote NoteToRemove)

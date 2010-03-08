@@ -48,7 +48,7 @@ class ImageDatabase
 	  
 	  String[] ImageToNoteHeader = {"NoteID", "ImageID", "Note", "X", "Y", "Width", "Height"};
       boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
-      ImageToImageTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
+      ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
   }
   
   // Loads the image database from the files it's stored in
@@ -373,16 +373,14 @@ class ImageDatabase
   }
   
   // Link an area of an image to a note
-  String addImageNote(String ImageID, String Note, int X, int Y, int Width, int Height)
-  {
-    String[] RecordString = {Integer.toString(NextNoteID), ImageID, Note, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
-    NextNoteID++;
-	if (ImageTable.getRecord(ImageID, 0) == null)
-      return null;
-    else
-	{
-      ImageToNoteTable.addRecord(new Record(RecordString));
-      return Integer.toString(NextNoteID-1);
+  String addImageNote(String ImageID, String Note, int X, int Y, int Width, int Height) {
+        String[] RecordString = {Integer.toString(NextNoteID), ImageID, Note, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
+        NextNoteID++;
+        if (ImageTable.getRecord(ImageID, 0) == null)
+            return null;
+        else {
+            ImageToNoteTable.addRecord(new Record(RecordString));
+            return Integer.toString(NextNoteID-1);
 	}
   }
   

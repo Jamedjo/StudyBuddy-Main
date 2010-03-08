@@ -1,6 +1,7 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,6 +16,7 @@ import javax.swing.event.ChangeListener;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -66,9 +68,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     Thread slideThread;
     JScrollPane mainScrollPane;
     JSplitPane splitpane;
-	JPanel contentPane;
+    //JPanel rightArea;
+    JPanel contentPane;
     JPanel imageAreas;
-	JScrollPane notePane;
+    JScrollPane notePane;
     JSlider zoomBar;
     File thumbPath;
     final int tagTreeStartSize = 150;
@@ -107,6 +110,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
+        w.setMinimumSize(new Dimension(200,200));
         //slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
     }
 
@@ -246,12 +250,19 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             }
         });
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-		notePane = new JScrollPane();
-		contentPane = new JPanel();
+
+        notePane = new JScrollPane();
+
+//        rightArea = new JPanel();
+//        rightArea.setLayout(new BoxLayout(rightArea,BoxLayout.Y_AXIS));
+//        rightArea.setMinimumSize(new Dimension(100,100));
+
+        //contentPane can only have thigs added once, use removeAll to change. (Due to borderlayout)
+        contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
         contentPane.add(toolbarMain, BorderLayout.PAGE_START);
-		contentPane.add(notePane, BorderLayout.EAST);
+        contentPane.add(notePane, BorderLayout.LINE_END);
 
         adjuster = new ImageAdjuster(w,true);
         adjuster.addChangeListeners( new ChangeListener(){

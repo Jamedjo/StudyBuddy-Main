@@ -40,7 +40,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.addMouseListener(this);
         dragThread = new Thread(new DragUpdate(this,dragPeriod));
         mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "This is a test Note!!!", 0, 0, 300, 200);
-        mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(),mainGUI.state.getCurrentImageID(), 300, 200, 100, 100);
+        mainGUI.mainImageDB.linkImage(mainGUI.state.getRelativeImageID(1),mainGUI.state.getCurrentImageID(), 300, 200, 100, 100);
     }
     DragMode getCursorMode(){
         return dragMode;
@@ -270,7 +270,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 			mainGUI.contentPane.remove(mainGUI.notePane);
 			mainGUI.notePane = new JScrollPane(PointNotes);
 			mainGUI.notePane.setVisible(true);
-			mainGUI.contentPane.add(mainGUI.notePane, BorderLayout.EAST);
+			mainGUI.contentPane.add(mainGUI.notePane, BorderLayout.LINE_END);
 			mainGUI.contentPane.validate();
 			mainGUI.mainPanel.onResize();
 		}

@@ -264,6 +264,10 @@ class ProgramState{
 	return imageList[i];//will be changed later to keep track of images in memory
     }
 
+    String getRelativeImageID(int relativeImage){
+        return imageIDs[relItoFixI(relativeImage)];
+    }
+
     BufferedImage getBImageI(int relativeImage, ImgSize size){
             //If getting thumb for an upcoming image, get the full image too.
             //if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
