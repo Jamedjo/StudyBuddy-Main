@@ -15,6 +15,8 @@ class ImageDatabase
   private String Name;
   private int NextImageID;
   private int NextTagID;
+  private int NextNoteID;
+  private int NextLinkID;
   
   // Create an image database with the supplied name
   ImageDatabase(String NewName)
@@ -22,6 +24,8 @@ class ImageDatabase
       Name = NewName;
       NextTagID = 0;
       NextImageID = 0;
+	  NextNoteID = 0;
+	  NextLinkID = 0;
       String[] ImageHeader = {"ImageID", "Title", "Filename"};
       boolean[] ImageKeys = {true, false, false};
       ImageTable = new IndexedTable("ImageTable", new Record(ImageHeader), ImageKeys);
@@ -38,12 +42,12 @@ class ImageDatabase
       boolean[] TagToTagKeys = {true, true};
       TagToTagTable = new IndexedTable("TagToTagTable", new Record(TagToTagHeader), TagToTagKeys);
 	  
-	  String[] ImageToImageHeader = {"FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
-      boolean[] ImageToImageKeys = {true, true, false, false, false, false};
+	  String[] ImageToImageHeader = {"LinkID", "FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
+      boolean[] ImageToImageKeys = {true, false, false, false, false, false, false};
       ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
 	  
-	  String[] ImageToNoteHeader = {"ImageID", "Note", "X", "Y", "Width", "Height"};
-      boolean[] ImageToNoteKeys = {true, false, true, true, true, true};
+	  String[] ImageToNoteHeader = {"NoteID", "ImageID", "Note", "X", "Y", "Width", "Height"};
+      boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
       ImageToImageTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
   }
   
@@ -57,12 +61,16 @@ class ImageDatabase
         Name = FileInput.readLine();
         NextImageID = Integer.parseInt(FileInput.readLine());
         NextTagID = Integer.parseInt(FileInput.readLine());
+		NextNoteID = Integer.parseInt(FileInput.readLine());
+	    NextLinkID = Integer.parseInt(FileInput.readLine());
       }
       catch (Exception TheError)
       {
         Name = NewName;
 		NextTagID = 0;
-		NextImageID = 0;   
+		NextImageID = 0;
+	    NextNoteID = 0;
+	    NextLinkID = 0;		
       }
 	  try
 	  {
@@ -110,8 +118,8 @@ class ImageDatabase
 	  }	
 	  catch(Exception TheError)
 	  {
-		String[] ImageToImageHeader = {"FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
-		boolean[] ImageToImageKeys = {true, true, false, false, false, false};
+		String[] ImageToImageHeader = {"LinkID", "FromImageID", "ToImageID", "X", "Y", "Width", "Height"};
+		boolean[] ImageToImageKeys = {true, false, false, false, false, false, false};
 		ImageToImageTable = new IndexedTable("ImageToImageTable", new Record(ImageToImageHeader), ImageToImageKeys);
 	  }
 	  try
@@ -120,8 +128,8 @@ class ImageDatabase
 	  }	
 	  catch(Exception TheError)
 	  {
-		String[] ImageToNoteHeader = {"ImageID", "Note", "X", "Y", "Width", "Height"};
-		boolean[] ImageToNoteKeys = {true, false, true, true, true, true};
+		String[] ImageToNoteHeader = {"NoteID", "ImageID", "Note", "X", "Y", "Width", "Height"};
+		boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
 		ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
 	  }
   }
@@ -153,6 +161,8 @@ class ImageDatabase
       FileOutput.println(Name);
       FileOutput.println(Integer.toString(NextImageID));
       FileOutput.println(Integer.toString(NextTagID));
+      FileOutput.println(Integer.toString(NextNoteID));
+      FileOutput.println(Integer.toString(NextLinkID));
     }
     catch (Exception TheError)
     {
@@ -197,14 +207,14 @@ class ImageDatabase
         return -1;
     }
 	// Delete ImageToImage records containing the image
-	Matches = ImageToImageTable.getRecords(r.getField(0),0);
+	Matches = ImageToImageTable.getRecords(r.getField(1),0);
 	Records = Matches.elements();
 	while (Records.hasMoreElements())
     {
       if (ImageToImageTable.deleteRecord((Record)Records.nextElement()) == -1)
         return -1;
     }
-	Matches = ImageToImageTable.getRecords(r.getField(0),1);
+	Matches = ImageToImageTable.getRecords(r.getField(2),1);
 	Records = Matches.elements();
 	while (Records.hasMoreElements())
     {
@@ -212,7 +222,7 @@ class ImageDatabase
         return -1;
     }
 	//Delete ImageToNote records containing the image
-	Matches = ImageToNoteTable.getRecords(r.getField(0),0);
+	Matches = ImageToNoteTable.getRecords(r.getField(1),0);
 	Records = Matches.elements();
 	while (Records.hasMoreElements())
     {
@@ -226,9 +236,9 @@ class ImageDatabase
   }
   
   // Delete an ImageToImage link from the database (by fields)
-  int deleteLink(String FromImageID, String ToImageID, int X, int Y, int Height, int Width)
+  int deleteLink(String LinkID)
   {
-    String[] RecordArray = {ToImageID, FromImageID, Integer.toString(X), Integer.toString(Y), Integer.toString(Height), Integer.toString(Width)};
+    String[] RecordArray = {LinkID, null, null, null, null, null, null};
     return deleteLink(new Record(RecordArray));
   }
   
@@ -236,6 +246,19 @@ class ImageDatabase
   int deleteLink(Record r)
   {
     return ImageToImageTable.deleteRecord(r);
+  }
+  
+  // Delete an ImageToNote link from the database (by fields)
+  int deleteNote(String NoteID)
+  {
+    String[] RecordArray = {NoteID, null, null, null, null, null, null};
+    return deleteNote(new Record(RecordArray));
+  }
+  
+  // Delete an ImageToImage link from the database (by record)
+  int deleteNote(Record r)
+  {
+    return ImageToNoteTable.deleteRecord(r);
   }
   
   // Delete an ImageToTag link from the database (by fields)
@@ -339,8 +362,9 @@ class ImageDatabase
   // Link an area of an image to a note
   int addImageNote(String ImageID, String Note, int X, int Y, int Width, int Height)
   {
-    String[] RecordString = {ImageID, Note, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
-    if (ImageTable.getRecord(ImageID, 0) == null)
+    String[] RecordString = {Integer.toString(NextNoteID), ImageID, Note, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
+    NextNoteID++;
+	if (ImageTable.getRecord(ImageID, 0) == null)
       return 0;
     else
       ImageToNoteTable.addRecord(new Record(RecordString));
@@ -350,8 +374,9 @@ class ImageDatabase
   // Link an area of an image to another image
   int linkImage(String ToImageID, String FromImageID, int X, int Y, int Width, int Height)
   {
-    String[] RecordString = {ToImageID, FromImageID, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
-    if (ImageTable.getRecord(ToImageID, 0) == null)
+    String[] RecordString = {Integer.toString(NextLinkID), ToImageID, FromImageID, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
+    NextLinkID++;
+	if (ImageTable.getRecord(ToImageID, 0) == null)
       return 0;
     else
       if (ImageTable.getRecord(FromImageID, 0) == null)
@@ -382,23 +407,23 @@ class ImageDatabase
   // Produce a sub table of Notes for a certain ImageID
   IndexedTable getNotesFromImageID(String ImageID)
   {
-	return ImageToNoteTable.getRecords(ImageID, 0);
+	return ImageToNoteTable.getRecords(ImageID, 1);
   }
   
   // Produce a sub table of links for a certain ImageID
   IndexedTable getLinksFromImageIDPoint(String ImageID)
   {
-	return ImageToImageTable.getRecords(ImageID, 0);
+	return ImageToImageTable.getRecords(ImageID, 1);
   }
   
   // Produce the rectangles of note links for a certain ImageID
   Rectangle[] getNoteRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
-	IndexedTable TempTable = ImageToNoteTable.getRecords(ImageID, 0);
+	IndexedTable TempTable = ImageToNoteTable.getRecords(ImageID, 1);
 	Enumeration Records;
 	Record TempRecord;
 	Rectangle[] Result;
-        int outX,outY,outW,outH;
+    int outX,outY,outW,outH;
 	int i=0;
 	if (TempTable.getNumRecords() == 0)
 		return null;
@@ -409,11 +434,11 @@ class ImageDatabase
 		while(Records.hasMoreElements())
 		{
 		  TempRecord = (Record) Records.nextElement();
-                  outX = (int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2))));
-                  outY = (int) (YOffset + (Scale*Integer.parseInt(TempRecord.getField(3))));
-                  outW = (int) (Scale*Integer.parseInt(TempRecord.getField(4)));
-                  outH = (int) (Scale*Integer.parseInt(TempRecord.getField(5)));
-                  Result[i] = new Rectangle(outX , outY, outW, outH);
+		  outX = (int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3))));
+		  outY = (int) (YOffset + (Scale*Integer.parseInt(TempRecord.getField(4))));
+		  outW = (int) (Scale*Integer.parseInt(TempRecord.getField(5)));
+		  outH = (int) (Scale*Integer.parseInt(TempRecord.getField(6)));
+		  Result[i] = new Rectangle(outX , outY, outW, outH);
 		  i++;
 		}
 		return Result;
@@ -427,6 +452,7 @@ class ImageDatabase
 	Enumeration Records;
 	Record TempRecord;
 	Rectangle[] Result;
+	int outX,outY,outW,outH;
 	int i=0;
 	if (TempTable.getNumRecords() == 0)
 		return null;
@@ -437,7 +463,12 @@ class ImageDatabase
 		while(Records.hasMoreElements())
 		{
 		  TempRecord = (Record) Records.nextElement();
-		  Result[i] = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
+		  TempRecord = (Record) Records.nextElement();
+		  outX = (int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3))));
+		  outY = (int) (YOffset + (Scale*Integer.parseInt(TempRecord.getField(4))));
+		  outW = (int) (Scale*Integer.parseInt(TempRecord.getField(5)));
+		  outH = (int) (Scale*Integer.parseInt(TempRecord.getField(6)));
+		  Result[i] = new Rectangle(outX , outY, outW, outH);
 		  i++;
 		}
 		return Result;
@@ -464,9 +495,20 @@ class ImageDatabase
   }
   
   // Produce an array of String that describe the point in the image
-  String[] getNoteStringsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
+  IDTitle[] getNoteStringsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
   {
-	return getNotesFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(1);
+	Record TempRecord;
+	IndexedTable TempNotes = getNotesFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale);
+	IDTitle[] Result = new IDTitle[TempNotes.getNumRecords()];
+	int i = 0;
+	Enumeration NoteRecords = TempNotes.elements();
+	while(NoteRecords.hasMoreElements())
+	{
+		TempRecord = (Record) NoteRecords.nextElement();
+		Result[i] = new IDTitle(TempRecord.getField(0), TempRecord.getField(2));
+		i++;
+	}
+	return Result;
   }
   
   // Produce the links for a certain point in an image
@@ -475,7 +517,7 @@ class ImageDatabase
 	Enumeration Records;
 	Record TempRecord;
 	Rectangle TempRectangle;
-	IndexedTable ImageLinks = ImageToImageTable.getRecords(ImageID, 0);
+	IndexedTable ImageLinks = ImageToImageTable.getRecords(ImageID, 1);
 	IndexedTable PointLinks = new IndexedTable("Result", ImageToImageTable.getHeader(), ImageToImageTable.getKeyFields());
 	Records = ImageLinks.elements();
 	while(Records.hasMoreElements())
@@ -491,7 +533,7 @@ class ImageDatabase
   // Produce an array of imageIDs pointed to by the point in the image
   String[] getImageIDsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
   {
-	return getLinksFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(1);
+	return getLinksFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(2);
   }
   
   // Produce a sub table of Images that are tagged with the TagID
