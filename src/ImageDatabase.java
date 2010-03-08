@@ -483,15 +483,19 @@ class ImageDatabase
 	Enumeration Records;
 	Record TempRecord;
 	Rectangle TempRectangle;
-	IndexedTable ImageNotes = ImageToNoteTable.getRecords(ImageID, 0);
+	IndexedTable ImageNotes = ImageToNoteTable.getRecords(ImageID, 1);
 	IndexedTable PointNotes = new IndexedTable("Result", ImageToNoteTable.getHeader(), ImageToNoteTable.getKeyFields());
 	Records = ImageNotes.elements();
 	while(Records.hasMoreElements())
 	{
 		TempRecord = (Record) Records.nextElement();
-		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
+		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(4)))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))), (int) (Scale*Integer.parseInt(TempRecord.getField(6))));
 		if (TempRectangle.contains(X, Y))
+		{
 			PointNotes.addRecord(TempRecord);
+			System.out.println("inside note");
+		}
+			
 	}
 	return PointNotes;
   }
@@ -525,7 +529,7 @@ class ImageDatabase
 	while(Records.hasMoreElements())
 	{
 		TempRecord = (Record) Records.nextElement();
-		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(2)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int) (Scale*Integer.parseInt(TempRecord.getField(4))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))));
+		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(4)))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))), (int) (Scale*Integer.parseInt(TempRecord.getField(6))));
 		if (TempRectangle.contains(X, Y))
 			PointLinks.addRecord(TempRecord);
 	}
