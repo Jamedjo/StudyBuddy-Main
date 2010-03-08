@@ -482,7 +482,7 @@ class ImageDatabase
   }
   
   // Produce a sub table of links for a certain ImageID
-  IndexedTable getLinksFromImageIDPoint(String ImageID)
+  IndexedTable getLinksFromImageID(String ImageID)
   {
 	return ImageToImageTable.getRecords(ImageID, 1);
   }

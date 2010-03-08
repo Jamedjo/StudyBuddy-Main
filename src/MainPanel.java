@@ -264,6 +264,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     public void mouseClicked(MouseEvent e)
 	{
 		NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.state.getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
+		String[] LinkedImageIDs = mainGUI.mainImageDB.getImageIDsFromImagePoint(mainGUI.state.getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
 		if (PointNotes.isEmpty() == false)
 		{
 			mainGUI.contentPane.remove(mainGUI.notePane);
