@@ -10,6 +10,7 @@ import java.awt.event.MouseWheelListener;
 
 
 class ThumbButton extends JPanel{
+    Log log = new Log();
     GUI mainGUI;
     int size;
     int thumbNumber;
@@ -92,7 +93,7 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 //            } catch (InterruptedException e){}
 //        }
         noTiles = Math.min(maxNoTiles,mainGUI.state.numberOfImages);
-       //**// System.out.println("now showing "+noTiles+" thumbnails");
+       //**// log.print(LogType.Debug,"now showing "+noTiles+" thumbnails");
 
         thumbnails = new ThumbButton[noTiles];
         JPanel centrePan = new JPanel();

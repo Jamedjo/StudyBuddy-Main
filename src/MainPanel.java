@@ -9,6 +9,7 @@ import java.awt.Rectangle;
 public class MainPanel extends JPanel implements MouseWheelListener, MouseListener, MouseMotionListener {//,Scrollable {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
 
+    Log log = new Log();
     Dimension gridSize;
     int boardW, boardH;
     Dimension useWH;
@@ -101,10 +102,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             useWH = mainGUI.state.getRelImageWH(ImgSize.Screen, boardW, boardH, 0);
         //}
         //Potentially inefficient as forces full size image to load
-        //System.out.println("old zoomMultiplier- " + getZoomMult());
+        //log.print(LogType.Debug,"old zoomMultiplier- " + getZoomMult());
         setZoomMult((double)((double) useWH.width) / ((double) mainGUI.state.getCurrentImage().getWidthAndMakeBig()));
-        //System.out.println("new zoomMultiplier- " + getZoomMult());
-        //System.out.println("boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
+        //log.print(LogType.Debug,"new zoomMultiplier- " + getZoomMult());
+        //log.print(LogType.Debug,"boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
     }
 
     void onResize() {
@@ -130,7 +131,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         if(isZoomFit()){
         fixFitZoomMultiplier();
         }
-        //if (oldScr!=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible()) System.out.println("Horizontal Scroll bar toggled");
+        //if (oldScr!=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible()) log.print(LogType.Debug,"Horizontal Scroll bar toggled");
     }
 
     void setOffsets() {
@@ -163,28 +164,32 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOffset, topOffset, useWH.width, useWH.height, this);
         drawLinkBoxes(g2, true, true);
     }
-	
+    final static float dashA[] = {16.0f};
+    final static BasicStroke dashLine = new BasicStroke(3.0f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,10.0f, dashA, 0.0f);
     // Retreive the boxes for notes and links and draw them on the image
     private void drawLinkBoxes(Graphics2D g2, boolean showNotes, boolean showImageLinks) {
         Rectangle[] linksRect;
         String CurrentImageID = mainGUI.state.getCurrentImageID();
-        //System.out.println("zoomMultiplier- " + getZoomMult());
+        g2.setStroke(dashLine);
+        //log.print(LogType.Debug,"zoomMultiplier- " + getZoomMult());
         if (CurrentImageID != null) {
             if (showNotes) {
+                g2.setColor(Color.red);
                 linksRect = mainGUI.mainImageDB.getNoteRectanglesFromImageID(CurrentImageID, leftOffset, topOffset, getZoomMult());
                 if (linksRect != null) {
                     for (int i = 0; i < linksRect.length; i++) {
-                        //System.out.println("Notes[i]- " + linksRect[i]);
+                        //log.print(LogType.Debug,"Notes[i]- " + linksRect[i]);
                         g2.draw(linksRect[i]);
                     }
                 }
                 linksRect = null;
             }
             if (showImageLinks) {
+                g2.setColor(Color.blue);
                 linksRect = mainGUI.mainImageDB.getLinkRectanglesFromImageID(CurrentImageID, leftOffset, topOffset, getZoomMult());
                 if (linksRect != null) {
                     for (int j = 0; j < linksRect.length; j++) {
-                        //System.out.println("Links[j]- " + linksRect[j]);
+                        //log.print(LogType.Debug,"Links[j]- " + linksRect[j]);
                         g2.draw(linksRect[j]);
                     }
                 }
@@ -192,6 +197,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             }
             //If dragging rectagle in relevent mode, draw it.
             if(mousePressed&&(getCursorMode()==DragMode.Link||getCursorMode()==DragMode.Note)){
+                if(getCursorMode()==DragMode.Link) g2.setColor(Color.blue);
+                else g2.setColor(Color.red);
                 g2.draw(getBoxFromPress(nowX,nowY,false));
             }
         }

@@ -6,6 +6,7 @@ import java.io.IOException;
 //import java.io.FileNotFoundException;
 
 public class Settings {
+    Log log = new Log();
     //String path;
     private String appPath;
     private final String propertiesFile = "StudyBuddy.properties";//Name of the file use to store properties
@@ -25,31 +26,31 @@ public class Settings {
 
         File folder = new File(appPath);
         if (!folder.isDirectory()) {
-            //System.err.println("path doesnt exist: "+appPath);
+            //log.print(LogType.Error,"path doesnt exist: "+appPath);
             //Make directory appPath
             boolean success = (new File(appPath)).mkdir();
             if(!success)
-                System.err.println("StudyBuddy Directory could not be created");
+                log.print(LogType.Error,"StudyBuddy Directory could not be created");
         }
-        //else System.out.println("path exists :)");
+        //else log.print(LogType.Debug,"path exists :)");
 
         propFile = new File(appPath+propertiesFile);
         if (!propFile.exists()) {
-            //System.err.println("properties files doesnt exist");
+            //log.print(LogType.Error,"properties files doesnt exist");
             //create propertiesFile file with default values as properties
             try{
                 propFile.createNewFile();
-                //System.out.println("New file created");
+                //log.print(LogType.Debug,"New file created");
                 setupJavaPropertiesObject();
                 setDefaults();
             }
             catch(Exception e){
-                System.err.println("Properties file couldnt be created");
+                log.print(LogType.Error,"Properties file couldnt be created");
                 //Throw custom error?
             }
         }
         else {
-            //System.out.println("Properties file already exists");
+            //log.print(LogType.Debug,"Properties file already exists");
             setupJavaPropertiesObject();
 
             //if version is different reset defaults. This is as default settings may have changed causing incompatabilites.
@@ -64,7 +65,7 @@ public class Settings {
             javaProperties.load(inProps);
             inProps.close();
         } catch (IOException e) {
-            System.err.println("Unable to load properties from file: " + appPath + propertiesFile);
+            log.print(LogType.Error,"Unable to load properties from file: " + appPath + propertiesFile);
         }
     }
 
@@ -94,7 +95,7 @@ public class Settings {
         javaProperties.store(outProps, "---Empty Comment---");
         outProps.close();
         } catch (IOException e){
-            System.err.println("Unable to save settings to file: "+propFile);
+            log.print(LogType.Error,"Unable to save settings to file: "+propFile);
         }// catch (FileNotFoundException e){}
     }
 
@@ -110,22 +111,23 @@ public class Settings {
     //containskey
 
     public static void main(String[] args){
+        Log log = new Log();
         Settings props = new Settings();
-        System.out.println("Os is windows?..."+props.isWindows());
-        System.out.println("(private) StudyBudy folder is: "+props.appPath);
-        System.out.println("(public) getSetting finds StudyBudy folder as: "+props.getSetting("homeDir"));
+        log.print(LogType.Plain,"Os is windows?..."+props.isWindows());
+        log.print(LogType.Plain,"(private) StudyBudy folder is: "+props.appPath);
+        log.print(LogType.Plain,"(public) getSetting finds StudyBudy folder as: "+props.getSetting("homeDir"));
         props.setSettingAndSave("testSaveAllSettigngsHere", "settingsvalue");//Test setting a property in the file and saving all settings to file
         AppDefaults.getAndPrint(props);
         props.setSettingDontSave("numberOfThumbnails", "5");//Test setting a property in the file. Doesn't save Properties to file.
-        System.out.println("Test property set at '5' has value: "+props.getSetting("numberOfThumbnails"));
+        log.print(LogType.Plain,"Test property set at '5' has value: "+props.getSetting("numberOfThumbnails"));
         props = null;
 
         //Simulate closing StudyBudy and running a second time
 
         //Any settings which are not saved will no longer exist and return null
         props = new Settings();
-        System.out.println("\nFirst default setting has value: "+props.getSetting(AppDefaults.s1.key));
-        System.out.println("(unsaved) Test property set at '5' has value: "+props.getSetting("numberOfThumbnails"));
+        log.print(LogType.Plain,"\nFirst default setting has value: "+props.getSetting(AppDefaults.s1.key));
+        log.print(LogType.Plain,"(unsaved) Test property set at '5' has value: "+props.getSetting("numberOfThumbnails"));
 
     }
 }

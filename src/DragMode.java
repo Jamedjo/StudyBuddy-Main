@@ -15,6 +15,7 @@ public enum DragMode {
 
     Cursor open,closed;
     static int count =0;
+    Log log = new Log();
 
     DragMode(Cursor openCur, Cursor closedCur) {
         open = openCur;
@@ -48,22 +49,26 @@ public enum DragMode {
     //get currsor from icons folder. Or alow icon?
 
     Cursor cursorFromIcon(SysIcon icon,HotSpotPos spot){
-        Cursor cur;
+        Cursor cur = null;
         Toolkit tk = Toolkit.getDefaultToolkit();
+        try{
+        if(icon.Icon != null){
         Image img = icon.Icon.getImage();
         Point hotSpot = spot.getPoint(img,tk);
         String name = icon.toString()+count;
-        try{
         cur = tk.createCustomCursor(img,hotSpot,name);
-//        } catch (IndexOutOfBoundsException e){
-//            System.out.println(e);
-//            cur = Cursor.getDefaultCursor();
-        } catch (HeadlessException e){
-            System.out.println(e);
-            cur = Cursor.getDefaultCursor();
         }
-        count++;
-        return cur;
+        } catch (IndexOutOfBoundsException e){
+            log.print(LogType.Error,e);
+        } catch (HeadlessException e){
+            log.print(LogType.Error,e);
+        } catch (NullPointerException e){
+            log.print(LogType.Error,e);
+        } finally{
+            if(cur==null) cur = Cursor.getDefaultCursor();
+            count++;
+            return cur;
+        }
     }
 }
 

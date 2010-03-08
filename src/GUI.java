@@ -1,6 +1,7 @@
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentEvent;
@@ -40,6 +41,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
 class GUI implements ActionListener, ComponentListener, WindowStateListener, ChangeListener {
+    Log log;
     Settings settings;
     JFrame w;
     JMenuBar menuBar;
@@ -54,7 +56,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JToolBar toolbarMain;
     JScrollPane boardScroll;
     ImageAdjuster adjuster;
+    OptionsGUI optionsGUI;
     TagTagger tagTagger;
+    QuickTagger quickTagger;
     volatile ProgramState state;
     JOptionPane tagBox;
     ImageDatabase mainImageDB;
@@ -86,6 +90,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     GUI() {
+        log = new Log();
         w = new JFrame();
         setTitle();
         w.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -255,13 +260,22 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             }
         });
 
+        optionsGUI = new OptionsGUI(w,true);
+
         tagTagger = new TagTagger(w,true);
+        quickTagger = new QuickTagger(w,true);
 
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
         w.pack();
         state.imageChanged();
         contentPane.addComponentListener(this);//don't want it to trigger while building
+
+        //Set positions. Should be done upon popup,show or set visable instead.
+        adjuster.setLocationRelativeTo(w);
+        optionsGUI.setLocationRelativeTo(w);
+        quickTagger.setLocationRelativeTo(w);
+        tagTagger.setLocationRelativeTo(w);
     }
 
     public void actionPerformed(ActionEvent ae) {
@@ -283,6 +297,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("Prev")) state.prevImage();
         else if (ae.getActionCommand().equals("AddTag")) addTag();
         else if (ae.getActionCommand().equals("TagThis")) tagThis();
+        else if (ae.getActionCommand().equals("QuickTag")) quickTag();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) tagTag();
         else if (ae.getActionCommand().equals("DragPan")) mainPanel.setCursorMode(DragMode.Drag);
@@ -291,6 +306,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
         else if (ae.getActionCommand().equals("ExportCurrentImg")) exportCurrentImage();
+        else if (ae.getActionCommand().equals("Options")) showOptions();
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
         } else if (ae.getActionCommand().equals("Help")) {
@@ -299,7 +315,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         } else if (ae.getActionCommand().equals("About")) {
             JOptionPane.showMessageDialog(w, "StudyBuddy by Team StudyBuddy", "About StudyBuddy", JOptionPane.INFORMATION_MESSAGE, SysIcon.Help.Icon);
         } else{
-            System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());
+            log.print(LogType.Error,"ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());
         }
         //+ ",\nwith source:\n\n " + e.getSource());
     }
@@ -312,7 +328,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     public void componentResized(ComponentEvent e) {
         // if(e.getSource()==boardScroll) {
         //if(e.getSource()==mainPanel) {
-        //**//System.err.println(e.paramString());
+        //**//log.print(LogType.Error,e.paramString());
         mainPanel.onResize();
         thumbPanel.onResize();
         //}
@@ -412,8 +428,21 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void zoomTo(double percent) {
+        double oldZoom = mainPanel.getZoomMult();
+        int width = mainScrollPane.getViewport().getExtentSize().width;
+        int hight = mainScrollPane.getViewport().getExtentSize().height;
+        int xpos = mainScrollPane.getViewport().getViewPosition().x+(width/2);
+        int ypos = mainScrollPane.getViewport().getViewPosition().y+(hight/2);
+
         mainPanel.setZoomMult(percent / 100);
         toggleZoomed(false);
+
+        double zoomFactor = mainPanel.getZoomMult()/oldZoom;
+        int newX = (int)(xpos*zoomFactor);
+        int newY = (int)(ypos*zoomFactor);
+        Rectangle r = mainScrollPane.getViewport().getViewRect();
+        r.translate(newX-xpos,newY-ypos);
+        mainPanel.scrollRectToVisible(r);
     }
 
     void toggleSlide(boolean setPlaying) {//true to start playing
@@ -511,6 +540,24 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         tagTree.updateTags();
     }
 
+    // TODO: change so image names, or "title:DSA Notes page 73" style name used, but ID returned. Use IDTitle?
+    // TODO: add option to show thumbnails instad of text list.
+    void quickTag() {
+        quickTagger.loadAllTags(mainImageDB.getTagIDTitles(),mainImageDB.getAllImageIDs());
+        quickTagger.setVisible(true);
+        if(quickTagger.getReturnStatus()==TagTagger.RET_OK){
+            Object[] SelectedImages = quickTagger.getSelctedImages();
+            Object NewTag = quickTagger.getSelectedTag();
+            if ((NewTag != null) && (NewTag instanceof IDTitle)) {
+                IDTitle NewTagIDTitle = (IDTitle) NewTag;
+                for(Object Img: SelectedImages){
+                    mainImageDB.tagImage(Img.toString(), NewTagIDTitle.getID());
+                }
+            }
+        }
+        tagTree.updateTags();
+    }
+
     void exportCurrentImage() {
         int destReady = fileGetter.showOpenDialog(w);
         if (destReady == JFileChooser.APPROVE_OPTION) {
@@ -579,5 +626,12 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }// else if((state.getCurrentImage().brightness !=oldBr)||(state.getCurrentImage().contrast!=oldCr)||(state.getCurrentImage().isInverted!=oldInv)){
             state.imageColoursUpdated();//Now always needed as preview may have changed values
         //}
+    }
+    void showOptions(){
+        optionsGUI.setVisible(true);
+//        state.getCurrentImage().optionsGUI = adjuster.getBrightness();
+//        state.getCurrentImage().optionsGUI = adjuster.getContrast();
+//        state.getCurrentImage().optionsGUI = adjuster.isInverted();
+
     }
 }

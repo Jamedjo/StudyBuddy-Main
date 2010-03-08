@@ -2,6 +2,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class Splash extends Frame {
+    Log log = new Log();
 
     public Splash() {
 
@@ -11,7 +12,7 @@ public class Splash extends Frame {
             e.getWindow().dispose();
         }  });
         final SplashScreen splash = SplashScreen.getSplashScreen();
-        System.out.println("splashed");
+        log.print(LogType.Debug,"splashed");
         splash.close();
     }
     

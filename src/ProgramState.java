@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import javax.swing.JOptionPane;
 import javax.swing.JOptionPane.*;
 
@@ -19,6 +20,7 @@ enum LoadType{Init,Load,Filter,Refresh,LoadLast}
 //Should keep track of whether to flush the curent image and various thumbs based-
 //Previous image and 3 next images should be kept, others flushed.
 class ProgramState{
+    Log log = new Log();
     private ImageObject[] imageList;
     private String[] imageIDs;
     int lastIndex; //Must be updated when number of images changes
@@ -74,7 +76,7 @@ class ProgramState{
 	case Filter:
 	    //Create image database by loading database
             if(filterTag==null) {
-                System.err.println("Error: Tried to filter by tag without a filter.");
+                log.print(LogType.Error,"Error: Tried to filter by tag without a filter.");
                 ConstructProgramState(LoadType.Load, parentGUI, "");
                 return;
             } else if (filterTag.equals("Show All Images")){
@@ -88,6 +90,7 @@ class ProgramState{
         mainGUI.settings.setSettingAndSave("lastFilterUsed", currentFilter);
 	//if imageIDs.length==0
 	//then a file should be added first (Construct with Init&imports, then return;)
+   long start = Calendar.getInstance().getTimeInMillis();
       	imageList = new ImageObject[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
@@ -101,9 +104,10 @@ class ProgramState{
             //imageChanged();//Will cause deadlock or bugs if uncommented. Call after constructing
 	//}
     if(imageList.length<1){
-            System.err.println("Error: There are no images loaded under current search.\nEnsure filter has some images.");
+            log.print(LogType.Error,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
             ConstructProgramState(LoadType.Refresh,parentGUI,"Show All Images");
         }
+        System.out.println("####### Loaded imagelist length "+imageList.length+" in "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds ########");
     }
 
     void importImages(File[] files) {
@@ -116,7 +120,7 @@ class ProgramState{
                 for (File f : files) {
                     if(f.isDirectory()) foldersList.add(f);
                     else{
-                        //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
+                        //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
                         String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
@@ -156,7 +160,7 @@ class ProgramState{
                 numberOfImages = imageList.length;
             } else {
                 for (File f : files) {
-                    //System.out.println(f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
+                    //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
                     mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
                 }
                 mainGUI.state = new ProgramState(LoadType.Filter, mainGUI, currentFilter);
@@ -254,7 +258,7 @@ class ProgramState{
 
     ImageObject getImageI(int i){
         if(imageList.length<1){
-            System.err.println("Error: There are no images loaded under current search.\nEnsure filter has some images.");
+            log.print(LogType.Error,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
             return null;
         }
 	return imageList[i];//will be changed later to keep track of images in memory

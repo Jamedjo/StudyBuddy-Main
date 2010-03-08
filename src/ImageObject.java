@@ -55,6 +55,7 @@ enum ImgSize {Thumb,Screen,Max,ThumbFull;
 }
 
 class ImageObject { //could be updated to take a File instead, or a javase7 path
+    Log log = new Log(false);
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
     private BufferedImage bImageFilt = null;
@@ -82,7 +83,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	String tempPath = "";
         imageID = currentID;
         thumbPath = thumbnailPath;
-        System.out.println("Image:"+imageID+" has inPath: "+inputPath);
+        log.print(LogType.Debug,"Image:"+imageID+" has inPath: "+inputPath);
 	try{
 	    if(inputPath.startsWith("///\\\\\\")){
 		tempPath = inputPath.substring(6);
@@ -100,15 +101,15 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	    }
 	}catch (URISyntaxException e){
             pathFile = null;
-	    System.err.println("Couldn't load image from " + tempPath + "\nError was- " + e.toString());
+	    log.print(LogType.Error,"Couldn't load image from " + tempPath + "\nError was- " + e.toString());
         }catch (NullPointerException e) {
 	    pathFile = null;
-	    System.err.println("Couldn't load image from file " + tempPath + "\nError was:- " + e.toString());
+	    log.print(LogType.Error,"Couldn't load image from file " + tempPath + "\nError was:- " + e.toString());
 	}
 	
 	
 	if(pathFile==null){
-	    System.err.println("File could not be found at " + inputPath);
+	    log.print(LogType.Error,"File could not be found at " + inputPath);
 	}
 	//ImageObjectConstructor);
 	//getImage(ImgSize.Screen);
@@ -182,8 +183,8 @@ long start = Calendar.getInstance().getTimeInMillis();
 		//JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
 		//bThumb = jpegMetadata.getEXIFThumbnail();
 	    //} //Wasn't working very well so has been removed
-	    //if(bThumb!=null) System.out.println("Read exif of image " + absolutePath);
-	    //System.out.println("Reading thumbnail from exif for file "+absolutePath+" with dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start));
+	    //if(bThumb!=null) log.print(LogType.Debug,"Read exif of image " + absolutePath);
+	    //log.print(LogType.Debug,"Reading thumbnail from exif for file "+absolutePath+" with dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start));
 start = Calendar.getInstance().getTimeInMillis();
 	    String ext = null;
 	    int pos = pathFile.getName().lastIndexOf(".");
@@ -191,7 +192,7 @@ start = Calendar.getInstance().getTimeInMillis();
 		ext = pathFile.getName().substring(pos+1).toLowerCase();
 	    }
 	    if(ext==null) {
-		System.err.println("Unable to get file extension from "+absolutePath);
+		log.print(LogType.Error,"Unable to get file extension from "+absolutePath);
 		return;
 	    }
 	    int sampleFactor = (int)Math.floor((double)Math.max((double)Bwidth,(double)Bheight)/((double)200));//9));
@@ -199,7 +200,7 @@ start = Calendar.getInstance().getTimeInMillis();
 //ImageIO.scanForPlugins();
 	    Iterator readers = ImageIO.getImageReadersBySuffix(ext);
 	    ImageReader reader = (ImageReader)readers.next();
-if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println("next reader");}
+if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.Debug,"next reader");}
 	    //ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
             ImageInputStream inputStream = ImageIO.createImageInputStream(new RandomAccessFile(pathFile,"r"));
 	    reader.setInput(inputStream,false);
@@ -212,18 +213,18 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	    reader.dispose();
 	    inputStream.close();
 
-	    //if(bThumb!=null) {System.out.println("Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
-            if(bThumb!=null) {System.out.println("        -sampled every "+sampleFactor+" pixels from "+Bwidth+"x"+Bheight+" in "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds"); isQuickThumb = true;}
+	    //if(bThumb!=null) {log.print(LogType.Debug,"Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels for image Dimensions "+Bwidth+"x"+Bheight+"\n        -took "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds to sample image to read thumb"); isQuickThumb = true;}
+            if(bThumb!=null) {log.print(LogType.Debug,"        -sampled every "+sampleFactor+" pixels from "+Bwidth+"x"+Bheight+" in "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds"); isQuickThumb = true;}
 	    //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
 	    //Bheight = reader.getHeight(0);
 	} catch (IOException e) {
-	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	    log.print(LogType.Error,"Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
 	} //catch (ImageReadException e) {
-	//System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+	//log.print(LogType.Error,"Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
 	//}
 
 	//int thumbnum = reader.getNumThumbnails(0);//imageIndex = 0 as we look at the first image in file
-	//System.out.println("Has "+thumbnum+" thumbnails. Using reader " +reader.getClass().getName());
+	//log.print(LogType.Debug,"Has "+thumbnum+" thumbnails. Using reader " +reader.getClass().getName());
 	//If a thumbnail image is present, it can be retrieved by calling:
 	//int thumbailIndex = 0;
 	//BufferedImage bi;
@@ -241,12 +242,12 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	    Bwidth = image_d.width;
 	    Bheight = image_d.height;	    
 	} catch (IOException e) {
-	    System.err.println("Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	    log.print(LogType.Error,"Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
 	}  catch (ImageReadException e) {
-	System.err.println("Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+	log.print(LogType.Error,"Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
 	}
-	if(Bwidth==null) System.err.println("Error reading exif dimensions of image " + absolutePath);
-	//System.out.println("Dimensions "+Bwidth+"x"+Bheight+" suceesfully got for " +absolutePath);
+	if(Bwidth==null) log.print(LogType.Error,"Error reading exif dimensions of image " + absolutePath);
+	//log.print(LogType.Debug,"Dimensions "+Bwidth+"x"+Bheight+" suceesfully got for " +absolutePath);
     }
 
     int getWidthForThumb(){
@@ -272,7 +273,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     //BufferedImage extractIcon(...)
 
     BufferedImage getImage(ImgSize size) {
-        //**//System.out.println("Image requested: " + absolutePath + " at size " + size);
+        //**//log.print(LogType.Debug,"Image requested: " + absolutePath + " at size " + size);
         //gets thumbnail or full image
         if (size.isThumb() && bThumb != null) {
             return localGetBufThumb();
@@ -297,7 +298,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 //ImageIO.setUseCache(true);
 //ImageIO.setCacheDirectory(pathFile);
             bImage = ImageIO.read(pathFile);
-            System.out.println("Loading image " + absolutePath + "\n      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to read image to memory");
+            log.print(LogType.Debug,"Loading image " + absolutePath + "\n      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to read image to memory");
             start = Calendar.getInstance().getTimeInMillis();
 
             if ((size == ImgSize.Screen) || (size == ImgSize.ThumbFull)) {//&& not thumb only (as this would be extra work)
@@ -307,24 +308,24 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
                 currentLarge = ImgSize.Max;
             }
 
-            System.out.println("      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to process image");
+            log.print(LogType.Debug,"      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to process image");
             makeThumb(bImage);
             start = Calendar.getInstance().getTimeInMillis();
             setVars();
-            System.out.println("      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to get width,height&orientation");
+            log.print(LogType.Debug,"      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to get width,height&orientation");
             start = Calendar.getInstance().getTimeInMillis();
         } catch (IOException e) {
-            System.err.println("Error loading image " + absolutePath + "\nError was: " + e.toString());
+            log.print(LogType.Error,"Error loading image " + absolutePath + "\nError was: " + e.toString());
             setToXasFileNotFound();
             //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
         } catch (IllegalArgumentException e) {
-            System.err.println("Image file " + absolutePath + " could not be found " + "\nError was: " + e.toString());
+            log.print(LogType.Error,"Image file " + absolutePath + " could not be found " + "\nError was: " + e.toString());
             setToXasFileNotFound();
         } catch (NullPointerException e) {
-            System.err.println("Could not load image from file " + absolutePath + "\nError was: " + e.toString());
+            log.print(LogType.Error,"Could not load image from file " + absolutePath + "\nError was: " + e.toString());
             setToXasFileNotFound();
         } catch (java.lang.OutOfMemoryError e) {
-            System.err.println("Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
+            log.print(LogType.Error,"Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
         }
         if (bImage == null) {
             return null;//if big is null, so is thumb.
@@ -332,7 +333,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
         if (size.isLarge()) {
             return localGetBufImage();
         }
-        //**//System.out.println("Made thumb for "+absolutePath);
+        //**//log.print(LogType.Debug,"Made thumb for "+absolutePath);
         if (size == ImgSize.ThumbFull) {
             return localGetBufThumb();
         } else {
@@ -359,7 +360,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
         //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
         g2.drawImage(bigImg, 0, 0, iconWH.width,iconWH.height, null);
         g2.dispose();
-        System.out.println("  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
+        log.print(LogType.Debug,"  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
         bThumb = tempimage;
         saveThumbToFile();
     }
@@ -376,7 +377,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             File thumbfile = new File(thumbPath,getSaveEncoding());
             ImageIO.write(bThumb,"jpg",thumbfile);//should use same format as file
         } catch (IOException e){
-            System.err.println("Error creating thumbnail for image: "+absolutePath);
+            log.print(LogType.Error,"Error creating thumbnail for image: "+absolutePath);
         }
     }
     void saveFullToPath(String path){
@@ -384,7 +385,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             File f = new File(path);
             ImageIO.write(localGetBufImage(),"jpg",f);//should use same format as file
         } catch (IOException e){
-            System.err.println("Error creating saving image: "+absolutePath+"\nTo path: "+path);
+            log.print(LogType.Error,"Error creating saving image: "+absolutePath+"\nTo path: "+path);
         }
     }
 
@@ -394,7 +395,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
             try {
                 bThumb = ImageIO.read(checkFile);
             } catch (IOException e) {
-                System.err.println("Error opening thumbnail " + checkFile + "\nError was: " + e.toString());
+                log.print(LogType.Error,"Error opening thumbnail " + checkFile + "\nError was: " + e.toString());
             }
         }
     }
@@ -417,7 +418,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
     }
 
     void setVars(){
-	if(bImage==null) System.err.println("ERROR getting image size as image not initilized");
+	if(bImage==null) log.print(LogType.Error,"ERROR getting image size as image not initilized");
 	Bwidth = bImage.getWidth();
 	Bheight = bImage.getHeight();
 	if(Bheight<Bwidth) iOri = Orientation.Landscape;
@@ -471,7 +472,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); System.out.println(
 	    bThumb = ImageIO.read(SysIcon.Error.imgURL);
 	    setVars();
 	} catch (IOException e) {
-	    System.err.println("Error loading image: " + e.toString());
+	    log.print(LogType.Error,"Error loading image: " + e.toString());
 	    //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
         } 
     }

@@ -1,24 +1,24 @@
-public class TagTagger extends javax.swing.JDialog {
+public class QuickTagger extends javax.swing.JDialog {
     /** A return status code - returned if Cancel button has been pressed */
     public static final int RET_CANCEL = 0;
     /** A return status code - returned if OK button has been pressed */
     public static final int RET_OK = 1;
 
     /** Creates new form TagTagger */
-    public TagTagger(java.awt.Frame parent, boolean modal) {
+    public QuickTagger(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
     }
 
-    public void loadAllTags(Object[] all){
-        parentList.setListData(all);
-        childList.setListData(all);
+    public void loadAllTags(Object[] tags,Object[] images){
+        tagList.setListData(tags);
+        imageList.setListData(images);
     }
-    Object getChildT(){
-        return childList.getSelectedValue();
+    Object[] getSelctedImages(){
+        return imageList.getSelectedValues();
     }
-    Object getParentT(){
-        return parentList.getSelectedValue();
+    Object getSelectedTag(){
+        return tagList.getSelectedValue();
     }
 
     /** @return the return status of this dialog - one of RET_OK or RET_CANCEL */
@@ -38,9 +38,9 @@ public class TagTagger extends javax.swing.JDialog {
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        childList = new javax.swing.JList();
+        imageList = new javax.swing.JList();
         jScrollPane2 = new javax.swing.JScrollPane();
-        parentList = new javax.swing.JList();
+        tagList = new javax.swing.JList();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
@@ -69,31 +69,30 @@ public class TagTagger extends javax.swing.JDialog {
             }
         });
 
-        childList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Error loading parent tags.", "Press Cancel." };
+        imageList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Error loading availiable images.", "Press Cancel." };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        childList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        childList.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        childList.setNextFocusableComponent(parentList);
-        jScrollPane1.setViewportView(childList);
+        imageList.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        imageList.setNextFocusableComponent(tagList);
+        jScrollPane1.setViewportView(imageList);
 
-        parentList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Error loading parent tags.", "Press Cancel." };
+        tagList.setModel(new javax.swing.AbstractListModel() {
+            String[] strings = { "Error loading tags.", "Press Cancel." };
             public int getSize() { return strings.length; }
             public Object getElementAt(int i) { return strings[i]; }
         });
-        parentList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane2.setViewportView(parentList);
+        tagList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        jScrollPane2.setViewportView(tagList);
 
-        jLabel1.setText("Pick Parent Tag");
+        jLabel1.setText("Pick A Tag");
 
-        jLabel2.setText("Pick Child Tag");
+        jLabel2.setText("Select image(s) to be tagged");
 
         jLabel3.setText("->");
 
-        Logo.setIcon(SysIcon.TagTag.Icon);
+        Logo.setIcon(SysIcon.QuickTag.Icon);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -189,14 +188,14 @@ public class TagTagger extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Logo;
     private javax.swing.JButton cancelButton;
-    private javax.swing.JList childList;
+    private javax.swing.JList imageList;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton okButton;
-    private javax.swing.JList parentList;
+    private javax.swing.JList tagList;
     // End of variables declaration//GEN-END:variables
 
     private int returnStatus = RET_CANCEL;

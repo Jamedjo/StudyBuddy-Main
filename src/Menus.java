@@ -23,6 +23,7 @@ enum ToolBar{
     bTagTree(false, "Show/Hide Tag Tree", "TagTree", SysIcon.JTree.Icon),
     bAddTag(true, "Create Tag", "AddTag", SysIcon.AddTag.Icon),
     bTagThis(false, "Tag This Image", "TagThis", SysIcon.TagThis.Icon),
+    bQuickTag(false, "Tag many images", "QuickTag", SysIcon.QuickTag.Icon),
     bTagTag(false, "Tag A Tag", "TagTag", SysIcon.TagTag.Icon),
     bTagFilter(false, "Filter By Tag", "TagFilter", SysIcon.TagFilter.Icon),
     bDragPan(true, "Drag Mode: Pan", "DragPan", SysIcon.DragPan.Icon),
@@ -32,11 +33,13 @@ enum ToolBar{
     bBlueDemo(true, "Bluetooth", "BlueT", SysIcon.BlueTooth.Icon),
     bZoomToX(true, "Zoom Dialog", "ZoomX", SysIcon.ZoomToX.Icon),
     bZoomFit(false, "Zoom: Fit     ", "ZoomFit", SysIcon.ZoomFit.Icon, false),
-    bZoomMax(false, "Zoom: 100%", "Zoom100", SysIcon.Zoom100.Icon);
+    bZoomMax(false, "Zoom: 100%", "Zoom100", SysIcon.Zoom100.Icon),
+    bOptions(false, "Options", "Options", SysIcon.Options.Icon);
 
     JButton button;
     boolean isSeperatorHere;
     static final boolean putSeperatorAtEnd = false;
+    static final int sliderPosFromEnd = 1;//Hom many icons should come after the slider
 
     ToolBar(boolean isNewGroup,String label, String command, ImageIcon icon, boolean visible) {
         isSeperatorHere = isNewGroup;
@@ -90,13 +93,13 @@ enum ToolBar{
 		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
 	    }
 	    bar.add(bt);
+            if(i==ToolBar.values().length-(1+sliderPosFromEnd)) bar.add(mainGUI.buildZoomBar());
 	    i++;
 	}
         if (putSeperatorAtEnd) {
             bar.addSeparator();
         }
-        bar.add(mainGUI.buildZoomBar());
-
+        
         //workaround to prevent toolbar from steeling focus
 	for(i=0; i<bar.getComponentCount();i++){
 	    if(bar.getComponent(i) instanceof JButton){

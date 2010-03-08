@@ -25,6 +25,7 @@ public enum SysIcon {
     ZoomToX("oxygen/preferences-system-windows-move.png"),//zoom-fit-best-4.png"),
     AddTag("oxygen/document-edit.png"),
     TagThis("oxygen/list-add-3.png"),
+    QuickTag("oxygen/view-pim-notes.png"),
     TagTag("oxygen/feed-subscribe.png"),
     TagFilter("oxygen/edit-find-6.png"),
     DragPan("oxygen/transform-move.png"),
@@ -36,9 +37,11 @@ public enum SysIcon {
     LinkCursor("oxygen/quickopen.png"),
     NoteCursor("oxygen/transform-crop.png"),
     Import("oxygen/application-x-egon.png"),
-    ImportDir("oxygen/folder-image.png"); 
+    ImportDir("oxygen/folder-image.png"),
+    Options("oxygen/preferences-system-3.png");
     ImageIcon Icon;
     URL imgURL;
+    Log log = new Log();
 
     SysIcon(String path) {
         imgURL = getRes(path);
@@ -53,11 +56,11 @@ public enum SysIcon {
                     failed = false;
                 }
             } catch (URISyntaxException e) {
-                System.err.println(e);
+                log.print(LogType.Error, e);
             }
         }
         if (failed) {
-            System.err.println("Error creating icon: " + path);
+            log.print(LogType.Error,"Error creating icon: " + path);
             Icon = null;
         }
     }
