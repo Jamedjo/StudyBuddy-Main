@@ -2,7 +2,10 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
+import javax.swing.JTable;
 import javax.swing.KeyStroke;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 
 public class QuickTagger extends javax.swing.JDialog {
     /** A return status code - returned if Cancel button has been pressed */
@@ -22,12 +25,27 @@ public class QuickTagger extends javax.swing.JDialog {
         initComponents();
     }
 
-    public void loadAllTags(Object[] tags,Object[] images){
+    public void loadAllTags(Object[] tags,Object[][] idTitleTable){
         tagList.setListData(tags);
-        imageList.setListData(images);
+        String[] headers = new String [] {"ID", "Name"};
+        imageTable = new JTable();
+        imageTable.setShowGrid(false);imageTable.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        jScrollPane3.setViewportView(imageTable);
+        imageTable.setModel(new DefaultTableModel(idTitleTable,headers));
+        imageTable.getTableHeader().getColumnModel().getColumn(0).setMaxWidth(0);
+        imageTable.getTableHeader().getColumnModel().getColumn(0).setMinWidth(0);
+        imageTable.getColumnModel().getColumn(0).setMaxWidth(0);
+        imageTable.getColumnModel().getColumn(0).setMinWidth(0);
+        imageTable.setTableHeader(null);
+        imageTable.addNotify();
     }
-    Object[] getSelctedImages(){
-        return imageList.getSelectedValues();
+    Object[] getSelctedImageIDs(){
+        int[] rows = imageTable.getSelectedRows();
+        Object [] images = new String[rows.length];
+        for(int i=0;i<rows.length;i++){
+            images[i] = imageTable.getValueAt(i,0);
+        }
+        return images;
     }
     Object getSelectedTag(){
         return tagList.getSelectedValue();
@@ -49,14 +67,14 @@ public class QuickTagger extends javax.swing.JDialog {
 
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        imageList = new javax.swing.JList();
         jScrollPane2 = new javax.swing.JScrollPane();
         tagList = new javax.swing.JList();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         Logo = new javax.swing.JLabel();
+        jScrollPane3 = new javax.swing.JScrollPane();
+        imageTable = new javax.swing.JTable();
 
         setTitle("Tag a tag");
         setIconImage(null);
@@ -82,15 +100,6 @@ public class QuickTagger extends javax.swing.JDialog {
             }
         });
 
-        imageList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Error loading availiable images.", "Press Cancel." };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
-        imageList.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        imageList.setNextFocusableComponent(tagList);
-        jScrollPane1.setViewportView(imageList);
-
         tagList.setModel(new javax.swing.AbstractListModel() {
             String[] strings = { "Error loading tags.", "Press Cancel." };
             public int getSize() { return strings.length; }
@@ -107,6 +116,32 @@ public class QuickTagger extends javax.swing.JDialog {
 
         Logo.setIcon(SysIcon.QuickTag.Icon);
 
+        imageTable.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {"-9", "Error loading avaliable images"},
+                {"-9", "Press Cancel."}
+            },
+            new String [] {
+                "ID", "Name"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
+        jScrollPane3.setViewportView(imageTable);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -114,17 +149,22 @@ public class QuickTagger extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(Logo)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel3)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel2)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 218, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(166, 166, 166)
+                                .addComponent(Logo))
+                            .addGroup(layout.createSequentialGroup()
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel2)
+                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)))))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -137,24 +177,25 @@ public class QuickTagger extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(Logo)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(jLabel2))
+                        .addContainerGap()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(Logo)
+                                .addGap(20, 20, 20))
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(cancelButton)
                             .addComponent(okButton)))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(123, 123, 123)
+                        .addGap(139, 139, 139)
                         .addComponent(jLabel3)))
                 .addContainerGap())
         );
@@ -201,12 +242,12 @@ public class QuickTagger extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel Logo;
     private javax.swing.JButton cancelButton;
-    private javax.swing.JList imageList;
+    private javax.swing.JTable imageTable;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton okButton;
     private javax.swing.JList tagList;
     // End of variables declaration//GEN-END:variables

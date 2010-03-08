@@ -558,17 +558,24 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     // TODO: change so image names, or "title:DSA Notes page 73" style name used, but ID returned. Use IDTitle?
     // TODO: add option to show thumbnails instad of text list.
     void quickTag() {
-        quickTagger.loadAllTags(mainImageDB.getTagIDTitles(),mainImageDB.getAllImageIDs());
+        String[] ids = mainImageDB.getAllImageIDs();
+        String[][] idTitleTable = new String[ids.length][2];
+        for(int i=0;i<ids.length;i++){
+            idTitleTable[i][0] = ids[i];
+            idTitleTable[i][1] = mainImageDB.getImageFilename(ids[i]);
+        }
+        quickTagger.loadAllTags(mainImageDB.getTagIDTitles(),idTitleTable);
         quickTagger.setVisible(true);
         if(quickTagger.getReturnStatus()==TagTagger.RET_OK){
-            Object[] SelectedImages = quickTagger.getSelctedImages();
+            Object[] SelectedImages = quickTagger.getSelctedImageIDs();
             Object NewTag = quickTagger.getSelectedTag();
-            if ((NewTag != null) && (NewTag instanceof IDTitle)) {
-                IDTitle NewTagIDTitle = (IDTitle) NewTag;
+            if ((NewTag == null) || !(NewTag instanceof IDTitle)) return;
+            if(SelectedImages.length<1) return;
+
+                String tagID = ((IDTitle)NewTag).getID();
                 for(Object Img: SelectedImages){
-                    mainImageDB.tagImage(Img.toString(), NewTagIDTitle.getID());
+                    mainImageDB.tagImage(Img.toString(), tagID);
                 }
-            }
         }
         tagTree.updateTags();
     }
