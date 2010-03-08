@@ -76,7 +76,7 @@ class ImageDatabase
 	private void BuildImageToSpecialTable() {
         String[] ImageToSpecialHeader = {"ImageID", "SpecialType", "SpecialString"};
         boolean[] ImageToSpecialKeys = {true, true, false};
-        ImageToSpecialTable = new IndexedTable("ImageToSpecialTable", new Record(ImageToSpecialTableHeader), ImageToSpecialTableKeys);
+        ImageToSpecialTable = new IndexedTable("ImageToSpecialTable", new Record(ImageToSpecialHeader), ImageToSpecialKeys);
     }
 
   // Loads the image database from the files it's stored in
@@ -209,12 +209,12 @@ class ImageDatabase
   }
   
   // Delete special tag for an image
-  int deleteSpecial(String ImageID, String SpecialTypex)
+  int deleteSpecial(String ImageID, String SpecialType)
   {
 	String[] RecordArray = {ImageID, SpecialType, null};
-	TempRecord = ImageToSpecialTable.getRecord(new Record(RecordArray));
+	Record TempRecord = ImageToSpecialTable.getRecord(new Record(RecordArray));
 	if (TempRecord == null)
-		return -1
+		return -1;
 	else
 		return ImageToSpecialTable.deleteRecord(TempRecord);
   }
