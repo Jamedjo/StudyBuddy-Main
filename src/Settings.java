@@ -107,12 +107,17 @@ public class Settings {
     public String getSetting(String settingName){
         return javaProperties.getProperty(settingName);
     }
-    Boolean getSettingAsBoolean(String settingName){
+    Boolean getSettingAsBooleanObject(String settingName){
         String temp = getSetting(settingName);
         if(temp == null) return null;
         if(temp.toLowerCase().equals("true")) return Boolean.valueOf(true);
         if(temp.toLowerCase().equals("false")) return Boolean.valueOf(false);
         return null;
+    }
+    boolean getSettingAsBool(String settingName, boolean defaultVal){
+        Boolean b = getSettingAsBooleanObject(settingName);
+        if(b==null) return defaultVal;
+        return b.booleanValue();
     }
     public int getSettingAsInt(String settingName) throws NumberFormatException{
         return Integer.parseInt(javaProperties.getProperty(settingName));//catch error

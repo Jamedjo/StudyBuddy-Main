@@ -75,7 +75,7 @@ enum  UserOptions{//Need to add option for default options
         if(settingName==null||settingName.equals("")) return;
         switch(type){
             case CheckBox:
-                Boolean bVal = settings.getSettingAsBoolean(settingName);
+                Boolean bVal = settings.getSettingAsBooleanObject(settingName);
                 if (bVal == null) return;
                 if(bVal.booleanValue()==false) ((JCheckBox)component).setSelected(false);
                 else if(bVal.booleanValue()==true) ((JCheckBox)component).setSelected(true);

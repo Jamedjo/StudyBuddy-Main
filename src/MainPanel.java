@@ -162,10 +162,12 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
         setOffsets();
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOffset, topOffset, useWH.width, useWH.height, this);
-        drawLinkBoxes(g2, true, true);
+        drawLinkBoxes(g2, mainGUI.settings.getSettingAsBool("showNotes",true), mainGUI.settings.getSettingAsBool("showLinks",true));
     }
+
     final static float dashA[] = {16.0f};
     final static BasicStroke dashLine = new BasicStroke(3.0f,BasicStroke.CAP_ROUND,BasicStroke.JOIN_ROUND,10.0f, dashA, 0.0f);
+
     // Retreive the boxes for notes and links and draw them on the image
     private void drawLinkBoxes(Graphics2D g2, boolean showNotes, boolean showImageLinks) {
         Rectangle[] linksRect;

@@ -638,6 +638,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         if(optionsGUI.getReturnStatus()==OptionsGUI.RET_OK){
             optionsGUI.saveAllValues(settings);
         }
-
+        mainPanel.onResize();
     }
 }
