@@ -188,10 +188,13 @@ class ImageDatabase
   }
   
   // Delete an image from the database (by fields)
-  int deleteImage(String ImageID, String Title, String Filename)
+  int deleteImage(String ImageID)
   {
-    String[] RecordArray = {ImageID, Title, Filename};
-    return deleteImage(new Record(RecordArray));
+    Record TempRecord = ImageTable.getRecord(ImageID, 0);
+	if (TempRecord == null)
+		return -1;
+	else
+		return deleteImage(TempRecord);
   }
   
   // Delete an image from the database (by record)
@@ -297,8 +300,11 @@ class ImageDatabase
   // Delete a tag from the database (by fields)
   int deleteTag(String TagID)
   {
-    String[] RecordArray = {TagID, getTagTitleFromTagID(TagID)};
-    return deleteTag(new Record(RecordArray));
+    Record TempRecord = TagTable.getRecord(TagID, 0);
+	if (TempRecord == null)
+		return -1;
+	else
+		return deleteTag(TempRecord);
   }
   
   // Delete a tag from the database (by record)
