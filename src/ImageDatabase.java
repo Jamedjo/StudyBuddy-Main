@@ -140,6 +140,7 @@ class ImageDatabase
   IndexedTable getImageToTagTable() { return ImageToTagTable; }
   IndexedTable getTagToTagTable() { return TagToTagTable; }
   IndexedTable getImageToImageTable() { return ImageToImageTable; }
+  IndexedTable getImageToNoteTable() { return ImageToNoteTable; }
   
   // Prints out a representation of the different tables
   void print()
@@ -360,15 +361,17 @@ class ImageDatabase
   }
   
   // Link an area of an image to a note
-  int addImageNote(String ImageID, String Note, int X, int Y, int Width, int Height)
+  String addImageNote(String ImageID, String Note, int X, int Y, int Width, int Height)
   {
     String[] RecordString = {Integer.toString(NextNoteID), ImageID, Note, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
     NextNoteID++;
 	if (ImageTable.getRecord(ImageID, 0) == null)
-      return 0;
+      return null;
     else
+	{
       ImageToNoteTable.addRecord(new Record(RecordString));
-      return 1;
+      return Integer.toString(NextNoteID-1);
+	}
   }
   
   // Link an area of an image to another image
@@ -462,7 +465,6 @@ class ImageDatabase
 		Records = TempTable.elements();
 		while(Records.hasMoreElements())
 		{
-		  TempRecord = (Record) Records.nextElement();
 		  TempRecord = (Record) Records.nextElement();
 		  outX = (int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3))));
 		  outY = (int) (YOffset + (Scale*Integer.parseInt(TempRecord.getField(4))));
