@@ -260,7 +260,20 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             this.repaint();
         }
     }
-    public void mouseClicked(MouseEvent e){ }
+    public void mouseClicked(MouseEvent e)
+	{
+		NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.state.getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
+		if (PointNotes.isEmpty() == false)
+		{
+			mainGUI.notePane.setVisible(true);
+			mainGUI.notePane.add(PointNotes);
+		}
+		else
+		{
+			mainGUI.notePane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+			mainGUI.notePane.setVisible(false);
+		}
+	}
     public void mouseEntered(MouseEvent e){ }
     public void mouseExited(MouseEvent e){ }
 
