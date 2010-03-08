@@ -35,6 +35,7 @@ class ImageDatabase
           BuildTagToTagTable();
           BuildImageToImageTable();
           BuildImageToNoteTable();
+		  BuildImageToSpecialTable();
   }
 
   private void BuildImageTable() {
