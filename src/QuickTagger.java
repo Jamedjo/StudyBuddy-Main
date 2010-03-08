@@ -1,3 +1,9 @@
+
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
+
 public class QuickTagger extends javax.swing.JDialog {
     /** A return status code - returned if Cancel button has been pressed */
     public static final int RET_CANCEL = 0;
@@ -7,6 +13,12 @@ public class QuickTagger extends javax.swing.JDialog {
     /** Creates new form TagTagger */
     public QuickTagger(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"CloseWindow");
+        getRootPane().getActionMap().put("CloseWindow", new AbstractAction(){
+            public void actionPerformed(ActionEvent e){
+                setVisible(false);
+            }
+        });
         initComponents();
     }
 

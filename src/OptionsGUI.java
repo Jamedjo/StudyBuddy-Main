@@ -1,6 +1,10 @@
 
 import java.awt.Container;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
 import javax.swing.BoxLayout;
+import javax.swing.KeyStroke;
 
 enum  UserOptions{
     SlideshowTime();
@@ -22,6 +26,12 @@ public class OptionsGUI extends javax.swing.JDialog {
     /** Creates new form TagTagger */
     public OptionsGUI(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"CloseWindow");
+        getRootPane().getActionMap().put("CloseWindow", new AbstractAction(){
+            public void actionPerformed(ActionEvent e){
+                setVisible(false);
+            }
+        });
         initComponents();
     }
 

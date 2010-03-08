@@ -1,4 +1,8 @@
 
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import javax.swing.AbstractAction;
+import javax.swing.KeyStroke;
 import javax.swing.event.ChangeListener;
 
 public class ImageAdjuster extends javax.swing.JDialog {
@@ -8,6 +12,18 @@ public class ImageAdjuster extends javax.swing.JDialog {
     private boolean resetPressed = false;
     //private boolean brightUsed = true;
     //private boolean contrastUsed = true;
+    /** Creates new form ImageAdjusterB */
+    
+    public ImageAdjuster(java.awt.Frame parent, boolean modal) {
+        super(parent, modal);
+        getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"CloseWindow");
+        getRootPane().getActionMap().put("CloseWindow", new AbstractAction(){
+            public void actionPerformed(ActionEvent e){
+                setVisible(false);
+            }
+        });
+        initComponents();
+    }
 
     void popupReset(){
         popup(brightSlider.isEnabled(),50,contrastSlider.isEnabled(),50,false);
@@ -46,12 +62,6 @@ public class ImageAdjuster extends javax.swing.JDialog {
     }
 
     //Should pause slideshow?
-
-    /** Creates new form ImageAdjusterB */
-    public ImageAdjuster(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
-        initComponents();
-    }
 
     /** This method is called from within the constructor to
      * initialize the form.

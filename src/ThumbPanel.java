@@ -45,7 +45,7 @@ class ThumbButton extends JPanel{
 	//int currentThumb = mainGUI.state.currentI;
 	int thumbOfsetW =0;
 	int thumbOfsetH = 0;
-	if(thumbNumber<=mainGUI.state.numberOfImages){
+	if(thumbNumber<mainGUI.state.numberOfImages){// use <= to show currentI too
 	    //set dimension
 	    //currentThumb = mainGUI.state.next(currentThumb);
 	    useWH = mainGUI.state.getRelImageWH(ImgSize.Thumb,size,size,thumbNumber);
@@ -67,6 +67,7 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
     int maxNoTiles;
     int squareSize = 100;
     int hBorder = 3;
+    int tilesHigh = 1;
     ThumbButton[] thumbnails;
     final GUI mainGUI;
 
@@ -92,14 +93,12 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 //                wait();
 //            } catch (InterruptedException e){}
 //        }
-        noTiles = Math.min(maxNoTiles,mainGUI.state.numberOfImages);
+        noTiles = Math.min(maxNoTiles,(mainGUI.state.numberOfImages-1));//remove -1 to show currentI too
        //**// log.print(LogType.Debug,"now showing "+noTiles+" thumbnails");
 
         thumbnails = new ThumbButton[noTiles];
         JPanel centrePan = new JPanel();
         centrePan.setLayout(new BoxLayout(centrePan,BoxLayout.LINE_AXIS));
-        centrePan.setMinimumSize(new Dimension(squareSize,squareSize));
-        centrePan.setPreferredSize(new Dimension((squareSize+hBorder)*noTiles,squareSize));//Includes border
         centrePan.setBackground(Color.darkGray);
 
         for (int i=0;i<thumbnails.length;i++){
@@ -109,6 +108,15 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
         }
         //centrePan.setMaximumSize(new Dimension(squareSize*thumbnails.length,squareSize*1));
 
+        if(noTiles>=1){
+            tilesHigh = 1;
+            centrePan.setMinimumSize(new Dimension(squareSize,squareSize));
+            centrePan.setPreferredSize(new Dimension((squareSize+hBorder)*noTiles,squareSize));//Includes border
+        } else {
+            tilesHigh = 0;
+            centrePan.setMinimumSize(new Dimension(0,0));
+            centrePan.setPreferredSize(new Dimension(0,0));
+        }
         centrePan.validate();
         return centrePan;
     }
@@ -122,15 +130,20 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 //change number of tiles if needed
         this.removeAll();
         //this.remove(0);
+        int oldTilesHigh= tilesHigh;
         JPanel thumbHolder = buildThumbHolders();
         //thumbHolder.setAlignmentY(Component.TOP_ALIGNMENT);
         this.add(thumbHolder);
+        this.setPreferredSize(thumbHolder.getPreferredSize());
+        this.setMinimumSize(thumbHolder.getMinimumSize());
+        if(oldTilesHigh!=tilesHigh) mainGUI.mainPanel.onResize();
+        getParent().validate();
         this.validate();
 
+	getParent().repaint();
 	this.repaint();
 	//this.setPreferredSize(new Dimension(boardW,boardH));
 	//this.revalidate();
-	//getParent().repaint();
 
         
     }
