@@ -45,7 +45,7 @@ class ProgramState{
     ProgramState(GUI parentGUI){
 	mainGUI = parentGUI;
         String temp;
-        temp =null;// mainGUI.settings.getSetting("databaseFilePathAndName");
+        temp = mainGUI.settings.getSetting("databaseFilePathAndName");
         if(temp==null) ConstructProgramState(LoadType.Init,  parentGUI,"");
         else ConstructProgramState(LoadType.LoadLast,  parentGUI,mainGUI.settings.getSetting("lastFilterUsed"));
     }
