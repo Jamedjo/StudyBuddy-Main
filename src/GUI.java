@@ -300,7 +300,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("QuickTag")) quickTag();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) tagTag();
-        else if (ae.getActionCommand().equals("DragPan")) mainPanel.setCursorMode(DragMode.Drag);
+        else if (ae.getActionCommand().equals("DragPan")) mainPanel.setCursorMode(mainPanel.getCurrentDrag());
         else if (ae.getActionCommand().equals("DragLink")) mainPanel.setCursorMode(DragMode.Link);
         else if (ae.getActionCommand().equals("DragNote")) mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
@@ -629,6 +629,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
     void showOptions(){
         optionsGUI.setVisible(true);
+        for(UserOptions option: optionsGUI.values){
+            log.print(LogType.Debug,"option: "+option.getValue());
+        }
 //        state.getCurrentImage().optionsGUI = adjuster.getBrightness();
 //        state.getCurrentImage().optionsGUI = adjuster.getContrast();
 //        state.getCurrentImage().optionsGUI = adjuster.isInverted();

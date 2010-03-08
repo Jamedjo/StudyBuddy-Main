@@ -62,6 +62,7 @@ public class TagTagger extends javax.swing.JDialog {
         setTitle("Tag a tag");
         setIconImage(null);
         setModal(true);
+        setResizable(false);
         addWindowListener(new java.awt.event.WindowAdapter() {
             public void windowClosing(java.awt.event.WindowEvent evt) {
                 closeDialog(evt);

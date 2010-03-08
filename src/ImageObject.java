@@ -438,18 +438,11 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
         BufferedImage srcImg;
         if(isThumb){
             srcImg=bThumb;
-        BufferedImage destImg=bThumbFilt;
         } else{
             srcImg=bImage;
-        BufferedImage destImg=bImageFilt;
         }
         if(srcImg==null){
             return;//should change to a call which sets it up.
-        }
-        if(isThumb){
-            if(bThumbFilt==null) bThumbFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);
-        } else{
-            if(bImageFilt==null) bImageFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);
         }
         RenderingHints hints = null;
         float offset = (brightness-50f)*5.10f;
@@ -458,7 +451,12 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
             offset = 255f-offset;
             scale = (-scale);
         }
-        BufferedImageOp op = new RescaleOp(scale,offset,hints);
+        RescaleOp op = new RescaleOp(scale,offset,hints);
+        if(isThumb){
+            if(bThumbFilt==null) bThumbFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);//*/op.createCompatibleDestImage(srcImg, null);
+        } else{
+            if(bImageFilt==null) bImageFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);//*/op.createCompatibleDestImage(srcImg, null);
+        }
         if(isThumb){
         op.filter(srcImg,bThumbFilt);
         } else op.filter(srcImg,bImageFilt);
