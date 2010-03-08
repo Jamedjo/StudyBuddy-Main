@@ -267,6 +267,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
 		{
 			mainGUI.notePane.setVisible(true);
 			mainGUI.notePane.add(PointNotes);
+			System.out.println("trying to show");
 		}
 		else
 		{

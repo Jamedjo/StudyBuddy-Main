@@ -66,6 +66,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     Thread slideThread;
     JScrollPane mainScrollPane;
     JSplitPane splitpane;
+	JPanel contentPane;
     JPanel imageAreas;
 	JScrollPane notePane;
     JSlider zoomBar;
@@ -246,12 +247,14 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         });
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 		notePane = new JScrollPane(JScrollPane.VERTICAL_SCROLLBAR_NEVER, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		notePane.setVisible(false);
-        JPanel contentPane = new JPanel();
+		notePane.add(new JPanel());
+		notePane.setVisible(true);
+        
+		contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
         contentPane.add(toolbarMain, BorderLayout.PAGE_START);
-		contentPane.add(notePane, BorderLayout.LINE_END);
+		contentPane.add(notePane, BorderLayout.EAST);
 
         adjuster = new ImageAdjuster(w,true);
         adjuster.addChangeListeners( new ChangeListener(){
