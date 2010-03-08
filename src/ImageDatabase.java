@@ -13,6 +13,7 @@ class ImageDatabase
   private IndexedTable TagToTagTable;
   private IndexedTable ImageToImageTable;
   private IndexedTable ImageToNoteTable;
+  private IndexedTable ImageToSpecialTable;
   private String Name;
   private int NextImageID;
   private int NextTagID;
@@ -70,6 +71,12 @@ class ImageDatabase
         String[] ImageToNoteHeader = {"NoteID", "ImageID", "Note", "X", "Y", "Width", "Height"};
         boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
         ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
+    }
+	
+	private void BuildImageToSpecialTable() {
+        String[] ImageToSpecialHeader = {"ImageID", "SpecialType", "SpecialString"};
+        boolean[] ImageToSpecialKeys = {true, true, false};
+        ImageToSpecialTable = new IndexedTable("ImageToSpecialTable", new Record(ImageToSpecialTableHeader), ImageToSpecialTableKeys);
     }
 
   // Loads the image database from the files it's stored in
@@ -130,6 +137,12 @@ class ImageDatabase
           log.print(LogType.DebugError, "Unable to load ImageToNoteTable: "+TheError.toString());
           BuildImageToNoteTable();
       }
+	  try {
+          ImageToSpecialTable = new IndexedTable(Filename + "_ImageToSpecialTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load ImageToSpecialTable: "+TheError.toString());
+          BuildImageToSpecialTable();
+      }
   }
   
   String getName() { return Name; }
@@ -139,6 +152,7 @@ class ImageDatabase
   IndexedTable getTagToTagTable() { return TagToTagTable; }
   IndexedTable getImageToImageTable() { return ImageToImageTable; }
   IndexedTable getImageToNoteTable() { return ImageToNoteTable; }
+  IndexedTable getImageToSpecialTable() { return ImageToSpecialTable; }
   
   // Prints out a representation of the different tables
   void print()
@@ -173,6 +187,7 @@ class ImageDatabase
     TagToTagTable.save(Filename + "_TagToTagTable");
     ImageToImageTable.save(Filename + "_ImageToImageTable");
     ImageToNoteTable.save(Filename + "_ImageToNoteTable");
+    ImageToSpecialTable.save(Filename + "_ImageToSpecialTable");
   }
   
   // Add a new image to the database
@@ -184,6 +199,41 @@ class ImageDatabase
         return null; // Failed, record already present
       else
         return Integer.toString(NextImageID - 1);
+  }
+  
+  // Add a new special tag for an image
+  int addSpecial(String ImageID, String SpecialType, String Special)
+  {
+	String[] RecordArray = {ImageID, SpecialType, Special};
+	return ImageToSpecialTable.addRecord(new Record(RecordArray));
+  }
+  
+  // Delete special tag for an image
+  int deleteSpecial(String ImageID, String SpecialTypex)
+  {
+	String[] RecordArray = {ImageID, SpecialType, null};
+	TempRecord = ImageToSpecialTable.getRecord(new Record(RecordArray));
+	if (TempRecord == null)
+		return -1
+	else
+		return ImageToSpecialTable.deleteRecord(TempRecord);
+  }
+  
+  // Return all special tags for an image
+  IndexedTable getImageSpecials(String ImageID)
+  {
+	return ImageToSpecialTable.getRecords(ImageID, 0);
+  }
+  
+  // Return special string of a certain type
+  String getImageSpecial(String ImageID, String SpecialType)
+  {
+	String[] RecordArray = {ImageID, SpecialType, null};
+	Record TempRecord = ImageToSpecialTable.getRecord(new Record(RecordArray));
+	if (TempRecord == null)
+		return null;
+    else
+		return TempRecord.getField(2);
   }
   
   // Delete an image from the database (by fields)
@@ -210,14 +260,14 @@ class ImageDatabase
         return -1;
     }
 	// Delete ImageToImage records containing the image
-	Matches = ImageToImageTable.getRecords(r.getField(1),0);
+	Matches = ImageToImageTable.getRecords(r.getField(0),1);
 	Records = Matches.elements();
 	while (Records.hasMoreElements())
     {
       if (ImageToImageTable.deleteRecord((Record)Records.nextElement()) == -1)
         return -1;
     }
-	Matches = ImageToImageTable.getRecords(r.getField(2),1);
+	Matches = ImageToImageTable.getRecords(r.getField(0),2);
 	Records = Matches.elements();
 	while (Records.hasMoreElements())
     {
@@ -225,11 +275,19 @@ class ImageDatabase
         return -1;
     }
 	//Delete ImageToNote records containing the image
-	Matches = ImageToNoteTable.getRecords(r.getField(1),0);
+	Matches = ImageToNoteTable.getRecords(r.getField(0),1);
 	Records = Matches.elements();
 	while (Records.hasMoreElements())
     {
       if (ImageToNoteTable.deleteRecord((Record)Records.nextElement()) == -1)
+        return -1;
+    }
+	//Delete ImageToSpecial records containing the image
+	Matches = ImageToSpecialTable.getRecords(r.getField(0),0);
+	Records = Matches.elements();
+	while (Records.hasMoreElements())
+    {
+      if (ImageToSpecialTable.deleteRecord((Record)Records.nextElement()) == -1)
         return -1;
     }
 	// Delete the image record from the image table
