@@ -267,6 +267,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         });
 
         optionsGUI = new OptionsGUI(w,true);
+        optionsGUI.setAllValues(settings);
 
         tagTagger = new TagTagger(w,true);
         quickTagger = new QuickTagger(w,true);
@@ -634,9 +635,13 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         //}
     }
     void showOptions(){
+        optionsGUI.setAllValues(settings);
         optionsGUI.setVisible(true);
-        for(UserOptions option: optionsGUI.values){
-            log.print(LogType.Debug,"option: "+option.getValue());
+        if(optionsGUI.getReturnStatus()==OptionsGUI.RET_OK){
+            for(UserOptions option: optionsGUI.values){
+                log.print(LogType.Debug,"option: "+option.getValue());
+            }
+            optionsGUI.saveAllValues(settings);
         }
 //        state.getCurrentImage().optionsGUI = adjuster.getBrightness();
 //        state.getCurrentImage().optionsGUI = adjuster.getContrast();

@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpringLayout;
@@ -26,25 +27,42 @@ enum OptionType{
 }
 
 enum  UserOptions{//Need to add option for default options
-    SlideshowTime(OptionType.TextBox),
-    CheckBoxTest(OptionType.CheckBox),
-    TextBoxExample(),
-    TextBoxExampleTwo(OptionType.Slider);
+    //Name(Label,Type,SettingName),
+    SlideshowTime("Slideshow Time",OptionType.TextBox,"slideShowTime"),
+    CheckBoxTest("CheckBox Test",OptionType.CheckBox),
+    SliderExample("Slider Example",OptionType.Slider),
+    TextBoxExample("TextBox Example");
+    private String text;
+    private String settingName;
     private JComponent component;
     private OptionType type;
 
-    UserOptions(OptionType t){
-        build(t);
+    UserOptions(String label){
+        this(label, OptionType.Default);
     }
-    UserOptions(){
-        build(OptionType.Default);
+    UserOptions(String label, OptionType t){
+        this(label, t,"");
+    }
+    UserOptions(String label, OptionType t, String setting){
+        build(label,t,setting);
     }
 
-    private void build(OptionType t){
+    private void build(String label,OptionType t,String setting){
+        if(label.equals("")) label = toString();
+        text = label;
         type = t;
+        settingName = setting;
+
         switch(type){
             case CheckBox:
                 component = new JCheckBox();
+                break;
+            case Slider:
+                component = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
+                ((JSlider) component).setMajorTickSpacing(25);
+                ((JSlider) component).setMinorTickSpacing(5);
+                ((JSlider) component).setPaintLabels(true);
+                ((JSlider) component).setPaintTicks(true);
                 break;
             case TextBox:
             default:
@@ -52,8 +70,32 @@ enum  UserOptions{//Need to add option for default options
         }
     }
 
+    void initValue(Settings settings){
+        if(settingName==null||settingName.equals("")) return;
+        switch(type){
+            case CheckBox:
+                Boolean bVal = settings.getSettingAsBoolean(settingName);
+                if(bVal.booleanValue()==false) ((JCheckBox)component).setSelected(false);
+                else if(bVal.booleanValue()==true) ((JCheckBox)component).setSelected(true);
+                break;
+            case Slider:
+                int iVal = settings.getSettingAsInt(settingName);
+                ((JSlider) component).setValue(iVal);
+                break;
+            case TextBox:
+            default:
+                String sVal = settings.getSetting(settingName);
+                if(sVal!=null) ((JTextField)component).setText(sVal);
+        }
+    }
+
+    void saveValue(Settings settings){
+        if(settingName==null||settingName.equals("")) return;
+        settings.setSettingAndSave(settingName, getValue());
+    }
+
     String getLabel(){
-        return toString()+": ";
+        return text+": ";
     }
 
     JComponent getComponent(){
@@ -66,6 +108,9 @@ enum  UserOptions{//Need to add option for default options
         switch(type){
             case CheckBox:
                 temp = (new Boolean(((JCheckBox)component).isSelected())).toString();
+                break;
+            case Slider:
+                temp = ((Integer)((JSlider)component).getValue()).toString();
                 break;
             case TextBox:
             default:
@@ -108,6 +153,17 @@ public class OptionsGUI extends JDialog {
         return returnStatus;
     }
 
+    void setAllValues(Settings setting){
+        for(UserOptions option : values){
+            option.initValue(setting);
+        }
+    }
+    void saveAllValues(Settings setting){
+        for(UserOptions option : values){
+            option.saveValue(setting);
+        }
+    }
+
     void initComponents(){
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
@@ -123,15 +179,6 @@ public class OptionsGUI extends JDialog {
                 closeDialog(evt);
             }
         });
-        //addComponentListener( new ComponentListener(){
-        //    public void componentResized(ComponentEvent e){
-        //        Dimension s=getContentPane().getSize();
-        //        getContentPane().setSize(Math.max(s.width, getMinimumSize().width),Math.max(s.height, getMinimumSize().height) );
-        //        }
-        //    public void componentMoved(ComponentEvent e) {}
-        //    public void componentShown(ComponentEvent e) {}
-        //    public void componentHidden(ComponentEvent e) {}
-        //});
 
         okButton.setText("OK");
         okButton.addActionListener(new java.awt.event.ActionListener() {
@@ -202,7 +249,7 @@ public class OptionsGUI extends JDialog {
     }
 
     private void doClose(int retStatus) {
-//        returnStatus = retStatus;
+        returnStatus = retStatus;
         setVisible(false);
         //dispose();
     }

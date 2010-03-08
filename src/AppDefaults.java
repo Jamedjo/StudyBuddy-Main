@@ -25,7 +25,7 @@ enum AppDefaults {
     static void set(Settings settings) {
         makeDirs(settings);
         for (AppDefaults setting : AppDefaults.values()) {
-            settings.setSettingDontSave(setting.key, setting.value);
+            settings.setSettingDontSaveYet(setting.key, setting.value);
         }
         settings.saveSettings();
     }

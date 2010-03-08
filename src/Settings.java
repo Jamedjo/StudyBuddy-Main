@@ -75,15 +75,19 @@ public class Settings {
     }
 
     private void setDefaults(){
-        setSettingDontSave("homeDir",appPath);
+        setSettingDontSaveYet("homeDir",appPath);
         AppDefaults.set(this);
     }
 
     //Use this when setting many settings. Use setSettingAndSave for final one.
-    public void setSettingDontSave(String settingName, String settingValue){
+    public void setSettingDontSaveYet(String settingName, String settingValue){
         javaProperties.setProperty(settingName, settingValue);
     }
-    
+    public void setSettingAndSave(String settingName, boolean settingValue){
+        String val = "false";
+        if(settingValue) val = "true";
+        setSettingAndSave(settingName,val);
+    }
     public void setSettingAndSave(String settingName, String settingValue){
         javaProperties.setProperty(settingName, settingValue);
         saveSettings();
@@ -103,7 +107,14 @@ public class Settings {
     public String getSetting(String settingName){
         return javaProperties.getProperty(settingName);
     }
-    public int getSettingAsInt(String settingName){
+    Boolean getSettingAsBoolean(String settingName){
+        String temp = getSetting(settingName);
+        if(temp == null) return null;
+        if(temp.toLowerCase().equals("true")) return new Boolean(true);
+        if(temp.toLowerCase().equals("false")) return new Boolean(false);
+        return null;
+    }
+    public int getSettingAsInt(String settingName) throws NumberFormatException{
         return Integer.parseInt(javaProperties.getProperty(settingName));//catch error
     }
 
@@ -118,7 +129,7 @@ public class Settings {
         log.print(LogType.Plain,"(public) getSetting finds StudyBudy folder as: "+props.getSetting("homeDir"));
         props.setSettingAndSave("testSaveAllSettigngsHere", "settingsvalue");//Test setting a property in the file and saving all settings to file
         AppDefaults.getAndPrint(props);
-        props.setSettingDontSave("numberOfThumbnails", "5");//Test setting a property in the file. Doesn't save Properties to file.
+        props.setSettingDontSaveYet("numberOfThumbnails", "5");//Test setting a property in the file. Doesn't save Properties to file.
         log.print(LogType.Plain,"Test property set at '5' has value: "+props.getSetting("numberOfThumbnails"));
         props = null;
 
