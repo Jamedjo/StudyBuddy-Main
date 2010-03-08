@@ -84,7 +84,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void setTitle(String suffix) {
-        String prefix = "Study Buddy 0.8beta";
+        String prefix = "Study Buddy 0.9gamma";
         if (suffix == null) suffix = "";
         else prefix = prefix.concat("- ");
         w.setTitle(prefix + suffix);
@@ -636,14 +636,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         optionsGUI.setAllValues(settings);
         optionsGUI.setVisible(true);
         if(optionsGUI.getReturnStatus()==OptionsGUI.RET_OK){
-            for(UserOptions option: optionsGUI.values){
-                log.print(LogType.Debug,"option: "+option.getValue());
-            }
             optionsGUI.saveAllValues(settings);
         }
-//        state.getCurrentImage().optionsGUI = adjuster.getBrightness();
-//        state.getCurrentImage().optionsGUI = adjuster.getContrast();
-//        state.getCurrentImage().optionsGUI = adjuster.isInverted();
 
     }
 }

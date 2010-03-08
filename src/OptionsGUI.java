@@ -29,7 +29,8 @@ enum OptionType{
 enum  UserOptions{//Need to add option for default options
     //Name(Label,Type,SettingName),
     SlideshowTime("Slideshow Time",OptionType.TextBox,"slideShowTime"),
-    CheckBoxTest("CheckBox Test",OptionType.CheckBox),
+    showLinks("Show Links",OptionType.CheckBox,"showLinks"),
+    showNotes("Show Notes",OptionType.CheckBox,"showNotes"),
     SliderExample("Slider Example",OptionType.Slider),
     TextBoxExample("TextBox Example");
     private String text;
@@ -75,6 +76,7 @@ enum  UserOptions{//Need to add option for default options
         switch(type){
             case CheckBox:
                 Boolean bVal = settings.getSettingAsBoolean(settingName);
+                if (bVal == null) return;
                 if(bVal.booleanValue()==false) ((JCheckBox)component).setSelected(false);
                 else if(bVal.booleanValue()==true) ((JCheckBox)component).setSelected(true);
                 break;

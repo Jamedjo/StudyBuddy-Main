@@ -110,8 +110,8 @@ public class Settings {
     Boolean getSettingAsBoolean(String settingName){
         String temp = getSetting(settingName);
         if(temp == null) return null;
-        if(temp.toLowerCase().equals("true")) return new Boolean(true);
-        if(temp.toLowerCase().equals("false")) return new Boolean(false);
+        if(temp.toLowerCase().equals("true")) return Boolean.valueOf(true);
+        if(temp.toLowerCase().equals("false")) return Boolean.valueOf(false);
         return null;
     }
     public int getSettingAsInt(String settingName) throws NumberFormatException{
