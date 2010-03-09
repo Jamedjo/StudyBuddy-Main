@@ -153,8 +153,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         ImgSize cSize;
         if (isZoomed()) {
             cSize = ImgSize.Max;
-            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
-            useWH = new Dimension((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()));
+            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            useWH = new Dimension((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()));
         } else {
             cSize = ImgSize.Screen;
             useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);

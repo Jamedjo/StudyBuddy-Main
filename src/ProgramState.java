@@ -292,6 +292,9 @@ class ProgramState{
     int getImageWidthFromBig(){
         return getCurrentImage().getWidthAndMakeBig();
     }
+    int getImageHeightFromBig(){
+        return getCurrentImage().getHeightAndMakeBig();
+    }
 
     void imageColoursReset(){
         getCurrentImage().brightness = 50;

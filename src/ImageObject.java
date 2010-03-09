@@ -4,22 +4,17 @@ import java.util.Iterator;
 import javax.imageio.stream.ImageInputStream;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
-import java.awt.Graphics2D;
 import java.io.File;
 import java.io.RandomAccessFile;
 import javax.imageio.ImageIO;
 import java.io.IOException;
-//import javax.swing.ImageIcon;
 import java.awt.RenderingHints;
-//import javax.swing.JOptionPane;
-import java.awt.image.BufferedImageOp;
 import java.awt.image.RescaleOp;
 import java.net.URISyntaxException;
 import java.util.Calendar;
 
 //Library of code under lib/
 //Various image utilities. needed as default image reader could not read thumbnails from exif
-import javax.swing.SwingWorker;
 import org.apache.sanselan.*;
 
 //use jpeg thumbs where availiable
@@ -303,7 +298,6 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
         loadViaSwingWorker(size);
         }
 
-        setVars();
 
         if (bImage == null) {
             return null;//if big is null, so is thumb.
@@ -329,6 +323,7 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
         imageLoader.execute();
         bImage = createLoadingThumb();
         bThumb = createLoadingThumb();
+        setVars();
     }
 
     void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgSize size){
@@ -432,189 +427,5 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
         bThumbFilt=null;
 	pathFile = null;
 	absolutePath = null;
-    }
-}
-
-class ImageLoader extends SwingWorker<BufferedImage, Void> {
-    BufferedImage loadBImage,loadBThumb;
-    Log log = new Log();
-    File pathFile,thumbPath;
-    String absolutePath,imageID;
-    ImgSize size,currentLarge;
-    int imgType;
-    int screenWidth,screenHeight,thumbMaxW,thumbMaxH;
-    ImageObject parent;//needed to publish result
-    boolean success = false;
-
-    ImageLoader(ImageObject p,File pF, String aP, ImgSize sz,
-            int iT,File tP,String iID,int sW,int sH,int tW,int tH,BufferedImage lBT) {
-        pathFile = pF;
-        absolutePath = aP;
-        size = sz;
-        imgType = iT;
-        thumbPath = tP;
-        imageID = iID;
-        screenWidth = sW;
-        screenHeight = sH;
-        thumbMaxW = tW;
-        thumbMaxH = tH;
-        parent=p;
-        loadBThumb=lBT;
-    }
-
-    public BufferedImage doInBackground() {
-        try {
-            long start = Calendar.getInstance().getTimeInMillis();
-            //ImageIO.setUseCache(true);
-            //ImageIO.setCacheDirectory(pathFile);
-            loadBImage = ImageIO.read(pathFile);
-            log.print(LogType.Debug, "Loading image " + absolutePath + "\n      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to read image to memory");
-            start = Calendar.getInstance().getTimeInMillis();
-
-            if ((size == ImgSize.Screen) || (size == ImgSize.ThumbFull)) {//&& not thumb only (as this would be extra work)
-                loadBImage = makeScreenImg(loadBImage);
-                currentLarge = ImgSize.Screen;
-            } else {
-                currentLarge = ImgSize.Max;
-            }
-
-            log.print(LogType.Debug, "      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to process image");
-            makeThumb(loadBImage);
-            start = Calendar.getInstance().getTimeInMillis();
-            log.print(LogType.Debug, "      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to get width,height&orientation");
-            start = Calendar.getInstance().getTimeInMillis();
-        success = true;
-        } catch (IOException e) {
-            log.print(LogType.Error, "Error loading image " + absolutePath + "\nError was: " + e.toString());
-            setToXasFileNotFound();
-            //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
-        } catch (IllegalArgumentException e) {
-            log.print(LogType.Error, "Image file " + absolutePath + " could not be found " + "\nError was: " + e.toString());
-            setToXasFileNotFound();
-        } catch (NullPointerException e) {
-            log.print(LogType.Error, "Could not load image from file " + absolutePath + "\nError was: " + e.toString());
-            setToXasFileNotFound();
-        } catch (java.lang.OutOfMemoryError e) {
-            log.print(LogType.Error, "Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
-        }
-        return loadBImage;
-    }
-
-    protected void done(){
-        try {
-               parent.setImageFromLoader(get(),loadBThumb,currentLarge);
-           } catch (Exception ignore) {
-           }
-
-    }
-
-    void setToXasFileNotFound() {
-        //set image to error icon
-        //improvement: set the buffered image to a java graphics drawn X icon
-        try {
-            loadBImage = ImageIO.read(SysIcon.FileNotFound.imgURL);
-            loadBThumb = ImageIO.read(SysIcon.FileNotFound.imgURL);
-        } catch (IOException e) {
-            log.print(LogType.Error, "Error loading image: " + e.toString());
-            //JOptionPane.showMessageDialog(parentPane,"Error Loading Image" + e.toString(),"Fatal Error",JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    void makeThumb(BufferedImage bigImg) {//quick one image read to bimage
-        long start = Calendar.getInstance().getTimeInMillis();
-        Dimension iconWH = ImageObjectUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), thumbMaxW, thumbMaxH);
-        if (!(iconWH.width < bigImg.getWidth())) {
-            loadBThumb = bigImg;
-            return;
-        }
-
-        //Image tempimage = bigIcon.getImage();
-        BufferedImage tempimage = new BufferedImage(iconWH.width, iconWH.height, imgType);
-
-        Graphics2D g2 = tempimage.createGraphics();//TYPE_INT_RGB
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-        g2.drawImage(bigImg, 0, 0, iconWH.width, iconWH.height, null);
-        g2.dispose();
-        log.print(LogType.Debug, "  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
-        loadBThumb = tempimage;
-        ImageObjectUtils.saveThumbToFile(thumbPath, absolutePath, loadBImage, imageID);
-    }
-
-    //could merge two functions
-    BufferedImage makeScreenImg(BufferedImage bigImg) {
-        Dimension iconWH = ImageObjectUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), screenWidth, screenHeight);
-        if (!(iconWH.width < bigImg.getWidth())) {
-            return bigImg;
-        }
-        //Image tempimage = bigIcon.getImage();
-        BufferedImage tempimage = (new BufferedImage(iconWH.width, iconWH.height, imgType));
-
-        Graphics2D g2 = tempimage.createGraphics();//TYPE_INT_RGB takes 4bytes, this takes 3. Less memory used
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);//might not be avaliable on all systems // might not have spelt biquibic right
-        //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2.drawImage(bigImg, 0, 0, iconWH.width, iconWH.height, null);
-        g2.dispose();
-
-        return tempimage;
-    }
-
-}
-
-class ImageObjectUtils{
-
-    static void saveThumbToFile(File thumbPath, String absolutePath, BufferedImage bThumb,String imageID){
-        try{
-            File thumbfile = new File(thumbPath,getSaveEncoding(imageID));
-            ImageIO.write(bThumb,"jpg",thumbfile);//should use same format as file
-        } catch (IOException e){
-            Log.Print(LogType.Error,"Error creating thumbnail for image: "+absolutePath);
-        }
-    }
-
-    //Use imageID for name for now but change to include random key from DB.
-    //In also use imageID,modified date,path,filesize to create quick pseudo checksum.
-    //Only load thumb if all same.
-    static String getSaveEncoding(String imageID){
-        return imageID+"_thumb.jpg";
-    }
-
-        //Finds maximum with and height somthing can be scaled to, without changing aspect ratio
-    //Takes the dimensions of the object inW and inH
-    //and the dimensions of the box it is to be fitted into maxW and maxH
-    //Returns (Width,Height) as an array of two integers.
-    //Not sure which class it belongs in.
-    static Dimension scaleToMax(int inW, int inH, int maxW, int maxH) {
-	float f_inW,f_inH,f_maxW,f_maxH;
-	f_inW = inW;
-	f_inH = inH;
-	f_maxW = maxW;
-	f_maxH = maxH;
-	//int[] outWH = new int[2];
-Dimension outWH = new Dimension();
-	if ( (f_inW/f_inH)<(f_maxW/f_maxH) ) {
-	    //narrower at same scale
-	    outWH.height = maxH;
-	    outWH.width = Math.round((f_maxH / f_inH)* f_inW);
-	}
-	else {
-	    //wider at same scale
-	    outWH.width = maxW;
-	    outWH.height = Math.round(( f_maxW / f_inW)* f_inH);
-	}
-	return outWH;
-    }
-    static Dimension scaleDownToMax(int inW, int inH, int maxW, int maxH) {
-	Dimension tempWH = scaleToMax(inW, inH, maxW, maxH);
-	if(tempWH.width<inW) return tempWH;
-	return new Dimension(inW,inH);
-    }
-    static Dimension useMaxMax(int inW, int inH, int maxW, int maxH){
-        int outW,outH;
-        outW = Math.max(inW, maxW);
-        outH = Math.max(inH,maxH);
-        return new Dimension(outW,outH);
     }
 }
