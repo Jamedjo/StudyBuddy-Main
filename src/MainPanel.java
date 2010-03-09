@@ -102,7 +102,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         //}
         //Potentially inefficient as forces full size image to load
         //log.print(LogType.Debug,"old zoomMultiplier- " + getZoomMult());
-        setZoomMult((double)((double) useWH.width) / ((double) mainGUI.state.getCurrentImage().getWidthAndMakeBig()));
+        setZoomMult((double)((double) useWH.width) / ((double) mainGUI.state.getImageWidthFromBig()));
         //log.print(LogType.Debug,"new zoomMultiplier- " + getZoomMult());
         //log.print(LogType.Debug,"boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
     }
@@ -110,7 +110,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     void onResize() {
         //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
         if ( isZoomed() ) {
-            this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * getZoomMult()), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             if((getCursorMode()==DragMode.Drag)||(getCursorMode()==DragMode.None)){
                 setCursorMode(getCurrentDrag());
             }
@@ -153,8 +153,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         ImgSize cSize;
         if (isZoomed()) {
             cSize = ImgSize.Max;
-            this.setPreferredSize(ImageObject.useMaxMax((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * getZoomMult()), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
-            useWH = new Dimension((int) (mainGUI.state.getCurrentImage().getWidthAndMakeBig() * getZoomMult()), (int) (mainGUI.state.getCurrentImage().getHeightAndMakeBig() * getZoomMult()));
+            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            useWH = new Dimension((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()));
         } else {
             cSize = ImgSize.Screen;
             useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
@@ -210,7 +210,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         double oldZoom = getZoomMult();
         if (isZoomFit()) {
             //get multiplier from fit so zoom doesnt jump
-            setZoomMult(((double)useWH.width) / ((double)mainGUI.state.getCurrentImage().getWidthAndMakeBig()));
+            setZoomMult(((double)useWH.width) / ((double)mainGUI.state.getImageWidthFromBig()));
         }
         //Does not look at offsets as these imply image is not enlarged in that dimension.
         //If the image is zoomed out and has offsets then no need to change JViewport position

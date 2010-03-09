@@ -38,7 +38,9 @@ public enum SysIcon {
     NoteCursor("oxygen/transform-crop.png"),
     Import("oxygen/application-x-egon.png"),
     ImportDir("oxygen/folder-image.png"),
-    Options("oxygen/preferences-system-3.png");
+    Options("oxygen/preferences-system-3.png"),
+    Loading("oxygenbig/edit-clear-history-3.png"),
+    FileNotFound("oxygen/dialog-cancel-4.png");
     ImageIcon Icon;
     URL imgURL;
     Log log = new Log();

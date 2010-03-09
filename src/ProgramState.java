@@ -94,11 +94,10 @@ class ProgramState{
         mainGUI.settings.setSettingAndSave("lastFilterUsed", currentFilter);
 	//if imageIDs.length==0
 	//then a file should be added first (Construct with Init&imports, then return;)
-   long start = Calendar.getInstance().getTimeInMillis();
       	imageList = new ImageObject[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI.thumbPath);
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI.thumbPath,mainGUI);
 	}
 	lastIndex = (imageIDs.length - 1);
 
@@ -109,9 +108,8 @@ class ProgramState{
 	//}
     if(imageList.length<1){
             log.print(LogType.Error,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
-            ConstructProgramState(LoadType.Refresh,parentGUI,"Show All Images");
-        }
-        System.out.println("####### Loaded imagelist length "+imageList.length+" in "+(Calendar.getInstance().getTimeInMillis()-start)+" milliseconds ########");
+            ConstructProgramState(LoadType.Refresh,parentGUI,"Show All Images");   
+        }        
     }
 
     void importImages(File[] files) {
@@ -129,7 +127,7 @@ class ProgramState{
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
                             //tempImageList.add(new ImageObject(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
-                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID, mainGUI.thumbPath));
+                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID, mainGUI.thumbPath,mainGUI));
                         }
                     }
                 }
@@ -147,7 +145,7 @@ class ProgramState{
                     String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());
                     if (currentImID != null) {
                         tempImageIDs.add(currentImID);
-                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID,mainGUI.thumbPath));
+                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID,mainGUI.thumbPath,mainGUI));
                     }
                 }
                 }
@@ -258,10 +256,10 @@ class ProgramState{
 	Dimension useWH = new Dimension();
 	//int[] useWH;
 	if(size.isLarge()){
-	    useWH= ImageObject.scaleToMax(getImageI(imageIndex).getWidthAndMake(),getImageI(imageIndex).getHeightAndMake(), MaxW, MaxH);
+	    useWH= ImageObjectUtils.scaleToMax(getImageI(imageIndex).getWidthAndMake(),getImageI(imageIndex).getHeightAndMake(), MaxW, MaxH);
 	}
 	else {
-	    useWH = ImageObject.scaleToMax(getImageI(imageIndex).getWidthForThumb(),getImageI(imageIndex).getHeightForThumb(), MaxW, MaxH);
+	    useWH = ImageObjectUtils.scaleToMax(getImageI(imageIndex).getWidthForThumb(),getImageI(imageIndex).getHeightForThumb(), MaxW, MaxH);
 	}
 	return useWH;
     }
@@ -290,6 +288,9 @@ class ProgramState{
             }
         }
 	return returnImage;
+    }
+    int getImageWidthFromBig(){
+        return getCurrentImage().getWidthAndMakeBig();
     }
 
     void imageColoursReset(){

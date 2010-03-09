@@ -15,6 +15,10 @@ public class Log {
     void print(Object message, LogType type){
         print(type,message);
     }
+    static void Print(LogType type,Object message){
+        Log l = new Log(true);
+        l.print(type, message);
+    }
     void print(LogType type, Object message){
         String msg = message.toString();
         switch(type){
