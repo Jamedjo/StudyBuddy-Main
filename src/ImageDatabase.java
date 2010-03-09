@@ -19,7 +19,13 @@ class ImageDatabase
   private int NextTagID;
   private int NextNoteID;
   private int NextLinkID;
-  
+
+  //Change this when database structure changes, e.g. after new table created
+  //Used to check for database incompatabilities
+  static String getDatabaseVersion(){
+      return "gamma_r241";
+  }
+
   // Create an image database with the supplied name
   ImageDatabase(String NewName)
   {

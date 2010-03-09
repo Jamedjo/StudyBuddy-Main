@@ -8,6 +8,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 
 public class QuickTagger extends javax.swing.JDialog {
+    Log log = new Log(false);
     /** A return status code - returned if Cancel button has been pressed */
     public static final int RET_CANCEL = 0;
     /** A return status code - returned if OK button has been pressed */
@@ -43,7 +44,8 @@ public class QuickTagger extends javax.swing.JDialog {
         int[] rows = imageTable.getSelectedRows();
         Object [] images = new String[rows.length];
         for(int i=0;i<rows.length;i++){
-            images[i] = imageTable.getValueAt(i,0);
+            images[i] = imageTable.getValueAt(rows[i],0);
+            log.print(LogType.Debug, imageTable.getValueAt(rows[i],1));
         }
         return images;
     }
@@ -76,7 +78,7 @@ public class QuickTagger extends javax.swing.JDialog {
         jScrollPane3 = new javax.swing.JScrollPane();
         imageTable = new javax.swing.JTable();
 
-        setTitle("Tag a tag");
+        setTitle("Quick Tag- for multiple images");
         setIconImage(null);
         setModal(true);
         setResizable(false);
@@ -160,11 +162,8 @@ public class QuickTagger extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(166, 166, 166)
                                 .addComponent(Logo))
-                            .addGroup(layout.createSequentialGroup()
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel2)
-                                    .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)))))
+                            .addComponent(jLabel2)
+                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -199,6 +198,8 @@ public class QuickTagger extends javax.swing.JDialog {
                         .addComponent(jLabel3)))
                 .addContainerGap())
         );
+
+        getAccessibleContext().setAccessibleName("Quick Tag- for multiple images");
 
         pack();
     }// </editor-fold>//GEN-END:initComponents

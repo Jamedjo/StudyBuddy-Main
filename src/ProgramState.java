@@ -66,9 +66,11 @@ class ProgramState{
 	case Init:
             mainGUI.settings.setSettingAndSave("databaseFilePathAndName", getSetting("homeDir")+getSetting("databasePathExt")+getSetting("databaseFileName"));
             InitDemoDB.initDB(mainGUI.settings.getSetting("databaseFilePathAndName"));//Resets database
+            mainGUI.settings.setSettingAndSave("databaseVersion", ImageDatabase.getDatabaseVersion());
 	case Load:
 	    mainGUI.mainImageDB = new ImageDatabase(getSetting("databaseFileName"),getSetting("databaseFilePathAndName"));
-	    //no break as image list must still be passed from DB
+            checkDBVersion();
+            //no break as image list must still be passed from DB
 	case Refresh:
 	    //Create image database by loading database
 	    currentFilter = "Show All Images";
@@ -76,6 +78,7 @@ class ProgramState{
 	    break;
         case LoadLast:
             mainGUI.mainImageDB = new ImageDatabase(getSetting("databaseFileName"),getSetting("databaseFilePathAndName"));
+            checkDBVersion();
             //change currentI by maingGUI.settings.getSetting("LastCurrentI") but be careful of null, etc.
 	case Filter:
 	    //Create image database by loading database
@@ -110,6 +113,17 @@ class ProgramState{
             log.print(LogType.Error,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
             ConstructProgramState(LoadType.Refresh,parentGUI,"Show All Images");   
         }        
+    }
+
+    void checkDBVersion() {
+        try {
+            if (!mainGUI.settings.getSetting("databaseVersion").equals(ImageDatabase.getDatabaseVersion())) {
+                log.print(LogType.Error, "Database version missmatch");
+            }
+        } catch (NullPointerException e) {
+            log.print(LogType.Error, "Database version missmatch- old version not set");
+            log.print(LogType.DebugError, "Try running: ProgramState(LoadType.Init, GUI parentGUI)");
+        }
     }
 
     void importImages(File[] files) {
@@ -281,10 +295,12 @@ class ProgramState{
             //if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
 	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
 
-        //removes from memory all images except next four.
         if(size.isLarge()){
-            for(int i=4;i<lastIndex;i++){
-                imageList[relItoFixI(i+relativeImage)].flush();
+            int i;
+            for(i=1;i<4;i++){
+                imageList[relItoFixI(i+relativeImage)].preload(size);//Preloads next three images
+            } for(;i<lastIndex;i++){
+                imageList[relItoFixI(i+relativeImage)].flush();//removes from memory all images after the preloaded ones
             }
         }
 	return returnImage;

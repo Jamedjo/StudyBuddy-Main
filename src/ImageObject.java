@@ -74,8 +74,8 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     int contrast = 50;
     boolean isInverted = false;
     boolean isLoading = false;
-    boolean bImageLoaded = false;//Only set if loaded via swingWorker
-    boolean bThumbLoaded = false;//Only set if loaded via swingWorker
+    boolean isBImageIcon = false;//Is the image a loading icon
+    boolean isBThumbIcon = false;//Is the thumb a loading icon
     GUI mainGUI;
     //String title,filename,comments?
 
@@ -272,6 +272,14 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
 
     //BufferedImage extractIcon(...)
 
+    void preload(ImgSize size){
+        if(size==ImgSize.Max){
+            //if file is known huge
+            size=ImgSize.Screen;
+        }
+        getImage(size); //Should only do if size will not be huge- huge images use too much memory to preload at Max.
+    }
+
     BufferedImage getImage(ImgSize size) {
         //**//log.print(LogType.Debug,"Image requested: " + absolutePath + " at size " + size);
         //gets thumbnail or full image
@@ -321,9 +329,15 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
         isLoading = true;
         ImageLoader imageLoader = new ImageLoader(this, pathFile, absolutePath, size, imgType, thumbPath, imageID, screenWidth, screenHeight, thumbMaxW, thumbMaxH, bThumb);
         imageLoader.execute();
-        bImage = createLoadingThumb();
-        bThumb = createLoadingThumb();
+        if (bImage == null) {
+            bImage = createLoadingThumb();
+            isBImageIcon = true;
         setVars();
+        }
+        if (bThumb == null) {
+            bThumb = createLoadingThumb();
+            isBThumbIcon = true;
+        }
     }
 
     void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgSize size){
@@ -331,12 +345,8 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
         bThumb = thmb;
         isLoading = false;
         currentLarge = size;
-//            if ((bImageLoaded == false)&&()) {
-//                bImageLoaded=true;
-//            }
-//            if ((bThumbLoaded == false)&&()) {
-//                bImageLoaded = true;
-//            }
+        isBImageIcon=false;
+        isBThumbIcon=false;
         setVars();
         mainGUI.mainPanel.onResize();
         mainGUI.thumbPanel.onResize();
