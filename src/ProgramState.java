@@ -266,16 +266,8 @@ class ProgramState{
 	
 
     Dimension getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
-	int imageIndex = relItoFixI(relativeImage);
-	Dimension useWH = new Dimension();
-	//int[] useWH;
-	if(size.isLarge()){
-	    useWH= ImageObjectUtils.scaleToMax(getImageI(imageIndex).getWidthAndMake(),getImageI(imageIndex).getHeightAndMake(), MaxW, MaxH);
-	}
-	else {
-	    useWH = ImageObjectUtils.scaleToMax(getImageI(imageIndex).getWidthForThumb(),getImageI(imageIndex).getHeightForThumb(), MaxW, MaxH);
-	}
-	return useWH;
+	ImageObject relImage = getImageI(relItoFixI(relativeImage));
+        return ImageObjectUtils.getImageWH(size, MaxW, MaxH, relImage);
     }
 
     ImageObject getImageI(int i){

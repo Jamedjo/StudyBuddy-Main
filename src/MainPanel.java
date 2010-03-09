@@ -110,7 +110,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     void onResize() {
         //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
         if ( isZoomed() ) {
-            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             if((getCursorMode()==DragMode.Drag)||(getCursorMode()==DragMode.None)){
                 setCursorMode(getCurrentDrag());
             }

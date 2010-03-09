@@ -29,7 +29,7 @@ import org.apache.sanselan.*;
 
 //Before doing Javadoc should make some variables private and use getters and setters.
 
-enum Orientation {Landscape,Portrait}
+enum Orientation {Landscape,Portrait} //For drawing/painting not for rotation
 
 enum ImgSize {Thumb,Screen,Max,ThumbFull;
     boolean isLarge(){
@@ -251,11 +251,11 @@ if(readers.hasNext()) {reader = (ImageReader)readers.next(); log.print(LogType.D
     }
 
     int getWidthForThumb(){
-	if(Bwidth!=null) return Bwidth;
+	if(bThumb!=null) return bThumb.getWidth();
 	return getWidthAndMake();//Makes error icon if pathFile was null. Returns value if present.
     }
     int getHeightForThumb(){
-	if(Bheight!=null) return Bheight;
+	if(bThumb!=null) return bThumb.getHeight();
 	return getHeightAndMake();//Returns Bheight if manualReadImage worked, makes an errror icon if path was null
     }
 

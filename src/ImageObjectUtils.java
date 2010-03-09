@@ -59,4 +59,15 @@ Dimension outWH = new Dimension();
         outH = Math.max(inH,maxH);
         return new Dimension(outW,outH);
     }
+
+    static Dimension getImageWH(ImgSize size, int MaxW, int MaxH,ImageObject relImage){
+        Dimension useWH = new Dimension();
+	if(size.isLarge()){
+	    useWH= scaleToMax(relImage.getWidthAndMake(),relImage.getHeightAndMake(), MaxW, MaxH);
+	}
+	else {
+	    useWH = scaleToMax(relImage.getWidthForThumb(),relImage.getHeightForThumb(), MaxW, MaxH);
+        }
+	return useWH;
+    }
 }
