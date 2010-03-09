@@ -11,7 +11,7 @@ import javax.swing.SwingWorker;
 
 class ImageLoader extends SwingWorker<BufferedImage, Void> {
     BufferedImage loadBImage,loadBThumb;
-    Log log = new Log();
+    Log log = new Log(false);
     File pathFile,thumbPath;
     String absolutePath,imageID;
     ImgSize size,currentLarge;

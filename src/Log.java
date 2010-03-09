@@ -16,7 +16,7 @@ public class Log {
         print(type,message);
     }
     static void Print(LogType type,Object message){
-        Log l = new Log(true);
+        Log l = new Log();
         l.print(type, message);
     }
     void print(LogType type, Object message){

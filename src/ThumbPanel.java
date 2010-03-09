@@ -143,12 +143,16 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 	getParent().repaint();
 	this.repaint();
 	//this.setPreferredSize(new Dimension(boardW,boardH));
-	//this.revalidate();
-
-        
+	//this.revalidate();       
     }
 
     @Override public void mouseWheelMoved(MouseWheelEvent e){
         mainGUI.state.offsetImage(-e.getWheelRotation());//not sure which direction is better
+    }
+    public void paintComponent(java.awt.Graphics g) {
+        for(int i=0;i<thumbnails.length;i++){//Draw thumbs in correct order, so swingworker loads in order
+            thumbnails[i].paintComponent(g);
+        }
+        super.paintComponent(g);
     }
 }
