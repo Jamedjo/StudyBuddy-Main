@@ -23,7 +23,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     private boolean bIsZoomed = false;
     private double zoomMultiplier = 1;//1 is 100%, 0.5 is 50% 3 is 300% etc.
     int pressX,pressY,nowX,nowY;
-    Thread dragThread;
+    //Thread dragThread;
     final int dragPeriod = 40;// 25fps is equivalent to every 40ms
     private DragMode dragMode;//Change if zoomed in by default
     boolean mousePressed = false;
@@ -38,7 +38,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.addMouseWheelListener(this);
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
-        dragThread = new Thread(new DragUpdate(this,dragPeriod));
+        //dragThread = new Thread(new DragUpdate(this,dragPeriod));
         mainGUI.mainImageDB.linkImage(mainGUI.state.getRelativeImageID(1),mainGUI.state.getCurrentImageID(), 300, 200, 100, 100);
     }
     DragMode getCursorMode(){
@@ -235,17 +235,24 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         pressY = e.getY();
         nowX = pressX;
         nowY = pressY;
-        dragThread.start();
+//        dragThread.start();
     }
     @Override public void mouseDragged(MouseEvent e) {
-        nowX = e.getX();
-        nowY = e.getY();
-        getParent().repaint();
-        repaint();
+        Point p = ((JViewport) getParent()).getViewPosition();
+        int cX = pressX - e.getX();
+        int cY = pressY - e.getY();
+        p.x += cX;
+        p.y += cY;//TODO: ensure not translating out of range.
+        p.x = Math.max(p.x, 0);
+        p.y = Math.max(p.y, 0);
+        p.x = Math.min(p.x,this.getPreferredSize().width-((JViewport) getParent()).getExtentSize().width);//width
+        p.y = Math.min(p.y,this.getPreferredSize().height-((JViewport) getParent()).getExtentSize().height);//hight
+        EventQueue.invokeLater(new DragUpdate(this,((JViewport) getParent()), p));
+                    //onResize();
     }
     public void mouseReleased(MouseEvent e){
-        dragThread.interrupt();
-        dragThread = new Thread(new DragUpdate(this, dragPeriod));
+//        dragThread.interrupt();
+//        dragThread = new Thread(new DragUpdate(this, dragPeriod));
         mousePressed = false;
         updateCursor();
         DragMode mode = getCursorMode();

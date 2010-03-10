@@ -280,7 +280,8 @@ void getThumbQuick() {
     //gets thumbnail or full image
     BufferedImage getImage(ImgSize size) {
         //**//log.print(LogType.Debug,"Image requested: " + absolutePath + " at size " + size);
-        
+        if(size==ImgSize.Screen) size=ImgSize.Max;
+
         //If requested image already exists, return it.
         if (size.isThumb() && bThumb != null) {
             return localGetBufThumb();
