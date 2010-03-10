@@ -98,12 +98,11 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 //        }
         noTiles = Math.min(maxNoTiles,(mainGUI.state.numberOfImages-1));//remove -1 to show currentI too
        //**// log.print(LogType.Debug,"now showing "+noTiles+" thumbnails");
-
-        thumbnails = new ThumbButton[noTiles];
-        JPanel centrePan = new JPanel();
-        centrePan.setLayout(new BoxLayout(centrePan,BoxLayout.LINE_AXIS));
+          JPanel centrePan = new JPanel();
+        if (noTiles < 0) noTiles=0;
+        centrePan.setLayout(new BoxLayout(centrePan, BoxLayout.LINE_AXIS));
         centrePan.setBackground(Color.darkGray);
-
+        thumbnails = new ThumbButton[noTiles];
         for (int i=0;i<thumbnails.length;i++){
             thumbnails[i] = new ThumbButton(mainGUI,squareSize,(i+1),hBorder);
             centrePan.add(thumbnails[i]);

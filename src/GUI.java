@@ -597,6 +597,11 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                 for(Object Img: SelectedImages){
                     mainImageDB.tagImage(Img.toString(), tagID);
                 }
+                if(tagID.equals(state.currentFilter)){
+                    state.ConstructProgramState(LoadType.Filter, this, tagID);
+                    mainPanel.onResize();
+                    thumbPanel.onResize();
+                }
         }
         tagTree.updateTags();
     }

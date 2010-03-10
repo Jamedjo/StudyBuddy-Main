@@ -63,6 +63,10 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
             success = true;
 
         } catch (IOException e) {
+            if(absolutePath.equals("///\\\\///\\\\\\NonExistingFile")){
+                loadBImage = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+                if(loadBImage!=null) success = true;
+            } else
             log.print(LogType.Error, "Error loading image " + absolutePath + "\nError was: " + e.toString());
         } catch (IllegalArgumentException e) {
             log.print(LogType.Error, "Image file " + absolutePath + " could not be found " + "\nError was: " + e.toString());

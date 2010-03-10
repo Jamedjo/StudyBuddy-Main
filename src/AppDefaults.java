@@ -10,7 +10,7 @@ enum AppDefaults {
     s3("thumbnailPathExt", "thumbnails"+File.separator),
     DBname("databaseFileName","gammaDB"),
     s5("databasePathExt","database"+File.separator),
-    ver("appVersionLast","0.9gamma_r228"),//change this whenever you change this enum.
+    ver("appVersionLast","0.9.1_r246"),//change this whenever you change this enum.
     s7("lastFilterUsed","Show All Images"),
     s8("lastCurrentI","0"),
     s9("showLinks","true"),
@@ -22,6 +22,12 @@ enum AppDefaults {
     AppDefaults(String k, String v) {
         key = k;
         value = v;
+    }
+
+    boolean valueDifferent(String b){
+        String a = value;
+        boolean bool =  ((String)a).equals(b);
+        return !bool;
     }
 
     static void set(Settings settings) {

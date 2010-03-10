@@ -54,7 +54,9 @@ public class Settings {
             setupJavaPropertiesObject();
 
             //if version is different reset defaults. This is as default settings may have changed causing incompatabilites.
-            if(!getSetting("appVersionLast").equals(AppDefaults.ver.value)) setDefaults(); 
+            if(AppDefaults.ver.valueDifferent(getSetting("appVersionLast"))){
+                setDefaults();
+            }
         }   
     }
 

@@ -20,7 +20,7 @@ enum LoadType{Init,Load,Filter,Refresh,LoadLast}
 //Should keep track of whether to flush the curent image and various thumbs based-
 //Previous image and 3 next images should be kept, others flushed.
 class ProgramState{
-    Log log = new Log();
+    Log log = new Log(false);
     private ImageObject[] imageList;
     private String[] imageIDs;
     int lastIndex; //Must be updated when number of images changes
@@ -110,8 +110,11 @@ class ProgramState{
             //imageChanged();//Will cause deadlock or bugs if uncommented. Call after constructing
 	//}
     if(imageList.length<1){
-            log.print(LogType.Error,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
-            ConstructProgramState(LoadType.Refresh,parentGUI,"Show All Images");   
+            log.print(LogType.DebugError,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
+            imageIDs = new String[1];
+            imageIDs[0] = "-1";
+            imageList = new ImageObject[1];
+            imageList[0] = new ImageObject("///\\\\///\\\\\\NonExistingFile",imageIDs[0],mainGUI.thumbPath,mainGUI);
         }        
     }
 

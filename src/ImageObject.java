@@ -210,7 +210,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
             isQuickThumb = true;
         }
     } catch (IOException e) {
-        log.print(LogType.Error, "Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+        log.print(LogType.DebugError, "Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
     }
         }
 
@@ -253,7 +253,7 @@ void getThumbQuick() {
         Bwidth = temp.width;
         Bheight = temp.height;
     } else {
-        log.print(LogType.Error, "Error reading exif dimensions of image " + absolutePath);
+        log.print(LogType.DebugError, "Error reading exif dimensions of image " + absolutePath);
         //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
         //Bheight = reader.getHeight(0);
     }
@@ -362,7 +362,7 @@ void getThumbQuick() {
     }
 
     void setVars(BufferedImage img){
-	if(bImage==null){ log.print(LogType.Error,"ERROR setting image size as image not initilized");return;}
+	if(bImage==null){ log.print(LogType.DebugError,"ERROR setting image size as image not initilized");return;}
 	Bwidth = img.getWidth();
 	Bheight = img.getHeight();
 	if(Bheight<Bwidth) iOri = Orientation.Landscape;

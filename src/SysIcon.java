@@ -24,20 +24,20 @@ public enum SysIcon {
     Next("oxygen/go-next-6.png"),
     Play("oxygen/media-playback-start-6.png"),
     Stop("oxygen/media-playback-stop-6.png"),
-//    HideThumbs("oxygen/view-right-close.png"),
-//    ShowThumbs("oxygen/folder-image.png"),
-    Thumbs("oxygen/view-list-icons.png"),
+    HideThumbs("oxygen/list-remove-4.png","oxygen/view-list-icons.png"){@Override void drawIt(){drawMidLeft();}},//document-edit.png"),
+    ShowThumbs("oxygen/list-add-3.png","oxygen/view-list-icons.png"){@Override void drawIt(){drawMidLeft();}},//document-edit.png"),
+//    Thumbs("oxygen/view-list-icons.png"),
     JTree("oxygen/view-sidetree-4.png"),
     Zoom100("oxygen/zoom-original-4.png"),
     ZoomFit("oxygen/document-preview.png"),
     ZoomToX("oxygen/preferences-system-windows-move.png"),//zoom-fit-best-4.png"),
-    AddTag("oxygen/document-edit.png"),
-    TagThis("oxygen/list-add-3.png"),
-    QuickTag("oxygen/view-pim-notes.png"),
-    TagTag("oxygen/feed-subscribe.png"),
-    TagFilter("oxygen/edit-find-6.png"),
+    AddTag("oxygen/list-add-3.png","oxygen/edit-rename.png"){@Override void drawIt(){drawBottomRight();}},//document-edit.png"),
+    TagThis("oxygen/feed-subscribe.png","oxygen/knotes-4.png"){@Override void drawIt(){drawBottomRight();}},
+    QuickTag("oxygen/feed-subscribe.png","oxygen/view-pim-notes.png"){@Override void drawIt(){drawBottomRight();}},
+    TagTag("oxygen/feed-subscribe.png","oxygen/feed-subscribe.png"){@Override void drawIt(){drawBottomRight();}},
+    TagFilter("oxygen/strigi.png"),
     DragPan("oxygen/transform-move.png"),
-    DragNote("oxygen/knotes-4.png"),
+    DragNote("oxygen/insert-text-2.png"),//knotes-4.png"),
     DragLink("oxygen/insert-link-2.png"),
     BlueTooth("oxygen/preferences-system-bluetooth.png"),//phone-3.png"),
     Adjust("oxygen/color-fill.png"),
@@ -53,6 +53,7 @@ public enum SysIcon {
     ImageIcon Icon;
     URL imgURL;
     Log log = new Log();
+    private Graphics2D g2;
 
     SysIcon(String path) {
         imgURL = getImgURL(path);
@@ -68,13 +69,23 @@ public enum SysIcon {
         AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
         try{
         BufferedImage b = ImageIO.read(i2URL);
-        Graphics2D g2 = b.createGraphics();
+        g2 = b.createGraphics();
         g2.setComposite(ac);
-        g2.drawImage(Icon.getImage(), 0, 0, null);
+        drawIt();
         Icon = new ImageIcon(b);
         } catch(IOException e){
             log.print(LogType.Error, "Error loading second image for icon: "+path2);
         }
+    }
+    void drawIt(){
+        g2.drawImage(Icon.getImage(), 0, 0, null);
+    }
+
+    void drawBottomRight(){
+        g2.drawImage(Icon.getImage(), Icon.getIconWidth()/2, Icon.getIconWidth()/2, Icon.getIconWidth()/2, Icon.getIconHeight()/2, null);
+    }
+    void drawMidLeft(){
+        g2.drawImage(Icon.getImage(), 0, Icon.getIconWidth()/4, Icon.getIconWidth()/2, Icon.getIconHeight()/2, null);
     }
 
     ImageIcon buildIcon(String path){

@@ -37,9 +37,9 @@ class ImageObjectUtils{
                 tempImage = jpegMetadata.getEXIFThumbnail();
             }
         } catch (ImageReadException e) {
-            Log.Print(LogType.Error, "Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+            Log.Print(LogType.DebugError, "Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
         } catch (IOException e) {
-	    Log.Print(LogType.Error,"Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	    Log.Print(LogType.DebugError,"Error- can not read dimensions of image " + absolutePath + "\nError was: " + e.toString());
 	}
         return tempImage;
     }
@@ -62,9 +62,9 @@ class ImageObjectUtils{
 	try{
 	     image_d = Sanselan.getImageSize(pathFile);
 	} catch (IOException e) {
-	    Log.Print(LogType.Error,"Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	    Log.Print(LogType.DebugError,"Error; reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
 	}  catch (ImageReadException e) {
-            Log.Print(LogType.Error,"Error reading exif dimensions of image " + absolutePath + "\nError was: " + e.toString());
+            Log.Print(LogType.DebugError,"Error reading exif dimensions of image " + absolutePath + "\nError was: " + e.toString());
 	}
         return image_d;
     }

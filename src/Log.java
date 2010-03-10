@@ -3,7 +3,7 @@ public class Log {
     boolean showDebug;
 
     Log(){
-        showDebug = true;//set false when releasing
+        showDebug = false;//set false when releasing
     }
     Log(boolean isDebug){
         showDebug = isDebug;
