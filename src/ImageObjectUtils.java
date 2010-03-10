@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import javax.imageio.ImageIO;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
@@ -13,9 +14,9 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 
 class ImageObjectUtils{
 
-    static void saveThumbToFile(File thumbPath, String absolutePath, BufferedImage bThumb,String imageID){
+    static void saveThumbToFile(File thumbPath,File pathFile, String absolutePath, BufferedImage bThumb,String imageID){
         try{
-            File thumbfile = new File(thumbPath,getSaveEncoding(imageID));
+            File thumbfile = new File(thumbPath,getSaveEncoding(pathFile,absolutePath));
             ImageIO.write(bThumb,"jpg",thumbfile);//should use same format as file
         } catch (IOException e){
             Log.Print(LogType.Error,"Error creating thumbnail for image: "+absolutePath);
@@ -25,8 +26,24 @@ class ImageObjectUtils{
     //Use imageID for name for now but change to include random key from DB.
     //In also use imageID,modified date,path,filesize to create quick pseudo checksum.
     //Only load thumb if all same.
-    static String getSaveEncoding(String imageID){
-        return imageID+"_thumb.jpg";
+    static String getSaveEncoding(File pathFile, String absolutePath){
+        if(!(pathFile.exists()&&pathFile.isFile())) return null;
+        String basic = (absolutePath+pathFile.getName()+pathFile.length()+pathFile.lastModified());
+        byte[] b = (basic.getBytes());
+        int l = b.length/2;
+        int l2 = b.length - l;
+        byte[] first = new byte[l];
+        byte[] snd = new byte[l2];
+        int i;
+        for(i=0;i<l;i++){
+            first[i]=b[i];
+        }//l2 = Math.min(l2,32);
+        for(i=0;i<l2;i++){
+            snd[i]=b[b.length-(i+1)];
+        }
+        int hashA = (new String(first)).hashCode();
+        String out = (new String(snd))+hashA;
+        return out.replaceAll("[^\\d\\w]", "")+".jpg";
     }
     static BufferedImage getThumbFromExif(File pathFile, String absolutePath) {//v.quick, but only works for some images
         BufferedImage tempImage = null;

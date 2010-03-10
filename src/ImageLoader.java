@@ -119,7 +119,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
         log.print(LogType.Debug, "  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
         loadBThumb = tempimage;
         }
-        ImageObjectUtils.saveThumbToFile(thumbPath, absolutePath, loadBThumb, imageID);
+        ImageObjectUtils.saveThumbToFile(thumbPath,pathFile, absolutePath, loadBThumb, imageID);
     }
 
     //could merge two functions

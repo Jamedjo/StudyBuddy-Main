@@ -241,7 +241,7 @@ void getThumbQuick() {
     //bi = reader.readThumbnail(imageIndex, thumbnailIndex);
 
     if (bThumb != null) {//Don't want to save sampled thumb as it will prevent better copy being saved
-        ImageObjectUtils.saveThumbToFile(thumbPath, absolutePath, bThumb, imageID);
+        ImageObjectUtils.saveThumbToFile(thumbPath ,pathFile, absolutePath, bThumb, imageID);
     }
 }
 
@@ -383,7 +383,7 @@ void getThumbQuick() {
     }
 
     void getThumbIfCached() {
-        File checkFile = new File(thumbPath, ImageObjectUtils.getSaveEncoding(imageID));
+        File checkFile = new File(thumbPath, (ImageObjectUtils.getSaveEncoding(pathFile,absolutePath)));
         if (checkFile.exists()) {
             boolean success = false;
             try {
