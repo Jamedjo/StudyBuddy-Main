@@ -139,6 +139,9 @@ enum  UserOptions{//Need to add option for default options
                 temp = ((JTextField)component).getText();
         }
         if(temp==null) temp="";
+        if (this == UserOptions.SlideshowTime && temp.equals("0")) {
+            temp = "300";//Slideshow cannot have 0 time so use 0.1s instead of 0s or 1s
+        }
         return temp;
     }
 }

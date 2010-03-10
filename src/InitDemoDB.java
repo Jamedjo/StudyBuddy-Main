@@ -46,6 +46,16 @@ public class InitDemoDB {
 
             tempDB.addImageNote(anID, "This is a test test Note!!!\nIts Multilined.", 300, 300, 250, 200);
 
+
+	    addI(tempDB,"hasJpegThumb","///\\\\\\IMG_0944_Corrected.jpg");
+	    addI(tempDB,"hasJpegThumb","///\\\\\\img_2810b_small.jpg");
+	    addI(tempDB,"hasJpegThumb","///\\\\\\img_2926_small.jpg");
+	    addI(tempDB,"hasJpegThumb","///\\\\\\img_5672bp_small.jpg");
+	    addI(tempDB,"hasJpegThumb","///\\\\\\img_6088b_small.jpg");
+	    addI(tempDB,"hasJpegThumb","///\\\\\\img_F028c_small.jpg");
+	    addI(tempDB,"hasJpegThumb","///\\\\\\PSD_0843.jpg");
+
+
             tempDB.tagTag(tempDB.getTagIDFromTagTitle("Data Structures&Algorithms note 1") , tempDB.getTagIDFromTagTitle("Notes"));
             tempDB.tagTag(tempDB.getTagIDFromTagTitle("Graph Notes for C/W") , tempDB.getTagIDFromTagTitle("Notes"));
 

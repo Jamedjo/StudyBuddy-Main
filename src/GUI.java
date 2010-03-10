@@ -87,7 +87,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void setTitle(String suffix) {
-        String prefix = "Study Buddy 0.9gamma";
+        String prefix = "Study Buddy 0.9.1";
         if (suffix == null) suffix = "";
         else prefix = prefix.concat("- ");
         w.setTitle(prefix + suffix);

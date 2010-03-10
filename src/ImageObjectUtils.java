@@ -1,9 +1,15 @@
-
+//Library of code under lib/
+//Various image utilities. needed as default image reader could not read thumbnails from exif
+//import org.apache.sanselan.*;
 import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
+import org.apache.sanselan.ImageReadException;
+import org.apache.sanselan.Sanselan;
+import org.apache.sanselan.common.IImageMetadata;
+import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 
 class ImageObjectUtils{
 
@@ -22,12 +28,51 @@ class ImageObjectUtils{
     static String getSaveEncoding(String imageID){
         return imageID+"_thumb.jpg";
     }
+    static BufferedImage getThumbFromExif(File pathFile, String absolutePath) {//v.quick, but only works for some images
+        BufferedImage tempImage = null;
+        try {
+            IImageMetadata metadata = Sanselan.getMetadata(pathFile);
+            if (metadata instanceof JpegImageMetadata) {
+                JpegImageMetadata jpegMetadata = (JpegImageMetadata) metadata;
+                tempImage = jpegMetadata.getEXIFThumbnail();
+            }
+        } catch (ImageReadException e) {
+            Log.Print(LogType.Error, "Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+        } catch (IOException e) {
+	    Log.Print(LogType.Error,"Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	}
+        return tempImage;
+    }
+    
+    static String getFileExtLowercase(File pathFile, String absolutePath) {
+        String ext = null;
+        int pos = pathFile.getName().lastIndexOf(".");
+        if (pos > 0 && pos < (pathFile.getName().length() - 1)) {
+            ext = pathFile.getName().substring(pos + 1).toLowerCase();
+        }
+        if (ext == null) {
+            Log.Print(LogType.Error, "Unable to get file extension from " + absolutePath);
+        }
+        return ext;
+    }
+
+    static Dimension getImageDimensionsSanslan(File pathFile, String absolutePath){
+        if(pathFile==null) return null;
+        Dimension image_d = null;
+	try{
+	     image_d = Sanselan.getImageSize(pathFile);
+	} catch (IOException e) {
+	    Log.Print(LogType.Error,"Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	}  catch (ImageReadException e) {
+            Log.Print(LogType.Error,"Error reading exif dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	}
+        return image_d;
+    }
 
         //Finds maximum with and height somthing can be scaled to, without changing aspect ratio
     //Takes the dimensions of the object inW and inH
     //and the dimensions of the box it is to be fitted into maxW and maxH
     //Returns (Width,Height) as an array of two integers.
-    //Not sure which class it belongs in.
     static Dimension scaleToMax(int inW, int inH, int maxW, int maxH) {
 	float f_inW,f_inH,f_maxW,f_maxH;
 	f_inW = inW;

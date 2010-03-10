@@ -40,6 +40,9 @@ class ThumbButton extends JPanel{
 	Dimension useWH;
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+
+
 	//Use icons for thumbnails, populate icons in loop and then position icons.
 
 	//int currentThumb = mainGUI.state.currentI;
@@ -84,8 +87,8 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
         this.validate();
     }
 
-//    synchronized JPanel buildThumbHolders(){
-      JPanel buildThumbHolders(){
+//     JPanel buildThumbHolders(){
+      synchronized JPanel buildThumbHolders(){
         int sizeW = squareSize + hBorder;
         maxNoTiles = (boardW-(boardW % sizeW)) / sizeW; //removes remainder to ensure int
 //        while(mainGUI.isChangingState){
@@ -145,13 +148,29 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 	//this.setPreferredSize(new Dimension(boardW,boardH));
 	//this.revalidate();       
     }
+    
+//    public void repaint(){
+//        super.repaint();
+//        try{
+//        for(int i=0;i<thumbnails.length;i++){//Draw thumbs in correct order, so swingworker loads in order
+//            thumbnails[i].repaint();
+//        }
+//        } catch (NullPointerException e){
+//            Log.Print(LogType.Error, "Error painting thumnail");
+//        }
+//    }
 
     @Override public void mouseWheelMoved(MouseWheelEvent e){
         mainGUI.state.offsetImage(-e.getWheelRotation());//not sure which direction is better
     }
+    @Override
     public void paintComponent(java.awt.Graphics g) {
-        for(int i=0;i<thumbnails.length;i++){//Draw thumbs in correct order, so swingworker loads in order
-            thumbnails[i].paintComponent(g);
+        try {
+            for (int i = 0; i < thumbnails.length; i++) {//Draw thumbs in correct order, so swingworker loads in order
+                thumbnails[i].paintComponent(g);
+            }
+        } catch (NullPointerException e) {
+            Log.Print(LogType.Error, "Error painting thumnail");
         }
         super.paintComponent(g);
     }
