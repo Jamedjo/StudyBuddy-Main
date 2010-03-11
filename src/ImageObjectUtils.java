@@ -14,21 +14,27 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 
 class ImageObjectUtils{
 
-    static void saveThumbToFile(File thumbPath,File pathFile, String absolutePath, BufferedImage bThumb,String imageID){
+    static void saveThumbToFile(Settings settings, BufferedImage bThumb,File pathFile,long fileLength, long modifiedDateTime){
         try{
-            File thumbfile = new File(thumbPath,getSaveEncoding(pathFile,absolutePath));
+            File thumbPath = new File(settings.getSetting("homeDir") + settings.getSetting("thumbnailPathExt"));
+            File thumbfile = new File(thumbPath,getSaveEncoding(pathFile,fileLength, modifiedDateTime));
             ImageIO.write(bThumb,"jpg",thumbfile);//should use same format as file
         } catch (IOException e){
-            Log.Print(LogType.Error,"Error creating thumbnail for image: "+absolutePath);
+            Log.Print(LogType.Error,"Error creating thumbnail for image: "+pathFile.toString());
         }
     }
 
-    //Use imageID for name for now but change to include random key from DB.
-    //In also use imageID,modified date,path,filesize to create quick pseudo checksum.
     //Only load thumb if all same.
-    static String getSaveEncoding(File pathFile, String absolutePath){
-        if(!(pathFile.exists()&&pathFile.isFile())) return null;
-        String basic = (absolutePath+pathFile.getName()+pathFile.length()+pathFile.lastModified());
+    static String getSaveEncoding(File pathFile,long fileLength, long modifiedDateTime){
+        return getUID(pathFile,fileLength,modifiedDateTime)+".jpg";
+    }
+
+    //Get unique id for the given file
+    //uses filename, modified date&time, path, and filesizefilesize
+    //creates a quick pseudo checksum, which will be unique for that imate
+    //and which will be the same for that image even if it is removed from the DB and added again, or added twice.
+    static String getUID(File pathFile,long fileLength, long modifiedDateTime){
+        String basic = (pathFile.toString()+fileLength+modifiedDateTime);
         byte[] b = (basic.getBytes());
         int l = b.length/2;
         int l2 = b.length - l;
@@ -43,9 +49,10 @@ class ImageObjectUtils{
         }
         int hashA = (new String(first)).hashCode();
         String out = (new String(snd))+hashA;
-        return out.replaceAll("[^\\d\\w]", "")+".jpg";
+        return out.replaceAll("[^\\d\\w]", "");
     }
-    static BufferedImage getThumbFromExif(File pathFile, String absolutePath) {//v.quick, but only works for some images
+    
+    static BufferedImage getThumbFromExif(File pathFile) {//v.quick, but only works for some images
         BufferedImage tempImage = null;
         try {
             IImageMetadata metadata = Sanselan.getMetadata(pathFile);
@@ -54,34 +61,34 @@ class ImageObjectUtils{
                 tempImage = jpegMetadata.getEXIFThumbnail();
             }
         } catch (ImageReadException e) {
-            Log.Print(LogType.DebugError, "Error reading exif of image " + absolutePath + "\nError was: " + e.toString());
+            Log.Print(LogType.DebugError, "Error reading exif of image " + pathFile.toString() + "\nError was: " + e.toString());
         } catch (IOException e) {
-	    Log.Print(LogType.DebugError,"Error- can not read dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	    Log.Print(LogType.DebugError,"Error- can not read dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
 	}
         return tempImage;
     }
     
-    static String getFileExtLowercase(File pathFile, String absolutePath) {
+    static String getFileExtLowercase(String name) {
         String ext = null;
-        int pos = pathFile.getName().lastIndexOf(".");
-        if (pos > 0 && pos < (pathFile.getName().length() - 1)) {
-            ext = pathFile.getName().substring(pos + 1).toLowerCase();
+        int pos = name.lastIndexOf(".");
+        if (pos > 0 && pos < (name.length() - 1)) {
+            ext = name.substring(pos + 1).toLowerCase();
         }
         if (ext == null) {
-            Log.Print(LogType.Error, "Unable to get file extension from " + absolutePath);
+            Log.Print(LogType.Error, "Unable to get file extension from " + name);
         }
         return ext;
     }
 
-    static Dimension getImageDimensionsSanslan(File pathFile, String absolutePath){
+    static Dimension getImageDimensionsSanslan(File pathFile){
         if(pathFile==null) return null;
         Dimension image_d = null;
 	try{
 	     image_d = Sanselan.getImageSize(pathFile);
 	} catch (IOException e) {
-	    Log.Print(LogType.DebugError,"Error; reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+	    Log.Print(LogType.DebugError,"Error; reading dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
 	}  catch (ImageReadException e) {
-            Log.Print(LogType.DebugError,"Error reading exif dimensions of image " + absolutePath + "\nError was: " + e.toString());
+            Log.Print(LogType.DebugError,"Error reading exif dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
 	}
         return image_d;
     }

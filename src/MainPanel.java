@@ -117,7 +117,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             //updateCursor();
         } else {
             mainGUI.imageAreas.getParent().validate();
-            //mainGUI.imageAreas.validate();
+            getParent().validate();
             boardW = mainGUI.mainScrollPane.getWidth() - 3;
             boardH = mainGUI.mainScrollPane.getHeight() - 3;
             this.setPreferredSize(new Dimension(boardW, boardH));

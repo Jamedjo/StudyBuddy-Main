@@ -29,7 +29,7 @@ enum ToolBar{
     bDragPan(true, "Drag Mode: Pan", "DragPan", SysIcon.DragPan.Icon),
     bDragLink(false, "Drag Mode: Add Link", "DragLink", SysIcon.DragLink.Icon),
     bDragNote(false, "Drag Mode: Add Note", "DragNote", SysIcon.DragNote.Icon),
-    bAdjustImage(true, "Adjust Image Colours", "AdjustImage", SysIcon.Adjust.Icon),
+    bImageToolBar(true, "Toggle Image ToolBar", "ImageBar", SysIcon.ImageBar.Icon),
     bBlueDemo(true, "Bluetooth", "BlueT", SysIcon.BlueTooth.Icon),
     bZoomToX(true, "Zoom Dialog", "ZoomX", SysIcon.ZoomToX.Icon),
     bZoomFit(false, "Zoom: Fit     ", "ZoomFit", SysIcon.ZoomFit.Icon, false),
@@ -99,7 +99,87 @@ enum ToolBar{
         if (putSeperatorAtEnd) {
             bar.addSeparator();
         }
-        
+
+        //workaround to prevent toolbar from steeling focus
+	for(i=0; i<bar.getComponentCount();i++){
+	    if(bar.getComponent(i) instanceof JButton){
+		((JButton)bar.getComponent(i)).setFocusable(false);
+	    }
+	}
+	return bar;
+    }
+
+}
+enum ImageToolBar{
+    //bDragPan(true, "Drag Mode: Pan", "DragPan", SysIcon.DragPan.Icon),
+    //bDragLink(false, "Drag Mode: Add Link", "DragLink", SysIcon.DragLink.Icon),
+    //bDragNote(false, "Drag Mode: Add Note", "DragNote", SysIcon.DragNote.Icon),
+    bAdjustImage(true, "Adjust Image Colours", "AdjustImage", SysIcon.Adjust.Icon);
+
+    JButton button;
+    boolean isSeperatorHere;
+    static final boolean putSeperatorAtEnd = false;
+
+    ImageToolBar(boolean isNewGroup,String label, String command, ImageIcon icon, boolean visible) {
+        isSeperatorHere = isNewGroup;
+        if (icon != null) {
+            button = new JButton(icon);
+            button.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+            button.setToolTipText(label);
+            //button.set text to hidden;
+        }
+        else{
+            button = new JButton(label);
+        }
+        button.setActionCommand(command);
+        button.setVisible(visible);
+    }
+    ImageToolBar(boolean isNewGroup,String label, String command) {
+        this(isNewGroup,label, command, true);
+    }
+    ImageToolBar(boolean isNewGroup,String label, String command, boolean visible) {
+        this(isNewGroup,label, command, null, visible);
+    }
+    ImageToolBar(boolean isNewGroup,String label, String command, ImageIcon icon) {
+        this(isNewGroup,label, command, icon, true);
+    }
+
+    void hide(){
+	button.setVisible(false);
+    }
+
+    void show(){
+	button.setVisible(true);
+    }
+
+    void setVisible(boolean value){
+        button.setVisible(value);
+    }
+
+    JButton create(ActionListener l){
+	button.addActionListener(l);
+	return button;
+    }
+
+    static JToolBar build(GUI mainGUI){
+	JToolBar bar = new JToolBar("Image Toolbar");
+	bar.setFocusable(false);
+        bar.setFloatable(false);
+        bar.setVisible(false);
+
+	int i=0;
+	for (ImageToolBar b : ImageToolBar.values()){
+	    JButton bt = b.create((ActionListener)mainGUI);
+	    if(b.isSeperatorHere){
+		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
+	    }
+	    bar.add(bt);
+	    i++;
+	}
+        if (putSeperatorAtEnd) {
+            bar.addSeparator();
+        }
+
         //workaround to prevent toolbar from steeling focus
 	for(i=0; i<bar.getComponentCount();i++){
 	    if(bar.getComponent(i) instanceof JButton){

@@ -8,44 +8,48 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.concurrent.CancellationException;
 import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingWorker;
 
 class ImageLoader extends SwingWorker<BufferedImage, Void> {
-    BufferedImage loadBImage,loadBThumb;
     Log log = new Log(false);
-    File pathFile,thumbPath;
-    String absolutePath,imageID;
+    double maxFilesizeToLoadThumb = 3;//Megabytes
+    BufferedImage loadBImage,loadBThumb;
+    File pathFile;
     ImgSize size;
     int imgType;
     int screenWidth,screenHeight,thumbMaxW,thumbMaxH;
+    long fileLength,modifiedDateTime;
     ImageObject parent;//needed to publish result
     boolean success = false;
+    boolean outOfMemory=false;
 
-    ImageLoader(ImageObject p,File pF, String aP, ImgSize sz,
-            int iT,File tP,String iID,int sW,int sH,int tW,int tH,BufferedImage lBT) {
+    ImageLoader(ImageObject p,File pF, ImgSize sz,
+            int iT,int sW,int sH,int tW,int tH, BufferedImage lBT,long fL,long mDT) {
         pathFile = pF;
-        absolutePath = aP;
         size = sz;
         imgType = iT;
-        thumbPath = tP;
-        imageID = iID;
         screenWidth = sW;
         screenHeight = sH;
         thumbMaxW = tW;
         thumbMaxH = tH;
         parent=p;
         loadBThumb=lBT;
+        fileLength = fL;
+        modifiedDateTime = mDT;
     }
 
     public BufferedImage doInBackground() {
         if((!isCancelled())||size.isThumb()) try {
+
+            if(size.isThumb()&&(pathFile.length()>(maxFilesizeToLoadThumb*1024*1024))){
+                outOfMemory=true;
+                throw new OutOfMemoryError("Image to large");
+            }
+            
             long start = Calendar.getInstance().getTimeInMillis();
-            //ImageIO.setUseCache(true);
-            //ImageIO.setCacheDirectory(pathFile);
             
             loadBImage = ImageIO.read(pathFile);
-            log.print(LogType.Debug, "Loading image " + absolutePath + "\n      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to read image to memory");
+            log.print(LogType.Debug, "Loading image " + pathFile.toString() + "\n      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to read image to memory");
             start = Calendar.getInstance().getTimeInMillis();
 
 
@@ -57,35 +61,38 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
 
             log.print(LogType.Debug, "      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to process image");
            
-            //start = Calendar.getInstance().getTimeInMillis();
-            //log.print(LogType.Debug, "      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to get width,height&orientation");
-            //start = Calendar.getInstance().getTimeInMillis();
             success = true;
 
         } catch (IOException e) {
-            if(absolutePath.equals("///\\\\///\\\\\\NonExistingFile")){
+            if(pathFile.toString().equals("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex")){
                 loadBImage = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
                 if(loadBImage!=null) success = true;
             } else
-            log.print(LogType.Error, "Error loading image " + absolutePath + "\nError was: " + e.toString());
+            log.print(LogType.Error, "Error loading image " + pathFile.toString() + "\nError was: " + e.toString());
         } catch (IllegalArgumentException e) {
-            log.print(LogType.Error, "Image file " + absolutePath + " could not be found " + "\nError was: " + e.toString());
+            log.print(LogType.Error, "Image file " + pathFile.toString() + " could not be found " + "\nError was: " + e.toString());
         } catch (NullPointerException e) {
-            log.print(LogType.Error, "Could not load image from file " + absolutePath + "\nError was: " + e.toString());
+            log.print(LogType.Error, "Could not load image from file " + pathFile.toString() + "\nError was: " + e.toString());
         } catch (java.lang.OutOfMemoryError e) {
-            log.print(LogType.Error, "Fatal Error. Out of heap memory.\nSwingWorker should be used in code, and not all images should be buffered");
+            if(!outOfMemory) {
+                log.print(LogType.Error, "Fatal Error. Out of heap memory.\nImage "+pathFile.toString()+" is probably too large to load");
+                outOfMemory=true;
+            } else log.print(LogType.Error, "Error: requested thumbnail for "+(pathFile.length()/(1024*1024))+"MB when the max is "+maxFilesizeToLoadThumb+"MB.");
         } finally{
-            if(!success){
-                loadBImage = setToXasFileNotFound();
-            }
-            makeThumb(loadBImage);//Will make thumb even if cancelled if already done that hard part
+            if(outOfMemory){
+                loadBImage = null;
+                if(loadBThumb==null) loadBThumb =  getOutOfMemoryImage();
+            } else if(!success){
+                loadBImage = getFileNotFoundImage();
+                if(loadBThumb==null) loadBThumb = getFileNotFoundImage();
+            } else makeThumb(loadBImage);//Will make thumb even if cancelled if already done that hard part
         }
         return loadBImage;
     }
 
     protected void done(){
         try {
-               parent.setImageFromLoader(loadBImage,loadBThumb,size,isCancelled());
+               parent.setImageFromLoader(loadBImage,loadBThumb,size,isCancelled(),outOfMemory);
            } catch (CancellationException e) {
                //Hmm, thrown by get()
                log.print(LogType.Error,"Cancellation Exception");
@@ -95,12 +102,16 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
 
     }
 
-    BufferedImage setToXasFileNotFound() {
+    BufferedImage getFileNotFoundImage() {
         //improvement: set the buffered image to a java graphics drawn X icon
         return SysIcon.FileNotFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     }
+    BufferedImage getOutOfMemoryImage() {
+        //improvement: set the buffered image to a java graphics drawn X icon
+        return SysIcon.OutOfMemory.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+    }
 
-    void makeThumb(BufferedImage bigImg) {//quick one image read to bimage
+    void makeThumb(BufferedImage bigImg) {
         long start = Calendar.getInstance().getTimeInMillis();
         Dimension iconWH = ImageObjectUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), thumbMaxW, thumbMaxH);
         if (!(iconWH.width < bigImg.getWidth())) {
@@ -119,7 +130,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
         log.print(LogType.Debug, "  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
         loadBThumb = tempimage;
         }
-        ImageObjectUtils.saveThumbToFile(thumbPath,pathFile, absolutePath, loadBThumb, imageID);
+        ImageObjectUtils.saveThumbToFile(parent.mainGUI.settings, loadBThumb,pathFile, fileLength,  modifiedDateTime);
     }
 
     //could merge two functions

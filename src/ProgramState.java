@@ -24,7 +24,7 @@ class ProgramState{
     private ImageObject[] imageList;
     private String[] imageIDs;
     int lastIndex; //Must be updated when number of images changes
-    String currentFilter;
+    String currentFilter;//replace with private IDTitle and use getters and setters to access if ever needed.
     int numberOfImages;
     int currentI = 0;//make private
     final GUI mainGUI;
@@ -73,7 +73,7 @@ class ProgramState{
             //no break as image list must still be passed from DB
 	case Refresh:
 	    //Create image database by loading database
-	    currentFilter = "Show All Images";
+	    currentFilter = "-1";
 	    imageIDs = mainGUI.mainImageDB.getAllImageIDs();
 	    break;
         case LoadLast:
@@ -86,7 +86,7 @@ class ProgramState{
                 log.print(LogType.Error,"Error: Tried to filter by tag without a filter.");
                 ConstructProgramState(LoadType.Load, parentGUI, "");
                 return;
-            } else if (filterTag.equals("Show All Images")){
+            } else if (filterTag.equals("-1")){
                 ConstructProgramState(LoadType.Refresh, parentGUI, filterTag);
                 return;
             }
@@ -100,7 +100,7 @@ class ProgramState{
       	imageList = new ImageObject[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI.thumbPath,mainGUI);
+	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI);
 	}
 	lastIndex = (imageIDs.length - 1);
 
@@ -114,7 +114,7 @@ class ProgramState{
             imageIDs = new String[1];
             imageIDs[0] = "-1";
             imageList = new ImageObject[1];
-            imageList[0] = new ImageObject("///\\\\///\\\\\\NonExistingFile",imageIDs[0],mainGUI.thumbPath,mainGUI);
+            imageList[0] = new ImageObject("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex",imageIDs[0],mainGUI);
         }        
     }
 
@@ -129,10 +129,10 @@ class ProgramState{
         }
     }
 
-    void importImages(File[] files) {
+    void importImages(File[] files) {// redo if hierarchy. Work out why GUI freezes when importing large files. Ensure import folder works.
         isLocked = true;
         try {
-            if (currentFilter.equals("Show All Images")) { //WRONG???-> // "-1" is now show all (working on TagID rather than Tag Title)
+            if (currentFilter.equals("-1")) { // "-1" is now show all (working on TagID rather than Tag Title)
                 ArrayList<String> tempImageIDs = new ArrayList<String>(Arrays.asList(imageIDs));
                 ArrayList<ImageObject> tempImageList = new ArrayList<ImageObject>(Arrays.asList(imageList));
                 ArrayList<File> foldersList = new ArrayList<File>();
@@ -144,7 +144,7 @@ class ProgramState{
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
                             //tempImageList.add(new ImageObject(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
-                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID, mainGUI.thumbPath,mainGUI));
+                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID,mainGUI));
                         }
                     }
                 }
@@ -162,7 +162,7 @@ class ProgramState{
                     String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());
                     if (currentImID != null) {
                         tempImageIDs.add(currentImID);
-                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID,mainGUI.thumbPath,mainGUI));
+                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID,mainGUI));
                     }
                 }
                 }
@@ -292,7 +292,7 @@ class ProgramState{
 
         if(size.isLarge()){
             int i;
-            int prev = prev(relativeImage);
+            int prev = prev(relativeImage); //dont preload too large files. If you load a file make sure it does not keep trying to load after failures.(heap mem)
             for(i=1;i<4;i++){//Use amount of memory avaliable to determine number to preload
                 imageList[relItoFixI(i+relativeImage)].preload(size);//Preloads next three images
             } for(;i<lastIndex;i++){

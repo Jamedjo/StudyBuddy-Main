@@ -15,6 +15,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.io.File;
 import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -44,7 +45,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 //Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
 class GUI implements ActionListener, ComponentListener, WindowStateListener, ChangeListener {
     Log log;
-    Settings settings;
+    Settings settings = new Settings();;
     JFrame w;
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
@@ -56,6 +57,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
+    JToolBar imageToolbar;
     JScrollPane boardScroll;
     ImageAdjuster adjuster;
     OptionsGUI optionsGUI;
@@ -73,7 +75,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JPanel imageAreas;
     JScrollPane notePane;
     JSlider zoomBar;
-    File thumbPath;
+    //File thumbPath;
     final int tagTreeStartSize = 150;
     final int tagTreeMaxSize = 350;
     //boolean isChangingState = false;
@@ -107,6 +109,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         buildFileGetter();
         buildFolderGetter();
         buildJpgExporter();
+        setupCache();
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
@@ -114,18 +117,26 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         //slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
     }
 
+    void setupCache() {
+        ImageIO.setUseCache(true);
+        String cachePath = settings.getSetting("homeDir") + settings.getSetting("cachePathExt");
+        if ((cachePath != null) && (cachePath.length() > 1)) {
+            File cacheDir = new File(cachePath);
+            if (cacheDir.isDirectory()) {
+                ImageIO.setCacheDirectory(cacheDir);
+            }
+        }
+    }
+
     boolean isImage(File f){
         String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
         //String[] readerNames = ImageIO.getReaderFormatNames();
         String ext = null;
-        String name = f.getName();
-        int pos = name.lastIndexOf(".");
-        if (pos > 0 && pos < (name.length() - 1)) {
-            ext = name.substring(pos + 1).toLowerCase();
-            for (String imgExt : exts) {
-                if (ext.equals(imgExt)) {
-                    return true;
-                }
+        ext = ImageObjectUtils.getFileExtLowercase(f.getName());
+        if (ext==null) return false;
+        for (String imgExt : exts) {
+            if (ext.equals(imgExt)) {
+                return true;
             }
         }
         return false;
@@ -144,16 +155,26 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             }
         });
         fileGetter.setDialogTitle("Import Image");
+        setGetterDir(fileGetter);
         fileGetter.setMultiSelectionEnabled(true);
+    }
+    void setGetterDir(JFileChooser getter){
+        String lastSetDir = settings.getSetting("lastOpenDirectory");
+        if((lastSetDir==null)||lastSetDir.equals("")) return;
+        File lastDir = new File(lastSetDir);
+        if((lastDir!=null)&&lastDir.exists()&&lastDir.isDirectory()){
+            getter.setCurrentDirectory(lastDir);
+        }
     }
     void buildFolderGetter() {
         folderGetter.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         folderGetter.setDialogTitle("Import Folder(s)");
+        setGetterDir(folderGetter);
         folderGetter.setMultiSelectionEnabled(true);
     }
     void buildJpgExporter() {
-        jpgExporter.setFileSelectionMode(JFileChooser.SAVE_DIALOG);
-        fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
+        //jpgExporter.setFileSelectionMode(JFileChooser.SAVE_DIALOG);
+        jpgExporter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
             public boolean accept(File f) {
                 if (f.isDirectory()) {
                     return true;//Still want to show directories to browse
@@ -167,6 +188,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         });
         jpgExporter.setDialogTitle("Export Image as JPG");
         jpgExporter.setSelectedFile(new File("image.jpg"));
+        setGetterDir(jpgExporter);
         jpgExporter.setMultiSelectionEnabled(false);
     }
 
@@ -194,8 +216,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void quickRestart(){
-        settings = new Settings();
-        thumbPath = new File(settings.getSetting("homeDir") + settings.getSetting("thumbnailPathExt"));
         state = new ProgramState(this);//Also initializes mainImageDB
         mainPanel = new MainPanel(this);
         mainPanel.setCursorMode(DragMode.None);
@@ -211,6 +231,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                 }
             }
         });
+        imageToolbar = ImageToolBar.build(this);
 
         tagTree = new TagTree(mainImageDB,this);
         //TagTree.setMinimumSize(new Dimension(150,0));
@@ -257,11 +278,15 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 //        rightArea.setLayout(new BoxLayout(rightArea,BoxLayout.Y_AXIS));
 //        rightArea.setMinimumSize(new Dimension(100,100));
 
-        //contentPane can only have thigs added once, use removeAll to change. (Due to borderlayout)
+        JPanel toolBarArea = new JPanel();
+        toolBarArea.setLayout(new BorderLayout());
+        toolBarArea.add(toolbarMain,BorderLayout.CENTER);
+        toolBarArea.add(imageToolbar,BorderLayout.PAGE_END);
+
         contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(splitpane, BorderLayout.CENTER);//contentPane.add(mainPanel);
-        contentPane.add(toolbarMain, BorderLayout.PAGE_START);
+        contentPane.add(toolBarArea, BorderLayout.PAGE_START);
         contentPane.add(notePane, BorderLayout.LINE_END);
 
         adjuster = new ImageAdjuster(w,true);
@@ -313,6 +338,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("AddTag")) addTag();
         else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("QuickTag")) quickTag();
+        else if (ae.getActionCommand().equals("ImageBar")) imageToolbarToggle();
         else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) tagTag();
         else if (ae.getActionCommand().equals("DragPan")) mainPanel.setCursorMode(mainPanel.getCurrentDrag());
@@ -607,20 +633,26 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void exportCurrentImage() {
-        int destReady = fileGetter.showOpenDialog(w);
+        int destReady = jpgExporter.showOpenDialog(w);
         if (destReady == JFileChooser.APPROVE_OPTION) {
-            state.getCurrentImage().saveFullToPath(((fileGetter.getSelectedFiles())[0]).toString());
+            String filePathAndName = jpgExporter.getSelectedFile().toString();
+            String ext = ImageObjectUtils.getFileExtLowercase(filePathAndName);
+            if((ext==null)||(!(ext.equals("jpg")||ext.equals("jpeg")))) filePathAndName = filePathAndName + ".jpg";
+            settings.setSettingAndSave("lastOpenDirectory",jpgExporter.getCurrentDirectory().toString());
+            state.getCurrentImage().saveFullToPath(filePathAndName);
         }
     }
     void importDo() {
         int wasGot = fileGetter.showOpenDialog(w);
         if (wasGot == JFileChooser.APPROVE_OPTION) {
+            settings.setSettingAndSave("lastOpenDirectory",fileGetter.getCurrentDirectory().toString());
             state.importImages(fileGetter.getSelectedFiles());
         }
     }
     void importDirDo() {
         int wasGot = folderGetter.showOpenDialog(w);
         if (wasGot == JFileChooser.APPROVE_OPTION) {
+            settings.setSettingAndSave("lastOpenDirectory",folderGetter.getCurrentDirectory().toString());
             state.importImages(folderGetter.getSelectedFiles());
         }
     }
@@ -681,6 +713,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         if(optionsGUI.getReturnStatus()==OptionsGUI.RET_OK){
             optionsGUI.saveAllValues(settings);
         }
+        mainPanel.onResize();
+    }
+    void imageToolbarToggle(){
+        imageToolbar.setVisible(!imageToolbar.isVisible());
         mainPanel.onResize();
     }
 }

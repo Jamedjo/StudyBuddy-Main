@@ -5,13 +5,14 @@ import java.io.File;
 enum AppDefaults {
     //date settings changed?
     s1("importPathExt", "importedimage"+File.separator),
+    cacheDir("cachePathExt","imageCache"+File.separator),
     s2("slideShowTime", "2000"),
     //example s99("nestedDirectoryTest_PathExt","topDir"+File.separator+"subDir"+File.separator),//just using the subDir will not create the dir
     s3("thumbnailPathExt", "thumbnails"+File.separator),
     DBname("databaseFileName","gammaDB"),
     s5("databasePathExt","database"+File.separator),
-    ver("appVersionLast","0.9.1_r246"),//change this whenever you change this enum.
-    s7("lastFilterUsed","Show All Images"),
+    ver("appVersionLast","0.9.1_r249"),//change this whenever you change this enum.
+    s7("lastFilterUsed","-1"),
     s8("lastCurrentI","0"),
     s9("showLinks","true"),
     s10("showNotes","true");

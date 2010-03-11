@@ -29,7 +29,7 @@ enum Orientation {Landscape,Portrait} //For drawing/painting not for rotation
 
 enum ImgSize {Screen,Max,Thumb;//,ThumbOnly,ThumbPreload;
     boolean isLarge(){
-	if(this==Thumb/*||this==ThumbPreload*/) return false;
+	if(this==Thumb) return false;/*||this==ThumbPreload*/
 	return true;
     }
     boolean isThumb(){
@@ -46,7 +46,7 @@ enum ImgSize {Screen,Max,Thumb;//,ThumbOnly,ThumbPreload;
     }
 }
 
-class ImageObject { //could be updated to take a File instead, or a javase7 path
+class ImageObject { //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
     Log log = new Log(false);
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
@@ -54,12 +54,11 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     private BufferedImage bThumbFilt = null;
     private boolean isFiltered = false;
     private final int imgType = BufferedImage.TYPE_INT_RGB;
-    String absolutePath;//Kept for error messages. Likely to be similar to pathFile.toString()
     File pathFile = null;
-    File thumbPath = null;
+    long imageFileLength,modifiedDateTime;
     Orientation iOri;
     private Integer Bwidth = null;
-    private Integer Bheight = null;//make private- external programs do not know if initialized
+    private Integer Bheight = null;
     int screenWidth, screenHeight;
     static final int thumbMaxW = 200;
     static final int thumbMaxH = 200;
@@ -78,24 +77,22 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     ImageLoader imageLoader;
     //String title,filename,comments?
 
-    ImageObject(String inputPath,String currentID,File thumbnailPath,GUI gui){
+    ImageObject(String inputPath,String currentID,GUI gui){
 	mainGUI = gui;
         String tempPath = "";
         imageID = currentID;
-        thumbPath = thumbnailPath;
         log.print(LogType.Debug,"Image:"+imageID+" has inPath: "+inputPath);
 	try{
 	    if(inputPath.startsWith("///\\\\\\")){
 		tempPath = inputPath.substring(6);
-		absolutePath = (GUI.class.getResource(tempPath)).toURI().getPath();//could be null
+		tempPath = (GUI.class.getResource(tempPath)).toURI().getPath();//could be null
 		//absolutePath = "etc/img/"+tempPath;//for use with jar files.
-		if(absolutePath==null){
-		    absolutePath=tempPath;
+		if(tempPath==null){
+		    tempPath=inputPath.substring(6);
 		}
-		else pathFile = new File(absolutePath);
+		else pathFile = new File(tempPath);
 	    }
 	    else {
-		absolutePath = inputPath;
 		tempPath = inputPath;
 		pathFile = new File(inputPath);	  
 	    }
@@ -108,7 +105,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	}
 	
 	
-	if(pathFile==null){
+	if(pathFile==null||(!pathFile.exists())||(!pathFile.isFile())){
 	    log.print(LogType.Error,"File could not be found at " + inputPath);
 	}
 	//ImageObjectConstructor);
@@ -118,6 +115,8 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 	Dimension scrD = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
 	screenWidth = scrD.width;
 	screenHeight = scrD.height;
+        modifiedDateTime = pathFile.lastModified();
+        imageFileLength = pathFile.length();
     }
 
 //    ImageObject(File inFile){
@@ -143,7 +142,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
 
     int getWidthAndMake(){
 	if(Bwidth!=null) return Bwidth;
-        extractDimensionsFromFile(pathFile,absolutePath);
+        extractDimensionsFromFile(pathFile);
 	if(Bwidth!=null) return Bwidth;
 	getImage(currentLarge);
 	//note that the bImage should now be set to null to clear memory???????????????????
@@ -151,7 +150,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     }
     int getHeightAndMake(){
 	if(Bheight!=null) return Bheight;
-        extractDimensionsFromFile(pathFile,absolutePath);
+        extractDimensionsFromFile(pathFile);
 	if(Bheight!=null) return Bheight;
 	getImage(currentLarge);
 	//note that the bImage should now be set to null to clear memory????????????????????
@@ -159,7 +158,7 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     }
     int getWidthAndMakeBig(){
 	if(Bwidth!=null) return Bwidth;
-        extractDimensionsFromFile(pathFile,absolutePath);
+        extractDimensionsFromFile(pathFile);
 	if(Bwidth!=null) return Bwidth;
 	getImage(ImgSize.Max);
 	//note that the bImage should now be set to null to clear memory???????????????
@@ -167,17 +166,21 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
     }
     int getHeightAndMakeBig(){
 	if(Bheight!=null) return Bheight;
-        extractDimensionsFromFile(pathFile,absolutePath);
+        extractDimensionsFromFile(pathFile);
 	if(Bheight!=null) return Bheight;
 	getImage(ImgSize.Max);
 	//note that the bImage should now be set to null to clear memory??????????????
 	return Bheight;
     }
+
+    String getImageUID(){
+        return ImageObjectUtils.getUID(pathFile, imageFileLength, modifiedDateTime);
+    }
     
     void getImageBySampling(){
         try {
             long start =Calendar.getInstance().getTimeInMillis();
-        String ext = ImageObjectUtils.getFileExtLowercase(pathFile, absolutePath);
+        String ext = ImageObjectUtils.getFileExtLowercase(pathFile.getName());
         if (ext == null)return;
         //ImageIO.scanForPlugins();
         Iterator readers = ImageIO.getImageReadersBySuffix(ext);
@@ -205,12 +208,12 @@ class ImageObject { //could be updated to take a File instead, or a javase7 path
         inputStream.close();
         
         if (bThumb != null) {
-            log.print(LogType.Debug,"Read thumbnail from image "+absolutePath+"\n        -by reading every "+sampleFactor+" pixels");
+            log.print(LogType.Debug,"Read thumbnail from image "+pathFile.toString()+"\n        -by reading every "+sampleFactor+" pixels");
             log.print(LogType.Debug, "   -sampled every " + sampleFactor + " pixels from " + Bwidth + "x" + Bheight + " in " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds");
             isQuickThumb = true;
         }
     } catch (IOException e) {
-        log.print(LogType.DebugError, "Error reading dimensions of image " + absolutePath + "\nError was: " + e.toString());
+        log.print(LogType.DebugError, "Error reading dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
     }
         }
 
@@ -219,15 +222,15 @@ void getThumbQuick() {
         return;
     }
     if (pathFile!= null) {
-    BufferedImage tempImage = ImageObjectUtils.getThumbFromExif(pathFile, absolutePath);
+    BufferedImage tempImage = ImageObjectUtils.getThumbFromExif(pathFile);
     if (tempImage != null) {
-        Log.Print(LogType.Debug, "Read exif of image " + absolutePath);
+        Log.Print(LogType.Debug, "Read exif of image " + pathFile.toString());
         bThumb = tempImage;
         mainGUI.thumbPanel.repaint();//not onResize
         return;
     }
         if(Bwidth==null)
-        extractDimensionsFromFile(pathFile,absolutePath);
+        extractDimensionsFromFile(pathFile);
         if(Bwidth!=null) getImageBySampling();
     }
         hasTriedQuickThumb = true;
@@ -240,20 +243,20 @@ void getThumbQuick() {
     //BufferedImage bi;
     //bi = reader.readThumbnail(imageIndex, thumbnailIndex);
 
-    if (bThumb != null) {//Don't want to save sampled thumb as it will prevent better copy being saved
-        ImageObjectUtils.saveThumbToFile(thumbPath ,pathFile, absolutePath, bThumb, imageID);
-    }
+    //if (bThumb != null) {//Don't want to save sampled thumb as it will prevent better copy being saved
+    //    ImageObjectUtils.saveThumbToFile(thumbPath, bThumb, pathFile, imageFileLength,  modifiedDateTime);
+    //}
 }
 
-  void extractDimensionsFromFile(File pathFile, String absolutePath) {
+  void extractDimensionsFromFile(File pathFile) {
       if(isBImageIcon) return;
     if(hasTriedExtractDimensions) return;
-    Dimension temp = ImageObjectUtils.getImageDimensionsSanslan(pathFile, absolutePath);
+    Dimension temp = ImageObjectUtils.getImageDimensionsSanslan(pathFile);
     if (temp != null) {
         Bwidth = temp.width;
         Bheight = temp.height;
     } else {
-        log.print(LogType.DebugError, "Error reading exif dimensions of image " + absolutePath);
+        log.print(LogType.DebugError, "Error reading exif dimensions of image " + pathFile.toString());
         //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
         //Bheight = reader.getHeight(0);
     }
@@ -289,6 +292,7 @@ void getThumbQuick() {
         if ((size == currentLarge) && (bImage != null)) {
             return localGetBufImage();
         }	
+
         
         if ((!isLoading)&&bThumb==null) {//If swing worker is loading an image, it will then write a thumb. Must avoid reading thumb at the same time as it is being written.
             getThumbIfCached();
@@ -326,7 +330,7 @@ void getThumbQuick() {
     //Must set a loading icon if not ready, and then update when done
     private void loadViaSwingWorker(ImgSize size) {
         isLoading = true;
-        imageLoader = new ImageLoader(this, pathFile, absolutePath, size, imgType, thumbPath, imageID, screenWidth, screenHeight, thumbMaxW, thumbMaxH, bThumb);
+        imageLoader = new ImageLoader(this, pathFile, size, imgType, screenWidth, screenHeight, thumbMaxW, thumbMaxH, bThumb,imageFileLength,modifiedDateTime);
         if (bImage == null) {
             bImage = createLoadingThumb();
             currentLarge = size;
@@ -343,20 +347,21 @@ void getThumbQuick() {
         imageLoader.execute();
     }
 
-    void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgSize size,boolean wasCancelled){
+    void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgSize size,boolean wasCancelled,boolean ranOutOfMemory){
+        bThumb = thmb;
         if(!wasCancelled){
-            setVars(b);
+            if(b!=null) setVars(b);
             bImage = b;
             currentLarge = size;
         } else {
             bImage = null;
         }
-        bThumb = thmb;
         isBThumbIcon=false;
         isBImageIcon=false;
         isLoading = false;
-        if(bImage!=null) 
-        if(isFiltered()) filterImage();
+        if(bImage!=null){
+            if(isFiltered()) filterImage();
+        }
         mainGUI.mainPanel.onResize();//resize as image have changed dimensions
         mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
     }
@@ -374,7 +379,7 @@ void getThumbQuick() {
             File f = new File(path);
             ImageIO.write(localGetBufImage(),"jpg",f);//should use same format as file
         } catch (IOException e){
-            log.print(LogType.Error,"Error creating saving image: "+absolutePath+"\nTo path: "+path);
+            log.print(LogType.Error,"Error creating saving image: "+pathFile.toString()+"\nTo path: "+path);
         }
     }
 
@@ -383,7 +388,8 @@ void getThumbQuick() {
     }
 
     void getThumbIfCached() {
-        File checkFile = new File(thumbPath, (ImageObjectUtils.getSaveEncoding(pathFile,absolutePath)));
+        File thumbPath = new File(mainGUI.settings.getSetting("homeDir") + mainGUI.settings.getSetting("thumbnailPathExt"));
+        File checkFile = new File(thumbPath, (ImageObjectUtils.getSaveEncoding(pathFile, imageFileLength,  modifiedDateTime)));
         if (checkFile.exists()) {
             boolean success = false;
             try {
@@ -456,6 +462,5 @@ void getThumbQuick() {
         bImageFilt=null;
         bThumbFilt=null;
 	pathFile = null;
-	absolutePath = null;
     }
 }
