@@ -1,3 +1,4 @@
+//<editor-fold desc="topstuff">
 import javax.imageio.ImageReadParam;
 import javax.imageio.ImageReader;
 import java.util.Iterator;
@@ -20,31 +21,16 @@ import java.util.Calendar;
 //Objectives from memory analysis
 //-Clearing the buffered image from memory when it is not being displayed,keeping only a scaled down thumbnail in memory, and moving that to a fixed disk cache when not needed. 
 //-Not storing more pixels than the screen can hold. If the image is zoomed in to a large extent we can reload the image at full size- only slowing the computer down when this is needed, not when scrolling through many images. 
-//-When a filter is applied, particularly ShowAll, only the images about to be viewed should be loaded to prevent a sudden hit on CPU usage and a sudden expectation of masses of heap memory. 
-//-Lastly using SwingWorker thread to allow GUI to be unnaffected by long loading times.
+
 
 //Before doing Javadoc should make some variables private and use getters and setters.
 
-enum Orientation {Landscape,Portrait} //For drawing/painting not for rotation
+//Overhead caused by ImgSize.Screen is not worth it considering it is v.likely
+//to be replaced by full quickly- meaning image has to be loaded twice.
+//Instead huge images can be set to use a smaller image from disk cache or mosaic system. See issue 31 .
 
-enum ImgSize {Screen,Max,Thumb;//,ThumbOnly,ThumbPreload;
-    boolean isLarge(){
-	if(this==Thumb) return false;/*||this==ThumbPreload*/
-	return true;
-    }
-    boolean isThumb(){
-	if(this==Screen||this==Max) return false;
-	else return true;
-    }
-    public String toString(){
-	switch (this){
-	case Thumb: return "Thumb";
-	//case ThumbPreload: return "ThumbFull";//ThumbFull requests size Thumb, but not clearing the full image as it may be used later
-	case Screen: return "Screen";
-	default: return "Max";//Max is not yet implemented.
-	}
-    }
-}
+enum N_ImgSize{Full,Thumb}
+enum ImageType{Original,Filtered,Icon,None}
 class ImageItem{
     //Will hold image, thumb, filtered version, current size, alternate place for icons and their sizes
     //Will include getters which return relevent image
@@ -52,31 +38,60 @@ class ImageItem{
     //Will deal with the image being flipped/rotated/cropped/filtered
     //Will not hold image title, path
     //Will use other classes to hold related information (eg. width and height as dimension OR brightness/contrast/isFiltered as Filter)
-    MultiSizeImage originalImage = null;
-    MultiSizeImage filteredImage = null;
-    MultiSizeImage iconImage = null;
+ //</editor-fold>
+    private MultiSizeImage originalImage = new MultiSizeImage();
+    private MultiSizeImage filteredImage = new MultiSizeImage();
+    private MultiSizeImage iconImage = new MultiSizeImage();
     FilterState filter = new FilterState();
+    ImageType fullType = ImageType.None;
+    ImageType thumbType = ImageType.None;
     //TransFormstate transform;
-    boolean isIcon = false;
 
+    boolean hasNoCurrentFullImage(){
+        if(fullType==ImageType.None) return true;
+        return false;
+    }
+    boolean hasNoCurrentThumbImage(){
+        if(thumbType==ImageType.None) return true;
+        return false;
+    }
 
-    MultiSizeImage getCurrentMultiSizeImage(){
-        if(isIcon) return iconImage;
-        if(filter.isFiltered) return filteredImage;
-        return originalImage;
+//    void setAllToIconImage(BufferedImage icon){
+//        setToIconImage(icon,N_ImgSize.Full);
+//        setToIconImage(icon,N_ImgSize.Thumb);
+//    }
+    void setToIconImage(BufferedImage icon,N_ImgSize size){
+        if(size==N_ImgSize.Full){
+        fullType = ImageType.Icon;
+        iconImage.fullImage = icon;
+        }
+        if(size==N_ImgSize.Thumb){
+        thumbType = ImageType.Icon;
+        iconImage.thumbImage = icon;
+        }
+    }
+
+    BufferedImage getCurrentFullImage(){
+        switch(fullType){
+            case Icon:
+                return iconImage.fullImage;
+            case Filtered:
+                return filteredImage.fullImage;
+            default:
+                return originalImage.fullImage;
+        }
     }
 
 }
 class MultiSizeImage{
     //make these private to some extent. Or make each multiSize image private.
-    BufferedImage fullImage;
-    //BufferedImage mediumImage;
-    BufferedImage thumbImage;
-    Dimension dimensions;
+    BufferedImage fullImage = null;
+    //BufferedImage mediumImage = null;
+    BufferedImage thumbImage = null;
+    Dimension dimensions = null;
 
 }
 class FilterState{
-    boolean isFiltered = false;
     int contrast = 50;
     int brightness = 50;
     boolean isInverted = false;
@@ -85,34 +100,32 @@ class FilterState{
 class ImageReference {
     //New
     Log log = new Log(false);
-    ImageItem image = new ImageItem();
+    ImageItem img = new ImageItem();
 
-
-
-    //Currently converting
-
-    //Get image using swing worker.
-    //Must set a loading icon if not ready, and then update when done
-    private void loadViaSwingWorker(ImgSize size) {
+private void loadViaSwingWorker(ImgRequestSize size) {
         isLoading = true;
         imageLoader = new ImageLoader(this, pathFile, size, imgType, screenWidth, screenHeight, thumbMaxW, thumbMaxH, bThumb,imageFileLength,modifiedDateTime);
-        if (bImage == null) {
-            bImage = createLoadingThumb();
-            currentLarge = size;
-            isBImageIcon = true;
+        if (img.hasNoCurrentFullImage()) {
+            img.setToIconImage(createLoadingThumb(),N_ImgSize.Full);
             setVars(bImage);
         }
-        if (bThumb == null) {
+        if (img.hasNoCurrentThumbImage()) {
             getThumbIfCached();
         }
-        if(bThumb==null){
-            bThumb = createLoadingThumb();
-            isBThumbIcon = true;
+        if(img.hasNoCurrentThumbImage()){
+            img.setToIconImage(createLoadingThumb(),N_ImgSize.Thumb);
         }
         imageLoader.execute();
     }
 
-    void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgSize size,boolean wasCancelled,boolean ranOutOfMemory){
+
+//<editor-fold defaultstate="collapsed" desc="Currently converting">
+
+    //Get image using swing worker.
+    //Must set a loading icon if not ready, and then update when done
+
+
+    void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgRequestSize size,boolean wasCancelled,boolean ranOutOfMemory){
         bThumb = thmb;
         if(!wasCancelled){
             if(b!=null) setVars(b);
@@ -131,9 +144,9 @@ class ImageReference {
         mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
     }    //gets thumbnail or full image
 
-    BufferedImage getImage(ImgSize size) {
+    BufferedImage getImage(ImgRequestSize size) {
         //**//log.print(LogType.Debug,"Image requested: " + absolutePath + " at size " + size);
-        if(size==ImgSize.Screen) size=ImgSize.Max;
+        if(size==ImgRequestSize.Screen) size=ImgRequestSize.Max;
 
         //If requested image already exists, return it.
         if (size.isThumb() && bThumb != null) {
@@ -149,7 +162,7 @@ class ImageReference {
             if(bThumb==null) {
                 getThumbQuick();//if no longer null thumbIsQuick();//add thumb to list of thumbs which are ThumbQuicks, so they can be loaded while idle.
             }
-            if (size == ImgSize.Thumb) {//If ImgSize.ThumbFull still want to create swingworker
+            if (size == ImgRequestSize.Thumb) {//If ImgRequestSize.ThumbFull still want to create swingworker
                 if (bThumb != null) {
                     return localGetBufThumb();
                 }
@@ -159,7 +172,7 @@ class ImageReference {
 
         //Build large icon and small icon, return relevent.
         if (!isLoading) {
-        loadViaSwingWorker(size);
+        OLD__loadViaSwingWorker(size);
         }
 
 
@@ -167,7 +180,7 @@ class ImageReference {
             if(size.isLarge()){//if bImage exists but is not currentlarge, use for now but swingworker will replace
             return localGetBufImage();
             }
-            //If ImgSize.ThumbOnly then clear bImage
+            //If ImgRequestSize.ThumbOnly then clear bImage
             return localGetBufThumb();
         }
         else {
@@ -185,13 +198,10 @@ class ImageReference {
 	if(Bheight<Bwidth) iOri = Orientation.Landscape;
 	else iOri = Orientation.Portrait;
     }
+//</editor-fold>
 
-
-
-
-
+//<editor-fold defaultstate="collapsed" desc="old stuffs">
     //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
-    //Old
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
     private BufferedImage bImageFilt = null;
@@ -211,8 +221,9 @@ class ImageReference {
         if(isFiltered) return bThumbFilt;
         return bThumb;
     }
+//</editor-fold>
 
-    //Unsorted
+//<editor-fold defaultstate="collapsed" desc="Unsorted">
     private final int imgType = BufferedImage.TYPE_INT_RGB;
     File pathFile = null;
     long imageFileLength,modifiedDateTime;
@@ -223,16 +234,15 @@ class ImageReference {
     boolean isQuickThumb = false;
     boolean hasTriedQuickThumb = false;
     boolean hasTriedExtractDimensions = false;
-    ImgSize currentLarge=ImgSize.Screen;//The size of the large bImage (Max or Screen)
+    ImgRequestSize currentLarge=ImgRequestSize.Screen;//The size of the large bImage (Max or Screen)
     boolean isLoading = false;
     boolean isBImageIcon = false;//Is the image a loading icon
     boolean isBThumbIcon = false;//Is the thumb a loading icon
     GUI mainGUI;
     ImageLoader imageLoader;
     //String title,filename,comments?
-
-    ImageReference(String inputPath,String currentID,GUI gui){
-        log.print(LogType.Debug,"Image:"+currentID+" has inPath: "+inputPath);
+//</editor-fold>
+    ImageReference(String inputPath ,GUI gui){
 	mainGUI = gui;
         String tempPath = "";
 	try{
@@ -262,7 +272,7 @@ class ImageReference {
 	    log.print(LogType.Error,"File could not be found at " + inputPath);
 	}
 	//ImageObjectConstructor);
-	//getImage(ImgSize.Screen);
+	//getImage(ImgRequestSize.Screen);
 
 	//initVars()
 	Dimension scrD = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
@@ -271,7 +281,7 @@ class ImageReference {
         modifiedDateTime = pathFile.lastModified();
         imageFileLength = pathFile.length();
     }
-
+//<editor-fold defaultstate="collapsed" desc="old Stuffs">
 //    ImageReference(File inFile){
 //	pathFile = inFile;
 //	pathFile.getAbsolutePath();
@@ -305,7 +315,7 @@ class ImageReference {
 	if(Bwidth!=null) return Bwidth;
         extractDimensionsFromFile(pathFile);
 	if(Bwidth!=null) return Bwidth;
-	getImage(ImgSize.Max);
+	getImage(ImgRequestSize.Max);
 	//note that the bImage should now be set to null to clear memory???????????????
 	return Bwidth;
     }
@@ -313,7 +323,7 @@ class ImageReference {
 	if(Bheight!=null) return Bheight;
         extractDimensionsFromFile(pathFile);
 	if(Bheight!=null) return Bheight;
-	getImage(ImgSize.Max);
+	getImage(ImgRequestSize.Max);
 	//note that the bImage should now be set to null to clear memory??????????????
 	return Bheight;
     }
@@ -410,11 +420,11 @@ void getThumbQuick() {
 
     int getWidthForThumb(){
 	//if(bThumb!=null) return bThumb.getWidth();
-	return getImage(ImgSize.Thumb).getWidth();
+	return getImage(ImgRequestSize.Thumb).getWidth();
     }
     int getHeightForThumb(){
 	//if(bThumb!=null) return bThumb.getHeight();
-	return getImage(ImgSize.Thumb).getHeight();//Thumbnail height not image height or Bheight
+	return getImage(ImgRequestSize.Thumb).getHeight();//Thumbnail height not image height or Bheight
     }
     int getNoPixels(){
         if((Bwidth==null)||(Bheight==null)){
@@ -425,12 +435,12 @@ void getThumbQuick() {
         return Bwidth*Bheight;
     }
 
-    void preload(ImgSize size){
+    void preload(ImgRequestSize size){
         if(getNoPixels() < 15 * 1024 * 1024) {//if can verify is less than 15 megapixels
-            if (size == ImgSize.Max) {
+            if (size == ImgRequestSize.Max) {
                 if (getNoPixels() > 8 * 1024 * 1024)//If has more than 8 megapixels
                 {
-                    size = ImgSize.Screen;
+                    size = ImgRequestSize.Screen;
                 }
             }
             getImage(size);
@@ -529,4 +539,47 @@ void getThumbQuick() {
         bThumbFilt=null;
 	pathFile = null;
     }
+
+    //Very Old and replaced
+        private void OLD__loadViaSwingWorker(ImgRequestSize size) {
+        isLoading = true;
+        imageLoader = new ImageLoader(this, pathFile, size, imgType, screenWidth, screenHeight, thumbMaxW, thumbMaxH, bThumb,imageFileLength,modifiedDateTime);
+        if (bImage == null) {
+            bImage = createLoadingThumb();
+            currentLarge = size;
+            isBImageIcon = true;
+            setVars(bImage);
+        }
+        if (bThumb == null) {
+            getThumbIfCached();
+        }
+        if(bThumb==null){
+            bThumb = createLoadingThumb();
+            isBThumbIcon = true;
+        }
+        imageLoader.execute();
+    }
 }
+
+enum Orientation {Landscape,Portrait} //For drawing/painting not for rotation
+
+enum ImgRequestSize {Screen,Max,Thumb;//,ThumbOnly,ThumbPreload;
+    boolean isLarge(){
+	if(this==Thumb) return false;/*||this==ThumbPreload*/
+	return true;
+    }
+    boolean isThumb(){
+	if(this==Screen||this==Max) return false;
+	else return true;
+    }
+    public String toString(){
+	switch (this){
+	case Thumb: return "Thumb";
+	//case ThumbPreload: return "ThumbFull";//ThumbFull requests size Thumb, but not clearing the full image as it may be used later
+	case Screen: return "Screen";
+	default: return "Max";//Max is not yet implemented.
+	}
+    }
+}
+
+// </editor-fold>

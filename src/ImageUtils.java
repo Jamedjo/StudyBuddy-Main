@@ -129,7 +129,7 @@ Dimension outWH = new Dimension();
         return new Dimension(outW,outH);
     }
 
-    static Dimension getImageWH(ImgSize size, int MaxW, int MaxH,ImageReference relImage){
+    static Dimension getImageWH(ImgRequestSize size, int MaxW, int MaxH,ImageReference relImage){
         Dimension useWH = new Dimension();
 	if(size.isLarge()){
 	    useWH= scaleToMax(relImage.getWidthAndMake(),relImage.getHeightAndMake(), MaxW, MaxH);

@@ -100,7 +100,7 @@ class ProgramState{
       	imageList = new ImageReference[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI);
+	    imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),mainGUI);
 	}
 	lastIndex = (imageIDs.length - 1);
 
@@ -114,7 +114,7 @@ class ProgramState{
             imageIDs = new String[1];
             imageIDs[0] = "-1";
             imageList = new ImageReference[1];
-            imageList[0] = new ImageReference("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex",imageIDs[0],mainGUI);
+            imageList[0] = new ImageReference("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex",mainGUI);
         }        
     }
 
@@ -144,7 +144,7 @@ class ProgramState{
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
                             //tempImageList.add(new ImageReference(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
-                            tempImageList.add(new ImageReference(f.getAbsolutePath(), currentImID,mainGUI));
+                            tempImageList.add(new ImageReference(f.getAbsolutePath(),mainGUI));
                         }
                     }
                 }
@@ -162,7 +162,7 @@ class ProgramState{
                     String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());
                     if (currentImID != null) {
                         tempImageIDs.add(currentImID);
-                        tempImageList.add(new ImageReference(c.getAbsolutePath(), currentImID,mainGUI));
+                        tempImageList.add(new ImageReference(c.getAbsolutePath(),mainGUI));
                     }
                 }
                 }
@@ -268,7 +268,7 @@ class ProgramState{
 	String getDummyLinkID() { return DummyLinkID; }
 	
 
-    Dimension getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
+    Dimension getRelImageWH(ImgRequestSize size, int MaxW, int MaxH, int relativeImage){
 	ImageReference relImage = getImageI(relItoFixI(relativeImage));
         return ImageUtils.getImageWH(size, MaxW, MaxH, relImage);
     }
@@ -285,9 +285,9 @@ class ProgramState{
         return imageIDs[relItoFixI(relativeImage)];
     }
 
-    BufferedImage getBImageI(int relativeImage, ImgSize size){
+    BufferedImage getBImageI(int relativeImage, ImgRequestSize size){
             //If getting thumb for an upcoming image, get the full image too.
-            //if((size==ImgSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgSize.ThumbFull;
+            //if((size==ImgRequestSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgRequestSize.ThumbFull;
 	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
 
         if(size.isLarge()){

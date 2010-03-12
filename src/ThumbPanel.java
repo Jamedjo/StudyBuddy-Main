@@ -51,11 +51,11 @@ class ThumbButton extends JPanel{
 	if(thumbNumber<mainGUI.state.numberOfImages){// use <= to show currentI too
 	    //set dimension
 	    //currentThumb = mainGUI.state.next(currentThumb);
-	    useWH = mainGUI.state.getRelImageWH(ImgSize.Thumb,size,size,thumbNumber);
+	    useWH = mainGUI.state.getRelImageWH(ImgRequestSize.Thumb,size,size,thumbNumber);
 	    thumbOfsetW= (size - useWH.width)/2;
 	    thumbOfsetH= (size - useWH.height)/2;
-	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgSize.Thumb));
-	    g2.drawImage(mainGUI.state.getBImageI(thumbNumber,ImgSize.Thumb), thumbOfsetW+hOffset, thumbOfsetH,useWH.width,useWH.height, this);
+	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgRequestSize.Thumb));
+	    g2.drawImage(mainGUI.state.getBImageI(thumbNumber,ImgRequestSize.Thumb), thumbOfsetW+hOffset, thumbOfsetH,useWH.width,useWH.height, this);
 	}
     }
 

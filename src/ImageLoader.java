@@ -15,7 +15,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
     double maxFilesizeToLoadThumb = 3;//Megabytes
     BufferedImage loadBImage,loadBThumb;
     File pathFile;
-    ImgSize size;
+    ImgRequestSize size;
     int imgType;
     int screenWidth,screenHeight,thumbMaxW,thumbMaxH;
     long fileLength,modifiedDateTime;
@@ -23,7 +23,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
     boolean success = false;
     boolean outOfMemory=false;
 
-    ImageLoader(ImageReference p,File pF, ImgSize sz,
+    ImageLoader(ImageReference p,File pF, ImgRequestSize sz,
             int iT,int sW,int sH,int tW,int tH, BufferedImage lBT,long fL,long mDT) {
         pathFile = pF;
         size = sz;
@@ -54,7 +54,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
 
 
             if(!isCancelled()){
-                if ((size == ImgSize.Screen) /*|| (size == ImgSize.ThumbFull)*/) {//&& not thumb only (as this would be extra work)
+                if ((size == ImgRequestSize.Screen) /*|| (size == ImgRequestSize.ThumbFull)*/) {//&& not thumb only (as this would be extra work)
                     loadBImage = makeScreenImg(loadBImage);
                 }
             }
