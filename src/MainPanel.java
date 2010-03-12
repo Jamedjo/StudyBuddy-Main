@@ -98,7 +98,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     }
     void fixFitZoomMultiplier(){
         //if(useWH==null){
-            useWH = mainGUI.state.getRelImageWH(ImgRequestSize.Screen, boardW, boardH, 0);
+            useWH = mainGUI.state.getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
         //}
         //Potentially inefficient as forces full size image to load
         //log.print(LogType.Debug,"old zoomMultiplier- " + getZoomMult());
@@ -156,7 +156,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             useWH = new Dimension((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()));
         } else {
-            cSize = ImgRequestSize.Screen;
+            cSize = ImgRequestSize.Max;
             useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
