@@ -288,7 +288,7 @@ class ProgramState{
     BufferedImage getBImageI(int relativeImage, ImgRequestSize size){
             //If getting thumb for an upcoming image, get the full image too.
             //if((size==ImgRequestSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgRequestSize.ThumbFull;
-	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
+	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].OLD_getImage(size);
 
         if(size.isLarge()){
             int i;
@@ -317,7 +317,7 @@ class ProgramState{
         imageColoursUpdated();
     }
     void imageColoursUpdated(){
-        getCurrentImage().filterImage();
+        getCurrentImage().OLD__filterImage();
         mainGUI.mainPanel.repaint();
         mainGUI.thumbPanel.repaint();
     }
