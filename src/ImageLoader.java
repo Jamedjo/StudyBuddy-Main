@@ -72,11 +72,11 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
             } finally {
                 if (outOfMemory) {
                     returnImage = null;
-                    returnThumb = getOutOfMemoryImage();
+                    returnThumb = ErrorImages.outOfMemory;
                     returnImageType = ImageType.None;
                     returnThumbType = ImageType.Icon;
                 } else if (returnImageType == ImageType.None) {
-                    returnImage = getFileNotFoundImage();
+                    returnImage = ErrorImages.fileNotFound;
                     returnThumb = returnImage;
                     returnImageType = ImageType.Icon;
                     returnThumbType = ImageType.Icon;
@@ -94,14 +94,6 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
             log.print(LogType.Debug, e);
         }
 
-    }
-    BufferedImage getFileNotFoundImage() {
-        //improvement: set the buffered image to a java graphics drawn X icon
-        return SysIcon.FileNotFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
-    }
-    BufferedImage getOutOfMemoryImage() {
-        //improvement: set the buffered image to a java graphics drawn X icon
-        return SysIcon.OutOfMemory.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     }
     void makeThumb(BufferedImage bigImg) {
         long start = Calendar.getInstance().getTimeInMillis();

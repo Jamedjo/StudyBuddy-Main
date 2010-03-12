@@ -19,8 +19,13 @@ enum ImageType{Original,Filtered,Icon,None;
         return false;
     }
 }
-
-
+//enum ErrorImageType{FileNotFound,OutOfMemory}
+class ErrorImages{
+    static BufferedImage fileNotFound = SysIcon.FileNotFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage outOfMemory = SysIcon.OutOfMemory.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage unknowError = SysIcon.Error.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+    //improvement: use java graphics to draw without relying on any external files, so GUI won't crash if no external file access
+}
 class MultiSizeImage{
     //make these private to some extent. Or make each multiSize image private.
     BufferedImage fullImage = null;
@@ -47,8 +52,6 @@ class FilterState{
     }
 }
 //enum ImageQuality{Sampled,Low,Medium,High}
- //</editor-fold>
-//<editor-fold desc="ImageItem">
 class ImageItem{
     //Will deal with the image being flipped/rotated/cropped/filtered
     //Will not hold image title, path
@@ -139,24 +142,30 @@ class ImageItem{
     }
 
     BufferedImage getCurrentFullImage(){
+        BufferedImage returnImage;
         switch(fullType){
             case Icon:
-                return iconImage.fullImage;
+                returnImage= iconImage.fullImage;
             case Filtered:
-                return filteredImage.fullImage;
+                returnImage= filteredImage.fullImage;
             default:
-                return originalImage.fullImage;
+                returnImage= originalImage.fullImage;
         }
+        if(returnImage==null) returnImage = ErrorImages.unknowError;
+        return returnImage;
     }
     BufferedImage getCurrentThumbImage(){
+        BufferedImage returnImage;
         switch(thumbType){
             case Icon:
-                return iconImage.thumbImage;
+                returnImage= iconImage.thumbImage;
             case Filtered:
-                return filteredImage.thumbImage;
+                returnImage= filteredImage.thumbImage;
             default:
-                return originalImage.thumbImage;
+                returnImage= originalImage.thumbImage;
         }
+        if(returnImage==null) returnImage = ErrorImages.unknowError;
+        return returnImage;
     }
     private void filterImage(ImgSize size){
         int i;
