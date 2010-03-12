@@ -650,7 +650,7 @@ void getThumbQuick() {
             bThumb = createLoadingThumb();
             isBThumbIcon = true;
         }
-        imageLoader.execute();
+        OLD_imageLoader.execute();
     }
             void OLD_setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgRequestSize size,boolean wasCancelled,boolean ranOutOfMemory){
         if(bThumb==null) bThumb = thmb;
