@@ -271,13 +271,26 @@ void getThumbQuick() {
 	//if(bThumb!=null) return bThumb.getHeight();
 	return getImage(ImgSize.Thumb).getHeight();//Thumbnail height not image height or Bheight
     }
+    int getNoPixels(){
+        if((Bwidth==null)||(Bheight==null)){
+            extractDimensionsFromFile(pathFile);
+        }
+
+        if((Bwidth==null)||(Bheight==null)) return Integer.MAX_VALUE;
+        return Bwidth*Bheight;
+    }
 
     void preload(ImgSize size){
-        if(size==ImgSize.Max){
-            //if file is known huge
-            size=ImgSize.Screen;
+        if(getNoPixels() < 15 * 1024 * 1024) {//if can verify is less than 15 megapixels
+            if (size == ImgSize.Max) {
+                if (getNoPixels() > 8 * 1024 * 1024)//If has more than 8 megapixels
+                {
+                    size = ImgSize.Screen;
+                }
+            }
+            getImage(size);
         }
-        getImage(size); //Should only do if size will not be huge- huge images use too much memory to preload at Max.
+        else flush();//if image is really huge we need to flush it.
     }
     
     //gets thumbnail or full image

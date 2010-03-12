@@ -160,6 +160,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
+        //g2.rotate(double theta);Math.toRadians(90.0);
+        //g2.transform(AffineTransform Tx)
         g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOffset, topOffset, useWH.width, useWH.height, this);
         drawLinkBoxes(g2, mainGUI.settings.getSettingAsBool("showNotes",true), mainGUI.settings.getSettingAsBool("showLinks",true));
     }

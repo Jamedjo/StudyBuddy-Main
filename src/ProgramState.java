@@ -297,7 +297,7 @@ class ProgramState{
                 imageList[relItoFixI(i+relativeImage)].preload(size);//Preloads next three images
             } for(;i<lastIndex;i++){
                 if(i==prev) imageList[prev].preload(size);//Preloads previous image
-                //imageList[relItoFixI(i+relativeImage)].flush();//removes from memory all images after the preloaded ones
+                imageList[relItoFixI(i+relativeImage)].flush();//removes from memory all images after the preloaded ones
             }
         }
 	return returnImage;

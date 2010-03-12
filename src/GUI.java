@@ -131,6 +131,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     boolean isImage(File f){
         String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
         //String[] readerNames = ImageIO.getReaderFormatNames();
+        //Sanselan.hasImageFileExtension();
         String ext = null;
         ext = ImageObjectUtils.getFileExtLowercase(f.getName());
         if (ext==null) return false;
@@ -717,6 +718,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
     void imageToolbarToggle(){
         imageToolbar.setVisible(!imageToolbar.isVisible());
+        w.validate();
         mainPanel.onResize();
     }
 }
