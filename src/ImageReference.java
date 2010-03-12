@@ -45,8 +45,17 @@ enum ImgSize {Screen,Max,Thumb;//,ThumbOnly,ThumbPreload;
 	}
     }
 }
+class ImageItem{
+    //Will hold image, thumb, filtered version, current size, alternate place for icons and their sizes
+    //Will include getters which return relevent image
+    //Will not include any information on how to load the image
+    //Will deal with the image being flipped/rotated/cropped/filtered
+    //Will not hold image title, path
+    //Will use other classes to hold related information (eg. width and height as dimension OR brightness/contrast/isFiltered as Filter)
 
-class ImageObject { //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
+}
+
+class ImageReference { //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
     Log log = new Log(false);
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
@@ -77,7 +86,7 @@ class ImageObject { //could be updated to use a javase7 path when java 7 release
     ImageLoader imageLoader;
     //String title,filename,comments?
 
-    ImageObject(String inputPath,String currentID,GUI gui){
+    ImageReference(String inputPath,String currentID,GUI gui){
 	mainGUI = gui;
         String tempPath = "";
         imageID = currentID;
@@ -119,7 +128,7 @@ class ImageObject { //could be updated to use a javase7 path when java 7 release
         imageFileLength = pathFile.length();
     }
 
-//    ImageObject(File inFile){
+//    ImageReference(File inFile){
 //	pathFile = inFile;
 //	pathFile.getAbsolutePath();
 //	initVars();
@@ -174,13 +183,13 @@ class ImageObject { //could be updated to use a javase7 path when java 7 release
     }
 
     String getImageUID(){
-        return ImageObjectUtils.getUID(pathFile, imageFileLength, modifiedDateTime);
+        return ImageUtils.getUID(pathFile, imageFileLength, modifiedDateTime);
     }
     
     void getImageBySampling(){
         try {
             long start =Calendar.getInstance().getTimeInMillis();
-        String ext = ImageObjectUtils.getFileExtLowercase(pathFile.getName());
+        String ext = ImageUtils.getFileExtLowercase(pathFile.getName());
         if (ext == null)return;
         //ImageIO.scanForPlugins();
         Iterator readers = ImageIO.getImageReadersBySuffix(ext);
@@ -222,7 +231,7 @@ void getThumbQuick() {
         return;
     }
     if (pathFile!= null) {
-    BufferedImage tempImage = ImageObjectUtils.getThumbFromExif(pathFile);
+    BufferedImage tempImage = ImageUtils.getThumbFromExif(pathFile);
     if (tempImage != null) {
         Log.Print(LogType.Debug, "Read exif of image " + pathFile.toString());
         bThumb = tempImage;
@@ -244,14 +253,14 @@ void getThumbQuick() {
     //bi = reader.readThumbnail(imageIndex, thumbnailIndex);
 
     //if (bThumb != null) {//Don't want to save sampled thumb as it will prevent better copy being saved
-    //    ImageObjectUtils.saveThumbToFile(thumbPath, bThumb, pathFile, imageFileLength,  modifiedDateTime);
+    //    ImageUtils.saveThumbToFile(thumbPath, bThumb, pathFile, imageFileLength,  modifiedDateTime);
     //}
 }
 
   void extractDimensionsFromFile(File pathFile) {
       if(isBImageIcon) return;
     if(hasTriedExtractDimensions) return;
-    Dimension temp = ImageObjectUtils.getImageDimensionsSanslan(pathFile);
+    Dimension temp = ImageUtils.getImageDimensionsSanslan(pathFile);
     if (temp != null) {
         Bwidth = temp.width;
         Bheight = temp.height;
@@ -402,7 +411,7 @@ void getThumbQuick() {
 
     void getThumbIfCached() {
         File thumbPath = new File(mainGUI.settings.getSetting("homeDir") + mainGUI.settings.getSetting("thumbnailPathExt"));
-        File checkFile = new File(thumbPath, (ImageObjectUtils.getSaveEncoding(pathFile, imageFileLength,  modifiedDateTime)));
+        File checkFile = new File(thumbPath, (ImageUtils.getSaveEncoding(pathFile, imageFileLength,  modifiedDateTime)));
         if (checkFile.exists()) {
             boolean success = false;
             try {

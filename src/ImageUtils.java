@@ -12,7 +12,7 @@ import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 
-class ImageObjectUtils{
+class ImageUtils{
 
     static void saveThumbToFile(Settings settings, BufferedImage bThumb,File pathFile,long fileLength, long modifiedDateTime){
         try{
@@ -129,7 +129,7 @@ Dimension outWH = new Dimension();
         return new Dimension(outW,outH);
     }
 
-    static Dimension getImageWH(ImgSize size, int MaxW, int MaxH,ImageObject relImage){
+    static Dimension getImageWH(ImgSize size, int MaxW, int MaxH,ImageReference relImage){
         Dimension useWH = new Dimension();
 	if(size.isLarge()){
 	    useWH= scaleToMax(relImage.getWidthAndMake(),relImage.getHeightAndMake(), MaxW, MaxH);

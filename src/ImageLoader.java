@@ -19,11 +19,11 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
     int imgType;
     int screenWidth,screenHeight,thumbMaxW,thumbMaxH;
     long fileLength,modifiedDateTime;
-    ImageObject parent;//needed to publish result
+    ImageReference parent;//needed to publish result
     boolean success = false;
     boolean outOfMemory=false;
 
-    ImageLoader(ImageObject p,File pF, ImgSize sz,
+    ImageLoader(ImageReference p,File pF, ImgSize sz,
             int iT,int sW,int sH,int tW,int tH, BufferedImage lBT,long fL,long mDT) {
         pathFile = pF;
         size = sz;
@@ -113,7 +113,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
 
     void makeThumb(BufferedImage bigImg) {
         long start = Calendar.getInstance().getTimeInMillis();
-        Dimension iconWH = ImageObjectUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), thumbMaxW, thumbMaxH);
+        Dimension iconWH = ImageUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), thumbMaxW, thumbMaxH);
         if (!(iconWH.width < bigImg.getWidth())) {
             loadBThumb = bigImg;
         } else {
@@ -130,12 +130,12 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
         log.print(LogType.Debug, "  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
         loadBThumb = tempimage;
         }
-        ImageObjectUtils.saveThumbToFile(parent.mainGUI.settings, loadBThumb,pathFile, fileLength,  modifiedDateTime);
+        ImageUtils.saveThumbToFile(parent.mainGUI.settings, loadBThumb,pathFile, fileLength,  modifiedDateTime);
     }
 
     //could merge two functions
     BufferedImage makeScreenImg(BufferedImage bigImg) {
-        Dimension iconWH = ImageObjectUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), screenWidth, screenHeight);
+        Dimension iconWH = ImageUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), screenWidth, screenHeight);
         if (!(iconWH.width < bigImg.getWidth())) {
             return bigImg;
         }

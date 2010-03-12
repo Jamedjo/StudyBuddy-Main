@@ -133,7 +133,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         //String[] readerNames = ImageIO.getReaderFormatNames();
         //Sanselan.hasImageFileExtension();
         String ext = null;
-        ext = ImageObjectUtils.getFileExtLowercase(f.getName());
+        ext = ImageUtils.getFileExtLowercase(f.getName());
         if (ext==null) return false;
         for (String imgExt : exts) {
             if (ext.equals(imgExt)) {
@@ -637,7 +637,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         int destReady = jpgExporter.showOpenDialog(w);
         if (destReady == JFileChooser.APPROVE_OPTION) {
             String filePathAndName = jpgExporter.getSelectedFile().toString();
-            String ext = ImageObjectUtils.getFileExtLowercase(filePathAndName);
+            String ext = ImageUtils.getFileExtLowercase(filePathAndName);
             if((ext==null)||(!(ext.equals("jpg")||ext.equals("jpeg")))) filePathAndName = filePathAndName + ".jpg";
             settings.setSettingAndSave("lastOpenDirectory",jpgExporter.getCurrentDirectory().toString());
             state.getCurrentImage().saveFullToPath(filePathAndName);

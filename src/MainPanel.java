@@ -110,7 +110,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     void onResize() {
         //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
         if ( isZoomed() ) {
-            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             if((getCursorMode()==DragMode.Drag)||(getCursorMode()==DragMode.None)){
                 setCursorMode(getCurrentDrag());
             }
@@ -153,7 +153,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         ImgSize cSize;
         if (isZoomed()) {
             cSize = ImgSize.Max;
-            this.setPreferredSize(ImageObjectUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             useWH = new Dimension((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()));
         } else {
             cSize = ImgSize.Screen;

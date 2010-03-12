@@ -21,7 +21,7 @@ enum LoadType{Init,Load,Filter,Refresh,LoadLast}
 //Previous image and 3 next images should be kept, others flushed.
 class ProgramState{
     Log log = new Log(false);
-    private ImageObject[] imageList;
+    private ImageReference[] imageList;
     private String[] imageIDs;
     int lastIndex; //Must be updated when number of images changes
     String currentFilter;//replace with private IDTitle and use getters and setters to access if ever needed.
@@ -97,10 +97,10 @@ class ProgramState{
         mainGUI.settings.setSettingAndSave("lastFilterUsed", currentFilter);
 	//if imageIDs.length==0
 	//then a file should be added first (Construct with Init&imports, then return;)
-      	imageList = new ImageObject[imageIDs.length];
+      	imageList = new ImageReference[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageObject(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI);
+	    imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),imageIDs[i],mainGUI);
 	}
 	lastIndex = (imageIDs.length - 1);
 
@@ -113,8 +113,8 @@ class ProgramState{
             log.print(LogType.DebugError,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
             imageIDs = new String[1];
             imageIDs[0] = "-1";
-            imageList = new ImageObject[1];
-            imageList[0] = new ImageObject("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex",imageIDs[0],mainGUI);
+            imageList = new ImageReference[1];
+            imageList[0] = new ImageReference("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex",imageIDs[0],mainGUI);
         }        
     }
 
@@ -134,7 +134,7 @@ class ProgramState{
         try {
             if (currentFilter.equals("-1")) { // "-1" is now show all (working on TagID rather than Tag Title)
                 ArrayList<String> tempImageIDs = new ArrayList<String>(Arrays.asList(imageIDs));
-                ArrayList<ImageObject> tempImageList = new ArrayList<ImageObject>(Arrays.asList(imageList));
+                ArrayList<ImageReference> tempImageList = new ArrayList<ImageReference>(Arrays.asList(imageList));
                 ArrayList<File> foldersList = new ArrayList<File>();
                 for (File f : files) {
                     if(f.isDirectory()) foldersList.add(f);
@@ -143,8 +143,8 @@ class ProgramState{
                         String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
-                            //tempImageList.add(new ImageObject(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
-                            tempImageList.add(new ImageObject(f.getAbsolutePath(), currentImID,mainGUI));
+                            //tempImageList.add(new ImageReference(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
+                            tempImageList.add(new ImageReference(f.getAbsolutePath(), currentImID,mainGUI));
                         }
                     }
                 }
@@ -162,13 +162,13 @@ class ProgramState{
                     String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());
                     if (currentImID != null) {
                         tempImageIDs.add(currentImID);
-                        tempImageList.add(new ImageObject(c.getAbsolutePath(), currentImID,mainGUI));
+                        tempImageList.add(new ImageReference(c.getAbsolutePath(), currentImID,mainGUI));
                     }
                 }
                 }
                 imageIDs = new String[tempImageIDs.size()];
                 tempImageIDs.toArray(imageIDs);
-                imageList = new ImageObject[tempImageList.size()];
+                imageList = new ImageReference[tempImageList.size()];
                 tempImageList.toArray(imageList);
                 if (lastIndex >= (imageIDs.length - 1)) {
                     //Print error loading images?
@@ -200,7 +200,7 @@ class ProgramState{
     //flushes all images and thumbs
     void safelyDestruct(){
 	//might check if mainGUI.state==this, as this would imply no need to distruct yet.
-	for(ImageObject imgObj : imageList){
+	for(ImageReference imgObj : imageList){
 	    imgObj.destroy();
 	    imgObj = null;
 	}
@@ -255,7 +255,7 @@ class ProgramState{
     }
 
     // Must be edited so empty DB/imageList does not cause error
-    ImageObject getCurrentImage(){
+    ImageReference getCurrentImage(){
 	return imageList[currentI];
     }
     String getCurrentImageID(){
@@ -269,11 +269,11 @@ class ProgramState{
 	
 
     Dimension getRelImageWH(ImgSize size, int MaxW, int MaxH, int relativeImage){
-	ImageObject relImage = getImageI(relItoFixI(relativeImage));
-        return ImageObjectUtils.getImageWH(size, MaxW, MaxH, relImage);
+	ImageReference relImage = getImageI(relItoFixI(relativeImage));
+        return ImageUtils.getImageWH(size, MaxW, MaxH, relImage);
     }
 
-    ImageObject getImageI(int i){
+    ImageReference getImageI(int i){
         if(imageList.length<1){
             log.print(LogType.Error,"Error: There are no images loaded under current search.\nEnsure filter has some images.");
             return null;
