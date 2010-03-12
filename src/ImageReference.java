@@ -52,22 +52,171 @@ class ImageItem{
     //Will deal with the image being flipped/rotated/cropped/filtered
     //Will not hold image title, path
     //Will use other classes to hold related information (eg. width and height as dimension OR brightness/contrast/isFiltered as Filter)
+    MultiSizeImage originalImage = null;
+    MultiSizeImage filteredImage = null;
+    MultiSizeImage iconImage = null;
+    FilterState filter = new FilterState();
+    //TransFormstate transform;
+    boolean isIcon = false;
+
+
+    MultiSizeImage getCurrentMultiSizeImage(){
+        if(isIcon) return iconImage;
+        if(filter.isFiltered) return filteredImage;
+        return originalImage;
+    }
 
 }
+class MultiSizeImage{
+    //make these private to some extent. Or make each multiSize image private.
+    BufferedImage fullImage;
+    //BufferedImage mediumImage;
+    BufferedImage thumbImage;
+    Dimension dimensions;
 
-class ImageReference { //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
+}
+class FilterState{
+    boolean isFiltered = false;
+    int contrast = 50;
+    int brightness = 50;
+    boolean isInverted = false;
+}
+
+class ImageReference {
+    //New
     Log log = new Log(false);
+    ImageItem image = new ImageItem();
+
+
+
+    //Currently converting
+
+    //Get image using swing worker.
+    //Must set a loading icon if not ready, and then update when done
+    private void loadViaSwingWorker(ImgSize size) {
+        isLoading = true;
+        imageLoader = new ImageLoader(this, pathFile, size, imgType, screenWidth, screenHeight, thumbMaxW, thumbMaxH, bThumb,imageFileLength,modifiedDateTime);
+        if (bImage == null) {
+            bImage = createLoadingThumb();
+            currentLarge = size;
+            isBImageIcon = true;
+            setVars(bImage);
+        }
+        if (bThumb == null) {
+            getThumbIfCached();
+        }
+        if(bThumb==null){
+            bThumb = createLoadingThumb();
+            isBThumbIcon = true;
+        }
+        imageLoader.execute();
+    }
+
+    void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgSize size,boolean wasCancelled,boolean ranOutOfMemory){
+        bThumb = thmb;
+        if(!wasCancelled){
+            if(b!=null) setVars(b);
+            bImage = b;
+            currentLarge = size;
+        } else {
+            bImage = null;
+        }
+        isBThumbIcon=false;
+        isBImageIcon=false;
+        isLoading = false;
+        if(bImage!=null){
+            if(isFiltered()) filterImage();
+        }
+        mainGUI.mainPanel.onResize();//resize as image have changed dimensions
+        mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
+    }    //gets thumbnail or full image
+
+    BufferedImage getImage(ImgSize size) {
+        //**//log.print(LogType.Debug,"Image requested: " + absolutePath + " at size " + size);
+        if(size==ImgSize.Screen) size=ImgSize.Max;
+
+        //If requested image already exists, return it.
+        if (size.isThumb() && bThumb != null) {
+            return localGetBufThumb();
+        }
+        if ((size == currentLarge) && (bImage != null)) {
+            return localGetBufImage();
+        }
+
+
+        if ((!isLoading)&&bThumb==null) {//If swing worker is loading an image, it will then write a thumb. Must avoid reading thumb at the same time as it is being written.
+            getThumbIfCached();
+            if(bThumb==null) {
+                getThumbQuick();//if no longer null thumbIsQuick();//add thumb to list of thumbs which are ThumbQuicks, so they can be loaded while idle.
+            }
+            if (size == ImgSize.Thumb) {//If ImgSize.ThumbFull still want to create swingworker
+                if (bThumb != null) {
+                    return localGetBufThumb();
+                }
+            }
+        }
+
+
+        //Build large icon and small icon, return relevent.
+        if (!isLoading) {
+        loadViaSwingWorker(size);
+        }
+
+
+        if (bImage!=null){
+            if(size.isLarge()){//if bImage exists but is not currentlarge, use for now but swingworker will replace
+            return localGetBufImage();
+            }
+            //If ImgSize.ThumbOnly then clear bImage
+            return localGetBufThumb();
+        }
+        else {
+            //bImage is null, bThumb may be null, returns either bThumb or null
+            return localGetBufThumb();
+        }
+    }
+
+
+
+    void setVars(BufferedImage img){
+	if(bImage==null){ log.print(LogType.DebugError,"ERROR setting image size as image not initilized");return;}
+	Bwidth = img.getWidth();
+	Bheight = img.getHeight();
+	if(Bheight<Bwidth) iOri = Orientation.Landscape;
+	else iOri = Orientation.Portrait;
+    }
+
+
+
+
+
+    //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
+    //Old
     private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
     private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
     private BufferedImage bImageFilt = null;
     private BufferedImage bThumbFilt = null;
+    private Integer Bwidth = null;
+    private Integer Bheight = null;
+    int brightness = 50;
+    int contrast = 50;
     private boolean isFiltered = false;
+    boolean isInverted = false;
+
+    private BufferedImage localGetBufImage(){
+        if(isFiltered) return bImageFilt;
+        return bImage;
+    }
+    private BufferedImage localGetBufThumb(){
+        if(isFiltered) return bThumbFilt;
+        return bThumb;
+    }
+
+    //Unsorted
     private final int imgType = BufferedImage.TYPE_INT_RGB;
     File pathFile = null;
     long imageFileLength,modifiedDateTime;
     Orientation iOri;
-    private Integer Bwidth = null;
-    private Integer Bheight = null;
     int screenWidth, screenHeight;
     static final int thumbMaxW = 200;
     static final int thumbMaxH = 200;
@@ -75,10 +224,6 @@ class ImageReference { //could be updated to use a javase7 path when java 7 rele
     boolean hasTriedQuickThumb = false;
     boolean hasTriedExtractDimensions = false;
     ImgSize currentLarge=ImgSize.Screen;//The size of the large bImage (Max or Screen)
-    String imageID;
-    int brightness = 50;
-    int contrast = 50;
-    boolean isInverted = false;
     boolean isLoading = false;
     boolean isBImageIcon = false;//Is the image a loading icon
     boolean isBThumbIcon = false;//Is the thumb a loading icon
@@ -87,10 +232,9 @@ class ImageReference { //could be updated to use a javase7 path when java 7 rele
     //String title,filename,comments?
 
     ImageReference(String inputPath,String currentID,GUI gui){
+        log.print(LogType.Debug,"Image:"+currentID+" has inPath: "+inputPath);
 	mainGUI = gui;
         String tempPath = "";
-        imageID = currentID;
-        log.print(LogType.Debug,"Image:"+imageID+" has inPath: "+inputPath);
 	try{
 	    if(inputPath.startsWith("///\\\\\\")){
 		tempPath = inputPath.substring(6);
@@ -139,14 +283,6 @@ class ImageReference { //could be updated to use a javase7 path when java 7 rele
     }
     void setFiltered(boolean newBool){
         isFiltered = newBool;
-    }
-    private BufferedImage localGetBufImage(){
-        if(isFiltered) return bImageFilt;
-        return bImage;
-    }
-    private BufferedImage localGetBufThumb(){
-        if(isFiltered) return bThumbFilt;
-        return bThumb;
     }
 
     int getWidthAndMake(){
@@ -302,99 +438,7 @@ void getThumbQuick() {
         else flush();//if image is really huge we need to flush it.
     }
     
-    //gets thumbnail or full image
-    BufferedImage getImage(ImgSize size) {
-        //**//log.print(LogType.Debug,"Image requested: " + absolutePath + " at size " + size);
-        if(size==ImgSize.Screen) size=ImgSize.Max;
 
-        //If requested image already exists, return it.
-        if (size.isThumb() && bThumb != null) {
-            return localGetBufThumb();
-        }
-        if ((size == currentLarge) && (bImage != null)) {
-            return localGetBufImage();
-        }	
-
-        
-        if ((!isLoading)&&bThumb==null) {//If swing worker is loading an image, it will then write a thumb. Must avoid reading thumb at the same time as it is being written.
-            getThumbIfCached();
-            if(bThumb==null) {
-                getThumbQuick();//if no longer null thumbIsQuick();//add thumb to list of thumbs which are ThumbQuicks, so they can be loaded while idle.
-            }
-            if (size == ImgSize.Thumb) {//If ImgSize.ThumbFull still want to create swingworker
-                if (bThumb != null) {
-                    return localGetBufThumb();
-                }
-            }
-        }
-        
-
-        //Build large icon and small icon, return relevent.
-        if (!isLoading) {
-        loadViaSwingWorker(size);
-        }
-
-        
-        if (bImage!=null){
-            if(size.isLarge()){//if bImage exists but is not currentlarge, use for now but swingworker will replace
-            return localGetBufImage();
-            }
-            //If ImgSize.ThumbOnly then clear bImage
-            return localGetBufThumb();
-        }
-        else {
-            //bImage is null, bThumb may be null, returns either bThumb or null
-            return localGetBufThumb();
-        }
-    }
-
-    //Get image using swing worker.
-    //Must set a loading icon if not ready, and then update when done
-    private void loadViaSwingWorker(ImgSize size) {
-        isLoading = true;
-        imageLoader = new ImageLoader(this, pathFile, size, imgType, screenWidth, screenHeight, thumbMaxW, thumbMaxH, bThumb,imageFileLength,modifiedDateTime);
-        if (bImage == null) {
-            bImage = createLoadingThumb();
-            currentLarge = size;
-            isBImageIcon = true;
-            setVars(bImage);
-        }
-        if (bThumb == null) {
-            getThumbIfCached();
-        }
-        if(bThumb==null){
-            bThumb = createLoadingThumb();
-            isBThumbIcon = true;
-        }
-        imageLoader.execute();
-    }
-
-    void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgSize size,boolean wasCancelled,boolean ranOutOfMemory){
-        bThumb = thmb;
-        if(!wasCancelled){
-            if(b!=null) setVars(b);
-            bImage = b;
-            currentLarge = size;
-        } else {
-            bImage = null;
-        }
-        isBThumbIcon=false;
-        isBImageIcon=false;
-        isLoading = false;
-        if(bImage!=null){
-            if(isFiltered()) filterImage();
-        }
-        mainGUI.mainPanel.onResize();//resize as image have changed dimensions
-        mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
-    }
-
-    void setVars(BufferedImage img){
-	if(bImage==null){ log.print(LogType.DebugError,"ERROR setting image size as image not initilized");return;}
-	Bwidth = img.getWidth();
-	Bheight = img.getHeight();
-	if(Bheight<Bwidth) iOri = Orientation.Landscape;
-	else iOri = Orientation.Portrait;
-    }
 
     void saveFullToPath(String path){
         try{
