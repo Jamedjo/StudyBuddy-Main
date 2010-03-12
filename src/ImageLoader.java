@@ -126,6 +126,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
         g2.dispose();
         log.print(LogType.Debug, "  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
         returnThumb = tempimage;
+        returnThumbType = ImageType.Original;
         }
         ImageUtils.saveThumbToFile(parent.mainGUI.settings, returnThumb,pathFile, fileLength,  modifiedDateTime);
     }

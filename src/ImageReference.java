@@ -29,7 +29,7 @@ import java.util.Calendar;
 //to be replaced by full quickly- meaning image has to be loaded twice.
 //Instead huge images can be set to use a smaller image from disk cache or mosaic system. See issue 31 .
 
-enum N_ImgSize{Full,Thumb}
+enum ImgSize{Full,Thumb}
 enum ImageType{Original,Filtered,Icon,None;
     boolean isNone(){
         if(this==None) return true;
@@ -44,16 +44,39 @@ enum ImageType{Original,Filtered,Icon,None;
         return false;
     }
 }
+
+
+class MultiSizeImage{
+    //make these private to some extent. Or make each multiSize image private.
+    BufferedImage fullImage = null;
+    //BufferedImage mediumImage = null;
+    BufferedImage thumbImage = null;
+    Dimension dimensions = null;
+
+}
+class FilterState{
+    int contrast;
+    int brightness;
+    boolean isInverted;
+
+    FilterState(){
+        constructor(false,50,50);
+    }
+    FilterState(boolean isInvert,int contrst, int bright){
+        constructor(isInvert,contrst, bright);
+    }
+    void constructor(boolean isInvert,int contrst, int bright){
+        isInverted = isInvert;
+        contrast=contrst;
+        brightness=bright;
+    }
+}
+//enum ImageQuality{Sampled,Low,Medium,High}
  //</editor-fold>
 //<editor-fold desc="ImageItem">
 class ImageItem{
-    //Will hold image, thumb, filtered version, current size, alternate place for icons and their sizes
-    //Will include getters which return relevent image
-    //Will not include any information on how to load the image
     //Will deal with the image being flipped/rotated/cropped/filtered
     //Will not hold image title, path
-    //Will use other classes to hold related information (eg. width and height as dimension OR brightness/contrast/isFiltered as Filter)
-
     private MultiSizeImage originalImage = new MultiSizeImage();
     private MultiSizeImage filteredImage = new MultiSizeImage();
     private MultiSizeImage iconImage = new MultiSizeImage();
@@ -66,7 +89,28 @@ class ImageItem{
     
 //	if(Bheight<Bwidth) iOri = Orientation.Landscape;
 //	else iOri = Orientation.Portrait;
+    Dimension getCurrentDimensions(){
+        switch(fullType){
+            case Icon:
+                return iconImage.dimensions;
+            case Filtered:
+                return filteredImage.dimensions;
+            default:
+                return originalImage.dimensions;
+        }
+    }
+    Dimension getFullDimension(){
+        return originalImage.dimensions;
+    }
+    void setFullDimensions(Dimension in){
+        originalImage.dimensions = in;
+        filteredImage.dimensions = in;
+    }
 
+    int getNoPixels(){
+        Dimension temp = getCurrentDimensions();
+        return temp.width*temp.height;
+    }
 
     boolean hasNoCurrentFullImage(){
         if(fullType.isNone()) return true;
@@ -77,17 +121,17 @@ class ImageItem{
         return false;
     }
     boolean hasFullImage(){
-        return !hasNoCurrentFullImage();
+        return (!hasNoCurrentFullImage());
     }
     boolean hasThumbImage(){
-        return !hasNoCurrentThumbImage();
+        return (!hasNoCurrentThumbImage());
     }
 
     void setFullImage(BufferedImage img,ImageType type){
         originalImage.fullImage = img;
         if(type.isBad()) fullType = type;
         else if(type.isFiltered()) {
-            filterImage(N_ImgSize.Full);
+            filterImage(ImgSize.Full);
             fullType = ImageType.Filtered;
         }
         fullType = type;
@@ -97,22 +141,22 @@ class ImageItem{
         originalImage.thumbImage = img;
         if(type.isBad()) thumbType = type;
         else if(type.isFiltered()) {
-            filterImage(N_ImgSize.Thumb);
+            filterImage(ImgSize.Thumb);
             thumbType = ImageType.Filtered;
         }
         thumbType = type;
     }
 
 //    void setAllToIconImage(BufferedImage icon){
-//        setToIconImage(icon,N_ImgSize.Full);
-//        setToIconImage(icon,N_ImgSize.Thumb);
+//        setToIconImage(icon,ImgSize.Full);
+//        setToIconImage(icon,ImgSize.Thumb);
 //    }
-    void setToIconImage(BufferedImage icon,N_ImgSize size){
-        if(size==N_ImgSize.Full){
+    void setToIconImage(BufferedImage icon,ImgSize size){
+        if(size==ImgSize.Full){
         fullType = ImageType.Icon;
         iconImage.fullImage = icon;
         }
-        if(size==N_ImgSize.Thumb){
+        if(size==ImgSize.Thumb){
         thumbType = ImageType.Icon;
         iconImage.thumbImage = icon;
         }
@@ -129,11 +173,21 @@ class ImageItem{
                 return originalImage.fullImage;
         }
     }
-    private void filterImage(N_ImgSize size){
+    BufferedImage getCurrentThumbImage(){
+        switch(thumbType){
+            case Icon:
+                return iconImage.thumbImage;
+            case Filtered:
+                return filteredImage.thumbImage;
+            default:
+                return originalImage.thumbImage;
+        }
+    }
+    private void filterImage(ImgSize size){
         int i;
         BufferedImage[] srcs = {originalImage.fullImage,originalImage.thumbImage};
-        BufferedImage[] dests = {filteredImage.fullImage,filteredImage.thumbImage};
-        if(size==N_ImgSize.Full) i=0;
+        BufferedImage destination;
+        if(size==ImgSize.Full) i=0;
         else i=1;
 
         RenderingHints hints = null;
@@ -146,45 +200,47 @@ class ImageItem{
         RescaleOp op = new RescaleOp(scale,offset,hints);
 
         if (srcs[i] == null) return;
-        if (dests[i] == null) dests[i] = new BufferedImage(srcs[i].getWidth(), srcs[i].getHeight(), BufferedImage.TYPE_INT_ARGB);//*/op.createCompatibleDestImage(srcImg, null);
-        op.filter(srcs[i], dests[i]);
-        if(size==N_ImgSize.Full) filteredImage.dimensions = new Dimension(filteredImage.fullImage.getWidth(),filteredImage.fullImage.getHeight());
+        if ((((size==ImgSize.Full)&&(filteredImage.fullImage== null)))||(((size==ImgSize.Thumb)&&(filteredImage.thumbImage== null))))
+            destination = new BufferedImage(srcs[i].getWidth(), srcs[i].getHeight(), BufferedImage.TYPE_INT_RGB);//*/op.createCompatibleDestImage(srcImg, null);
+        else{
+            destination = new BufferedImage[]{filteredImage.fullImage,filteredImage.thumbImage}[i];
+        }
+        op.filter(srcs[i], destination);
+        if(size==ImgSize.Full) {
+            filteredImage.dimensions = new Dimension(destination.getWidth(),destination.getHeight());
+            filteredImage.fullImage = destination;
+        } else{
+            filteredImage.thumbImage = destination;
+        }
     }
 
-    private void resetFilters(){//set to original values
-        //filter = new FilterState();
+    void resetFilters(){//set to original values
         if(fullType==ImageType.Filtered) fullType=ImageType.Original;
         if(thumbType==ImageType.Filtered) thumbType=ImageType.Original;
+        filter = new FilterState();
     }
     private void updateFilters(){
-        filterImage(N_ImgSize.Full);
-        filterImage(N_ImgSize.Thumb);
-        fullType = ImageType.Filtered;
-        thumbType = ImageType.Filtered;
+        filterImage(ImgSize.Full);
+        filterImage(ImgSize.Thumb);
+        if(filteredImage.fullImage!=null) fullType = ImageType.Filtered;
+        if(filteredImage.thumbImage!=null) thumbType = ImageType.Filtered;
     }
     void refreshFilters(){
         if((filter.contrast==50)&&(filter.brightness==50)&&(!filter.isInverted)) {
             resetFilters();
             return;
         }
-        updateFilters();
+        else updateFilters();
+    }
+    void clearMem(){
+        //clears the full size image.
+        fullType = ImageType.None;
+        originalImage.fullImage = null;
+        filteredImage.fullImage=null;
     }
 }
 //</editor-fold>
 
-class MultiSizeImage{
-    //make these private to some extent. Or make each multiSize image private.
-    BufferedImage fullImage = null;
-    //BufferedImage mediumImage = null;
-    BufferedImage thumbImage = null;
-    Dimension dimensions = null;
-
-}
-class FilterState{
-    int contrast = 50;
-    int brightness = 50;
-    boolean isInverted = false;
-}
 
 class ImageReference {
     //New
@@ -194,26 +250,72 @@ class ImageReference {
     ImageItem img = new ImageItem();
     ImageLoader imageLoader;
 
+    //Unsorted
+    long imageFileLength,modifiedDateTime;
+    //Orientation iOri;
+    boolean isQuickThumb = false;
+    boolean hasTriedQuickThumb = false;
+    boolean hasTriedExtractDimensions = false;
+    boolean isLoading = false;
+    //String title,filename,comments?
+
+        ImageReference(String inputPath ,GUI gui){
+	mainGUI = gui;
+        String tempPath = "";
+	try{
+	    if(inputPath.startsWith("///\\\\\\")){
+		tempPath = inputPath.substring(6);
+		tempPath = (GUI.class.getResource(tempPath)).toURI().getPath();//could be null
+		//absolutePath = "etc/img/"+tempPath;//for use with jar files.
+		if(tempPath==null){
+		    tempPath=inputPath.substring(6);
+		}
+		else pathFile = new File(tempPath);
+	    }
+	    else {
+		tempPath = inputPath;
+		pathFile = new File(inputPath);
+	    }
+	}catch (URISyntaxException e){
+            pathFile = null;
+	    log.print(LogType.Error,"Couldn't load image from " + tempPath + "\nError was- " + e.toString());
+        }catch (NullPointerException e) {
+	    pathFile = null;
+	    log.print(LogType.Error,"Couldn't load image from file " + tempPath + "\nError was:- " + e.toString());
+	}
+
+
+	if(pathFile==null||(!pathFile.exists())||(!pathFile.isFile())){
+	    log.print(LogType.Error,"File could not be found at " + inputPath);
+	}
+	//ImageObjectConstructor);
+	//getImage(ImgRequestSize.Screen);
+
+	//initVars()
+
+        modifiedDateTime = pathFile.lastModified();
+        imageFileLength = pathFile.length();
+    }
+
 private void loadViaSwingWorker(ImgRequestSize size) {
         isLoading = true;
         imageLoader = new ImageLoader(this, pathFile, size,imageFileLength,modifiedDateTime);
         if (img.hasNoCurrentFullImage()) {
-            img.setToIconImage(createLoadingThumb(),N_ImgSize.Full);
+            img.setToIconImage(createLoadingThumb(),ImgSize.Full);
         }
         if (img.hasNoCurrentThumbImage()) {
             getThumbIfCached();
         }
         if(img.hasNoCurrentThumbImage()){
-            img.setToIconImage(createLoadingThumb(),N_ImgSize.Thumb);
+            img.setToIconImage(createLoadingThumb(),ImgSize.Thumb);
         }
         imageLoader.execute();
     }
 
-
 //if thumb image an icon just set both to icon and ignore full.
-    void setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgRequestSize size,ImageType returnImageType,ImageType returnThumbType){
-        img.setThumbImage(b, returnThumbType);
-        img.setFullImage(b, returnImageType);
+    void setImageFromLoader(BufferedImage full,BufferedImage thmb,ImgRequestSize size,ImageType returnImageType,ImageType returnThumbType){
+        img.setThumbImage(thmb, returnThumbType);
+        img.setFullImage(full, returnImageType);
         
         isLoading = false;
 
@@ -224,10 +326,10 @@ private void loadViaSwingWorker(ImgRequestSize size) {
     BufferedImage getImage(ImgRequestSize size) {
         //If requested image already exists, return it.
         if (size.isThumb() && img.hasThumbImage()) {
-            return localGetBufThumb();
+            return img.getCurrentThumbImage();
         }
         if (size.isLarge() && img.hasFullImage()) {
-            return localGetBufImage();
+            return img.getCurrentFullImage();
         }
 
         if ((!isLoading)&&img.hasNoCurrentThumbImage()) {//If swing worker is loading an image, it will then write a thumb. Must avoid reading thumb at the same time as it is being written.
@@ -237,7 +339,7 @@ private void loadViaSwingWorker(ImgRequestSize size) {
             }
             if (size == ImgRequestSize.Thumb) {//If ImgRequestSize.ThumbFull still want to create swingworker
                 if (img.hasThumbImage()) {
-                    return localGetBufThumb();
+                    return img.getCurrentThumbImage();
                 }
             }
         }
@@ -249,45 +351,20 @@ private void loadViaSwingWorker(ImgRequestSize size) {
 
         if (img.hasFullImage()){
             if(size.isLarge()){//if bImage exists but is not currentlarge, use for now but swingworker will replace
-            return localGetBufImage();
+            return img.getCurrentFullImage();
             }
             //If ImgRequestSize.ThumbOnly then clear bImage
-            return localGetBufThumb();
+            return img.getCurrentThumbImage();
         }
         else {
             //bImage is null, bThumb may be null, returns either bThumb or null
-            return localGetBufThumb();
+            return img.getCurrentThumbImage();
         }
     }
 
     String getImageUID(){
         return ImageUtils.getUID(pathFile, imageFileLength, modifiedDateTime);
     }
-
-
-
-
-
-
-
-
-
-
-
-//<editor-fold defaultstate="collapsed" desc="Currently converting">
-
-
- private BufferedImage localGetBufImage(){
-        if(isFiltered) return bImageFilt;
-        return bImage;
-    }
-    private BufferedImage localGetBufThumb(){
-        if(isFiltered) return bThumbFilt;
-        return bThumb;
-    }
-
-
-
 
     void getImageBySampling(){
         try {
@@ -310,26 +387,26 @@ private void loadViaSwingWorker(ImgRequestSize size) {
         //To make thumnail at least 200 pixels, finds how many times bigger input is.
         //Looks at largest dimension as a square thumnail is limited by largest dimension.
 
-        int sampleFactor = (int) Math.floor((double) Math.max((double) Bwidth, (double) Bheight) / ((double) 200));//9));
+        int sampleFactor = (int) Math.floor((double) Math.max((double) img.getFullDimension().width, (double) img.getFullDimension().height) / ((double) 200));//9));
         if (sampleFactor <= 1) {
             return;//Full size image is less than thumbImage, return full size image.
         }
         readParam.setSourceSubsampling(sampleFactor, sampleFactor, 0, 0);//reads the image at 1/4 size
-        bThumb = reader.read(0, readParam);
+        img.setThumbImage(reader.read(0, readParam), ImageType.Original);
         reader.dispose();
         inputStream.close();
 
-        if (bThumb != null) {
+        if (img.hasThumbImage()) {
             log.print(LogType.Debug,"Read thumbnail from image "+pathFile.toString()+"\n        -by reading every "+sampleFactor+" pixels");
-            log.print(LogType.Debug, "   -sampled every " + sampleFactor + " pixels from " + Bwidth + "x" + Bheight + " in " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds");
+            log.print(LogType.Debug, "   -sampled every " + sampleFactor + " pixels from " + img.getFullDimension() + " in " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds");
             isQuickThumb = true;
         }
-    } catch (IOException e) {
-        log.print(LogType.DebugError, "Error reading dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
-    }
+        } catch (IOException e) {
+            log.print(LogType.DebugError, "Error reading dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
         }
+    }
 
-void getThumbQuick() {
+    void getThumbQuick() {
     if (hasTriedQuickThumb) {
         return;
     }
@@ -337,13 +414,13 @@ void getThumbQuick() {
     BufferedImage tempImage = ImageUtils.getThumbFromExif(pathFile);
     if (tempImage != null) {
         Log.Print(LogType.Debug, "Read exif of image " + pathFile.toString());
-        bThumb = tempImage;
+        img.setThumbImage(tempImage, ImageType.Original);
         mainGUI.thumbPanel.repaint();//not onResize
         return;
     }
-        if(Bwidth==null)
-        extractDimensionsFromFile(pathFile);
-        if((Bwidth!=null)&&(Bheight!=null)&&((Bwidth*Bheight)<(6*1024*1024))) getImageBySampling();
+        if(img.getFullDimension()==null)
+            extractDimensionsFromFile(pathFile);
+        if((img.getFullDimension()!=null)&&((img.getFullDimension().width*img.getFullDimension().height)<(6*1024*1024))) getImageBySampling();
     }
         hasTriedQuickThumb = true;
 
@@ -360,150 +437,40 @@ void getThumbQuick() {
     //}
 }
 
-  void extractDimensionsFromFile(File pathFile) {
-      if(isBImageIcon) return;
+    void extractDimensionsFromFile(File pathFile) {
     if(hasTriedExtractDimensions) return;
     Dimension temp = ImageUtils.getImageDimensionsSanslan(pathFile);
     if (temp != null) {
-        Bwidth = temp.width;
-        Bheight = temp.height;
+        img.setFullDimensions(temp);
     } else {
         log.print(LogType.DebugError, "Error reading exif dimensions of image " + pathFile.toString());
-        //Bwidth = reader.getWidth(0);//gets the width of the first image in the file
-        //Bheight = reader.getHeight(0);
+        //img.setFullDimensions(new Dimensinon(reader.getWidth(0),reader.getHeight(0)));//uses the width of the first image in the file
     }
     hasTriedExtractDimensions = true;
   }
 
-
-
-//</editor-fold>
-
-//<editor-fold defaultstate="collapsed" desc="Unsorted">
-    long imageFileLength,modifiedDateTime;
-    Orientation iOri;
-    boolean isQuickThumb = false;
-    boolean hasTriedQuickThumb = false;
-    boolean hasTriedExtractDimensions = false;
-    ImgRequestSize currentLarge=ImgRequestSize.Max;//The size of the large bImage (Max or Screen)
-    boolean isLoading = false;
-    //String title,filename,comments?
-//</editor-fold>
-    ImageReference(String inputPath ,GUI gui){
-	mainGUI = gui;
-        String tempPath = "";
-	try{
-	    if(inputPath.startsWith("///\\\\\\")){
-		tempPath = inputPath.substring(6);
-		tempPath = (GUI.class.getResource(tempPath)).toURI().getPath();//could be null
-		//absolutePath = "etc/img/"+tempPath;//for use with jar files.
-		if(tempPath==null){
-		    tempPath=inputPath.substring(6);
-		}
-		else pathFile = new File(tempPath);
-	    }
-	    else {
-		tempPath = inputPath;
-		pathFile = new File(inputPath);	  
-	    }
-	}catch (URISyntaxException e){
-            pathFile = null;
-	    log.print(LogType.Error,"Couldn't load image from " + tempPath + "\nError was- " + e.toString());
-        }catch (NullPointerException e) {
-	    pathFile = null;
-	    log.print(LogType.Error,"Couldn't load image from file " + tempPath + "\nError was:- " + e.toString());
-	}
-	
-	
-	if(pathFile==null||(!pathFile.exists())||(!pathFile.isFile())){
-	    log.print(LogType.Error,"File could not be found at " + inputPath);
-	}
-	//ImageObjectConstructor);
-	//getImage(ImgRequestSize.Screen);
-
-	//initVars()
-	
-        modifiedDateTime = pathFile.lastModified();
-        imageFileLength = pathFile.length();
-    }
-//<editor-fold defaultstate="collapsed" desc="old Stuffs">
-//    ImageReference(File inFile){
-//	pathFile = inFile;
-//	pathFile.getAbsolutePath();
-//	initVars();
-//    }
-
-
-    int getWidthAndMake(){
-	if(Bwidth!=null) return Bwidth;
-        extractDimensionsFromFile(pathFile);
-	if(Bwidth!=null) return Bwidth;
-	OLD_getImage(currentLarge);
-	//note that the bImage should now be set to null to clear memory???????????????????
-	return Bwidth;
-    }
-    int getHeightAndMake(){
-	if(Bheight!=null) return Bheight;
-        extractDimensionsFromFile(pathFile);
-	if(Bheight!=null) return Bheight;
-	OLD_getImage(currentLarge);
-	//note that the bImage should now be set to null to clear memory????????????????????
-	return Bheight;
-    }
-    int getWidthAndMakeBig(){
-	if(Bwidth!=null) return Bwidth;
-        extractDimensionsFromFile(pathFile);
-	if(Bwidth!=null) return Bwidth;
-	OLD_getImage(ImgRequestSize.Max);
-	//note that the bImage should now be set to null to clear memory???????????????
-	return Bwidth;
-    }
-    int getHeightAndMakeBig(){
-	if(Bheight!=null) return Bheight;
-        extractDimensionsFromFile(pathFile);
-	if(Bheight!=null) return Bheight;
-	OLD_getImage(ImgRequestSize.Max);
-	//note that the bImage should now be set to null to clear memory??????????????
-	return Bheight;
-    }
-
-    int getWidthForThumb(){
-	//if(bThumb!=null) return bThumb.getWidth();
-	return OLD_getImage(ImgRequestSize.Thumb).getWidth();
-    }
-    int getHeightForThumb(){
-	//if(bThumb!=null) return bThumb.getHeight();
-	return OLD_getImage(ImgRequestSize.Thumb).getHeight();//Thumbnail height not image height or Bheight
-    }
     int getNoPixels(){
-        if((Bwidth==null)||(Bheight==null)){
+        if(img.getFullDimension()==null){
             extractDimensionsFromFile(pathFile);
         }
-
-        if((Bwidth==null)||(Bheight==null)) return Integer.MAX_VALUE;
-        return Bwidth*Bheight;
+        if(img.getFullDimension()==null) return Integer.MAX_VALUE;
+        return img.getNoPixels();
     }
-
-    void preload(ImgRequestSize size){
-        if(getNoPixels() < 15 * 1024 * 1024) {//if can verify is less than 15 megapixels
-            OLD_getImage(size);
-        }
-        else flush();//if image is really huge we need to flush it.
-    }
-    
-
 
     void saveFullToPath(String path){
         try{
             File f = new File(path);
-            ImageIO.write(localGetBufImage(),"jpg",f);//should use same format as file
+            ImageIO.write(img.getCurrentFullImage(),"jpg",f);//should use same format as file
         } catch (IOException e){
             log.print(LogType.Error,"Error creating saving image: "+pathFile.toString()+"\nTo path: "+path);
         }
     }
 
-    private BufferedImage createLoadingThumb(){
-        return SysIcon.Loading.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    void preload(ImgRequestSize size){
+        if(getNoPixels() < 15 * 1024 * 1024) {//if can verify is less than 15 megapixels
+            getImage(size);
+        }
+        else flush();//if image is really huge we need to flush it.
     }
 
     void getThumbIfCached() {
@@ -513,7 +480,7 @@ void getThumbQuick() {
             boolean success = false;
             try {
                 BufferedImage tempThumb = ImageIO.read(checkFile);
-                bThumb = tempThumb; //Stops incomplete thumbnails from being returned if error while loading.
+                img.setThumbImage(tempThumb, ImageType.Original); //Stops incomplete thumbnails from being returned if error while loading.
             } catch (IOException e) {
                 log.print(LogType.Error,"Error opening thumbnail " + checkFile + "\nError was: "+e.toString());
             } catch (ArrayIndexOutOfBoundsException e){
@@ -525,188 +492,93 @@ void getThumbQuick() {
         }
     }
 
-
- 
-
-    void clearMem(){
-	//clears the full size image.
-	bImage = null;
-        bImageFilt=null;
-	//bThumb = null;
+    void replaceFilter(boolean isInvert, int contrast, int brightness){
+        img.filter = new FilterState(isInvert,contrast,brightness);
+        img.refreshFilters();
     }
-    void flush() {//called externally
+
+
+
+
+
+ void flush() {//called externally
         if(imageLoader!=null){
             imageLoader.cancel(false);
         }
-        clearMem();
+        img.clearMem();
     }
 
     void destroy(){
-	bImage = null;
-	bThumb = null;
-        bImageFilt=null;
-        bThumbFilt=null;
+	flush();
+        img=null;
 	pathFile = null;
     }
 
-    //<editor-fold desc="Very Old and replaced">
+
+
+
+
+//<editor-fold defaultstate="collapsed" desc="unchecked methods">
+//    ImageReference(File inFile){
+//	pathFile = inFile;
+//	pathFile.getAbsolutePath();
+//	initVars();
+//    }
+
+
+    int getWidthWithMake(){
+	if(img.getCurrentDimensions()!=null) return img.getCurrentDimensions().width;
+        extractDimensionsFromFile(pathFile);
+	if(img.getCurrentDimensions()!=null) return img.getCurrentDimensions().width;
+	getImage(ImgRequestSize.Max);
+	//note that the bImage should now be set to null to clear memory???????????????
+	return img.getCurrentDimensions().width;
+    }
+    int getHeightWithMake(){
+	if(img.getCurrentDimensions()!=null) return img.getCurrentDimensions().height;
+        extractDimensionsFromFile(pathFile);
+	if(img.getCurrentDimensions()!=null) return img.getCurrentDimensions().height;
+	getImage(ImgRequestSize.Max);
+	//note that the bImage should now be set to null to clear memory??????????????
+	return img.getCurrentDimensions().height;
+    }
+
+    int getWidthForThumb(){
+        if(img.getCurrentThumbImage()!=null) return img.getCurrentThumbImage().getWidth();
+	return getImage(ImgRequestSize.Thumb).getWidth();
+    }
+    int getHeightForThumb(){
+        if(img.getCurrentThumbImage()!=null) return img.getCurrentThumbImage().getHeight();
+	return getImage(ImgRequestSize.Thumb).getHeight();//Thumbnail height not image height or Bheight
+    }
+
+
+    private BufferedImage createLoadingThumb(){
+        return SysIcon.Loading.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    }
+
+}
         //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
-    private BufferedImage bImage = null;//Full size image, may be maxed at size of screen. set to null when not needed.
-    private BufferedImage bThumb = null;//Created when large created, not removed.//Will be created from exif thumb
-    private BufferedImage bImageFilt = null;
-    private BufferedImage bThumbFilt = null;
-    private Integer Bwidth = null;
-    private Integer Bheight = null;
-    int brightness = 50;
-    int contrast = 50;
-    private boolean isFiltered = false;
-    boolean isInverted = false;
-    private final int imgType = BufferedImage.TYPE_INT_RGB;
-    OLD__ImageLoader OLD_imageLoader;
-    boolean isBImageIcon = false;//Is the image a loading icon
-    boolean isBThumbIcon = false;//Is the thumb a loading icon
-    BufferedImage OLD_getImage(ImgRequestSize size) {
-        //If requested image already exists, return it.
-        if (size.isThumb() && bThumb != null) {
-            return localGetBufThumb();
-        }
-        if ((size == currentLarge) && (bImage != null)) {
-            return localGetBufImage();
-        }
-        if ((!isLoading)&&bThumb==null) {//If swing worker is loading an image, it will then write a thumb. Must avoid reading thumb at the same time as it is being written.
-            getThumbIfCached();
-            if(bThumb==null) {
-                getThumbQuick();//if no longer null thumbIsQuick();//add thumb to list of thumbs which are ThumbQuicks, so they can be loaded while idle.
-            }
-            if (size == ImgRequestSize.Thumb) {//If ImgRequestSize.ThumbFull still want to create swingworker
-                if (bThumb != null) {
-                    return localGetBufThumb();
-                }
-            }
-        }
-        //Build large icon and small icon, return relevent.
-        if (!isLoading) {
-        OLD__loadViaSwingWorker(size);
-        }
-        if (bImage!=null){
-            if(size.isLarge()){//if bImage exists but is not currentlarge, use for now but swingworker will replace
-            return localGetBufImage();
-            }
-            //If ImgRequestSize.ThumbOnly then clear bImage
-            return localGetBufThumb();
-        }
-        else {
-            //bImage is null, bThumb may be null, returns either bThumb or null
-            return localGetBufThumb();
-        }
-    }
+    //Image may be maxed at size of screen.
 
-           private void OLD_filterBufImage(boolean isThumb){
-        BufferedImage srcImg;
-        if(isThumb){
-            srcImg=bThumb;
-        } else{
-            srcImg=bImage;
-        }
-        if(srcImg==null){
-            return;//should change to a call which sets it up.
-        }
-        RenderingHints hints = null;
-        float offset = (brightness-50f)*5.10f;
-        float scale = 1.0f+(contrast-50f)/50f;
-        if(isInverted){
-            offset = 255f-offset;
-            scale = (-scale);
-        }
-        RescaleOp op = new RescaleOp(scale,offset,hints);
-        if(isThumb){
-            if(bThumbFilt==null) bThumbFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);//*/op.createCompatibleDestImage(srcImg, null);
-        } else{
-            if(bImageFilt==null) bImageFilt = new BufferedImage(srcImg.getWidth(),srcImg.getHeight(),imgType);//*/op.createCompatibleDestImage(srcImg, null);
-        }
-        if(isThumb){
-        op.filter(srcImg,bThumbFilt);
-        } else op.filter(srcImg,bImageFilt);
-           }
-    boolean isFiltered(){
-        return isFiltered;
-    }
-    void setFiltered(boolean newBool){
-        isFiltered = newBool;
-    }
-        private void OLD__loadViaSwingWorker(ImgRequestSize size) {
-        isLoading = true;
-        OLD_imageLoader = new OLD__ImageLoader(this,pathFile,size,imgType, bThumb,imageFileLength,modifiedDateTime);
-        if (bImage == null) {
-            bImage = createLoadingThumb();
-            currentLarge = size;
-            isBImageIcon = true;
-            OLD__setVars(bImage);
-        }
-        if (bThumb == null) {
-            getThumbIfCached();
-        }
-        if(bThumb==null){
-            bThumb = createLoadingThumb();
-            isBThumbIcon = true;
-        }
-        OLD_imageLoader.execute();
-    }
-            void OLD_setImageFromLoader(BufferedImage b,BufferedImage thmb,ImgRequestSize size,boolean wasCancelled,boolean ranOutOfMemory){
-        if(bThumb==null) bThumb = thmb;
-        //if bThumb not an icon, set it.
-        if(!wasCancelled){
-            if(b!=null) OLD__setVars(b);
-            bImage = b;
-            currentLarge = size;
-        } else {
-            bImage = null;
-        }
-        isBThumbIcon=false;
-        isBImageIcon=false;
-        isLoading = false;
-        if(bImage!=null){
-            if(isFiltered()) OLD__filterImage();
-        }
-        mainGUI.mainPanel.onResize();//resize as image have changed dimensions
-        mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
-    }    //gets thumbnail or full image
-    void OLD__filterImage(){
-        if((contrast==50)&&(brightness==50)&&(!isInverted)) {
-            isFiltered = false;
-            return;
-        }
-        isFiltered = true;
-        OLD_filterBufImage(true);
-        OLD_filterBufImage(false);
-    }
-    void OLD__setVars(BufferedImage img){
-	if(bImage==null){ log.print(LogType.DebugError,"ERROR setting image size as image not initilized");return;}
-	Bwidth = img.getWidth();
-	Bheight = img.getHeight();
-	if(Bheight<Bwidth) iOri = Orientation.Landscape;
-	else iOri = Orientation.Portrait;
-    }
-}
-//</editor-fold>
-enum Orientation {Landscape,Portrait} //For drawing/painting not for rotation
+    enum Orientation {Landscape,Portrait} //For drawing/painting not for rotation
 
-enum ImgRequestSize {Max,Thumb;//,ThumbOnly,ThumbPreload;
-    boolean isLarge(){
-	if(this==Thumb) return false;/*||this==ThumbPreload*/
-	return true;
+    enum ImgRequestSize {Max,Thumb;//,ThumbOnly,ThumbPreload;
+        boolean isLarge(){
+            if(this==Thumb) return false;/*||this==ThumbPreload*/
+            return true;
+        }
+        boolean isThumb(){
+            if(this==Max) return false;
+            else return true;
+        }
+        public String toString(){
+            switch (this){
+            case Thumb: return "Thumb";
+            //case ThumbPreload: return "ThumbFull";//ThumbFull requests size Thumb, but not clearing the full image as it may be used later
+            default: return "Max";//Max is not yet implemented.
+            }
+        }
     }
-    boolean isThumb(){
-	if(this==Max) return false;
-	else return true;
-    }
-    public String toString(){
-	switch (this){
-	case Thumb: return "Thumb";
-	//case ThumbPreload: return "ThumbFull";//ThumbFull requests size Thumb, but not clearing the full image as it may be used later
-	default: return "Max";//Max is not yet implemented.
-	}
-    }
-}
 
 // </editor-fold>

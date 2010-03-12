@@ -293,9 +293,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         adjuster = new ImageAdjuster(w,true);
         adjuster.addChangeListeners( new ChangeListener(){
             public void stateChanged(ChangeEvent e){
-                state.getCurrentImage().brightness = adjuster.getCurrentSliderBright();
-                state.getCurrentImage().contrast = adjuster.getCurrentSliderContrast();
-                state.getCurrentImage().isInverted = adjuster.getCurrentInvertBox();
+                state.getCurrentImage().replaceFilter(adjuster.getCurrentInvertBox(), adjuster.getCurrentSliderContrast(),adjuster.getCurrentSliderBright());
                 state.imageColoursUpdated();
             }
         });
@@ -699,14 +697,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 //        int oldCr = state.getCurrentImage().contrast;
 //        boolean oldInv = state.getCurrentImage().isInverted;
         adjuster.popup();
-        state.getCurrentImage().brightness = adjuster.getBrightness();
-        state.getCurrentImage().contrast = adjuster.getContrast();
-        state.getCurrentImage().isInverted = adjuster.isInverted();
+        state.getCurrentImage().replaceFilter(adjuster.isInverted(), adjuster.getContrast(),adjuster.getBrightness());
         if(adjuster.shouldReset()){
             state.imageColoursReset();
-        }// else if((state.getCurrentImage().brightness !=oldBr)||(state.getCurrentImage().contrast!=oldCr)||(state.getCurrentImage().isInverted!=oldInv)){
-            state.imageColoursUpdated();//Now always needed as preview may have changed values
-        //}
+        }
     }
     void showOptions(){
         optionsGUI.setAllValues(settings);
