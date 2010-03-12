@@ -16,7 +16,8 @@
 		<!-- Create the time stamp -->
 		<tstamp>  
 			<format property="TODAY_UK" pattern="dd MMM yyyy HH.mm" locale="en_GB" />  
-		</tstamp>   
+		</tstamp>
+		<!-- <splash /> -->   
 	</target>
 
 	<target name="compile" depends="init" description="compile the source " >
@@ -40,6 +41,7 @@
 	<!-- also used for run-->
 	<target name="running" description="run current build">
 		<java classname="${main-class}" fork="true">
+				<arg value="-splash:splash.png"/>
 			<classpath>
 				<fileset dir="${lib}" includes="**/*.jar"/>
 				<path location="${build}"/>
@@ -56,10 +58,12 @@
 	
 	<target name="run+" description="run with additional memory" depends="init,compile" >
 		<java classname="${main-class}" fork="true" maxmemory="256m">
+				<arg value="-splash:splash.png"/>
 			<classpath>
 				<fileset dir="${lib}" includes="**/*.jar"/>
 				<path location="${build}"/>
 				<path location="${img}"/>
+				<path location="${icons}"/>
 			</classpath>
 		</java>
 	</target>
@@ -71,6 +75,7 @@
 			<manifest>
 				<attribute name="Main-Class" value="${main-class}" />
 				<attribute name="Class-Path" value="lib/sanselan-0.97-incubator.jar" />
+				<attribute name="SplashScreen-Image" value="splash.png" />
 			</manifest>
 		</jar>
 	</target>

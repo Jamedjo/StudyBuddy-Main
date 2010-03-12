@@ -231,7 +231,7 @@ void getThumbQuick() {
     }
         if(Bwidth==null)
         extractDimensionsFromFile(pathFile);
-        if(Bwidth!=null) getImageBySampling();
+        if((Bwidth!=null)&&(Bheight!=null)&&((Bwidth*Bheight)<(6*1024*1024))) getImageBySampling();
     }
         hasTriedQuickThumb = true;
    
@@ -306,7 +306,7 @@ void getThumbQuick() {
             }
         }
         
-        
+
         //Build large icon and small icon, return relevent.
         if (!isLoading) {
         loadViaSwingWorker(size);
