@@ -287,14 +287,16 @@ class ProgramState{
             //if((size==ImgRequestSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgRequestSize.ThumbFull;
 	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
 
-        if(size.isLarge()){
+        //POENTIALLY BUGGY- COMMENTING THIS OUT GETS RID OF ERRORS, BUT COMMENTING OUT imageLoader.execute CREATES MORE??~?~???
+        if(size.isLarge()&&(relativeImage==0)){
             int i;
-            int prev = prev(relativeImage); //dont preload too large files. If you load a file make sure it does not keep trying to load after failures.(heap mem)
+            int prev = prev(currentI); //dont preload too large files. If you load a file make sure it does not keep trying to load after failures.(heap mem)
             for(i=1;i<Math.min(4,lastIndex);i++){//Use amount of memory avaliable to determine number to preload
-                imageList[relItoFixI(i+relativeImage)].preload(size);//Preloads next three images
-            } for(;i<lastIndex;i++){
+                imageList[relItoFixI(i)].preload(size);//Preloads next three images
+            }
+            for(;i<lastIndex;i++){
                 if(i==prev) imageList[prev].preload(size);//Preloads previous image
-                imageList[relItoFixI(i+relativeImage)].flush();//removes from memory all images after the preloaded ones
+                imageList[relItoFixI(i)].flush();//removes from memory all images after the preloaded ones
             }
         }
 	return returnImage;

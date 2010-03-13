@@ -130,14 +130,15 @@ Dimension outWH = new Dimension();
     }
 
     static Dimension getImageWH(ImgRequestSize size, int MaxW, int MaxH,ImageReference relImage){
-        Dimension useWH = new Dimension();
+        Dimension useWH;// = new Dimension();
+        Dimension relImageDimension;
 	if(size.isLarge()){
-            Dimension relImageDimension = relImage.getDimensionsWithMake();
-	    useWH= scaleToMax(relImageDimension.width,relImageDimension.height, MaxW, MaxH);
+            relImageDimension = relImage.getDimensionsWithMake();
 	}
 	else {
-	    useWH = scaleToMax(relImage.getWidthForThumb(),relImage.getHeightForThumb(), MaxW, MaxH);
+            relImageDimension = relImage.getThumbDimensionsWithMake();
         }
+        useWH= scaleToMax(relImageDimension.width,relImageDimension.height, MaxW, MaxH);
 	return useWH;
     }
 }

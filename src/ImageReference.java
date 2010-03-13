@@ -1,5 +1,7 @@
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -27,19 +29,19 @@ import javax.imageio.stream.ImageInputStream;
 //Instead huge images can be set to use a smaller image from disk cache or mosaic system. See issue 31 .
 
 class ImageReference {
-    //New
     Log log = new Log(false);
     GUI mainGUI;
     File pathFile = null;
     ImageItem img = new ImageItem();
     ImageLoader imageLoader;
-    //Unsorted
+    double maxFilesizeToLoadThumb = 3;//Megabytes
     long imageFileLength, modifiedDateTime;
     //Orientation iOri;
     boolean isQuickThumb = false;
     boolean hasTriedQuickThumb = false;
     boolean hasTriedExtractDimensions = false;
     boolean hasCalledLoad = false;
+    ImgRequestSize lastRequestSize=ImgRequestSize.Thumb;//could be replaced with boolean- hasRequestedFull
     //String title,filename,comments?
     
     ImageReference(String inputPath, GUI gui) {
@@ -77,75 +79,102 @@ class ImageReference {
         modifiedDateTime = pathFile.lastModified();
         imageFileLength = pathFile.length();
     }
-    private void loadViaSwingWorker(ImgRequestSize size) {
-        if (!hasCalledLoad) {
+    synchronized private void loadViaSwingWorker(ImgRequestSize size) {
+        // if ( making a load request for the first time ) OR ( requesting full size for first time ) THEN new ImageLoader
+        if (lastRequestSize==ImgRequestSize.Max) return;
+        if ((hasCalledLoad)&&(size==ImgRequestSize.Thumb)) return;
+        if((hasCalledLoad)&&img.hasNoGoodThumbImage()) return;
             hasCalledLoad = true;
-            imageLoader = new ImageLoader(this, pathFile, size, imageFileLength, modifiedDateTime);
-            if (img.hasNoCurrentFullImage()) {
+//            if (size.isThumb() && (pathFile.length() > (maxFilesizeToLoadThumb * 1024 * 1024))) {
+//                    //outOfMemory = true;
+//                    log.print(LogType.Error, "Error: requested thumbnail for " + (pathFile.length() / (1024 * 1024)) + "MB when the max is " + maxFilesizeToLoadThumb + "MB.");
+//                    returnImage = ErrorImages.outOfMemory;
+//                    returnImageType = ImageType.Icon;
+//                    setImageFromLoader?
+//            }
+//            else
+                imageLoader = new ImageLoader(this, pathFile);
+            lastRequestSize=size;
+            if (img.hasNoGoodFullImage()) {
                 img.setToIconImage(ErrorImages.loading, ImgSize.Full);
             }
             if (img.hasNoGoodThumbImage()) {
                 getThumbIfCached();
             }
-            if (img.hasNoCurrentThumbImage()) {
+            if (img.hasNoGoodThumbImage()) {
                 img.setToIconImage(ErrorImages.loading, ImgSize.Thumb);
             }
-            mainGUI.mainPanel.onResize();//resize as image have changed dimensions
-            mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
+//            mainGUI.mainPanel.onResize();//resize as image may have changed dimensions //Not needed al likely already repainting
+//            mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
             imageLoader.execute();
-        }
     }
 //if thumb image an icon just set both to icon and ignore full.
-    void setImageFromLoader(BufferedImage full, BufferedImage thmb, ImgRequestSize size, ImageType returnImageType, ImageType returnThumbType,boolean outOfMemory) {
-        img.setThumbImage(thmb, returnThumbType);
-        img.setFullImage(full, returnImageType);
+    void setImageFromLoader(BufferedImage returnImage, ImageType returnImageType,boolean outOfMemory) {
+        if(returnImage!=null){
+            img.setFullImage(returnImage, returnImageType);
 
-        mainGUI.mainPanel.onResize();//resize as image have changed dimensions
-        mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
+            //lastRequstSize
+
+            BufferedImage thmb=null;
+            if (returnImageType == ImageType.Original) thmb = makeThumb(returnImage);
+            if (returnImageType == ImageType.Icon) thmb = returnImage;
+            if(thmb!=null) img.setThumbImage(thmb, returnImageType);
+
+            if(lastRequestSize!=ImgRequestSize.Max) img.clearMem();
+
+            mainGUI.mainPanel.onResize();//resize as image have changed dimensions
+            mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
+        }
+        //else has been cancelled or has failed
+
         
         //After onResize and repaint calls
-        if(outOfMemory||((size==ImgRequestSize.Thumb)&&(returnThumbType==ImageType.Original))) hasCalledLoad = false;
+        if(outOfMemory) hasCalledLoad = false;//If it ran out of memory during the call it is asif it was never called
+        //??lastRequestSize ?? if out of memory ??
     }
-    BufferedImage getImage(ImgRequestSize size) {
+    BufferedImage getImage(ImgRequestSize size){//This method should be replaced where possible
+        return getImage(size,true);
+    }
+    //loadViaWorker exists to allow thumbnails to signal they only want lowQ versions if the calling method is aware of the flush/preload system in use.
+    BufferedImage getImage(ImgRequestSize size,boolean loadViaWorker) {
         //If requested image already exists, return it.
-        if (size.isThumb() && img.hasAnyThumbImage()) {
+        if (size.isThumb() && img.hasGoodThumbImage()) {
             return img.getCurrentThumbImage();
         }
-        if (size.isLarge() && img.hasAnyFullImage()) {
+        if (size.isLarge() && img.hasGoodFullImage()) {
             return img.getCurrentFullImage();
         }
 
-        if ((!hasCalledLoad) && img.hasNoCurrentThumbImage()) {//If swing worker is loading an image, it will then write a thumb. Must avoid reading thumb at the same time as it is being written.
+        if ((!hasCalledLoad) && img.hasNoGoodThumbImage()) {//If has called before this will have been done before
+            //If swing worker is loading an image, it will then write a thumb. Must avoid reading thumb at the same time as it is being written.
             getThumbIfCached();
             if (img.hasNoGoodThumbImage()) {
                 getThumbQuick();//if no longer null thumbIsQuick();//add thumb to list of thumbs which are ThumbQuicks, so they can be loaded while idle.
             }
             if (size == ImgRequestSize.Thumb) {//If ImgRequestSize.ThumbFull still want to create swingworker
-                if (img.hasNoGoodThumbImage()) {
+                if (img.hasGoodThumbImage()) {
                     return img.getCurrentThumbImage();
                 }
             }
         }
 
-        //Build large icon and small icon, return relevent.
-        loadViaSwingWorker(size);
+        if(loadViaWorker)
+            loadViaSwingWorker(size);
         
-        if (img.hasAnyFullImage()) {
+//        if(img.hasNoCurrentThumbImage()) img.setToIconImage(ErrorImages.fileNotFound, ImgSize.Thumb);
+//        if(img.hasNoCurrentFullImage()) img.setToIconImage(ErrorImages.fileNotFound, ImgSize.Full);
+        //if (img.hasAnyFullImage())
             if (size.isLarge()) {//if bImage exists but is not currentlarge, use for now but swingworker will replace
                 return img.getCurrentFullImage();
             }
-            //If ImgRequestSize.ThumbOnly then clear bImage
-            return img.getCurrentThumbImage();
-        } else {
-            //bImage is null, bThumb may be null, returns either bThumb or null
-            return img.getCurrentThumbImage();
-        }
+        return img.getCurrentThumbImage();
     }
     String getImageUID() {
         return ImageUtils.getUID(pathFile, imageFileLength, modifiedDateTime);
     }
-    void getImageBySampling() {
+    void getImageBySampling() { //TODO: move to sampleImage SwingWorker??
         try {
+            LogType logthis = LogType.Plain;
             long start = Calendar.getInstance().getTimeInMillis();
             String ext = ImageUtils.getFileExtLowercase(pathFile.getName());
             if (ext == null) return;
@@ -154,7 +183,7 @@ class ImageReference {
             ImageReader reader = (ImageReader) readers.next();
             if (readers.hasNext()) {
                 reader = (ImageReader) readers.next();
-                log.print(LogType.Debug, "next reader");
+                log.print(logthis, "next reader");
             }
             //ImageInputStream inputStream = ImageIO.createImageInputStream(pathFile);
             ImageInputStream inputStream = ImageIO.createImageInputStream(new RandomAccessFile(pathFile, "r"));
@@ -165,7 +194,7 @@ class ImageReference {
             //To make thumnail at least 200 pixels, finds how many times bigger input is.
             //Looks at largest dimension as a square thumnail is limited by largest dimension.
 
-            int sampleFactor = (int) Math.floor((double) Math.max((double) img.getFullDimension().width, (double) img.getFullDimension().height) / ((double) 200));//9));
+            int sampleFactor = (int) Math.floor((double) Math.max((double) img.getFullDimensions().width, (double) img.getFullDimensions().height) / ((double) 200));//9));
             if (sampleFactor <= 1) {
                 return;//Full size image is less than thumbImage, return full size image.
             }
@@ -176,8 +205,8 @@ class ImageReference {
             inputStream.close();
 
             if (img.hasAnyThumbImage()) {
-                log.print(LogType.Debug, "Read thumbnail from image " + pathFile.toString() + "\n        -by reading every " + sampleFactor + " pixels");
-                log.print(LogType.Debug, "   -sampled every " + sampleFactor + " pixels from " + img.getFullDimension() + " in " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds");
+                log.print(logthis, "Read thumbnail from image " + pathFile.toString() + "\n        -by reading every " + sampleFactor + " pixels");
+                log.print(logthis, "   -sampled every " + sampleFactor + " pixels from " + img.getFullDimensions() + " in " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds");
                 isQuickThumb = true;
             }
         } catch (IOException e) {
@@ -191,14 +220,14 @@ class ImageReference {
         if (pathFile != null) {
             BufferedImage tempImage = ImageUtils.getThumbFromExif(pathFile);
             if (tempImage != null) {
-                Log.Print(LogType.Debug, "Read exif of image " + pathFile.toString());
+                Log.Print(LogType.Plain, "Read exif of image " + pathFile.toString());
                 img.setThumbImage(tempImage, ImageType.Original);
                 mainGUI.thumbPanel.repaint();//not onResize
                 return;
             }
-            if (img.getFullDimension() == null)
+            if (img.getFullDimensions() == null)
                 extractDimensionsFromFile(pathFile);
-            if ((img.getFullDimension() != null) && ((img.getFullDimension().width * img.getFullDimension().height) < (6 * 1024 * 1024))) getImageBySampling();
+            if ((img.getFullDimensions() != null) && ((img.getFullDimensions().width * img.getFullDimensions().height) < (6 * 1024 * 1024))) getImageBySampling();
         }
         hasTriedQuickThumb = true;
 
@@ -226,10 +255,10 @@ class ImageReference {
         hasTriedExtractDimensions = true;
     }
     int getNoPixels() {
-        if (img.getFullDimension() == null) {
+        if (img.getFullDimensions() == null) {
             extractDimensionsFromFile(pathFile);
         }
-        if (img.getFullDimension() == null) return Integer.MAX_VALUE;
+        if (img.getFullDimensions() == null) return Integer.MAX_VALUE;
         return img.getNoPixels();
     }
     void saveFullToPath(String path) {
@@ -273,16 +302,42 @@ class ImageReference {
         img.refreshFilters();
     }
     void flush() {//called externally
-        if (imageLoader != null) {
-            imageLoader.cancel(false);
-        }
-        //hasCalledLoad = false;
+//        if (imageLoader != null) {BUGGY- COMMENTING THIS OUT GETS RID OF ERRORS, BUT COMMENTING OUT imageLoader.execute CREATES MORE??~?~???
+//            imageLoader.cancel(false);
+//        }
         img.clearMem();
+        lastRequestSize=ImgRequestSize.Thumb;
     }
     void destroy() {
         flush();
         img = null;
         pathFile = null;
+    }
+    
+    
+    static final int thumbMaxW = 200;
+    static final int thumbMaxH = 200;
+    BufferedImage makeThumb(BufferedImage bigImg) {    //TODO: move to thumbSizer SwingWorker??
+        BufferedImage returnThumb;
+        long start = Calendar.getInstance().getTimeInMillis();
+        Dimension iconWH = ImageUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), thumbMaxW, thumbMaxH);
+        if (!(iconWH.width < bigImg.getWidth())) {
+            returnThumb = bigImg;
+        } else {
+
+            //Image tempimage = bigIcon.getImage();
+            returnThumb = new BufferedImage(iconWH.width, iconWH.height, BufferedImage.TYPE_INT_RGB);
+
+            Graphics2D g2 = returnThumb.createGraphics();//TYPE_INT_RGB
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            //g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+            //g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+            g2.drawImage(bigImg, 0, 0, iconWH.width, iconWH.height, null);
+            g2.dispose();
+            log.print(LogType.Debug, "  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
+        }
+        ImageUtils.saveThumbToFile(mainGUI.settings, returnThumb, pathFile, imageFileLength, modifiedDateTime);
+        return returnThumb;
     }
 //<editor-fold desc="unchecked methods">
 //    ImageReference(File inFile){
@@ -290,37 +345,22 @@ class ImageReference {
 //	pathFile.getAbsolutePath();
 //	initVars();
 //    }
-//    int getWidthWithMake() {
-//        if (img.getCurrentDimensions() != null) return img.getCurrentDimensions().width;
-//        extractDimensionsFromFile(pathFile);
-//        if (img.getCurrentDimensions() != null) return img.getCurrentDimensions().width;
-//        getImage(ImgRequestSize.Max);
-//        //note that the bImage should now be set to null to clear memory???????????????
-//        return img.getCurrentDimensions().width;
-//    }
-//    int getHeightWithMake() {
-//        if (img.getCurrentDimensions() != null) return img.getCurrentDimensions().height;
-//        extractDimensionsFromFile(pathFile);
-//        if (img.getCurrentDimensions() != null) return img.getCurrentDimensions().height;
-//        getImage(ImgRequestSize.Max);
-//        //note that the bImage should now be set to null to clear memory??????????????
-//        return img.getCurrentDimensions().height;
-//    }
     Dimension getDimensionsWithMake() {
-        if (img.getCurrentDimensions() != null) return img.getCurrentDimensions();
+        if (img.getCurrentFullDimensions() != null) return img.getCurrentFullDimensions();
         extractDimensionsFromFile(pathFile);
-        if (img.getCurrentDimensions() != null) return img.getCurrentDimensions();
+        if (img.getCurrentFullDimensions() != null) return img.getCurrentFullDimensions();
         getImage(ImgRequestSize.Max);
         //note that the bImage should now be set to null to clear memory??????????????
-        return img.getCurrentDimensions();
+        return img.getCurrentFullDimensions();
     }
-    int getWidthForThumb() {
-        if (img.getCurrentThumbImage() != null) return img.getCurrentThumbImage().getWidth();
-        return getImage(ImgRequestSize.Thumb).getWidth();
-    }
-    int getHeightForThumb() {
-        if (img.getCurrentThumbImage() != null) return img.getCurrentThumbImage().getHeight();
-        return getImage(ImgRequestSize.Thumb).getHeight();//Thumbnail height not image height or Bheight
+        Dimension getThumbDimensionsWithMake() {//Make component exists as dimensions often requested immediately before image requested.
+        getImage(ImgRequestSize.Thumb);
+        if (img.getThumbDimensions() != null) return img.getThumbDimensions();
+        //getThumbIfCached();
+//        if (img.getThumbDimensions() != null) return img.getThumbDimensions();
+        if(img.getThumbDimensions()==null) {log.print(LogType.Error, "Null image height: "+img.thumbType); Thread.dumpStack(); return new Dimension(256,256);}
+
+        return img.getThumbDimensions();
     }
 }
 //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible

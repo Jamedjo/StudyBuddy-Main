@@ -21,36 +21,36 @@ enum ImageType{Original,Filtered,Icon,None;
 }
 //enum ErrorImageType{FileNotFound,OutOfMemory}
 class ErrorImages{
-    static BufferedImage fileNotFound = SysIcon.FileNotFound.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
-    static BufferedImage outOfMemory = SysIcon.OutOfMemory.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
-    static BufferedImage loading = SysIcon.Loading.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
-    static BufferedImage unknowError = SysIcon.Error.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
-    static BufferedImage noNotesFound = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+    static final BufferedImage fileNotFound = SysIcon.FileNotFound.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static final BufferedImage outOfMemory = SysIcon.OutOfMemory.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static final BufferedImage loading = SysIcon.Loading.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static final BufferedImage unknownError = SysIcon.Error.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static final BufferedImage noNotesFound = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     //improvement: use java graphics to draw without relying on any external files, so GUI won't crash if no external file access
 }
-class MultiSizeImage{
+class MultiSizeImage {
     //make these private to some extent. Or make each multiSize image private.
-    BufferedImage fullImage = null;
+    volatile BufferedImage fullImage = null;
     //BufferedImage mediumImage = null;
-    BufferedImage thumbImage = null;
-    Dimension dimensions = null;
-
+    volatile BufferedImage thumbImage = null;
+    volatile Dimension fullDimensions = null;
+    volatile Dimension thumbDimensions = null;
 }
-class FilterState{
+
+class FilterState {
     int contrast;
     int brightness;
     boolean isInverted;
-
-    FilterState(){
-        constructor(false,50,50);
+    FilterState() {
+        constructor(false, 50, 50);
     }
-    FilterState(boolean isInvert,int contrst, int bright){
-        constructor(isInvert,contrst, bright);
+    FilterState(boolean isInvert, int contrst, int bright) {
+        constructor(isInvert, contrst, bright);
     }
-    void constructor(boolean isInvert,int contrst, int bright){
+    void constructor(boolean isInvert, int contrst, int bright) {
         isInverted = isInvert;
-        contrast=contrst;
-        brightness=bright;
+        contrast = contrst;
+        brightness = bright;
     }
 }
 //enum ImageQuality{Sampled,Low,Medium,High}
@@ -61,38 +61,53 @@ class ImageItem{
     private MultiSizeImage filteredImage = new MultiSizeImage();
     private MultiSizeImage iconImage = new MultiSizeImage();
     FilterState filter = new FilterState();
-    ImageType fullType = ImageType.None;
-    ImageType thumbType = ImageType.None;
+    volatile ImageType fullType = ImageType.None;
+    volatile ImageType thumbType = ImageType.None;
     //TransFormstate transform;
     //Orientation iOri
 
     ImageItem(){
-        iconImage.dimensions = new Dimension(ErrorImages.unknowError.getWidth(),ErrorImages.unknowError.getHeight());
+//        iconImage.fullDimensions = new Dimension(ErrorImages.unknownError.getWidth(),ErrorImages.unknownError.getHeight());
+//        iconImage.fullImage=ErrorImages.unknownError;
+//        iconImage.thumbImage=iconImage.fullImage;
+//        iconImage.thumbDimensions=iconImage.fullDimensions;
     }
 
-
-//	if(Bheight<Bwidth) iOri = Orientation.Landscape;
-//	else iOri = Orientation.Portrait;
-    Dimension getCurrentDimensions(){
+    Dimension getCurrentFullDimensions(){//output of this is checked for null at geyDimensionsWithMake
         switch(fullType){
             case Original:
-                return originalImage.dimensions;
+                return originalImage.fullDimensions;
             case Filtered:
-                return filteredImage.dimensions;
+                return filteredImage.fullDimensions;
             default:
-                return iconImage.dimensions;
+                return iconImage.fullDimensions;
         }
     }
-    Dimension getFullDimension(){
-        return originalImage.dimensions;
+    Dimension getThumbDimensions(){
+        Dimension returnDim = null;
+        switch(fullType){
+            case Original:
+                returnDim = originalImage.thumbDimensions;
+            case Filtered:
+                returnDim = filteredImage.thumbDimensions;
+            case Icon:
+                returnDim = iconImage.thumbDimensions;
+            default:
+                returnDim = originalImage.thumbDimensions;
+        }
+        if(returnDim==null) returnDim = new Dimension(0,0);
+        return returnDim;
+    }
+    Dimension getFullDimensions(){
+        return originalImage.fullDimensions;
     }
     void setFullDimensions(Dimension in){
-        originalImage.dimensions = in;
-        filteredImage.dimensions = in;
+        originalImage.fullDimensions = in;
+        filteredImage.fullDimensions = in;
     }
 
     int getNoPixels(){
-        Dimension temp = getCurrentDimensions();
+        Dimension temp = getFullDimensions();
         return temp.width*temp.height;
     }
 
@@ -105,12 +120,20 @@ class ImageItem{
         return false;
     }
     boolean hasNoGoodFullImage(){
-        if(originalImage.fullImage==null) return true;
+        if(fullType.isBad()) return true;
         return false;
     }
     boolean hasNoGoodThumbImage(){
-        if(originalImage.thumbImage==null) return true;
+        if(thumbType.isBad()) return true;
         return false;
+    }
+    boolean hasGoodFullImage(){
+        if(fullType.isBad()) return false;
+        return true;
+    }
+    boolean hasGoodThumbImage(){
+        if(thumbType.isBad()) return false;
+        return true;
     }
     boolean hasAnyFullImage(){
         if(fullType.isNone()) return false;
@@ -121,21 +144,23 @@ class ImageItem{
         return true;
     }
 
-    void setFullImage(BufferedImage img,ImageType type){
+    synchronized void setFullImage(BufferedImage img,ImageType type){
         originalImage.fullImage = img;
+        if(img!=null) originalImage.fullDimensions=new Dimension(img.getWidth(),img.getHeight());
+        else {
+            Log.Print(LogType.Error, "trying to set full image to null");
+            Thread.dumpStack();
+        }
         if(type.isBad()) fullType = type;
         else if(type.isFiltered()) {
             filterImage(ImgSize.Full);
             fullType = ImageType.Filtered;
         }
         fullType = type;
-        if(img!=null) originalImage.dimensions=new Dimension(img.getWidth(),img.getHeight());
-        else {
-            Log.Print(LogType.Error, "trying to set full image to null");
-            Thread.dumpStack();
-        }
     }
-    void setThumbImage(BufferedImage img,ImageType type){
+    synchronized void setThumbImage(BufferedImage img,ImageType type){
+        if((img!=null)) originalImage.thumbDimensions=new Dimension(img.getWidth(),img.getHeight());
+        //if(img==null) {Log.Print(LogType.Error, "Setting icon to null");Thread.dumpStack();return;}
         originalImage.thumbImage = img;
         if(type.isBad()) thumbType = type;
         else if(type.isFiltered()) {
@@ -149,16 +174,17 @@ class ImageItem{
 //        setToIconImage(icon,ImgSize.Full);
 //        setToIconImage(icon,ImgSize.Thumb);
 //    }
-    void setToIconImage(BufferedImage icon,ImgSize size){
-        if(size==ImgSize.Full){
-        iconImage.fullImage = icon;
-        fullType = ImageType.Icon;
+    synchronized void setToIconImage(BufferedImage icon, ImgSize size) {
+        //if(icon==null) {Log.Print(LogType.Error, "Setting icon to null");Thread.dumpStack();return;}
+        if (size == ImgSize.Full) {
+            fullType = ImageType.Icon;
+            iconImage.fullDimensions=new Dimension(icon.getWidth(),icon.getHeight());
+            iconImage.fullImage = icon;
+        } else if (size == ImgSize.Thumb) {
+            thumbType = ImageType.Icon;
+            iconImage.thumbDimensions=new Dimension(icon.getWidth(),icon.getHeight());
+            iconImage.thumbImage = icon;
         }
-        else if(size==ImgSize.Thumb){
-        iconImage.thumbImage = icon;
-        thumbType = ImageType.Icon;
-        }
-        iconImage.dimensions=new Dimension(icon.getWidth(),icon.getHeight());
     }
 
     BufferedImage getCurrentFullImage(){
@@ -170,7 +196,7 @@ class ImageItem{
             case Original:
                 return originalImage.fullImage;
             default:
-                return ErrorImages.unknowError;
+                return ErrorImages.unknownError;
         }
     }
     BufferedImage getCurrentThumbImage(){
@@ -182,7 +208,7 @@ class ImageItem{
             case Original:
                 return originalImage.thumbImage;
             default:
-                return ErrorImages.unknowError;
+                return ErrorImages.unknownError;
         }
     }
     private void filterImage(ImgSize size){
@@ -209,10 +235,11 @@ class ImageItem{
         }
         op.filter(srcs[i], destination);
         if(size==ImgSize.Full) {
-            filteredImage.dimensions = new Dimension(destination.getWidth(),destination.getHeight());
+            filteredImage.fullDimensions = new Dimension(destination.getWidth(),destination.getHeight());
             filteredImage.fullImage = destination;
         } else{
             filteredImage.thumbImage = destination;
+            filteredImage.thumbDimensions = new Dimension(destination.getWidth(),destination.getHeight());
         }
     }
 
@@ -236,7 +263,9 @@ class ImageItem{
     }
     void clearMem(){
         //clears the full size image.
-        fullType = ImageType.None;
+        if(fullType!=ImageType.Icon){
+            fullType = ImageType.None;
+        }
         originalImage.fullImage = null;
         filteredImage.fullImage=null;
     }
