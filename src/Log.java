@@ -23,12 +23,12 @@ public class Log {
         String msg = message.toString();
         switch(type){
             case DebugError:
-                if(!showDebug) return;
+                if(!showDebug) return;//comment out to force all errors to be shown
             case Error:
                 System.err.println(message);
                 break;
             case Debug:
-                if(!showDebug) return;
+                if(!showDebug) return;//comment out to force all non-error messages to be shown
             default:
                 System.out.println(message);
         }

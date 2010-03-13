@@ -52,7 +52,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
 
             } catch (IOException e) {
                 if (pathFile.toString().equals("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex")) {
-                    returnImage = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+                    returnImage = ErrorImages.noNotesFound;
                     if (returnImage != null) {
                         returnThumb = returnImage;
                         returnImageType = ImageType.Icon;
@@ -71,9 +71,9 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
                 } else log.print(LogType.Error, "Error: requested thumbnail for " + (pathFile.length() / (1024 * 1024)) + "MB when the max is " + maxFilesizeToLoadThumb + "MB.");
             } finally {
                 if (outOfMemory) {
-                    returnImage = null;
+                    returnImage = ErrorImages.outOfMemory;
                     returnThumb = ErrorImages.outOfMemory;
-                    returnImageType = ImageType.None;
+                    returnImageType = ImageType.Icon;
                     returnThumbType = ImageType.Icon;
                 } else if (returnImageType == ImageType.None) {
                     returnImage = ErrorImages.fileNotFound;
@@ -86,12 +86,13 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
     }
     protected void done() {
         try {
-            parent.setImageFromLoader(returnImage, returnThumb, size, returnImageType, returnThumbType);
+            parent.setImageFromLoader(returnImage, returnThumb, size, returnImageType, returnThumbType,outOfMemory);
         } catch (CancellationException e) {
             //Hmm, thrown by get()
             log.print(LogType.Error, "Cancellation Exception");
         } catch (Exception e) {
-            log.print(LogType.Debug, e);
+            //log.print(LogType.Error, e);
+            e.printStackTrace();
         }
 
     }

@@ -21,9 +21,11 @@ enum ImageType{Original,Filtered,Icon,None;
 }
 //enum ErrorImageType{FileNotFound,OutOfMemory}
 class ErrorImages{
-    static BufferedImage fileNotFound = SysIcon.FileNotFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
-    static BufferedImage outOfMemory = SysIcon.OutOfMemory.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
-    static BufferedImage unknowError = SysIcon.Error.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage fileNotFound = SysIcon.FileNotFound.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage outOfMemory = SysIcon.OutOfMemory.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage loading = SysIcon.Loading.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage unknowError = SysIcon.Error.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage noNotesFound = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     //improvement: use java graphics to draw without relying on any external files, so GUI won't crash if no external file access
 }
 class MultiSizeImage{
@@ -64,17 +66,21 @@ class ImageItem{
     //TransFormstate transform;
     //Orientation iOri
 
+    ImageItem(){
+        iconImage.dimensions = new Dimension(ErrorImages.unknowError.getWidth(),ErrorImages.unknowError.getHeight());
+    }
+
 
 //	if(Bheight<Bwidth) iOri = Orientation.Landscape;
 //	else iOri = Orientation.Portrait;
     Dimension getCurrentDimensions(){
         switch(fullType){
-            case Icon:
-                return iconImage.dimensions;
+            case Original:
+                return originalImage.dimensions;
             case Filtered:
                 return filteredImage.dimensions;
             default:
-                return originalImage.dimensions;
+                return iconImage.dimensions;
         }
     }
     Dimension getFullDimension(){
@@ -98,11 +104,21 @@ class ImageItem{
         if(thumbType.isNone()) return true;
         return false;
     }
-    boolean hasFullImage(){
-        return (!hasNoCurrentFullImage());
+    boolean hasNoGoodFullImage(){
+        if(originalImage.fullImage==null) return true;
+        return false;
     }
-    boolean hasThumbImage(){
-        return (!hasNoCurrentThumbImage());
+    boolean hasNoGoodThumbImage(){
+        if(originalImage.thumbImage==null) return true;
+        return false;
+    }
+    boolean hasAnyFullImage(){
+        if(fullType.isNone()) return false;
+        return true;
+    }
+    boolean hasAnyThumbImage(){
+        if(thumbType.isNone()) return false;
+        return true;
     }
 
     void setFullImage(BufferedImage img,ImageType type){
@@ -113,7 +129,11 @@ class ImageItem{
             fullType = ImageType.Filtered;
         }
         fullType = type;
-        originalImage.dimensions=new Dimension(img.getWidth(),img.getHeight());
+        if(img!=null) originalImage.dimensions=new Dimension(img.getWidth(),img.getHeight());
+        else {
+            Log.Print(LogType.Error, "trying to set full image to null");
+            Thread.dumpStack();
+        }
     }
     void setThumbImage(BufferedImage img,ImageType type){
         originalImage.thumbImage = img;
@@ -122,7 +142,7 @@ class ImageItem{
             filterImage(ImgSize.Thumb);
             thumbType = ImageType.Filtered;
         }
-        thumbType = type;
+        else thumbType = type;//original and not to be filtered
     }
 
 //    void setAllToIconImage(BufferedImage icon){
@@ -131,41 +151,39 @@ class ImageItem{
 //    }
     void setToIconImage(BufferedImage icon,ImgSize size){
         if(size==ImgSize.Full){
-        fullType = ImageType.Icon;
         iconImage.fullImage = icon;
+        fullType = ImageType.Icon;
         }
-        if(size==ImgSize.Thumb){
-        thumbType = ImageType.Icon;
+        else if(size==ImgSize.Thumb){
         iconImage.thumbImage = icon;
+        thumbType = ImageType.Icon;
         }
         iconImage.dimensions=new Dimension(icon.getWidth(),icon.getHeight());
     }
 
     BufferedImage getCurrentFullImage(){
-        BufferedImage returnImage;
         switch(fullType){
             case Icon:
-                returnImage= iconImage.fullImage;
+                return iconImage.fullImage;
             case Filtered:
-                returnImage= filteredImage.fullImage;
+                return filteredImage.fullImage;
+            case Original:
+                return originalImage.fullImage;
             default:
-                returnImage= originalImage.fullImage;
+                return ErrorImages.unknowError;
         }
-        if(returnImage==null) returnImage = ErrorImages.unknowError;
-        return returnImage;
     }
     BufferedImage getCurrentThumbImage(){
-        BufferedImage returnImage;
         switch(thumbType){
             case Icon:
-                returnImage= iconImage.thumbImage;
+                return iconImage.thumbImage;
             case Filtered:
-                returnImage= filteredImage.thumbImage;
+                return filteredImage.thumbImage;
+            case Original:
+                return originalImage.thumbImage;
             default:
-                returnImage= originalImage.thumbImage;
+                return ErrorImages.unknowError;
         }
-        if(returnImage==null) returnImage = ErrorImages.unknowError;
-        return returnImage;
     }
     private void filterImage(ImgSize size){
         int i;

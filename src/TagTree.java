@@ -65,11 +65,11 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
         if (CurrentNode != null) {
             NodeObject = (IDTitle) CurrentNode.getUserObject();
             if (NodeObject.getID().equals("-1")) {
-                mainGUI.state = new ProgramState(LoadType.Refresh, mainGUI);
-                mainGUI.state.imageChanged();
+                mainGUI.setState(new ProgramState(LoadType.Refresh, mainGUI));
+                mainGUI.getState().imageChanged();
             } else {
-                mainGUI.state = new ProgramState(LoadType.Filter, mainGUI, NodeObject.getID());
-                mainGUI.state.imageChanged();
+                mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, NodeObject.getID()));
+                mainGUI.getState().imageChanged();
             }
         }
     }
@@ -77,7 +77,7 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
 public void actionPerformed(ActionEvent ae) {//ensue x and y are from first click and not menu click
         if (ae.getActionCommand().equals("rTagThis")){
             IDTitle idT =(IDTitle)((DefaultMutableTreeNode)this.getPathForLocation(lastX,lastY).getLastPathComponent()).getUserObject();
-            mainImageDB.tagImage(mainGUI.state.getCurrentImageID(), idT.getID());
+            mainImageDB.tagImage(mainGUI.getState().getCurrentImageID(), idT.getID());
         }
         else {
             System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());

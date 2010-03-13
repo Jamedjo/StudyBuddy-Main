@@ -47,27 +47,29 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     Log log;
     Settings settings = new Settings();;
     JFrame w;
+    private volatile ProgramState state;
+    ImageDatabase mainImageDB;
+    
+    ImageAdjuster adjuster;
+    OptionsGUI optionsGUI;
+    TagTagger tagTagger;
+    QuickTagger quickTagger;
+    Thread slideThread;
+
+    final JFileChooser fileGetter = new JFileChooser();
+    final JFileChooser folderGetter = new JFileChooser();
+    final JFileChooser jpgExporter = new JFileChooser();
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
     JMenuItem Options;
     JButton bSideBar;
-    final JFileChooser fileGetter = new JFileChooser();
-    final JFileChooser folderGetter = new JFileChooser();
-    final JFileChooser jpgExporter = new JFileChooser();
     MainPanel mainPanel;
     ThumbPanel thumbPanel;
     JToolBar toolbarMain;
     JToolBar imageToolbar;
     JScrollPane boardScroll;
-    ImageAdjuster adjuster;
-    OptionsGUI optionsGUI;
-    TagTagger tagTagger;
-    QuickTagger quickTagger;
-    volatile ProgramState state;
     JOptionPane tagBox;
-    ImageDatabase mainImageDB;
     TagTree tagTree;
-    Thread slideThread;
     JScrollPane mainScrollPane;
     JSplitPane splitpane;
     //JPanel rightArea;
@@ -80,8 +82,18 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     final int tagTreeMaxSize = 350;
     //boolean isChangingState = false;
 
+    ProgramState getState(){
+        return state;
+    }
+    void setState(ProgramState newstate){
+        ProgramState tempstate = state;
+        state = newstate;
+        tempstate.safelyDestruct();
+    }
+
     public static void main(String[] args) {
-        GUI mainGUI = new GUI();
+        //GUI mainGUI =
+        new GUI();
     }
 
     void setTitle() {
@@ -217,7 +229,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void quickRestart(){
-        state = new ProgramState(this);//Also initializes mainImageDB
+        state = new ProgramState(this);//Also initializes mainImageDB //Only time that state = should be used out side of setState()
         mainPanel = new MainPanel(this);
         mainPanel.setCursorMode(DragMode.None);
 
@@ -293,8 +305,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         adjuster = new ImageAdjuster(w,true);
         adjuster.addChangeListeners( new ChangeListener(){
             public void stateChanged(ChangeEvent e){
-                state.getCurrentImage().replaceFilter(adjuster.getCurrentInvertBox(), adjuster.getCurrentSliderContrast(),adjuster.getCurrentSliderBright());
-                state.imageColoursUpdated();
+                getState().getCurrentImage().replaceFilter(adjuster.getCurrentInvertBox(), adjuster.getCurrentSliderContrast(),adjuster.getCurrentSliderBright());
+                getState().imageColoursUpdated();
             }
         });
 
@@ -307,7 +319,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
         w.pack();
-        state.imageChanged();
+        getState().imageChanged();
         contentPane.addComponentListener(this);//don't want it to trigger while building
 
         //Set positions. Should be done upon popup,show or set visable instead.
@@ -332,8 +344,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
         else if (ae.getActionCommand().equals("Zoom100")) zoomTo(100);
         else if (ae.getActionCommand().equals("ZoomX")) zoomBox();
-        else if (ae.getActionCommand().equals("Next")) state.nextImage();
-        else if (ae.getActionCommand().equals("Prev")) state.prevImage();
+        else if (ae.getActionCommand().equals("Next")) getState().nextImage();
+        else if (ae.getActionCommand().equals("Prev")) getState().prevImage();
         else if (ae.getActionCommand().equals("AddTag")) addTag();
         else if (ae.getActionCommand().equals("TagThis")) tagThis();
         else if (ae.getActionCommand().equals("QuickTag")) quickTag();
@@ -364,15 +376,15 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 	{
 		Record TempRecord;
 		String DummyLinkID;
-		if (state.getSelectingImage())
+		if (getState().getSelectingImage())
 		{
-			DummyLinkID = state.getDummyLinkID();
+			DummyLinkID = getState().getDummyLinkID();
 			TempRecord = mainImageDB.getLink(DummyLinkID);
 			mainImageDB.deleteLink(DummyLinkID);
-			mainImageDB.linkImage(TempRecord.getField(1), state.getCurrentImageID(), Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)), Integer.parseInt(TempRecord.getField(6)));
+			mainImageDB.linkImage(TempRecord.getField(1), getState().getCurrentImageID(), Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)), Integer.parseInt(TempRecord.getField(6)));
 			JOptionPane.showMessageDialog(w, "Images Linked!");
 			mainPanel.repaint();
-			state.setSelectingImage(false);
+			getState().setSelectingImage(false);
 		}
 		else
 		{
@@ -565,11 +577,11 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         if ((FilterTag != null) && (FilterTag instanceof IDTitle)) {
             IDTitle FilterTagIDTitle = (IDTitle) FilterTag;
             if (FilterTagIDTitle.getID().equals("-1")) {
-                state = new ProgramState(LoadType.Refresh, this); //flush first?
-                state.imageChanged();
+                setState(new ProgramState(LoadType.Refresh, this));
+                getState().imageChanged();
             } else {
-                state = new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()); //flush first?
-                state.imageChanged();
+                setState(new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()));
+                getState().imageChanged();
             }
         }
         tagTree.updateTags();
@@ -581,7 +593,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                 JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, AllTags, null);
         if ((NewTag != null) && (NewTag instanceof IDTitle)) {
             IDTitle NewTagIDTitle = (IDTitle) NewTag;
-            mainImageDB.tagImage(state.getCurrentImageID(), NewTagIDTitle.getID());
+            mainImageDB.tagImage(getState().getCurrentImageID(), NewTagIDTitle.getID());
         }
         tagTree.updateTags();
     }
@@ -622,8 +634,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
                 for(Object Img: SelectedImages){
                     mainImageDB.tagImage(Img.toString(), tagID);
                 }
-                if(tagID.equals(state.currentFilter)){
-                    state.ConstructProgramState(LoadType.Filter, this, tagID);
+                if(tagID.equals(getState().currentFilter)){
+                    setState(new ProgramState(LoadType.Filter, this, tagID));
                     mainPanel.onResize();
                     thumbPanel.onResize();
                 }
@@ -638,21 +650,21 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             String ext = ImageUtils.getFileExtLowercase(filePathAndName);
             if((ext==null)||(!(ext.equals("jpg")||ext.equals("jpeg")))) filePathAndName = filePathAndName + ".jpg";
             settings.setSettingAndSave("lastOpenDirectory",jpgExporter.getCurrentDirectory().toString());
-            state.getCurrentImage().saveFullToPath(filePathAndName);
+            getState().getCurrentImage().saveFullToPath(filePathAndName);
         }
     }
     void importDo() {
         int wasGot = fileGetter.showOpenDialog(w);
         if (wasGot == JFileChooser.APPROVE_OPTION) {
             settings.setSettingAndSave("lastOpenDirectory",fileGetter.getCurrentDirectory().toString());
-            state.importImages(fileGetter.getSelectedFiles());
+            getState().importImages(fileGetter.getSelectedFiles());
         }
     }
     void importDirDo() {
         int wasGot = folderGetter.showOpenDialog(w);
         if (wasGot == JFileChooser.APPROVE_OPTION) {
             settings.setSettingAndSave("lastOpenDirectory",folderGetter.getCurrentDirectory().toString());
-            state.importImages(folderGetter.getSelectedFiles());
+            getState().importImages(folderGetter.getSelectedFiles());
         }
     }
 
@@ -697,9 +709,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 //        int oldCr = state.getCurrentImage().contrast;
 //        boolean oldInv = state.getCurrentImage().isInverted;
         adjuster.popup();
-        state.getCurrentImage().replaceFilter(adjuster.isInverted(), adjuster.getContrast(),adjuster.getBrightness());
+        getState().getCurrentImage().replaceFilter(adjuster.isInverted(), adjuster.getContrast(),adjuster.getBrightness());
         if(adjuster.shouldReset()){
-            state.imageColoursReset();
+            getState().imageColoursReset();
         }
     }
     void showOptions(){

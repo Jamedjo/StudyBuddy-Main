@@ -25,7 +25,7 @@ class ThumbButton extends JPanel{
         addMouseListener(new MouseAdapter() {
           public void mousePressed(MouseEvent e) {
               //set current image to one clicked
-              mainGUI.state.offsetImage(thumbNumber);
+              mainGUI.getState().offsetImage(thumbNumber);
           }
         });
 
@@ -35,7 +35,7 @@ class ThumbButton extends JPanel{
 
     //all scaling in terms of height. max size is 20 times minimum.????
     public void paintComponent(java.awt.Graphics g) {
-	if(mainGUI.state.isLocked) return;
+	if(mainGUI.getState().isLocked) return;
 
 	Dimension useWH;
         super.paintComponent(g);
@@ -48,14 +48,14 @@ class ThumbButton extends JPanel{
 	//int currentThumb = mainGUI.state.currentI;
 	int thumbOfsetW =0;
 	int thumbOfsetH = 0;
-	if(thumbNumber<mainGUI.state.numberOfImages){// use <= to show currentI too
+	if(thumbNumber<mainGUI.getState().numberOfImages){// use <= to show currentI too
 	    //set dimension
 	    //currentThumb = mainGUI.state.next(currentThumb);
-	    useWH = mainGUI.state.getRelImageWH(ImgRequestSize.Thumb,size,size,thumbNumber);
+	    useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Thumb,size,size,thumbNumber);
 	    thumbOfsetW= (size - useWH.width)/2;
 	    thumbOfsetH= (size - useWH.height)/2;
 	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgRequestSize.Thumb));
-	    g2.drawImage(mainGUI.state.getBImageI(thumbNumber,ImgRequestSize.Thumb), thumbOfsetW+hOffset, thumbOfsetH,useWH.width,useWH.height, this);
+	    g2.drawImage(mainGUI.getState().getBImageI(thumbNumber,ImgRequestSize.Thumb), thumbOfsetW+hOffset, thumbOfsetH,useWH.width,useWH.height, this);
 	}
     }
 
@@ -96,7 +96,7 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 //                wait();
 //            } catch (InterruptedException e){}
 //        }
-        noTiles = Math.min(maxNoTiles,(mainGUI.state.numberOfImages-1));//remove -1 to show currentI too
+        noTiles = Math.min(maxNoTiles,(mainGUI.getState().numberOfImages-1));//remove -1 to show currentI too
        //**// log.print(LogType.Debug,"now showing "+noTiles+" thumbnails");
           JPanel centrePan = new JPanel();
         if (noTiles < 0) noTiles=0;
@@ -160,7 +160,7 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 //    }
 
     @Override public void mouseWheelMoved(MouseWheelEvent e){
-        mainGUI.state.offsetImage(-e.getWheelRotation());//not sure which direction is better
+        mainGUI.getState().offsetImage(-e.getWheelRotation());//not sure which direction is better
     }
     @Override
     public void paintComponent(java.awt.Graphics g) {

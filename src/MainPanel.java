@@ -39,7 +39,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
         //dragThread = new Thread(new DragUpdate(this,dragPeriod));
-        mainGUI.mainImageDB.linkImage(mainGUI.state.getRelativeImageID(1),mainGUI.state.getCurrentImageID(), 300, 200, 100, 100);
+        mainGUI.mainImageDB.linkImage(mainGUI.getState().getRelativeImageID(1),mainGUI.getState().getCurrentImageID(), 300, 200, 100, 100);
     }
     DragMode getCursorMode(){
         return dragMode;
@@ -98,11 +98,11 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     }
     void fixFitZoomMultiplier(){
         //if(useWH==null){
-            useWH = mainGUI.state.getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
+            useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
         //}
         //Potentially inefficient as forces full size image to load
         //log.print(LogType.Debug,"old zoomMultiplier- " + getZoomMult());
-        setZoomMult((double)((double) useWH.width) / ((double) mainGUI.state.getImageWidthFromBig()));
+        setZoomMult((double)((double) useWH.width) / ((double) mainGUI.getState().getImageWidthFromBig()));
         //log.print(LogType.Debug,"new zoomMultiplier- " + getZoomMult());
         //log.print(LogType.Debug,"boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
     }
@@ -110,7 +110,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     void onResize() {
         //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
         if ( isZoomed() ) {
-            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             if((getCursorMode()==DragMode.Drag)||(getCursorMode()==DragMode.None)){
                 setCursorMode(getCurrentDrag());
             }
@@ -145,7 +145,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     
     //all scaling in terms of height. max size is 20 times minimum.
     @Override public void paintComponent(java.awt.Graphics g) {
-        if (mainGUI.state.isLocked) {
+        if (mainGUI.getState().isLocked) {
             return;
         }
         super.paintComponent(g);
@@ -153,16 +153,16 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         ImgRequestSize cSize;
         if (isZoomed()) {
             cSize = ImgRequestSize.Max;
-            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
-            useWH = new Dimension((int) (mainGUI.state.getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.state.getImageHeightFromBig() * getZoomMult()));
+            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            useWH = new Dimension((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()));
         } else {
             cSize = ImgRequestSize.Max;
-            useWH = mainGUI.state.getRelImageWH(cSize, boardW, boardH, 0);
+            useWH = mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
         //g2.rotate(double theta);Math.toRadians(90.0);
         //g2.transform(AffineTransform Tx)
-        g2.drawImage(mainGUI.state.getBImageI(0, cSize), leftOffset, topOffset, useWH.width, useWH.height, this);
+        g2.drawImage(mainGUI.getState().getBImageI(0, cSize), leftOffset, topOffset, useWH.width, useWH.height, this);
         drawLinkBoxes(g2, mainGUI.settings.getSettingAsBool("showNotes",true), mainGUI.settings.getSettingAsBool("showLinks",true));
     }
 
@@ -172,7 +172,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     // Retreive the boxes for notes and links and draw them on the image
     private void drawLinkBoxes(Graphics2D g2, boolean showNotes, boolean showImageLinks) {
         Rectangle[] linksRect;
-        String CurrentImageID = mainGUI.state.getCurrentImageID();
+        String CurrentImageID = mainGUI.getState().getCurrentImageID();
         g2.setStroke(dashLine);
         //log.print(LogType.Debug,"zoomMultiplier- " + getZoomMult());
         if (CurrentImageID != null) {
@@ -212,7 +212,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         double oldZoom = getZoomMult();
         if (isZoomFit()) {
             //get multiplier from fit so zoom doesnt jump
-            setZoomMult(((double)useWH.width) / ((double)mainGUI.state.getImageWidthFromBig()));
+            setZoomMult(((double)useWH.width) / ((double)mainGUI.getState().getImageWidthFromBig()));
         }
         //Does not look at offsets as these imply image is not enlarged in that dimension.
         //If the image is zoomed out and has offsets then no need to change JViewport position
@@ -262,10 +262,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             setOffsets();
             Rectangle rec = getBoxFromPress(e.getX(),e.getY(),true);
             if (mode == DragMode.Note) {
-                mainGUI.mainImageDB.addImageNote(mainGUI.state.getCurrentImageID(), "", rec.x, rec.y ,rec.width ,rec.height);
+                mainGUI.mainImageDB.addImageNote(mainGUI.getState().getCurrentImageID(), "", rec.x, rec.y ,rec.width ,rec.height);
             } else if (mode == DragMode.Link) {
-				mainGUI.state.setSelectingImage(true);
-                mainGUI.state.setDummyLinkID(mainGUI.mainImageDB.linkImage(mainGUI.state.getCurrentImageID(), mainGUI.state.getCurrentImageID(), rec.x, rec.y, rec.width,rec.height));
+				mainGUI.getState().setSelectingImage(true);
+                mainGUI.getState().setDummyLinkID(mainGUI.mainImageDB.linkImage(mainGUI.getState().getCurrentImageID(), mainGUI.getState().getCurrentImageID(), rec.x, rec.y, rec.width,rec.height));
 				JOptionPane.showMessageDialog(mainGUI.w, "Navigate to the image to link to and repress the link button");
             }
             setCursorMode(getCurrentDrag());
@@ -274,8 +274,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     }
     public void mouseClicked(MouseEvent e)
 	{
-		NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.state.getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
-		String[] LinkedImageIDs = mainGUI.mainImageDB.getImageIDsFromImagePoint(mainGUI.state.getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
+		NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
+		String[] LinkedImageIDs = mainGUI.mainImageDB.getImageIDsFromImagePoint(mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
 		String TempString = "";
 		if (PointNotes.isEmpty() == false)
 		{

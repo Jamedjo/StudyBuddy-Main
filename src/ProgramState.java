@@ -182,16 +182,13 @@ class ProgramState{
                     //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
                     mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
                 }
-                mainGUI.state = new ProgramState(LoadType.Filter, mainGUI, currentFilter);
+                mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, currentFilter));
             }
-            mainGUI.state.imageChanged();
+            mainGUI.getState().imageChanged();
         } catch (java.lang.OutOfMemoryError e) {
             JOptionPane.showMessageDialog(mainGUI.w, "Out of memory", "Fatal Error", JOptionPane.ERROR_MESSAGE);
         } finally {
             isLocked = false;
-            if (this != mainGUI.state) {
-                safelyDestruct();
-            }
         }
     }
 
@@ -206,7 +203,7 @@ class ProgramState{
 	}
 	imageList = null;
 	imageIDs = null;
-	//call garbage collect?
+        System.gc(); //hint at garbage collection
     }
 
     int next(int val){
@@ -293,7 +290,7 @@ class ProgramState{
         if(size.isLarge()){
             int i;
             int prev = prev(relativeImage); //dont preload too large files. If you load a file make sure it does not keep trying to load after failures.(heap mem)
-            for(i=1;i<4;i++){//Use amount of memory avaliable to determine number to preload
+            for(i=1;i<Math.min(4,lastIndex);i++){//Use amount of memory avaliable to determine number to preload
                 imageList[relItoFixI(i+relativeImage)].preload(size);//Preloads next three images
             } for(;i<lastIndex;i++){
                 if(i==prev) imageList[prev].preload(size);//Preloads previous image
@@ -303,10 +300,10 @@ class ProgramState{
 	return returnImage;
     }
     int getImageWidthFromBig(){
-        return getCurrentImage().getWidthWithMake();
+        return getCurrentImage().getDimensionsWithMake().width;
     }
     int getImageHeightFromBig(){
-        return getCurrentImage().getHeightWithMake();
+        return getCurrentImage().getDimensionsWithMake().height;
     }
 
     void imageColoursReset(){

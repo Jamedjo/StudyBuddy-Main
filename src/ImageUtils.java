@@ -75,7 +75,7 @@ class ImageUtils{
             ext = name.substring(pos + 1).toLowerCase();
         }
         if (ext == null) {
-            Log.Print(LogType.Error, "Unable to get file extension from " + name);
+            Log.Print(LogType.DebugError, "Unable to get file extension from " + name);
         }
         return ext;
     }
@@ -132,7 +132,8 @@ Dimension outWH = new Dimension();
     static Dimension getImageWH(ImgRequestSize size, int MaxW, int MaxH,ImageReference relImage){
         Dimension useWH = new Dimension();
 	if(size.isLarge()){
-	    useWH= scaleToMax(relImage.getWidthWithMake(),relImage.getHeightWithMake(), MaxW, MaxH);
+            Dimension relImageDimension = relImage.getDimensionsWithMake();
+	    useWH= scaleToMax(relImageDimension.width,relImageDimension.height, MaxW, MaxH);
 	}
 	else {
 	    useWH = scaleToMax(relImage.getWidthForThumb(),relImage.getHeightForThumb(), MaxW, MaxH);
