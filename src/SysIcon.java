@@ -14,44 +14,60 @@ import javax.swing.ImageIcon;
 
 public enum SysIcon {
 
-    Logo("logo.png"){@Override ImageIcon fail(){return new ImageIcon();}},//Create empty icon if logo missing so GUI still loads.
-    Question("question.gif"){},
-    Error("error.gif"),
-    Info("oxygen/dialog-information-3.png"),//info.gif"),
-    Help("help.gif"),
-    Export("oxygen/document-save-as-3.png"),
-    Prev("oxygen/go-previous-6.png"),
-    Next("oxygen/go-next-6.png"),
-    Play("oxygen/media-playback-start-6.png"),
-    Stop("oxygen/media-playback-stop-6.png"),
-    HideThumbs("oxygen/list-remove-4.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}},//document-edit.png"),
-    ShowThumbs("oxygen/list-add-3.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}},//document-edit.png"),
-//    Thumbs("oxygen/view-list-icons.png"),
-    JTree("oxygen/view-sidetree-4.png"),
-    ImageBar("oxygen/applications-graphics-3.png","oxygencustom/toolbar-32.png"){@Override void drawIt(){drawMidRight();}},
-    Zoom100("oxygen/zoom-original-4.png"),
-    ZoomFit("oxygen/document-preview.png"),
-    ZoomToX("oxygencustom/zoom-32.png"),//preferences-system-windows-move.png"),//zoom-fit-best-4.png"),
-    AddTag("oxygen/list-add-3.png","oxygen/edit-rename.png"){@Override void drawIt(){drawBottomRight();}},//document-edit.png"),
-    TagThis("oxygen/feed-subscribe.png","oxygen/knotes-4.png"){@Override void drawIt(){drawBottomRight();}},
-    QuickTag("oxygen/feed-subscribe.png","oxygen/view-pim-notes.png"){@Override void drawIt(){drawBottomRight();}},
-    TagTag("oxygen/feed-subscribe.png","oxygen/feed-subscribe.png"){@Override void drawIt(){drawBottomRight();}},
-    TagFilter("oxygencustom/zoom-32.png","oxygen/feed-subscribe.png"),//("oxygen/strigi.png"),
-    DragPan("oxygen/transform-move.png"),
-    DragNote("oxygen/insert-text-2.png"),//knotes-4.png"),
-    DragLink("oxygen/insert-link-2.png"),
-    BlueTooth("oxygen/preferences-system-bluetooth.png"),//phone-3.png"),
-    Adjust("oxygen/color-fill.png"),
-    BigAdjust("oxygenbig/color-fill.png"),
-    LinkCursor("oxygen/quickopen.png"),
-    NoteCursor("oxygen/transform-crop.png"),
-    Import("oxygen/application-x-egon.png"),
-    ImportDir("oxygen/folder-image.png"),
-    Options("oxygen/preferences-system-3.png"),
-    Loading("oxygenbig/view-refresh-6.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}},//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    OutOfMemory("oxygenbig/dialog-warning-3.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}},//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    FileNotFound("oxygenbig/dialog-cancel-4.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}},
-    NoNotesFound("oxygenbig/dialog-cancel-4.png","oxygenbig/view-pim-notes.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}};
+    Logo("logo.png"){@Override ImageIcon fail(){return new ImageIcon();}}//Create empty icon if logo missing so GUI still loads.
+    ,Question("question.gif"){}
+    ,Error("error.gif")
+    ,Info("oxygen/dialog-information-3.png")//info.gif")
+    ,Help("help.gif")
+    ,Export("oxygen/document-save-as-3.png")
+    ,Prev("oxygen/go-previous-6.png")
+    ,Next("oxygen/go-next-6.png")
+    ,Play("oxygen/media-playback-start-6.png")
+    ,Stop("oxygen/media-playback-stop-6.png")
+    ,HideThumbs("oxygen/list-remove-4.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
+    ,ShowThumbs("oxygen/list-add-3.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
+//    ,Thumbs("oxygen/view-list-icons.png")
+    ,JTree("oxygen/view-sidetree-4.png")
+    ,ImageBar("oxygen/applications-graphics-3.png","oxygencustom/toolbar-32.png"){@Override void drawIt(){drawMidRight();}}
+    ,Zoom100("oxygen/zoom-original-4.png")
+    ,ZoomFit("oxygen/document-preview.png")
+    ,ZoomToX("oxygencustom/zoom-32.png")//preferences-system-windows-move.png"),//zoom-fit-best-4.png")
+    ,AddTag("oxygen/list-add-3.png","oxygen/edit-rename.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
+    ,TagThis("oxygen/feed-subscribe.png","oxygen/knotes-4.png"){@Override void drawIt(){drawBottomRight();}}
+    ,QuickTag("oxygen/feed-subscribe.png","oxygen/view-pim-notes.png"){@Override void drawIt(){drawBottomRight();}}
+    ,TagTag("oxygen/feed-subscribe.png","oxygen/feed-subscribe.png"){@Override void drawIt(){drawBottomRight();}}
+    ,TagFilter("oxygencustom/zoom-32.png","oxygen/feed-subscribe.png")//("oxygen/strigi.png")
+    ,DragPan("oxygen/transform-move.png")
+    ,DragNote("oxygen/insert-text-2.png")//knotes-4.png")
+    ,DragLink("oxygen/insert-link-2.png")
+    ,BlueTooth("oxygen/preferences-system-bluetooth.png")//phone-3.png")
+    ,Adjust("oxygen/color-fill.png")
+    ,BigAdjust("oxygenbig/color-fill.png")
+    ,LinkCursor("oxygen/quickopen.png")
+    ,NoteCursor("oxygen/transform-crop.png")
+    ,Import("oxygen/application-x-egon.png")
+    ,ImportDir("oxygen/folder-image.png")
+    ,Options("oxygen/preferences-system-3.png")
+    ,Loading("oxygenbig/view-refresh-6.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,OutOfMemory("oxygenbig/dialog-warning-3.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,FileNotFound("oxygenbig/dialog-cancel-4.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}
+    ,NoNotesFound("oxygenbig/dialog-cancel-4.png","oxygenbig/view-pim-notes.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}
+
+    ,LoadingAni1("oxygencustom/view-refresh-6-HQ-01.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,LoadingAni2("oxygencustom/view-refresh-6-HQ-02.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,LoadingAni3("oxygencustom/view-refresh-6-HQ-03.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,LoadingAni4("oxygencustom/view-refresh-6-HQ-04.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,LoadingAni5("oxygencustom/view-refresh-6-HQ-05.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,LoadingAni6("oxygencustom/view-refresh-6-HQ-06.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,LoadingAni7("oxygencustom/view-refresh-6-HQ-07.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+    ,LoadingAni8("oxygencustom/view-refresh-6-HQ-08.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
+
+
+
+
+
+
+    ;
     ImageIcon Icon;
     URL imgURL;
     Log log = new Log();

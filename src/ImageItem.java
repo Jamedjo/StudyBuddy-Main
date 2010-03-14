@@ -1,6 +1,8 @@
 
 import java.awt.Dimension;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 
@@ -20,13 +22,64 @@ enum ImageType{Original,Filtered,Icon,None;
     }
 }
 //enum ErrorImageType{FileNotFound,OutOfMemory}
-class ErrorImages{
+class ErrorImages implements Runnable {
+    static final BufferedImage[] loadingAnim= {
+        SysIcon.LoadingAni1.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
+        SysIcon.LoadingAni2.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
+        SysIcon.LoadingAni3.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
+        SysIcon.LoadingAni4.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
+        SysIcon.LoadingAni5.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
+        SysIcon.LoadingAni6.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
+        SysIcon.LoadingAni7.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
+        SysIcon.LoadingAni8.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB)
+    };
     static final BufferedImage fileNotFound = SysIcon.FileNotFound.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage outOfMemory = SysIcon.OutOfMemory.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage loading = SysIcon.Loading.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage unknownError = SysIcon.Error.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage noNotesFound = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     //improvement: use java graphics to draw without relying on any external files, so GUI won't crash if no external file access
+    
+    static final int angle = 10;
+    static int current = 0;//animations go from 1to8, array from 0to7.
+    static final int numberOfSprites = 8;
+    int t;//milliseconds
+    GUI mainGUI;
+    static boolean mainPanelShouldRepaint = false;
+
+     ErrorImages(int updatePeriod,GUI gui){
+        t = updatePeriod;
+        mainGUI = gui;
+    }
+
+    @Override public void run(){
+        while(true){
+            try{
+                Thread.sleep(t);
+                updateIcons();
+            } catch (InterruptedException e){
+                return;
+                //remember when you 'stop' thread, to create a new one to allow thread to be started again
+            }
+        }
+    }
+
+    void updateIcons(){
+        if(current==(numberOfSprites-1)) current=0;
+        else current++;
+        mainGUI.mainPanel.repaint();
+        //loading=loadingAnim[current];
+    }
+
+    public static BufferedImage getLoading(){
+        mainPanelShouldRepaint=true;
+        return loadingAnim[current];
+    }
+
+    public static void stopAnim(){
+        mainPanelShouldRepaint=false;
+    }
+
 }
 class MultiSizeImage {
     //make these private to some extent. Or make each multiSize image private.

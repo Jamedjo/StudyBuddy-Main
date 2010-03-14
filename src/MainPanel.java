@@ -5,6 +5,7 @@ import javax.swing.JOptionPane.*;
 import java.awt.event.*;
 import java.awt.Cursor;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 
 public class MainPanel extends JPanel implements MouseWheelListener, MouseListener, MouseMotionListener {//,Scrollable {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
@@ -151,18 +152,23 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         ImgRequestSize cSize;
+        if (isZoomed())  cSize = ImgRequestSize.Max;
+        else cSize = ImgRequestSize.Max;
+        BufferedImage img = mainGUI.getState().getBImageI(0, cSize);
+        
+        if(img==ErrorImages.loading) img=ErrorImages.getLoading();
+        else ErrorImages.stopAnim();
+
         if (isZoomed()) {
-            cSize = ImgRequestSize.Max;
             this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
             useWH = new Dimension((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()));
         } else {
-            cSize = ImgRequestSize.Max;
             useWH = mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
         //g2.rotate(double theta);Math.toRadians(90.0);
         //g2.transform(AffineTransform Tx)
-        g2.drawImage(mainGUI.getState().getBImageI(0, cSize), leftOffset, topOffset, useWH.width, useWH.height, this);
+        g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
         drawLinkBoxes(g2, mainGUI.settings.getSettingAsBool("showNotes",true), mainGUI.settings.getSettingAsBool("showLinks",true));
     }
 
