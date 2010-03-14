@@ -1,9 +1,6 @@
 
 import java.awt.AlphaComposite;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -53,18 +50,22 @@ public enum SysIcon {
     ,FileNotFound("oxygenbig/dialog-cancel-4.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}
     ,NoNotesFound("oxygenbig/dialog-cancel-4.png","oxygenbig/view-pim-notes.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}
 
-    ,LoadingAni1("oxygencustom/view-refresh-6-HQ-01.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    ,LoadingAni2("oxygencustom/view-refresh-6-HQ-02.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    ,LoadingAni3("oxygencustom/view-refresh-6-HQ-03.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    ,LoadingAni4("oxygencustom/view-refresh-6-HQ-04.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    ,LoadingAni5("oxygencustom/view-refresh-6-HQ-05.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    ,LoadingAni6("oxygencustom/view-refresh-6-HQ-06.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    ,LoadingAni7("oxygencustom/view-refresh-6-HQ-07.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-    ,LoadingAni8("oxygencustom/view-refresh-6-HQ-08.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
-
-
-
-
+    ,LoadingAni1("oxygencustom/view-refresh-6-HQ-01.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni1b("oxygencustom/view-refresh-6-HQ-01b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni2("oxygencustom/view-refresh-6-HQ-02.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni2b("oxygencustom/view-refresh-6-HQ-02b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni3("oxygencustom/view-refresh-6-HQ-03.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni3b("oxygencustom/view-refresh-6-HQ-03b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni4("oxygencustom/view-refresh-6-HQ-04.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni4b("oxygencustom/view-refresh-6-HQ-04b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni5("oxygencustom/view-refresh-6-HQ-05.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni5b("oxygencustom/view-refresh-6-HQ-05b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni6("oxygencustom/view-refresh-6-HQ-06.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni6b("oxygencustom/view-refresh-6-HQ-06b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni7("oxygencustom/view-refresh-6-HQ-07.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni7b("oxygencustom/view-refresh-6-HQ-07b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni8("oxygencustom/view-refresh-6-HQ-08.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni8b("oxygencustom/view-refresh-6-HQ-08b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
 
 
     ;

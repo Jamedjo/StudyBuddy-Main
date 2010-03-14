@@ -1,11 +1,25 @@
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.JOptionPane.*;
-import java.awt.event.*;
+import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 
 public class MainPanel extends JPanel implements MouseWheelListener, MouseListener, MouseMotionListener {//,Scrollable {
 //parent is JViewport parent of parent is JScrollPane so use getParent().getParent()
@@ -151,25 +165,56 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
+        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR );
         ImgRequestSize cSize;
         if (isZoomed())  cSize = ImgRequestSize.Max;
         else cSize = ImgRequestSize.Max;
         BufferedImage img = mainGUI.getState().getBImageI(0, cSize);
-        
-        if(img==ErrorImages.loading) img=ErrorImages.getLoading();
-        else ErrorImages.stopAnim();
+        boolean loading=false;BufferedImage b=null;
+        if(img==ErrorImages.loading){
+//            Graphics2D composite;
+            img=mainGUI.getState().getBImageI(0,ImgRequestSize.Thumb);
+            b =  ErrorImages.getLoading();
+            //composite = img.createGraphics();
+//            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
+//            composite.setComposite(ac);
+            //composite.drawImage(b, 0, 0, null);
+//            composite.drawImage(b, 0, 0, img.getWidth(), img.getHeight(), this);
+            loading=true;
+        }
+        else {
+            ErrorImages.stopAnim();
+        }
 
         if (isZoomed()) {
-            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
-            useWH = new Dimension((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()));
+            int w,h;
+            if(loading){
+                w=img.getWidth();
+                h=img.getHeight();
+            }else{
+                w= mainGUI.getState().getImageWidthFromBig();
+                h= mainGUI.getState().getImageHeightFromBig();
+            }
+            this.setPreferredSize(ImageUtils.useMaxMax((int) (w * getZoomMult()),(int) (h * getZoomMult()),this.getParent().getWidth(),this.getParent().getHeight()));
+            useWH = new Dimension((int) (w * getZoomMult()),(int) (h * getZoomMult()));
         } else {
-            useWH = mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
+            if(loading) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
+            else mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
         //g2.rotate(double theta);Math.toRadians(90.0);
         //g2.transform(AffineTransform Tx)
         g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
+        if(loading) {
+            int leftLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().x : 0 ;
+            int topLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().y : 0 ;
+            Dimension loadingWH = ImageUtils.scaleToMax(b.getWidth(), b.getHeight(), boardW, boardH);
+            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
+            g2.setComposite(ac);
+            g2.drawImage(b, ((boardW - loadingWH.width) / 2)+leftLoadOS, ((boardH - loadingWH.height) / 2)+topLoadOS, loadingWH.width, loadingWH.height, this);
+        }
         drawLinkBoxes(g2, mainGUI.settings.getSettingAsBool("showNotes",true), mainGUI.settings.getSettingAsBool("showLinks",true));
+        //g2.dispose();?
     }
 
     final static float dashA[] = {16.0f};

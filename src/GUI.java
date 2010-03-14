@@ -122,7 +122,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         buildFolderGetter();
         buildJpgExporter();
         setupCache();
-        Thread errorImgsThread = new Thread(new ErrorImages(150,this));
+        Thread errorImgsThread = new Thread(new ErrorImages(100,this));
         errorImgsThread.start();
         quickRestart();
         //w.setDefaultLookAndFeelDecorated(false);
