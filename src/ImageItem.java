@@ -154,9 +154,12 @@ class ImageItem{
         fullType = type;
     }
     synchronized void setThumbImage(BufferedImage img,ImageType type){
-        if((img!=null)) originalImage.thumbDimensions=new Dimension(img.getWidth(),img.getHeight());
+        MultiSizeImage setter;
+        if(type==ImageType.Icon) setter=iconImage;
+        else setter=originalImage;
+        if((img!=null)) setter.thumbDimensions=new Dimension(img.getWidth(),img.getHeight());
         //if(img==null) {Log.Print(LogType.Error, "Setting icon to null");Thread.dumpStack();return;}
-        originalImage.thumbImage = img;
+        setter.thumbImage = img;
         if(type.isBad()) thumbType = type;
         else if(type.isFiltered()) {
             filterImage(ImgSize.Thumb);

@@ -85,14 +85,12 @@ class ImageReference {
         if ((hasCalledLoad)&&(size==ImgRequestSize.Thumb)) return;
         if((hasCalledLoad)&&img.hasNoGoodThumbImage()) return;
             hasCalledLoad = true;
-//            if (size.isThumb() && (pathFile.length() > (maxFilesizeToLoadThumb * 1024 * 1024))) {
-//                    //outOfMemory = true;
-//                    log.print(LogType.Error, "Error: requested thumbnail for " + (pathFile.length() / (1024 * 1024)) + "MB when the max is " + maxFilesizeToLoadThumb + "MB.");
-//                    returnImage = ErrorImages.outOfMemory;
-//                    returnImageType = ImageType.Icon;
-//                    setImageFromLoader?
-//            }
-//            else
+            if (size.isThumb() && (pathFile.length() > (maxFilesizeToLoadThumb * 1024 * 1024))) {
+                    //hasCalledLoad=false;
+                    log.print(LogType.Error, "Error: requested thumbnail for " + (pathFile.length() / (1024 * 1024)) + "MB image when the max is " + maxFilesizeToLoadThumb + "MB.");
+                    setImageFromLoader(ErrorImages.outOfMemory,ImageType.Icon,false);//false as we don't want it to try again
+                    return;
+            }
                 imageLoader = new ImageLoader(this, pathFile);
             lastRequestSize=size;
             if (img.hasNoGoodFullImage()) {
@@ -109,7 +107,7 @@ class ImageReference {
             imageLoader.execute();
     }
 //if thumb image an icon just set both to icon and ignore full.
-    void setImageFromLoader(BufferedImage returnImage, ImageType returnImageType,boolean outOfMemory) {
+    void setImageFromLoader(BufferedImage returnImage, ImageType returnImageType,boolean outOfMemory) {//outOfMemory is equivelent to it being cancelled due to memory limitations. boolean outOfMemory will be true if cancelled for any reason from now.
         if(returnImage!=null){
             img.setFullImage(returnImage, returnImageType);
 
@@ -270,8 +268,9 @@ class ImageReference {
         }
     }
     void preload(ImgRequestSize size) {
-        if (getNoPixels() < (15 * 1024 * 1024)) {//if can verify is less than 15 megapixels
+        if ((getNoPixels() < (12 * 1024 * 1024)) ){// && (System.)){//if can verify is less than 12 megapixels
             getImage(size);
+            //log.print(LogType.Plain,"mem"+Runtime.getRuntime().freeMemory());
         }
         else {
             flush();//if image is really huge we need to flush it.
@@ -302,9 +301,9 @@ class ImageReference {
         img.refreshFilters();
     }
     void flush() {//called externally
-//        if (imageLoader != null) {BUGGY- COMMENTING THIS OUT GETS RID OF ERRORS, BUT COMMENTING OUT imageLoader.execute CREATES MORE??~?~???
-//            imageLoader.cancel(false);
-//        }
+        if (imageLoader != null) {
+            imageLoader.cancel(false);
+        }
         img.clearMem();
         lastRequestSize=ImgRequestSize.Thumb;
     }
@@ -365,10 +364,6 @@ class ImageReference {
 }
 //could be updated to use a javase7 path when java 7 released... but 7 has been delayed by a year so not possible
 //Image may be maxed at size of screen.
-
-enum Orientation {
-    Landscape, Portrait
-} //For drawing/painting not for rotation
 
 enum ImgRequestSize {
     Max, Thumb;//,ThumbOnly,ThumbPreload;

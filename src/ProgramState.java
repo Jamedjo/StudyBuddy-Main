@@ -287,7 +287,6 @@ class ProgramState{
             //if((size==ImgRequestSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgRequestSize.ThumbFull;
 	BufferedImage returnImage = imageList[relItoFixI(relativeImage)].getImage(size);
 
-        //POENTIALLY BUGGY- COMMENTING THIS OUT GETS RID OF ERRORS, BUT COMMENTING OUT imageLoader.execute CREATES MORE??~?~???
         if(size.isLarge()&&(relativeImage==0)){
             int i;
             int prev = prev(currentI); //dont preload too large files. If you load a file make sure it does not keep trying to load after failures.(heap mem)
