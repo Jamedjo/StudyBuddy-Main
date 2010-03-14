@@ -114,7 +114,10 @@ enum ImageToolBar{
     //bDragPan(true, "Drag Mode: Pan", "DragPan", SysIcon.DragPan.Icon),
     //bDragLink(false, "Drag Mode: Add Link", "DragLink", SysIcon.DragLink.Icon),
     //bDragNote(false, "Drag Mode: Add Note", "DragNote", SysIcon.DragNote.Icon),
-    bAdjustImage(true, "Adjust Image Colours", "AdjustImage", SysIcon.Adjust.Icon);
+    bAdjustImage(true, "Adjust Image Colours", "AdjustImage", SysIcon.Adjust.Icon),
+    bMirror(true, "Mirror Image", "Mirror", SysIcon.Mirror.Icon),
+    bFlip(true, "Flip Image Horizontaly", "Flip", SysIcon.Flip.Icon),
+    bRotate(true, "Rotate 90* clockwise", "Rotate", SysIcon.Rotate.Icon);
 
     JButton button;
     boolean isSeperatorHere;

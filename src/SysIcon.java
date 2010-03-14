@@ -49,6 +49,9 @@ public enum SysIcon {
     ,OutOfMemory("oxygenbig/dialog-warning-3.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}//Create empty icon if png missing so GUI still loads.//edit-clear-history-3.png
     ,FileNotFound("oxygenbig/dialog-cancel-4.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}
     ,NoNotesFound("oxygenbig/dialog-cancel-4.png","oxygenbig/view-pim-notes.png"){@Override ImageIcon fail(){return new ImageIcon(new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB));}}
+    ,Mirror("object-flip-horizontal-2.png")
+    ,Flip("object-flip-vertical-2.png")
+    ,Rotate("transform-rotate.png")
 
     ,LoadingAni1("oxygencustom/view-refresh-6-HQ-01.png"){@Override ImageIcon fail(){return Loading.Icon;}}
     ,LoadingAni1b("oxygencustom/view-refresh-6-HQ-01b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
