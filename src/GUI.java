@@ -381,15 +381,15 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 	{
 		Record TempRecord;
 		String DummyLinkID;
-		if (getState().getSelectingImage())
+		if (ImageLinker.getSelectingImage())
 		{
-			DummyLinkID = getState().getDummyLinkID();
+			DummyLinkID = ImageLinker.getDummyLinkID();
 			TempRecord = mainImageDB.getLink(DummyLinkID);
 			mainImageDB.deleteLink(DummyLinkID);
 			mainImageDB.linkImage(TempRecord.getField(1), getState().getCurrentImageID(), Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)), Integer.parseInt(TempRecord.getField(6)));
 			JOptionPane.showMessageDialog(w, "Images Linked!");
 			mainPanel.repaint();
-			getState().setSelectingImage(false);
+			ImageLinker.setSelectingImage(false);
 		}
 		else
 		{

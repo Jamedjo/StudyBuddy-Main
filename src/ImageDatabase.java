@@ -633,6 +633,15 @@ class ImageDatabase
       Result.addRecord(ImageTable.getRecord(ImageIDs[i], 0));
     return Result;
   }
+
+  // Produce an array of TagIDs used in an Image
+  String[] getTagIDsFromImage(String ImageID)
+  {
+    String[] TagIDs;
+    // Get the TagIDs that are used  by the ImageID
+    TagIDs = ImageToTagTable.getRecords(ImageID, 0).getColArray(1);
+    return TagIDs;
+  }
   
   // Produce a sub table of Tags that are tagged with the TagID
   IndexedTable getTagsFromTagID(String TagID)

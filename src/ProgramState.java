@@ -29,8 +29,6 @@ class ProgramState{
     int currentI = 0;//make private
     final GUI mainGUI;
     boolean isLocked = false;//Do not draw if locked.
-	boolean SelectingImage = false; // For selecting an image link
-	String DummyLinkID;
 
     // IMPORTANT NOTE: WHEN CONSTRUCTING NEW PROGRAM STATE. OTHER THREADS WILL SEE OLD STATE UNTIL CONTSRUCTOR RETURNS.
     // THIS MEANS METHODS CAN ACCIDENTALLY USE VALUES FROM THE OLD STATE.
@@ -258,12 +256,6 @@ class ProgramState{
     String getCurrentImageID(){
 	return imageIDs[currentI];
     }
-	
-	void setSelectingImage(boolean IsSelecting) { SelectingImage = IsSelecting; }
-	boolean getSelectingImage() { return SelectingImage; }
-	void setDummyLinkID(String LinkID) { DummyLinkID = LinkID; }
-	String getDummyLinkID() { return DummyLinkID; }
-	
 
     Dimension getRelImageWH(ImgRequestSize size, int MaxW, int MaxH, int relativeImage){
 	ImageReference relImage = getImageI(relItoFixI(relativeImage));
@@ -281,7 +273,34 @@ class ProgramState{
     String getRelativeImageID(int relativeImage){
         return imageIDs[relItoFixI(relativeImage)];
     }
+    void goToImageByID(String newID){
+        //Seach for image in current list of images
+        //Goto if found
+        for(int i=0;i<imageIDs.length;i++){
+            if(imageIDs[i].equals(newID)){
+                currentI = i;
+                imageChanged();
+                mainGUI.tagTree.repaint();//Needs to update not repaint.
+                return;
+            }
+        }
 
+        String[] possibleTags = mainGUI.mainImageDB.getTagIDsFromImage(newID);
+        if (possibleTags.length > 0) {
+            if (!currentFilter.equals(possibleTags[0])) {
+                mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, possibleTags[0]));
+                mainGUI.getState().goToImageByID(newID);
+            }
+            return;
+        } else {
+            if (!currentFilter.equals("-1")) {
+                mainGUI.setState(new ProgramState(LoadType.Refresh, mainGUI, "-1"));
+                mainGUI.getState().goToImageByID(newID);
+            }
+        }
+
+        JOptionPane.showMessageDialog(mainGUI.w, "Unable to jumping to image " + newID);
+    }
     BufferedImage getBImageI(int relativeImage, ImgRequestSize size){
             //If getting thumb for an upcoming image, get the full image too.
             //if((size==ImgRequestSize.Thumb)&&(relativeImage<=3)&&(relativeImage>=-1)) size = ImgRequestSize.ThumbFull;

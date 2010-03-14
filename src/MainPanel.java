@@ -299,7 +299,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         repaint();
                     //onResize();
     }
-    public void mouseReleased(MouseEvent e){
+    public void mouseReleased(MouseEvent e) {
 //        dragThread.interrupt();
 //        dragThread = new Thread(new DragUpdate(this, dragPeriod));
         mousePressed = false;
@@ -307,48 +307,46 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         DragMode mode = getCursorMode();
         if ((mode == DragMode.Note) || (mode == DragMode.Link)) {
             setOffsets();
-            Rectangle rec = getBoxFromPress(e.getX(),e.getY(),true);
+            Rectangle rec = getBoxFromPress(e.getX(), e.getY(), true);
             if (mode == DragMode.Note) {
-                mainGUI.mainImageDB.addImageNote(mainGUI.getState().getCurrentImageID(), "", rec.x, rec.y ,rec.width ,rec.height);
+                mainGUI.mainImageDB.addImageNote(mainGUI.getState().getCurrentImageID(), "", rec.x, rec.y, rec.width, rec.height);
             } else if (mode == DragMode.Link) {
-				mainGUI.getState().setSelectingImage(true);
-                mainGUI.getState().setDummyLinkID(mainGUI.mainImageDB.linkImage(mainGUI.getState().getCurrentImageID(), mainGUI.getState().getCurrentImageID(), rec.x, rec.y, rec.width,rec.height));
-				JOptionPane.showMessageDialog(mainGUI.w, "Navigate to the image to link to and repress the link button");
+                ImageLinker.setSelectingImage(true);
+                ImageLinker.setDummyLinkID(mainGUI.mainImageDB.linkImage(mainGUI.getState().getCurrentImageID(), mainGUI.getState().getCurrentImageID(), rec.x, rec.y, rec.width, rec.height));
+                JOptionPane.showMessageDialog(mainGUI.w, "Navigate to the image to link to and repress the link button");
             }
             setCursorMode(getCurrentDrag());
             this.repaint();
         }
     }
-    public void mouseClicked(MouseEvent e)
-	{
-		NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
-		String[] LinkedImageIDs = mainGUI.mainImageDB.getImageIDsFromImagePoint(mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
-		String TempString = "";
-		if (PointNotes.isEmpty() == false)
-		{
-			mainGUI.contentPane.remove(mainGUI.notePane);
-			mainGUI.notePane = new JScrollPane(PointNotes);
-			mainGUI.notePane.setVisible(true);
-			mainGUI.contentPane.add(mainGUI.notePane, BorderLayout.LINE_END);
-			mainGUI.contentPane.validate();
-			mainGUI.mainPanel.onResize();
-		}
-		else
-		{
-			mainGUI.contentPane.remove(mainGUI.notePane);
-			mainGUI.contentPane.validate();
-			mainGUI.mainPanel.onResize();
-		}
-		if (LinkedImageIDs.length > 0)
-		{
-			TempString = TempString + LinkedImageIDs[0]; 
-			for (int i=1; i< LinkedImageIDs.length; i++)
-			{
-				TempString = TempString + "," + LinkedImageIDs[i];
-			}
-			JOptionPane.showMessageDialog(mainGUI.w, "Links to images " + TempString);
-		}
-	}
+    public void mouseClicked(MouseEvent e) {
+        NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
+        String[] LinkedImageIDs = mainGUI.mainImageDB.getImageIDsFromImagePoint(mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
+        //String TempString = "";
+        if (PointNotes.isEmpty() == false) {
+            mainGUI.contentPane.remove(mainGUI.notePane);
+            mainGUI.notePane = new JScrollPane(PointNotes);
+            mainGUI.notePane.setVisible(true);
+            mainGUI.contentPane.add(mainGUI.notePane, BorderLayout.LINE_END);
+            mainGUI.contentPane.validate();
+            mainGUI.mainPanel.onResize();
+        } else {
+            mainGUI.contentPane.remove(mainGUI.notePane);
+            mainGUI.contentPane.validate();
+            mainGUI.mainPanel.onResize();
+        }
+        if (LinkedImageIDs.length > 0) {
+            //One hyperlink should only link to one image
+            mainGUI.getState().goToImageByID(LinkedImageIDs[0]);
+            //This could be improved by allowing hyperlinks to websites if we wanted.
+
+            //TempString = TempString + LinkedImageIDs[0];
+            //for (int i = 1; i < LinkedImageIDs.length; i++) {
+                //TempString = TempString + "," + LinkedImageIDs[i];
+            //}
+            //JOptionPane.showMessageDialog(mainGUI.w, "Links to images " + TempString);
+        }
+    }
     public void mouseEntered(MouseEvent e){ }
     public void mouseExited(MouseEvent e){ }
 
