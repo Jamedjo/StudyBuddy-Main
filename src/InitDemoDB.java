@@ -45,6 +45,7 @@ public class InitDemoDB {
 	    String anID = addI(tempDB,"Barbados","///\\\\\\barbados-08-046-733284.jpg");
 
             tempDB.addImageNote(anID, "This is a test test Note!!!\nIts Multilined.", 300, 300, 250, 200);
+            tempDB.linkImage(anID,"0", 300, 200, 100, 100);
 
 
 	    addI(tempDB,"hasJpegThumb","///\\\\\\IMG_0944_Corrected.jpg");

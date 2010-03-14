@@ -228,7 +228,7 @@ class ProgramState{
     }
 
     void imageChanged(){
-        mainGUI.setTitle("Image: "+(currentI+1));
+        mainGUI.setTitle("Image: "+(mainGUI.mainImageDB.getImageFilename(imageIDs[currentI])));
         mainGUI.mainPanel.onResize();
 	mainGUI.thumbPanel.onResize();
         //mainGUI.tagTree.repaint();
@@ -296,6 +296,7 @@ class ProgramState{
             if (!currentFilter.equals("-1")) {
                 mainGUI.setState(new ProgramState(LoadType.Refresh, mainGUI, "-1"));
                 mainGUI.getState().goToImageByID(newID);
+                return;
             }
         }
 

@@ -55,7 +55,6 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
         //dragThread = new Thread(new DragUpdate(this,dragPeriod));
-        mainGUI.mainImageDB.linkImage(mainGUI.getState().getRelativeImageID(1),mainGUI.getState().getCurrentImageID(), 300, 200, 100, 100);
     }
     DragMode getCursorMode(){
         return dragMode;

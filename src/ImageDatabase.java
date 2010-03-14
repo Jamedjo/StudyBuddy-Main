@@ -23,7 +23,7 @@ class ImageDatabase
   //Change this when database structure changes, e.g. after new table created
   //Used to check for database incompatabilities
   static String getDatabaseVersion(){
-      return "gamma_r246";
+      return "gamma_r276";
   }
 
   // Create an image database with the supplied name
