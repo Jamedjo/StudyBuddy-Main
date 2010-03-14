@@ -15,6 +15,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -172,20 +173,11 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         BufferedImage img = mainGUI.getState().getBImageI(0, cSize);
         boolean loading=false;BufferedImage b=null;
         if(img==ErrorImages.loading){
-//            Graphics2D composite;
             img=mainGUI.getState().getBImageI(0,ImgRequestSize.Thumb);
             b =  ErrorImages.getLoading();
-            //composite = img.createGraphics();
-//            AlphaComposite ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER);
-//            composite.setComposite(ac);
-            //composite.drawImage(b, 0, 0, null);
-//            composite.drawImage(b, 0, 0, img.getWidth(), img.getHeight(), this);
             loading=true;
-        }
-        else {
-            ErrorImages.stopAnim();
-        }
-
+        } else ErrorImages.stopAnim();
+        
         if (isZoomed()) {
             int w,h;
             if(loading){
@@ -202,9 +194,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             else mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
-        //g2.rotate(double theta);Math.toRadians(90.0);
-        //g2.transform(AffineTransform Tx)
+        AffineTransform originalAffine = g2.getTransform();
+        g2.setTransform(mainGUI.getState().getCurrentImage().img.transform.getAffine(originalAffine,(leftOffset*2)+useWH.width,(topOffset*2)+useWH.height));//offset+(w/2)
         g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
+        g2.setTransform(originalAffine);
         if(loading) {
             int leftLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().x : 0 ;
             int topLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().y : 0 ;
@@ -286,11 +279,13 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         updateCursor();
         pressX = e.getX();
         pressY = e.getY();
-        nowX = pressX;
-        nowY = pressY;
+        nowX = e.getX();
+        nowY = e.getY();
 //        dragThread.start();
     }
     @Override public void mouseDragged(MouseEvent e) {
+        nowX = e.getX();
+        nowY = e.getY();
         Point p = ((JViewport) getParent()).getViewPosition();
         int cX = pressX - e.getX();
         int cY = pressY - e.getY();
@@ -301,6 +296,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         p.x = Math.min(p.x,this.getPreferredSize().width-((JViewport) getParent()).getExtentSize().width);//width
         p.y = Math.min(p.y,this.getPreferredSize().height-((JViewport) getParent()).getExtentSize().height);//hight
         EventQueue.invokeLater(new DragUpdate(this,((JViewport) getParent()), p));
+        repaint();
                     //onResize();
     }
     public void mouseReleased(MouseEvent e){

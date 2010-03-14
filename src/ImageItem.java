@@ -1,6 +1,7 @@
 
 import java.awt.Dimension;
 import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
 
@@ -54,7 +55,7 @@ class ImageItem{
     FilterState filter = new FilterState();
     volatile ImageType fullType = ImageType.None;
     volatile ImageType thumbType = ImageType.None;
-    //TransFormstate transform;
+    Transformer transform=new Transformer();
     //Orientation iOri
 
     ImageItem(){
@@ -136,14 +137,17 @@ class ImageItem{
     }
 
     synchronized void setFullImage(BufferedImage img,ImageType type){
-        originalImage.fullImage = img;
-        if(img!=null) originalImage.fullDimensions=new Dimension(img.getWidth(),img.getHeight());
+        MultiSizeImage setter;
+        if(type==ImageType.Icon) setter=iconImage;
+        else setter=originalImage;
+        setter.fullImage =img;
+        if(img!=null) setter.fullDimensions=new Dimension(img.getWidth(),img.getHeight());
         else {
             Log.Print(LogType.Error, "trying to set full image to null");
             Thread.dumpStack();
         }
         if(type.isBad()) fullType = type;
-        else if(type.isFiltered()) {
+        else if(type.isFiltered()&&type==ImageType.Original) {
             filterImage(ImgSize.Full);
             fullType = ImageType.Filtered;
         }

@@ -359,6 +359,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("DragNote")) mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
+        else if (ae.getActionCommand().equals("Flip")) {state.getCurrentImage().img.transform.flip(); mainPanel.onResize();}
+        else if (ae.getActionCommand().equals("Mirror")){ state.getCurrentImage().img.transform.mirror(); mainPanel.onResize();}
+        else if (ae.getActionCommand().equals("Rotate")) {state.getCurrentImage().img.transform.rotate90(); mainPanel.onResize();}
         else if (ae.getActionCommand().equals("ExportCurrentImg")) exportCurrentImage();
         else if (ae.getActionCommand().equals("Options")) showOptions();
         else if (ae.getActionCommand().equals("Exit")) {
