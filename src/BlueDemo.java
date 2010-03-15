@@ -16,7 +16,7 @@ import javax.bluetooth.UUID;
  * Connects to the chosen device and checks for the presence of OBEX push service in it.
  * and displays their name and bluetooth address.
  *
- *
+ * 
  */
 public class BlueDemo implements DiscoveryListener{
 	//object used for waiting
@@ -123,15 +123,15 @@ public class BlueDemo implements DiscoveryListener{
 		}
 	}//end method
 
-    static BlueDemo BlueTester() throws IOException {
+    static BlueDemo BlueTester(BluetoothGUI blueGUI) throws IOException {
         BlueDemo blSeDi =new BlueDemo();
 		//display local device address and name
 		LocalDevice localDevice = LocalDevice.getLocalDevice();
-		System.out.println("Address: "+localDevice.getBluetoothAddress());
-		System.out.println("Name: "+localDevice.getFriendlyName());
+		blueGUI.message("Address: "+localDevice.getBluetoothAddress());
+		blueGUI.message("Name: "+localDevice.getFriendlyName());
 		//find devices
 		blSeDi.agent = localDevice.getDiscoveryAgent();
-		System.out.println("Starting device inquiry...");
+		blueGUI.message("Starting device inquiry...");
 		blSeDi.agent.startInquiry(DiscoveryAgent.GIAC, blSeDi);
 		try {
 			synchronized(lock){
@@ -141,15 +141,15 @@ public class BlueDemo implements DiscoveryListener{
 		catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Device Inquiry Completed. ");
+		blueGUI.message("Device Inquiry Completed. ");
 		//print all devices in vecDevices
 		int deviceCount=vecDevices.size();
 		if(deviceCount <= 0){
-			System.out.println("No Devices Found .");
+			blueGUI.message("No Devices Found .");
 		}
 		else{
 			//print bluetooth device addresses and names in the format [ No. address (name) ]
-			System.out.println("Bluetooth Devices: ");
+			blueGUI.message("Bluetooth Devices: ");
                         blSeDi.devicelist = new String[deviceCount];
 			for (int i = 0; i <deviceCount; i++) {
 				RemoteDevice remoteDevice=(RemoteDevice)vecDevices.elementAt(i);
@@ -164,14 +164,14 @@ public class BlueDemo implements DiscoveryListener{
 		
     }
 
-    static boolean probeProtocol(BlueDemo blSeDi,int devNo) throws IOException{
+    static boolean probeProtocol(BluetoothGUI blueGUI, BlueDemo blSeDi,int devNo) throws IOException{
         
 		int index=devNo+1;
 		//check for obex service
 		RemoteDevice remoteDevice=(RemoteDevice)vecDevices.elementAt(index-1);
 		UUID[] uuidSet = new UUID[1];
 		uuidSet[0]=new UUID("1105",true);
-		System.out.println("\nSearching for service...");
+		blueGUI.message("\nSearching for service...");
 		blSeDi.agent.searchServices(null,uuidSet,remoteDevice,blSeDi);
 		try {
 			synchronized(lock){
@@ -182,11 +182,11 @@ public class BlueDemo implements DiscoveryListener{
 			e.printStackTrace();
 		}
 		if(connectionURL==null){
-			System.out.println("Device does not support Object Push.");
+			blueGUI.message("Device does not support Object Push.");
                         return false;
 		}
 		else{
-			System.out.println("Device supports Object Push.");
+			blueGUI.message("Device supports Object Push.");
                         return true;
 		}
     }

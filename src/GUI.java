@@ -123,8 +123,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         buildJpgExporter();
         setupCache();
         Thread errorImgsThread = new Thread(new ErrorImages(100,this));
-        errorImgsThread.start();
         quickRestart();
+        errorImgsThread.start();
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         w.setMinimumSize(new Dimension(200,200));
@@ -540,35 +540,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
 
     void bluetoothDo() {
-        try {
-            String outcome = "Device does not support sellected protocol";
-
-            JOptionPane.showMessageDialog(w, "Click OK to procede with Bluetooh.\nThis may take some time to respond", "Bluetooth", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
-
-            BlueDemo blD = BlueDemo.BlueTester();
-            Object[] DevIDs = blD.devicelist;
-            if (DevIDs == null || DevIDs.length == 0) {
-                outcome = "No Bluetooth devices could be found,\nPlease ensure phone is on and near by.";
-            } else {
-                String DevString = (String) JOptionPane.showInputDialog(w, "Which device would you like to use?", "Bluetooth Devices Found",
-                        JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, DevIDs, null);
-
-                int chosenDevId = -1;
-                for (int i = 0; i < DevIDs.length; i++) {
-                    if (DevString.equals(DevIDs[i])) {
-                        chosenDevId = i;
-                        i = (Integer.MAX_VALUE - 1);
-                    }
-                }
-
-                if (BlueDemo.probeProtocol(blD, chosenDevId)) {
-                    outcome = "Device supports OBEX push";
-                }
-            }
-            JOptionPane.showMessageDialog(w, outcome, "Bluetooth service discovery", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
-        } catch (IOException er) {
-            er.printStackTrace();
-        }
+        BluetoothGUI blueGUI = new BluetoothGUI(w,true);
+        blueGUI.setVisible(true);
     }
 
     void tagFilter() {
