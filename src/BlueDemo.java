@@ -27,7 +27,112 @@ public class BlueDemo implements DiscoveryListener{
         DiscoveryAgent agent;
         String[] devicelist = null;
 
-	public static void mains(String[] args){
+	/**
+	 * Called when a bluetooth device is discovered.
+	 * Used for device search.
+	 */
+	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
+		//add the device to the vector
+		if(!vecDevices.contains(btDevice)){
+			vecDevices.addElement(btDevice);
+		}
+	}
+	/**
+	 * Called when a bluetooth service is discovered.
+	 * Used for service search.
+	 */
+	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
+		if(servRecord!=null && servRecord.length>0){
+			connectionURL=servRecord[0].getConnectionURL(0,false);
+		}
+		synchronized(lock){
+			lock.notify();
+		}
+	}
+	/**
+	 * Called when the service search is over.
+	 */
+	public void serviceSearchCompleted(int transID, int respCode) {
+		synchronized(lock){
+			lock.notify();
+		}
+	}
+	/**
+	 * Called when the device search is over.
+	 */
+	public void inquiryCompleted(int discType) {
+		synchronized(lock){
+			lock.notify();
+		}
+	}//end method
+
+    static BlueDemo BlueTester(BluetoothGUI blueGUI) throws IOException {
+        BlueDemo blSeDi = new BlueDemo();
+        //display local device address and name
+        LocalDevice localDevice = LocalDevice.getLocalDevice();
+        blueGUI.message("Address: " + localDevice.getBluetoothAddress());
+        blueGUI.message("Name: " + localDevice.getFriendlyName());
+        //find devices
+        blSeDi.agent = localDevice.getDiscoveryAgent();
+        blueGUI.message("Starting device inquiry...");
+        blSeDi.agent.startInquiry(DiscoveryAgent.GIAC, blSeDi);
+        try {
+            synchronized (lock) {
+                lock.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        blueGUI.message("Device Inquiry Completed. ");
+        //print all devices in vecDevices
+        int deviceCount = vecDevices.size();
+        if (deviceCount <= 0) {
+            blueGUI.message("No Devices Found .");
+        } else {
+            //print bluetooth device addresses and names in the format [ No. address (name) ]
+            blueGUI.message("Bluetooth Devices: ");
+            blSeDi.devicelist = new String[deviceCount];
+            for (int i = 0; i < deviceCount; i++) {
+                RemoteDevice remoteDevice = (RemoteDevice) vecDevices.elementAt(i);
+                try {
+                    blSeDi.devicelist[i] = "" + remoteDevice.getBluetoothAddress() + ": " + remoteDevice.getFriendlyName(true);
+                } catch (IOException e) {
+                    //
+                }
+            }
+        }
+        return blSeDi;
+    }
+
+    static boolean probeProtocol(BluetoothGUI blueGUI, BlueDemo blSeDi,int devNo) throws IOException {
+        int index = devNo + 1;
+        //check for obex service
+        RemoteDevice remoteDevice = (RemoteDevice) vecDevices.elementAt(index - 1);
+        UUID[] uuidSet = new UUID[1];
+        uuidSet[0] = new UUID("1105", true);
+        blueGUI.message("\nSearching for service...");
+        blSeDi.agent.searchServices(null, uuidSet, remoteDevice, blSeDi);
+        try {
+            synchronized (lock) {
+                lock.wait();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (connectionURL == null) {
+            blueGUI.message("Device does not support Object Push.");
+            return false;
+        } else {
+            blueGUI.message("Device supports Object Push.");
+            return true;
+        }
+    }
+}
+
+
+
+// <editor-fold defaultstate="collapsed" desc="main class from example usage">
+//	public static void mains(String[] args){
 //		BlueDemo bluetoothServiceDiscovery=new BlueDemo();
 //		//display local device address and name
 //		LocalDevice localDevice = LocalDevice.getLocalDevice();
@@ -83,112 +188,4 @@ public class BlueDemo implements DiscoveryListener{
 //		else{
 //			System.out.println("Device supports Object Push.");
 //		}
-	}
-	/**
-	 * Called when a bluetooth device is discovered.
-	 * Used for device search.
-	 */
-	public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-		//add the device to the vector
-		if(!vecDevices.contains(btDevice)){
-			vecDevices.addElement(btDevice);
-		}
-	}
-	/**
-	 * Called when a bluetooth service is discovered.
-	 * Used for service search.
-	 */
-	public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
-		if(servRecord!=null && servRecord.length>0){
-			connectionURL=servRecord[0].getConnectionURL(0,false);
-		}
-		synchronized(lock){
-			lock.notify();
-		}
-	}
-	/**
-	 * Called when the service search is over.
-	 */
-	public void serviceSearchCompleted(int transID, int respCode) {
-		synchronized(lock){
-			lock.notify();
-		}
-	}
-	/**
-	 * Called when the device search is over.
-	 */
-	public void inquiryCompleted(int discType) {
-		synchronized(lock){
-			lock.notify();
-		}
-	}//end method
-
-    static BlueDemo BlueTester(BluetoothGUI blueGUI) throws IOException {
-        BlueDemo blSeDi =new BlueDemo();
-		//display local device address and name
-		LocalDevice localDevice = LocalDevice.getLocalDevice();
-		blueGUI.message("Address: "+localDevice.getBluetoothAddress());
-		blueGUI.message("Name: "+localDevice.getFriendlyName());
-		//find devices
-		blSeDi.agent = localDevice.getDiscoveryAgent();
-		blueGUI.message("Starting device inquiry...");
-		blSeDi.agent.startInquiry(DiscoveryAgent.GIAC, blSeDi);
-		try {
-			synchronized(lock){
-				lock.wait();
-			}
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		blueGUI.message("Device Inquiry Completed. ");
-		//print all devices in vecDevices
-		int deviceCount=vecDevices.size();
-		if(deviceCount <= 0){
-			blueGUI.message("No Devices Found .");
-		}
-		else{
-			//print bluetooth device addresses and names in the format [ No. address (name) ]
-			blueGUI.message("Bluetooth Devices: ");
-                        blSeDi.devicelist = new String[deviceCount];
-			for (int i = 0; i <deviceCount; i++) {
-				RemoteDevice remoteDevice=(RemoteDevice)vecDevices.elementAt(i);
-				try{
-                                blSeDi.devicelist[i]= ""+remoteDevice.getBluetoothAddress()+": "+remoteDevice.getFriendlyName(true);
-                                } catch (IOException e){
-                                    //
-                                }
-			}
-		}
-                return blSeDi;
-		
-    }
-
-    static boolean probeProtocol(BluetoothGUI blueGUI, BlueDemo blSeDi,int devNo) throws IOException{
-        
-		int index=devNo+1;
-		//check for obex service
-		RemoteDevice remoteDevice=(RemoteDevice)vecDevices.elementAt(index-1);
-		UUID[] uuidSet = new UUID[1];
-		uuidSet[0]=new UUID("1105",true);
-		blueGUI.message("\nSearching for service...");
-		blSeDi.agent.searchServices(null,uuidSet,remoteDevice,blSeDi);
-		try {
-			synchronized(lock){
-				lock.wait();
-			}
-		}
-		catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		if(connectionURL==null){
-			blueGUI.message("Device does not support Object Push.");
-                        return false;
-		}
-		else{
-			blueGUI.message("Device supports Object Push.");
-                        return true;
-		}
-    }
-
-}
+//	}// </editor-fold>

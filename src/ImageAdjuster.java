@@ -1,7 +1,7 @@
-
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
+import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 import javax.swing.event.ChangeListener;
 
@@ -10,12 +10,14 @@ public class ImageAdjuster extends javax.swing.JDialog {
     private int contrast = 50;
     private boolean inverted = false;
     private boolean resetPressed = false;
+    private JFrame parent;
     //private boolean brightUsed = true;
     //private boolean contrastUsed = true;
     /** Creates new form ImageAdjusterB */
     
-    public ImageAdjuster(java.awt.Frame parent, boolean modal) {
-        super(parent, modal);
+    public ImageAdjuster(JFrame parentFrame, boolean modal) {
+        super(parentFrame, modal);
+        parent = parentFrame;
         getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"CloseWindow");
         getRootPane().getActionMap().put("CloseWindow", new AbstractAction(){
             public void actionPerformed(ActionEvent e){
@@ -29,6 +31,7 @@ public class ImageAdjuster extends javax.swing.JDialog {
         popup(brightSlider.isEnabled(),50,contrastSlider.isEnabled(),50,false);
     }
     void popup(){
+        setLocationRelativeTo(parent);
         resetPressed = false;
         setVisible(true);
     }

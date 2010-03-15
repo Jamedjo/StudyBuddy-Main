@@ -324,11 +324,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         getState().imageChanged();
         contentPane.addComponentListener(this);//don't want it to trigger while building
 
-        //Set positions. Should be done upon popup,show or set visable instead.
-        adjuster.setLocationRelativeTo(w);
-        optionsGUI.setLocationRelativeTo(w);
-        quickTagger.setLocationRelativeTo(w);
-        tagTagger.setLocationRelativeTo(w);
     }
 
     public void actionPerformed(ActionEvent ae) {
@@ -577,6 +572,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
     void tagTag() {
         tagTagger.loadAllTags(mainImageDB.getTagIDTitles());
+        tagTagger.setLocationRelativeTo(w);
         tagTagger.setVisible(true);
         if(tagTagger.getReturnStatus()==TagTagger.RET_OK){
             Object ChildTag = tagTagger.getChildT();
@@ -601,6 +597,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             idTitleTable[i][1] = mainImageDB.getImageFilename(ids[i]);
         }
         quickTagger.loadAllTags(mainImageDB.getTagIDTitles(),idTitleTable);
+        quickTagger.setLocationRelativeTo(w);
         quickTagger.setVisible(true);
         if(quickTagger.getReturnStatus()==TagTagger.RET_OK){
             Object[] SelectedImages = quickTagger.getSelctedImageIDs();
@@ -694,6 +691,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     }
     void showOptions(){
         optionsGUI.setAllValues(settings);
+        optionsGUI.setLocationRelativeTo(w);
         optionsGUI.setVisible(true);
         if(optionsGUI.getReturnStatus()==OptionsGUI.RET_OK){
             optionsGUI.saveAllValues(settings);
