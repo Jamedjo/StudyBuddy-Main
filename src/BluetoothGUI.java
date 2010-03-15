@@ -69,6 +69,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
         });
 
         cancelButton.setText("Cancel");
+        cancelButton.setActionCommand("Done");
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
@@ -168,30 +169,26 @@ public class BluetoothGUI extends javax.swing.JDialog {
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
         searchButton.setEnabled(false);
 
-        try {
-            blD = BlueDemo.BlueTester(this);
-        } catch (IOException er) {
-            er.printStackTrace();
-        }
-
-
-        updateDevices(blD);
+        blD = BlueDemo.setup(this);
+        blD.threadGetDevices();
     }
 
-    //Takes a BlueDemo and finds its devices
-    public void updateDevices(BlueDemo blueD) {
-        //if blD is null return with error
-        blD = blueD;
-            DevIDs = blD.devicelist;
-        if (DevIDs == null || DevIDs.length == 0) {
-            message("No Bluetooth devices could be found,\nPlease ensure phone is on and near by.");
-        } else {
-            message("Bluetooth Devices Found");
-            message("Which device would you like to use?");
-            deviceNames.setModel(new DefaultComboBoxModel((String[]) DevIDs));
-            deviceNames.setEnabled(true);
-            connectButton.setEnabled(true);
-        }
+    //Called from seperate thread, updates list of devices
+    public void updateDevices(final Object[] devicelist) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                DevIDs = devicelist;
+                if (DevIDs == null || DevIDs.length == 0) {
+                    message("No Bluetooth devices could be found,\nPlease ensure phone is on and near by.");
+                } else {
+                    message("Bluetooth Devices Found");
+                    message("Which device would you like to use?");
+                    deviceNames.setModel(new DefaultComboBoxModel((String[]) DevIDs));
+                    deviceNames.setEnabled(true);
+                    connectButton.setEnabled(true);
+                }
+            }
+        });
     }//GEN-LAST:event_searchButtonActionPerformed
 
     private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
@@ -204,30 +201,16 @@ public class BluetoothGUI extends javax.swing.JDialog {
     }//GEN-LAST:event_closeDialog
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
-        try {
-            deviceNames.setEnabled(false);
-            connectButton.setEnabled(false);
-            String outcome;
-            int chosenDevId = -1;
-            for (int i = 0; i < DevIDs.length; i++) {
-                if (((String) deviceNames.getSelectedItem()).equals(DevIDs[i])) {
-                    chosenDevId = i;
-                    i = (Integer.MAX_VALUE - 1);
-                }
+        deviceNames.setEnabled(false);
+        connectButton.setEnabled(false);
+        int chosenDevId = -1;
+        for (int i = 0; i < DevIDs.length; i++) {
+            if (((String) deviceNames.getSelectedItem()).equals(DevIDs[i])) {
+                chosenDevId = i;
+                i = (Integer.MAX_VALUE - 1);
             }
-
-            if (BlueDemo.probeProtocol(this, blD, chosenDevId)) {
-                outcome = "Device supports OBEX push";
-            } else {
-                outcome = "Device does not support sellected protocol";
-            }
-
-            message("Bluetooth service discovery:\n" + outcome);
-
-        } catch (IOException er) {
-            er.printStackTrace();
         }
-        message("Finished");
+        blD.threadCheckServices(chosenDevId);
     }//GEN-LAST:event_connectButtonActionPerformed
 
     private void doClose(int retStatus) {
