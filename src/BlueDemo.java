@@ -121,6 +121,10 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         agent = localDevice.getDiscoveryAgent();
         blueGUI.message("Starting device inquiry...");
         agent.startInquiry(DiscoveryAgent.GIAC, this);
+        } catch(javax.bluetooth.BluetoothStateException er){
+            blueGUI.message("Unable to find bluetooth installed on this PC");
+            blueGUI.bluetoothStartError();
+            return;
         } catch (IOException er) {
             er.printStackTrace();
         }

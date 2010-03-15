@@ -188,6 +188,12 @@ public class BluetoothGUI extends javax.swing.JDialog {
     }
 
     //Called from seperate thread, updates list of devices
+    public void bluetoothStartError() {
+        ((LoadingAnimationPane)loadingAnimation).stopAnimation();
+        searchButton.setEnabled(true);
+    }
+
+    //Called from seperate thread, updates list of devices
     public void updateDevices(final Object[] devicelist) {
         ((LoadingAnimationPane)loadingAnimation).stopAnimation();
         SwingUtilities.invokeLater(new Runnable() {
