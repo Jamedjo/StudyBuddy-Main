@@ -173,9 +173,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         boolean loading=false;BufferedImage b=null;
         if(img==ErrorImages.loading){
             img=mainGUI.getState().getBImageI(0,ImgRequestSize.Thumb);
-            b =  ErrorImages.getLoading();
+            b =  ErrorImages.getMainLoading();
             loading=true;
-        } else ErrorImages.stopAnim();
+        } else ErrorImages.stopMainAnim();
         
         if (isZoomed()) {
             int w,h;

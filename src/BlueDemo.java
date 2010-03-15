@@ -174,10 +174,10 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         blueGUI.message("Bluetooth service discovery:");
         if (connectionURL == null) {
             blueGUI.message("Device does not support Object Push,\nor is no longer reachable");
-            //return false;
+            blueGUI.serviceCheckFinished(false);
         } else {
             blueGUI.message("Device supports OBEX Push.");
-            //return true;
+            blueGUI.serviceCheckFinished(true);
         }
     }
 }

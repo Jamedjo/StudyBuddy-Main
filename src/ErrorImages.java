@@ -1,5 +1,6 @@
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 //enum ErrorImageType{FileNotFound,OutOfMemory}
 class ErrorImages implements Runnable {
@@ -32,10 +33,11 @@ class ErrorImages implements Runnable {
     static int current = 0;//animations go from 1to8, array from 0to7.
     static final int numberOfSprites = 16;
     int t;//milliseconds
-    GUI mainGUI;
+    static GUI mainGUI;
+    static ArrayList<LoadingAnimationPane> panelAnims=new ArrayList<LoadingAnimationPane>();
     static boolean mainPanelShouldRepaint = false;
 
-     ErrorImages(int updatePeriod,GUI gui){
+    ErrorImages(int updatePeriod,GUI gui){
         t = updatePeriod;
         mainGUI = gui;
     }
@@ -52,19 +54,31 @@ class ErrorImages implements Runnable {
         }
     }
 
-    void updateIcons(){
+    static void updateIcons(){
         if(current==(numberOfSprites-1)) current=0;
         else current++;
         mainGUI.mainPanel.repaint();
-        //loading=loadingAnim[current];
+        if (panelAnims != null) {
+            for (LoadingAnimationPane panel : panelAnims) {
+                if (panel.shouldRepaint()) {
+                    panel.repaint();
+                }
+            }
+        }
+    }
+    public static void addPanel(LoadingAnimationPane panel){
+        panelAnims.add(panel);
     }
 
     public static BufferedImage getLoading(){
+        return loadingAnim[current];
+    }
+    public static BufferedImage getMainLoading(){
         mainPanelShouldRepaint=true;
         return loadingAnim[current];
     }
 
-    public static void stopAnim(){
+    public static void stopMainAnim(){
         mainPanelShouldRepaint=false;
     }
 

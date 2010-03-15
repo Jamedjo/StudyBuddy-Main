@@ -1,7 +1,6 @@
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 import javax.swing.AbstractAction;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.KeyStroke;
@@ -50,6 +49,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
         connectButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         Logo = new javax.swing.JLabel();
+        loadingAnimation = new LoadingAnimationPane();
 
         setTitle("Quick Tag- for multiple images");
         setIconImage(null);
@@ -68,8 +68,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
             }
         });
 
-        cancelButton.setText("Cancel");
-        cancelButton.setActionCommand("Done");
+        cancelButton.setText("Done");
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
@@ -110,6 +109,17 @@ public class BluetoothGUI extends javax.swing.JDialog {
                 .addContainerGap(30, Short.MAX_VALUE))
         );
 
+        javax.swing.GroupLayout loadingAnimationLayout = new javax.swing.GroupLayout(loadingAnimation);
+        loadingAnimation.setLayout(loadingAnimationLayout);
+        loadingAnimationLayout.setHorizontalGroup(
+            loadingAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 258, Short.MAX_VALUE)
+        );
+        loadingAnimationLayout.setVerticalGroup(
+            loadingAnimationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 160, Short.MAX_VALUE)
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -123,12 +133,14 @@ public class BluetoothGUI extends javax.swing.JDialog {
                         .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 83, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(loadingAnimation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(deviceNames, javax.swing.GroupLayout.Alignment.TRAILING, 0, 258, Short.MAX_VALUE)
-                            .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(deviceNames, javax.swing.GroupLayout.Alignment.TRAILING, 0, 258, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 266, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -141,12 +153,14 @@ public class BluetoothGUI extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(searchButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deviceNames, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(connectButton, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(loadingAnimation, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 234, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -168,13 +182,14 @@ public class BluetoothGUI extends javax.swing.JDialog {
 
     private void searchButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_searchButtonActionPerformed
         searchButton.setEnabled(false);
-
+        ((LoadingAnimationPane)loadingAnimation).startAnimation();
         blD = BlueDemo.setup(this);
         blD.threadGetDevices();
     }
 
     //Called from seperate thread, updates list of devices
     public void updateDevices(final Object[] devicelist) {
+        ((LoadingAnimationPane)loadingAnimation).stopAnimation();
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 DevIDs = devicelist;
@@ -201,6 +216,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
     }//GEN-LAST:event_closeDialog
 
     private void connectButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_connectButtonActionPerformed
+        ((LoadingAnimationPane)loadingAnimation).startAnimation();
         deviceNames.setEnabled(false);
         connectButton.setEnabled(false);
         int chosenDevId = -1;
@@ -212,6 +228,10 @@ public class BluetoothGUI extends javax.swing.JDialog {
         }
         blD.threadCheckServices(chosenDevId);
     }//GEN-LAST:event_connectButtonActionPerformed
+
+    public void serviceCheckFinished(boolean serviceSupported){
+        ((LoadingAnimationPane)loadingAnimation).stopAnimation();
+    }
 
     private void doClose(int retStatus) {
         returnStatus = retStatus;
@@ -244,6 +264,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JPanel loadingAnimation;
     private javax.swing.JTextArea logArea;
     private javax.swing.JButton searchButton;
     // End of variables declaration//GEN-END:variables
