@@ -122,23 +122,23 @@ public enum SysIcon {
     }
     URL getImgURL(String path){
         URL newURL = getRes(path);
-        boolean failed = true;
-        if (newURL != null) {
-            try {
-                if ((new File(GUI.class.getResource(path).toURI())).isFile()) {
-                    failed = false;
-                } else{
-                    newURL = null;
-                }
-            } catch (URISyntaxException e) {
-                log.print(LogType.Error, e);
-                    newURL = null;
-            }
-        }
-        if (failed) {
-            log.print(LogType.Error,"Error creating icon: " + path);
-            //tempIcon = null;
-        }
+//        boolean failed = true;
+//        if (newURL != null) {
+//            try {
+//                if ((new File(GUI.class.getResource(path).toURI())).isFile()) {
+//                    failed = false;
+//                } else{
+//                    newURL = null;
+//                }
+//            } catch (URISyntaxException e) {
+//                log.print(LogType.Error, e);
+//                    newURL = null;
+//            }
+//        }
+//        if (failed) {
+//            log.print(LogType.Error,"Error creating icon: " + path);
+//            //tempIcon = null;
+//        }
         return newURL;
     }
 
