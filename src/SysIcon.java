@@ -21,6 +21,7 @@ public enum SysIcon {
     ,Next("oxygen/go-next-6.png")
     ,Play("oxygen/media-playback-start-6.png")
     ,Stop("oxygen/media-playback-stop-6.png")
+    ,Tick("oxygenbig/dialog-ok-4.png")
     ,HideThumbs("oxygen/list-remove-4.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
     ,ShowThumbs("oxygen/list-add-3.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
 //    ,Thumbs("oxygen/view-list-icons.png")
@@ -154,13 +155,13 @@ public enum SysIcon {
     //so that the Icon shinks when the BufferedImage is displayed at the same size
     //Use 1 for no change. Less than one will result in an error due to drawing at negative coordinates
     // and 0 will result infinite coordinates in a zero size image
-    BufferedImage getBufferedImage(int shrinkFactor,int imgType){
+    BufferedImage getBufferedImage(double shrinkFactor,int imgType){
         if(shrinkFactor<1){
             log.print(LogType.DebugError,"Bad argument to SysIcon getBufferedImage");
             return null;
         }
-        int newW =Icon.getIconWidth()*shrinkFactor;
-        int newH =Icon.getIconHeight()*shrinkFactor;
+        int newW =(int)(Icon.getIconWidth()*shrinkFactor);
+        int newH =(int)(Icon.getIconHeight()*shrinkFactor);
         BufferedImage tempB = new BufferedImage(newW,newH,imgType);
         Icon.paintIcon(null, tempB.createGraphics(), (newW-Icon.getIconWidth())/2, (newH-Icon.getIconHeight())/2);
         return tempB;

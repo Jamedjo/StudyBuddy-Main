@@ -128,6 +128,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         w.setMinimumSize(new Dimension(200,200));
+        JFrame test = new JFrame();
+        test.add(new ImageSelectPane(this));
+        test.setMinimumSize(test.getComponent(0).getMinimumSize());
+        test.setVisible(true);
         //slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
     }
 
