@@ -3,16 +3,18 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.KeyStroke;
 
-public class TagTagger extends javax.swing.JDialog {
+public class TagTagger extends JDialog {
     /** A return status code - returned if Cancel button has been pressed */
     public static final int RET_CANCEL = 0;
     /** A return status code - returned if OK button has been pressed */
     public static final int RET_OK = 1;
 
     /** Creates new form TagTagger */
-    public TagTagger(java.awt.Frame parent, boolean modal) {
+    public TagTagger(JFrame parent, boolean modal) {
         super(parent, modal);
         getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"CloseWindow");
         getRootPane().getActionMap().put("CloseWindow", new AbstractAction(){
@@ -90,7 +92,6 @@ public class TagTagger extends javax.swing.JDialog {
         });
         childList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         childList.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        childList.setNextFocusableComponent(parentList);
         jScrollPane1.setViewportView(childList);
 
         parentList.setModel(new javax.swing.AbstractListModel() {

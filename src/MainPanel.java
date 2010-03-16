@@ -170,12 +170,18 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         if (isZoomed())  cSize = ImgRequestSize.Max;
         else cSize = ImgRequestSize.Max;
         BufferedImage img = mainGUI.getState().getBImageI(0, cSize);
-        boolean loading=false;BufferedImage b=null;
+        boolean loading=false;BufferedImage b=null;boolean firstStart=false;
         if(img==ErrorImages.loading){
             img=mainGUI.getState().getBImageI(0,ImgRequestSize.Thumb);
             b =  ErrorImages.getMainLoading();
             loading=true;
         } else ErrorImages.stopMainAnim();
+        if(img==ErrorImages.noNotesFound){
+            if(mainGUI.getState().currentFilter.equals("-1")){
+                img=ErrorImages.splashScreen;
+                firstStart=true;
+            }
+        }
         
         if (isZoomed()) {
             int w,h;
@@ -189,7 +195,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             this.setPreferredSize(ImageUtils.useMaxMax((int) (w * getZoomMult()),(int) (h * getZoomMult()),this.getParent().getWidth(),this.getParent().getHeight()));
             useWH = new Dimension((int) (w * getZoomMult()),(int) (h * getZoomMult()));
         } else {
-            if(loading) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
+            if(loading||firstStart) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
             else mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();

@@ -12,7 +12,8 @@ import javax.swing.ImageIcon;
 public enum SysIcon {
 
     Logo("logo.png"){@Override ImageIcon fail(){return new ImageIcon();}}//Create empty icon if logo missing so GUI still loads.
-    ,Question("question.gif"){}
+    ,Splash("splash.png")
+    ,Question("question.gif")
     ,Error("error.gif")
     ,Info("oxygen/dialog-information-3.png")//info.gif")
     ,Help("help.gif")
@@ -123,23 +124,26 @@ public enum SysIcon {
     }
     URL getImgURL(String path){
         URL newURL = getRes(path);
-//        boolean failed = true;
-//        if (newURL != null) {
-//            try {
-//                if ((new File(GUI.class.getResource(path).toURI())).isFile()) {
-//                    failed = false;
-//                } else{
-//                    newURL = null;
-//                }
-//            } catch (URISyntaxException e) {
-//                log.print(LogType.Error, e);
-//                    newURL = null;
-//            }
-//        }
-//        if (failed) {
-//            log.print(LogType.Error,"Error creating icon: " + path);
-//            //tempIcon = null;
-//        }
+        boolean failed = true;
+        if (newURL != null) {
+            try {
+                if ((new File(GUI.class.getResource(path).toURI())).isFile()) {
+                    failed = false;
+                } else{
+                    newURL = null;
+                }
+            } catch (URISyntaxException e) {
+                log.print(LogType.Error, e);
+                    newURL = null;
+            } catch(IllegalArgumentException e){
+                log.print(LogType.DebugError,"Error creating icon, or StudyBuddy is running from a .jar");
+                failed=false;
+            }
+        }
+        if (failed) {
+            log.print(LogType.Error,"Error creating icon: " + path);
+            //tempIcon = null;
+        }
         return newURL;
     }
 

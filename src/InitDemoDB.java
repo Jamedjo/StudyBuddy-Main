@@ -4,10 +4,12 @@
  * Not runing this file before running GUI could result in app with no images.
  */
 public class InitDemoDB {
+    static final boolean isJar = false;//Change to true when creating a jar file.
+
     static void initDB(String name){
         ImageDatabase tempDB;
 	    tempDB = new ImageDatabase(AppDefaults.DBname.value);
-            
+            if(!isJar){
             String barbTagID = tempDB.addTag("Barbados");
             String notesTagID = tempDB.addTag("Notes");
             String palmTagID = tempDB.addTag("Palm Tree");
@@ -59,7 +61,7 @@ public class InitDemoDB {
 
             tempDB.tagTag(tempDB.getTagIDFromTagTitle("Data Structures&Algorithms note 1") , tempDB.getTagIDFromTagTitle("Notes"));
             tempDB.tagTag(tempDB.getTagIDFromTagTitle("Graph Notes for C/W") , tempDB.getTagIDFromTagTitle("Notes"));
-
+    }
             tempDB.save(name);
             //copy all images to user dir
     }

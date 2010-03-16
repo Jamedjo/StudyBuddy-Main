@@ -25,7 +25,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
 
     private static Object lock = new Object();
     //vector containing the devices discovered
-    private static Vector vecDevices = new Vector();
+    private static Vector<RemoteDevice> vecDevices = new Vector<RemoteDevice>();
     private static String connectionURL = null;
     DiscoveryAgent agent;
     String[] devicelist = null;
