@@ -128,10 +128,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         //w.setDefaultLookAndFeelDecorated(false);
         w.setVisible(true);
         w.setMinimumSize(new Dimension(200,200));
-        JFrame test = new JFrame();
-        test.add(new ImageSelectPane(this,3));
-        test.setMinimumSize(new Dimension(200,200));
-        test.setVisible(true);
     }
 
     void setupCache() {
@@ -590,16 +586,9 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         tagTree.updateTags();
     }
 
-    // TODO: change so image names, or "title:DSA Notes page 73" style name used, but ID returned. Use IDTitle?
-    // TODO: add option to show thumbnails instad of text list.
+    // TODO: change so image names, or "title:DSA Notes page 73" style name used when image thumbnail not loaded/file not found.
     void quickTag() {
-        String[] ids = mainImageDB.getAllImageIDs();
-        String[][] idTitleTable = new String[ids.length][2];
-        for(int i=0;i<ids.length;i++){
-            idTitleTable[i][0] = ids[i];
-            idTitleTable[i][1] = mainImageDB.getImageFilename(ids[i]);
-        }
-        quickTagger.loadAllTags(mainImageDB.getTagIDTitles(),idTitleTable);
+        quickTagger.loadAllTags(mainImageDB.getTagIDTitles());
         quickTagger.setLocationRelativeTo(w);
         quickTagger.setVisible(true);
         if(quickTagger.getReturnStatus()==TagTagger.RET_OK){

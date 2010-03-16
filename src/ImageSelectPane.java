@@ -4,18 +4,23 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.LayoutManager;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.Scrollable;
 
 public class ImageSelectPane extends JScrollPane {
     private JPanel imageGrid;
     private String[] imageIDs;
     private ImageReference[] imageList;
     private final int thumbSize = 80;
+    private final int border = 1;
     final int noColumns;
 
     public ImageSelectPane(GUI mainGUI,int columns) {
@@ -26,8 +31,30 @@ public class ImageSelectPane extends JScrollPane {
             imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]), mainGUI);
         }
 
-        GridLayout gridLayout = new GridLayout(0, noColumns,1,1);
-        imageGrid = new JPanel(gridLayout);
+        GridLayout gridLayout = new GridLayout(0, noColumns,border,border);
+        class ImageGrid extends JPanel implements Scrollable {
+            ImageGrid(LayoutManager l){
+                super(l);
+            }
+            @Override
+            public int getScrollableUnitIncrement(Rectangle visibleRect,int orientation,int direction){
+                return thumbSize+border;
+            }
+            @Override
+            public int getScrollableBlockIncrement(Rectangle visibleRect,int orientation,int direction){
+                return thumbSize+border;
+            }
+            @Override
+            public boolean getScrollableTracksViewportWidth(){return false;}
+            @Override
+            public boolean getScrollableTracksViewportHeight(){return false;}
+            @Override
+            public Dimension getPreferredScrollableViewportSize(){
+                return getPreferredSize();
+            }
+        }
+        imageGrid = new ImageGrid(gridLayout);
+        
         imageGrid.setBackground(Color.darkGray);
         gridLayout.minimumLayoutSize(imageGrid);
 
@@ -43,7 +70,15 @@ public class ImageSelectPane extends JScrollPane {
     public int numberImages() {
         return imageIDs.length;
     }
-
+    public String[] getSelectedImageIDs(){
+        ArrayList selectedIDs= new ArrayList();
+        for(int i=0;i<imageIDs.length;i++){
+            if(((ThumbIcon)imageGrid.getComponent(i)).isSelected){
+                selectedIDs.add(imageIDs[i]);
+            }
+        }
+        return (String[])selectedIDs.toArray(new String[0]);
+    }
 }
 
 class ThumbIcon extends JPanel implements MouseListener {
@@ -67,6 +102,7 @@ class ThumbIcon extends JPanel implements MouseListener {
         setMaximumSize(d);
     }
 
+    @Override
     public void paintComponent(java.awt.Graphics g) {
         Dimension useWH;
         super.paintComponent(g);

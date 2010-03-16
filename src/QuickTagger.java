@@ -26,28 +26,11 @@ public class QuickTagger extends javax.swing.JDialog {
         initComponents();
     }
 
-    public void loadAllTags(Object[] tags,Object[][] idTitleTable){
+    public void loadAllTags(Object[] tags){
         tagList.setListData(tags);
-        String[] headers = new String [] {"ID", "Name"};
-        imageTable = new JTable();
-        imageTable.setShowGrid(false);imageTable.setSelectionMode(javax.swing.ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-        jScrollPane3.setViewportView(imageTable);
-        imageTable.setModel(new DefaultTableModel(idTitleTable,headers));
-        imageTable.getTableHeader().getColumnModel().getColumn(0).setMaxWidth(0);
-        imageTable.getTableHeader().getColumnModel().getColumn(0).setMinWidth(0);
-        imageTable.getColumnModel().getColumn(0).setMaxWidth(0);
-        imageTable.getColumnModel().getColumn(0).setMinWidth(0);
-        imageTable.setTableHeader(null);
-        imageTable.addNotify();
     }
     Object[] getSelctedImageIDs(){
-        int[] rows = imageTable.getSelectedRows();
-        Object [] images = new String[rows.length];
-        for(int i=0;i<rows.length;i++){
-            images[i] = imageTable.getValueAt(rows[i],0);
-            log.print(LogType.Debug, imageTable.getValueAt(rows[i],1));
-        }
-        return images;
+        return ((ImageSelectPane)imageSelector).getSelectedImageIDs();
     }
     Object getSelectedTag(){
         return tagList.getSelectedValue();
@@ -75,8 +58,6 @@ public class QuickTagger extends javax.swing.JDialog {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         Logo = new javax.swing.JLabel();
-        jScrollPane3 = new javax.swing.JScrollPane();
-        imageTable = new javax.swing.JTable();
         imageSelector = new ImageSelectPane(mainGUI,3);
 
         setTitle("Quick Tag- for multiple images");
@@ -119,32 +100,6 @@ public class QuickTagger extends javax.swing.JDialog {
 
         Logo.setIcon(SysIcon.QuickTag.Icon);
 
-        imageTable.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {"-9", "Error loading avaliable images"},
-                {"-9", "Press Cancel."}
-            },
-            new String [] {
-                "ID", "Name"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class
-            };
-            boolean[] canEdit = new boolean [] {
-                false, false
-            };
-
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
-            }
-
-            public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit [columnIndex];
-            }
-        });
-        jScrollPane3.setViewportView(imageTable);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -152,25 +107,23 @@ public class QuickTagger extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(166, 166, 166)
-                        .addComponent(Logo))
-                    .addComponent(jLabel2)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(cancelButton))
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addComponent(imageSelector, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)))
+                                .addGap(166, 166, 166)
+                                .addComponent(Logo))
+                            .addComponent(jLabel2)
+                            .addComponent(imageSelector, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cancelButton)))
                 .addContainerGap())
         );
 
@@ -190,10 +143,13 @@ public class QuickTagger extends javax.swing.JDialog {
                             .addComponent(jLabel1))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
-                            .addComponent(imageSelector, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE))
-                        .addGap(11, 11, 11)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
+                                .addGap(11, 11, 11))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(imageSelector, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(cancelButton)
                             .addComponent(okButton)))
@@ -246,12 +202,10 @@ public class QuickTagger extends javax.swing.JDialog {
     private javax.swing.JLabel Logo;
     private javax.swing.JButton cancelButton;
     private javax.swing.JScrollPane imageSelector;
-    private javax.swing.JTable imageTable;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton okButton;
     private javax.swing.JList tagList;
     // End of variables declaration//GEN-END:variables
