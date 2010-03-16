@@ -63,6 +63,7 @@ public class ImageSelectPane extends JScrollPane {
         }
 
         this.setViewportView(imageGrid);
+        repaint();
     }
     BufferedImage imageFromNumber(int thumbNumber) {
         return imageList[thumbNumber].getImage(ImgRequestSize.Thumb, false);

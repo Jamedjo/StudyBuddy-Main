@@ -2,10 +2,8 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.AbstractAction;
-import javax.swing.JTable;
+import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
 public class QuickTagger extends javax.swing.JDialog {
     public static final int RET_CANCEL = 0;

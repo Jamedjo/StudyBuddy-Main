@@ -315,7 +315,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         optionsGUI.setAllValues(settings);
 
         tagTagger = new TagTagger(w,true);
-        quickTagger = new QuickTagger(w,true,this);
 
         w.setContentPane(contentPane);
         w.addWindowStateListener(this);
@@ -588,6 +587,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
     // TODO: change so image names, or "title:DSA Notes page 73" style name used when image thumbnail not loaded/file not found.
     void quickTag() {
+        quickTagger = new QuickTagger(w,true,this);
         quickTagger.loadAllTags(mainImageDB.getTagIDTitles());
         quickTagger.setLocationRelativeTo(w);
         quickTagger.setVisible(true);
