@@ -72,7 +72,7 @@ public class ImageSelectPane extends JScrollPane {
         return imageIDs.length;
     }
     public String[] getSelectedImageIDs(){
-        ArrayList selectedIDs= new ArrayList();
+        ArrayList<String> selectedIDs= new ArrayList<String>();
         for(int i=0;i<imageIDs.length;i++){
             if(((ThumbIcon)imageGrid.getComponent(i)).isSelected){
                 selectedIDs.add(imageIDs[i]);

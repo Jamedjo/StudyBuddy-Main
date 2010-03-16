@@ -124,6 +124,17 @@ public class Settings {
     public int getSettingAsInt(String settingName) throws NumberFormatException{
         return Integer.parseInt(javaProperties.getProperty(settingName));//catch error
     }
+    public File getPropertiesFile(){
+        try{
+            return propFile.getCanonicalFile();
+        } catch (IOException e) {
+            try{
+                return propFile.getAbsoluteFile();
+            } catch (Exception ex){
+                return propFile;
+            }
+        }
+    }
 
     //public boolean containsSetting(String settingName)
     //containskey
