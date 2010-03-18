@@ -127,6 +127,10 @@ class ProgramState{
         }
     }
 
+    void imageDeleted(){
+         mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, currentFilter));
+    }
+
     void importImages(File[] files) {// redo if hierarchy. Work out why GUI freezes when importing large files. Ensure import folder works.
         isLocked = true;
         try {

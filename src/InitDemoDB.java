@@ -4,7 +4,7 @@
  * Not runing this file before running GUI could result in app with no images.
  */
 public class InitDemoDB {
-    static final boolean isJar = false;//Change to true when creating a jar file.
+    static final boolean isJar = true;//Change to true when creating a jar file.
 
     static void initDB(String name){
         ImageDatabase tempDB;

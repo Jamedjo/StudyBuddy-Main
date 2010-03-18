@@ -10,7 +10,10 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 
-enum ToolBar{
+// <editor-fold defaultstate="collapsed" desc="ToolBar">
+enum
+
+ToolBar{
     mImport(false,"Import Image","mImport", SysIcon.Import.Icon),
     mImportD(false, "Import Directory", "mImportD", SysIcon.ImportDir.Icon),
     mExprtImg(false, "Export Current Image", "ExportCurrentImg", SysIcon.Export.Icon),
@@ -36,177 +39,249 @@ enum ToolBar{
     bZoomMax(false, "Zoom: 100%", "Zoom100", SysIcon.Zoom100.Icon),
     bOptions(false, "Options", "Options", SysIcon.Options.Icon);
 
-    JButton button;
-    boolean isSeperatorHere;
-    static final boolean putSeperatorAtEnd = false;
-    static final int sliderPosFromEnd = 1;//Hom many icons should come after the slider
+    JButton
 
-    ToolBar(boolean isNewGroup,String label, String command, ImageIcon icon, boolean visible) {
+button;
+
+
+boolean isSeperatorHere;
+    static final boolean
+
+putSeperatorAtEnd = false;
+    static final int
+
+sliderPosFromEnd = 1;//Hom many icons should come after the slider
+
+    ToolBar(
+
+boolean isNewGroup,String label, String command, ImageIcon icon, boolean visible) {
         isSeperatorHere = isNewGroup;
-        if (icon != null) {
+
+
+if (icon != null) {
             button = new JButton(icon);
-            button.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-            button.setToolTipText(label);
+            button.
+
+setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+            button.
+
+setToolTipText(label);
             //button.set text to hidden;
-        }
+
+
+}
         else{
             button = new JButton(label);
-        }
+
+
+}
         button.setActionCommand(command);
-        button.setVisible(visible);
-    }
+        button.
+
+setVisible(visible);
+
+
+}
     ToolBar(boolean isNewGroup,String label, String command) {
         this(isNewGroup,label, command, true);
-    }
+
+
+}
     ToolBar(boolean isNewGroup,String label, String command, boolean visible) {
         this(isNewGroup,label, command, null, visible);
-    }
+
+
+}
     ToolBar(boolean isNewGroup,String label, String command, ImageIcon icon) {
         this(isNewGroup,label, command, icon, true);
-    }
+
+
+}
 
     void hide(){
 	button.setVisible(false);
-    }
+
+
+}
 
     void show(){
 	button.setVisible(true);
-    }
+
+
+}
 
     void setVisible(boolean value){
         button.setVisible(value);
-    }
+
+
+}
 
     JButton create(ActionListener l){
 	button.addActionListener(l);
-	return button;
-    }
+
+
+return button;
+
+
+}
 
     static JToolBar build(GUI mainGUI){
 	JToolBar bar = new JToolBar("StudyBuddy Toolbar");
-	bar.setFocusable(false);
+	bar.
 
-	int i=0;
-	for (ToolBar b : ToolBar.values()){
+setFocusable(false);
+
+
+
+int i=0;
+
+
+for (ToolBar b : ToolBar.values()){
 	    JButton bt = b.create((ActionListener)mainGUI);
-	    if(b.isSeperatorHere){
-		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
-	    }
-	    bar.add(bt);
-            if(i==ToolBar.values().length-(1+sliderPosFromEnd)) bar.add(mainGUI.buildZoomBar());
-	    i++;
-	}
-        if (putSeperatorAtEnd) {
-            bar.addSeparator();
-        }
 
-        //workaround to prevent toolbar from steeling focus
-	for(i=0; i<bar.getComponentCount();i++){
-	    if(bar.getComponent(i) instanceof JButton){
-		((JButton)bar.getComponent(i)).setFocusable(false);
-	    }
-	}
-	return bar;
-    }
+
+if(b.isSeperatorHere){
+		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
+
 
 }
-enum ImageToolBar{
+	    bar.add(bt);
+
+
+if(i==ToolBar.values().length-(1+sliderPosFromEnd)) bar.add(mainGUI.buildZoomBar());
+	    i++;
+
+}
+
+
+if (putSeperatorAtEnd) {
+            bar.addSeparator();
+
+
+}
+
+        //workaround to prevent toolbar from steeling focus
+	for(i=0; i<
+
+bar.getComponentCount();i++
+
+){
+	    if(bar.getComponent(i) instanceof JButton){
+		((JButton)bar.getComponent(i)).setFocusable(false);
+
+
+}
+	}
+	return bar;
+
+
+
+
+    }
+
+}// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="ImageToolBar">
+enum ImageToolBar {
     //bDragPan(true, "Drag Mode: Pan", "DragPan", SysIcon.DragPan.Icon),
     //bDragLink(false, "Drag Mode: Add Link", "DragLink", SysIcon.DragLink.Icon),
     //bDragNote(false, "Drag Mode: Add Note", "DragNote", SysIcon.DragNote.Icon),
+
     bAdjustImage(true, "Adjust Image Colours", "AdjustImage", SysIcon.Adjust.Icon),
     bMirror(true, "Mirror Image", "Mirror", SysIcon.Mirror.Icon),
     bFlip(true, "Flip Image Horizontaly", "Flip", SysIcon.Flip.Icon),
     bRotate(true, "Rotate 90* clockwise", "Rotate", SysIcon.Rotate.Icon);
-
     JButton button;
     boolean isSeperatorHere;
     static final boolean putSeperatorAtEnd = false;
 
-    ImageToolBar(boolean isNewGroup,String label, String command, ImageIcon icon, boolean visible) {
+    ImageToolBar(boolean isNewGroup, String label, String command, ImageIcon icon, boolean visible) {
         isSeperatorHere = isNewGroup;
         if (icon != null) {
             button = new JButton(icon);
             button.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
             button.setToolTipText(label);
             //button.set text to hidden;
-        }
-        else{
+        } else {
             button = new JButton(label);
         }
         button.setActionCommand(command);
         button.setVisible(visible);
     }
-    ImageToolBar(boolean isNewGroup,String label, String command) {
-        this(isNewGroup,label, command, true);
-    }
-    ImageToolBar(boolean isNewGroup,String label, String command, boolean visible) {
-        this(isNewGroup,label, command, null, visible);
-    }
-    ImageToolBar(boolean isNewGroup,String label, String command, ImageIcon icon) {
-        this(isNewGroup,label, command, icon, true);
+
+    ImageToolBar(boolean isNewGroup, String label, String command) {
+        this(isNewGroup, label, command, true);
     }
 
-    void hide(){
-	button.setVisible(false);
+    ImageToolBar(boolean isNewGroup, String label, String command, boolean visible) {
+        this(isNewGroup, label, command, null, visible);
     }
 
-    void show(){
-	button.setVisible(true);
+    ImageToolBar(boolean isNewGroup, String label, String command, ImageIcon icon) {
+        this(isNewGroup, label, command, icon, true);
     }
 
-    void setVisible(boolean value){
+    void hide() {
+        button.setVisible(false);
+    }
+
+    void show() {
+        button.setVisible(true);
+    }
+
+    void setVisible(boolean value) {
         button.setVisible(value);
     }
 
-    JButton create(ActionListener l){
-	button.addActionListener(l);
-	return button;
+    JButton create(ActionListener l) {
+        button.addActionListener(l);
+        return button;
     }
 
-    static JToolBar build(GUI mainGUI){
-	JToolBar bar = new JToolBar("Image Toolbar");
-	bar.setFocusable(false);
+    static JToolBar build(GUI mainGUI) {
+        JToolBar bar = new JToolBar("Image Toolbar");
+        bar.setFocusable(false);
         bar.setFloatable(false);
         bar.setVisible(false);
 
-	int i=0;
-	for (ImageToolBar b : ImageToolBar.values()){
-	    JButton bt = b.create((ActionListener)mainGUI);
-	    if(b.isSeperatorHere){
-		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
-	    }
-	    bar.add(bt);
-	    i++;
-	}
+        int i = 0;
+        for (ImageToolBar b : ImageToolBar.values()) {
+            JButton bt = b.create((ActionListener) mainGUI);
+            if (b.isSeperatorHere) {
+                bar.addSeparator();//add seperator before positions 0,2&4 in the menu
+            }
+            bar.add(bt);
+            i++;
+        }
         if (putSeperatorAtEnd) {
             bar.addSeparator();
         }
 
         //workaround to prevent toolbar from steeling focus
-	for(i=0; i<bar.getComponentCount();i++){
-	    if(bar.getComponent(i) instanceof JButton){
-		((JButton)bar.getComponent(i)).setFocusable(false);
-	    }
-	}
-	return bar;
+        for (i = 0; i < bar.getComponentCount(); i++) {
+            if (bar.getComponent(i) instanceof JButton) {
+                ((JButton) bar.getComponent(i)).setFocusable(false);
+            }
+        }
+        return bar;
     }
+}// </editor-fold>
 
-}
+// <editor-fold defaultstate="collapsed" desc="ImageMenu">
+enum ImageMenu {
 
-enum ImageMenu{
-    mImport("Import Image(s)",KeyEvent.VK_I,KeyEvent.VK_I, ActionEvent.CTRL_MASK,"mImport"),
-    mImportD("Import Folder",KeyEvent.VK_F,KeyEvent.VK_I, ActionEvent.CTRL_MASK+ActionEvent.SHIFT_MASK,"mImportD"),
-    mRestart("Restart Viewer",KeyEvent.VK_R,KeyEvent.VK_N,  ActionEvent.CTRL_MASK,"mRestart"),
-    mExit("Exit",KeyEvent.VK_X,KeyEvent.VK_W, ActionEvent.CTRL_MASK,"Exit");
-    
+    mImport("Import Image(s)", KeyEvent.VK_I, KeyEvent.VK_I, ActionEvent.CTRL_MASK, "mImport"),
+    mImportD("Import Folder", KeyEvent.VK_F, KeyEvent.VK_I, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK, "mImportD"),
+    mRemoveI("Remove Image from StudyBuddy", KeyEvent.VK_R, -1, -1, "mRemoveI"),
+    mRestart("Restart Viewer", KeyEvent.VK_R, KeyEvent.VK_N, ActionEvent.CTRL_MASK, "mRestart"),
+    mExit("Exit", KeyEvent.VK_X, KeyEvent.VK_W, ActionEvent.CTRL_MASK, "Exit");
     JMenuItem item;
-    ImageMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){
-        item = new JMenuItem(label,mnemonic);
-	if(acceleratorKey!=-1) {
-	    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey,acceleratorMask));
-	}
-	item.setActionCommand(command);
+
+    ImageMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
+        item = new JMenuItem(label, mnemonic);
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
+        item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
     //ImageMenu(String label, String command, boolean visible){
@@ -223,30 +298,30 @@ enum ImageMenu{
 //        item.setVisible(value);
 //    }
 
-
-    JMenuItem create(ActionListener l){
-	item.addActionListener(l);
-	return item;
+    JMenuItem create(ActionListener l) {
+        item.addActionListener(l);
+        return item;
     }
 
-    static JMenu build(ActionListener l){
-	JMenu menu = new JMenu("Image");
-	menu.setMnemonic(KeyEvent.VK_I);
-	int i=0;
-	for (ImageMenu iTM : ImageMenu.values()){
-	    JMenuItem itm = iTM.create(l);
-	    menu.add(itm);
-	    i++;
-	}
-	return menu;
+    static JMenu build(ActionListener l) {
+        JMenu menu = new JMenu("Image");
+        menu.setMnemonic(KeyEvent.VK_I);
+        int i = 0;
+        for (ImageMenu iTM : ImageMenu.values()) {
+            JMenuItem itm = iTM.create(l);
+            menu.add(itm);
+            i++;
+        }
+        return menu;
     }
-}
+}// </editor-fold>
 
 enum TagMenu{
     AddTag("Create new tag",KeyEvent.VK_N,-1,-1,"AddTag"),
-	TagThis("Tag this Image",KeyEvent.VK_T,KeyEvent.VK_T,0,"TagThis"),
-	TagTag("Tag a Tag",KeyEvent.VK_A,-1,-1,"TagTag"),
-	TagFilter("Filter Images by Tag",KeyEvent.VK_F,-1,-1,"TagFilter");
+    DeleteTag("Delete a tag",KeyEvent.VK_D,-1,-1,"DeleteTag"),
+    TagThis("Tag this Image",KeyEvent.VK_T,KeyEvent.VK_T,0,"TagThis"),
+    TagTag("Tag a Tag",KeyEvent.VK_A,-1,-1,"TagTag"),
+    TagFilter("Filter Images by Tag",KeyEvent.VK_F,-1,-1,"TagFilter");
     
     JMenuItem item;
     TagMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){

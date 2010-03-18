@@ -339,6 +339,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
         else if (ae.getActionCommand().equals("Zoom100")) zoomTo(100);
         else if (ae.getActionCommand().equals("ZoomX")) zoomBox();
+        else if (ae.getActionCommand().equals("mRemoveI")) deleteCurrentImage();
+//        else if (ae.getActionCommand().equals("DeleteTag")) deleteTag();
         else if (ae.getActionCommand().equals("Next")) getState().nextImage();
         else if (ae.getActionCommand().equals("Prev")) getState().prevImage();
         else if (ae.getActionCommand().equals("AddTag")) addTag();
@@ -694,5 +696,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         imageToolbar.setVisible(!imageToolbar.isVisible());
         w.validate();
         mainPanel.onResize();
+    }
+
+    void deleteCurrentImage(){
+        mainImageDB.deleteImage(getState().getCurrentImageID());
+        getState().imageDeleted();
     }
 }
