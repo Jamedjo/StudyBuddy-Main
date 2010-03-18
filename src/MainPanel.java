@@ -202,7 +202,6 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         AffineTransform originalAffine = g2.getTransform();
         g2.setTransform(mainGUI.getState().getCurrentImage().img.transform.getAffine(originalAffine,(leftOffset*2)+useWH.width,(topOffset*2)+useWH.height));//offset+(w/2)
         g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
-        g2.setTransform(originalAffine);
         if(loading) {
             int leftLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().x : 0 ;
             int topLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().y : 0 ;
@@ -212,6 +211,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             g2.drawImage(b, ((boardW - loadingWH.width) / 2)+leftLoadOS, ((boardH - loadingWH.height) / 2)+topLoadOS, loadingWH.width, loadingWH.height, this);
         }
         drawLinkBoxes(g2, mainGUI.settings.getSettingAsBool("showNotes",true), mainGUI.settings.getSettingAsBool("showLinks",true));
+        g2.setTransform(originalAffine);
         //g2.dispose();?
     }
 

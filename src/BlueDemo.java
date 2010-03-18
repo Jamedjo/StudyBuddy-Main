@@ -181,9 +181,21 @@ public class BlueDemo implements DiscoveryListener,Runnable {
             blueGUI.serviceCheckFinished(false);
         } else {
             blueGUI.message("Device supports OBEX Push.");
-            blueGUI.serviceCheckFinished(true);
+            blueGUI.serviceCheckFinished(true);//Stops animation for now
+            OBEX_Put_Server(connectionURL);
         }
     }
+
+    void OBEX_Put_Server(String connectionURL){
+        String thisServerUUID="12358934876238497239847328957152";
+//        LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);
+
+
+    }
+
+
+
+
 }
 // <editor-fold defaultstate="collapsed" desc="main class from example usage">
 //	public static void mains(String[] args){
