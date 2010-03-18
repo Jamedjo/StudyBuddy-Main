@@ -15,6 +15,8 @@ class ImageDatabase
   private IndexedTable ImageToNoteTable;
   private IndexedTable ImageToSpecialTable;
   private String Name;
+  private String StoredFilename;
+  private boolean DoAutosave;
   private int NextImageID;
   private int NextTagID;
   private int NextNoteID;
@@ -34,7 +36,8 @@ class ImageDatabase
       NextImageID = 0;
 	  NextNoteID = 0;
 	  NextLinkID = 0;
-          
+      DoAutosave = true;
+	  StoredFilename = NewName;
           BuildImageTable();
           BuildTagTable();
           BuildImageToTagTable();
@@ -90,6 +93,8 @@ class ImageDatabase
   ImageDatabase(String NewName, String Filename)
   {
       BufferedReader FileInput;
+	  DoAutosave = true;
+	  StoredFilename = Filename;
       try
       {
         FileInput = new BufferedReader(new FileReader(Filename + "_ID"));
@@ -161,6 +166,18 @@ class ImageDatabase
   IndexedTable getImageToNoteTable() { return ImageToNoteTable; }
   IndexedTable getImageToSpecialTable() { return ImageToSpecialTable; }
   
+  void Autosave()
+  {
+	if (DoAutosave == true)
+		save(StoredFilename);
+  }
+  
+  void setAutosave(boolean Set) { DoAutosave = Set; }
+  boolean getAutosave() { return DoAutosave; }
+  void setStoredFilename(String Filename) { StoredFilename = Filename; }
+  String getStoredFilename() { return StoredFilename; }
+  
+  
   // Prints out a representation of the different tables
   void print()
   {
@@ -206,25 +223,38 @@ class ImageDatabase
       if (ImageTable.addRecord(new Record(RecordArray)) == -1)
         return null; // Failed, record already present
       else
-        return Integer.toString(NextImageID - 1);
+	  {
+        Autosave();
+		return Integer.toString(NextImageID - 1);
+	  }
   }
   
   // Add a new special tag for an image
   int addSpecial(String ImageID, String SpecialType, String Special)
   {
+	int Result;
 	String[] RecordArray = {ImageID, SpecialType, Special};
-	return ImageToSpecialTable.addRecord(new Record(RecordArray));
+	Result = ImageToSpecialTable.addRecord(new Record(RecordArray));
+	if (Result == 1)
+		Autosave();
+	return Result;
   }
   
   // Delete special tag for an image
   int deleteSpecial(String ImageID, String SpecialType)
   {
+	int Result;
 	String[] RecordArray = {ImageID, SpecialType, null};
 	Record TempRecord = ImageToSpecialTable.getRecord(new Record(RecordArray));
 	if (TempRecord == null)
 		return -1;
 	else
-		return ImageToSpecialTable.deleteRecord(TempRecord);
+	{
+		Result = ImageToSpecialTable.deleteRecord(TempRecord);
+		if (Result == 1)
+			Autosave();
+		return Result; 
+	}
   }
   
   // Return all special tags for an image
@@ -247,7 +277,7 @@ class ImageDatabase
   // Delete an image from the database (by fields)
   int deleteImage(String ImageID)
   {
-    Record TempRecord = ImageTable.getRecord(ImageID, 0);
+	Record TempRecord = ImageTable.getRecord(ImageID, 0);
 	if (TempRecord == null)
 		return -1;
 	else
@@ -301,13 +331,14 @@ class ImageDatabase
 	// Delete the image record from the image table
 	if (ImageTable.deleteRecord(r) == -1)
       return -1;
+	Autosave();
     return 1;
   }
   
   // Delete an ImageToImage link from the database (by fields)
   int deleteLink(String LinkID)
   {
-    Record TempRecord = ImageToImageTable.getRecord(LinkID, 0);
+	Record TempRecord = ImageToImageTable.getRecord(LinkID, 0);
 	if (TempRecord == null)
 		return -1;
 	else
@@ -317,13 +348,17 @@ class ImageDatabase
   // Delete an ImageToImage link from the database (by record)
   int deleteLink(Record r)
   {
-    return ImageToImageTable.deleteRecord(r);
+    int Result;
+	Result = ImageToImageTable.deleteRecord(r);
+	if (Result == 1)
+		Autosave();
+	return Result;
   }
   
   // Delete an ImageToNote link from the database (by fields)
   int deleteNote(String NoteID)
   {
-    Record TempRecord = ImageToNoteTable.getRecord(NoteID, 0);
+	Record TempRecord = ImageToNoteTable.getRecord(NoteID, 0);
 	if (TempRecord == null)
 		return -1;
 	else
@@ -333,33 +368,42 @@ class ImageDatabase
   // Delete an ImageToImage link from the database (by record)
   int deleteNote(Record r)
   {
-    return ImageToNoteTable.deleteRecord(r);
+    int Result = ImageToNoteTable.deleteRecord(r);
+	if (Result == 1)
+		Autosave();
+	return Result;
   }
   
   // Delete an ImageToTag link from the database (by fields)
   int deleteImageTag(String ImageID, String TagID)
   {
-    String[] RecordArray = {ImageID, ImageID};
+	String[] RecordArray = {ImageID, ImageID};
     return deleteImageTag(new Record(RecordArray));
   }
   
   // Delete an ImageToTag link from the database (by record)
   int deleteImageTag(Record r)
   {
-    return ImageToTagTable.deleteRecord(r);
+    int Result = ImageToTagTable.deleteRecord(r);
+	if (Result == 1)
+		Autosave();
+	return Result;
   }
   
   // Delete an TagToTag link from the database (by fields)
   int deleteTagTag(String ImageID, String TagID)
   {
-    String[] RecordArray = {ImageID, ImageID};
-    return deleteTagTag(new Record(RecordArray));
+	String[] RecordArray = {ImageID, ImageID};
+	return deleteTagTag(new Record(RecordArray));
   }
   
   // Delete an TagToTag link from the database (by record)
   int deleteTagTag(Record r)
   {
-    return TagToTagTable.deleteRecord(r);
+    int Result = TagToTagTable.deleteRecord(r);
+	if (Result == 1)
+		Autosave();
+	return Result;
   }
   
   // Delete a tag from the database (by fields)
@@ -405,6 +449,7 @@ class ImageDatabase
     // Delete tag from tagtable
     if (TagTable.deleteRecord(r) == -1)
       return -1;
+	Autosave();
     return 1;
   }
   
@@ -418,7 +463,10 @@ class ImageDatabase
       return null;
     }
     else
-      return Integer.toString(NextTagID - 1);
+	{
+      Autosave();
+	  return Integer.toString(NextTagID - 1);
+	}
   }
   
   // Link an image with a tag
@@ -433,6 +481,7 @@ class ImageDatabase
       else
       {
         ImageToTagTable.addRecord(new Record(RecordString));
+		Autosave();
         return 1;
       }
   }
@@ -443,10 +492,12 @@ class ImageDatabase
         NextNoteID++;
         if (ImageTable.getRecord(ImageID, 0) == null)
             return null;
-        else {
+        else
+		{
             ImageToNoteTable.addRecord(new Record(RecordString));
+			Autosave();
             return Integer.toString(NextNoteID-1);
-	}
+		}
   }
   
   // Link an area of an image to another image
@@ -462,7 +513,8 @@ class ImageDatabase
       else
       {
         ImageToImageTable.addRecord(new Record(RecordString));
-        return Integer.toString(NextLinkID-1);
+        Autosave();
+		return Integer.toString(NextLinkID-1);
       }
   }
   
@@ -483,7 +535,8 @@ class ImageDatabase
         return 0;
       else
       {
-        TagToTagTable.addRecord(new Record(RecordString));
+		  TagToTagTable.addRecord(new Record(RecordString));
+		  Autosave();
           return 1;
       }
   }
