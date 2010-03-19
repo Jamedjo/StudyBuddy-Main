@@ -177,7 +177,12 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         if((lastSetDir==null)||lastSetDir.equals("")) return;
         File lastDir = new File(lastSetDir);
         if((lastDir!=null)&&lastDir.exists()&&lastDir.isDirectory()){
+            try{
             getter.setCurrentDirectory(lastDir);
+            } catch (IndexOutOfBoundsException e){
+                log.print(LogType.Error,"Error creating open/save dialog at: "+lastSetDir);
+                e.printStackTrace();
+            }
         }
     }
     void buildFolderGetter() {
