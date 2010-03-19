@@ -55,22 +55,22 @@ public enum SysIcon {
     ,Flip("oxygen/object-flip-vertical-2.png")
     ,Rotate("oxygen/transform-rotate.png")
 
-    ,LoadingAni1("oxygencustom/view-refresh-6-HQ-01.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni1b("oxygencustom/view-refresh-6-HQ-01b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni2("oxygencustom/view-refresh-6-HQ-02.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni2b("oxygencustom/view-refresh-6-HQ-02b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni3("oxygencustom/view-refresh-6-HQ-03.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni3b("oxygencustom/view-refresh-6-HQ-03b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni4("oxygencustom/view-refresh-6-HQ-04.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni4b("oxygencustom/view-refresh-6-HQ-04b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni5("oxygencustom/view-refresh-6-HQ-05.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni5b("oxygencustom/view-refresh-6-HQ-05b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni6("oxygencustom/view-refresh-6-HQ-06.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni6b("oxygencustom/view-refresh-6-HQ-06b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni7("oxygencustom/view-refresh-6-HQ-07.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni7b("oxygencustom/view-refresh-6-HQ-07b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni8("oxygencustom/view-refresh-6-HQ-08.png"){@Override ImageIcon fail(){return Loading.Icon;}}
-    ,LoadingAni8b("oxygencustom/view-refresh-6-HQ-08b.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni1("oxygencustom/view-refresh-6-HQ-01_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni1b("oxygencustom/view-refresh-6-HQ-01b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni2("oxygencustom/view-refresh-6-HQ-02_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni2b("oxygencustom/view-refresh-6-HQ-02b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni3("oxygencustom/view-refresh-6-HQ-03_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni3b("oxygencustom/view-refresh-6-HQ-03b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni4("oxygencustom/view-refresh-6-HQ-04_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni4b("oxygencustom/view-refresh-6-HQ-04b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni5("oxygencustom/view-refresh-6-HQ-05_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni5b("oxygencustom/view-refresh-6-HQ-05b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni6("oxygencustom/view-refresh-6-HQ-06_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni6b("oxygencustom/view-refresh-6-HQ-06b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni7("oxygencustom/view-refresh-6-HQ-07_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni7b("oxygencustom/view-refresh-6-HQ-07b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni8("oxygencustom/view-refresh-6-HQ-08_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
+    ,LoadingAni8b("oxygencustom/view-refresh-6-HQ-08b_s.png"){@Override ImageIcon fail(){return Loading.Icon;}}
 
 
     ;
