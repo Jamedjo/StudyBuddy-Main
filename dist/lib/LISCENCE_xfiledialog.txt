@@ -1,0 +1,10 @@
+This liscence relates to the following components only: net.tomahawk and xfiledialog.
+
+Usage:
+This software is released into the public domain.
+This software is provided "as is" with no expressed or implied warranty.
+
+http://code.google.com/p/xfiledialog/
+
+Google code liscence: Apache Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
