@@ -105,7 +105,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         bIsZoomed = isZoomed;
         if(isZoomFit()){
             //fixFitZoomMultiplier();
-            onResize();
+            RepaintManager.repaint(RepaintType.MainPanel);
             if(getCursorMode()==DragMode.Drag) setCursorMode(DragMode.None);
         } else{
             if(getCursorMode()==DragMode.None) setCursorMode(DragMode.Drag);
@@ -210,7 +210,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             g2.setComposite(ac);
             g2.drawImage(b, ((boardW - loadingWH.width) / 2)+leftLoadOS, ((boardH - loadingWH.height) / 2)+topLoadOS, loadingWH.width, loadingWH.height, this);
         }
-        drawLinkBoxes(g2, mainGUI.settings.getSettingAsBool("showNotes",true), mainGUI.settings.getSettingAsBool("showLinks",true));
+        drawLinkBoxes(g2, Settings.getSettingAsBool("showNotes",true), Settings.getSettingAsBool("showLinks",true));
         g2.setTransform(originalAffine);
         //g2.dispose();?
     }
@@ -334,11 +334,11 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             mainGUI.notePane.setVisible(true);
             mainGUI.contentPane.add(mainGUI.notePane, BorderLayout.LINE_END);
             mainGUI.contentPane.validate();
-            mainGUI.mainPanel.onResize();
+            RepaintManager.repaint(RepaintType.MainPanel);
         } else {
             mainGUI.contentPane.remove(mainGUI.notePane);
             mainGUI.contentPane.validate();
-            mainGUI.mainPanel.onResize();
+            RepaintManager.repaint(RepaintType.MainPanel);
         }
         if (LinkedImageIDs.length > 0) {
             //One hyperlink should only link to one image

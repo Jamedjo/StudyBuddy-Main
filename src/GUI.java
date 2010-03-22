@@ -20,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 //We should use javadoc.
@@ -28,7 +29,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 
 class GUI {
     Log log;
-    Settings settings = new Settings();;
     JFrame w;
     private volatile ProgramState state;
     ImageDatabase mainImageDB;
@@ -91,6 +91,13 @@ class GUI {
 
     GUI() {
         log = new Log();
+        Settings.init();
+        //try {
+        //    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        //} catch (Exception e) {
+        //    log.print(LogType.Debug, "Unable to use system look&feel");
+        //}
+        RepaintManager.initMain(this);
         w = new JFrame();
         setTitle();
         w.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -111,7 +118,7 @@ class GUI {
 
     void setupCache() {
         ImageIO.setUseCache(true);
-        String cachePath = settings.getSetting("homeDir") + settings.getSetting("cachePathExt");
+        String cachePath = Settings.getSetting("homeDir") + Settings.getSetting("cachePathExt");
         if ((cachePath != null) && (cachePath.length() > 1)) {
             File cacheDir = new File(cachePath);
             if (cacheDir.isDirectory()) {
@@ -196,8 +203,7 @@ class GUI {
                         if(splitpane.getDividerLocation()>tagTreeMaxSize) splitpane.setDividerLocation(tagTreeMaxSize);
                     }
                     if (mainPanel.isValid()) {
-                        mainPanel.onResize();
-                        thumbPanel.onResize();
+                        RepaintManager.repaint(RepaintType.Window);
                     }
                 }
             }
@@ -231,7 +237,7 @@ class GUI {
         });
 
         optionsGUI = new OptionsGUI(w,true);
-        optionsGUI.setAllValues(settings);
+        optionsGUI.setAllValues();
 
         tagTagger = new TagTagger(w,true);
 
@@ -267,7 +273,7 @@ class GUI {
         ToolBar.bThumbsS.setVisible(!makeVisible);
         ToolBar.bThumbsH.setVisible(makeVisible);
 
-        mainPanel.onResize();
+        RepaintManager.repaint(RepaintType.MainPanel);
     }
     void toggleTagTree() {//true to show
         //boolean makeVisible =
@@ -280,8 +286,7 @@ class GUI {
         } else {
             splitpane.setDividerLocation(1);
         }
-        mainPanel.onResize();
-        thumbPanel.onResize();
+        RepaintManager.repaint(RepaintType.Window);
     }
 
     void toggleZoomed(boolean makeFit) {//true to set zoom to fit
@@ -301,7 +306,7 @@ class GUI {
         ToolBar.bZoomFit.setVisible(!makeFit);
         ToolBar.bZoomMax.setVisible(makeFit);
 
-        mainPanel.onResize();
+        RepaintManager.repaint(RepaintType.MainPanel);
     }
 
     void zoomBox() {
@@ -343,7 +348,7 @@ class GUI {
 
     void toggleSlide(boolean setPlaying) {//true to start playing
         if (setPlaying) {
-            slideThread = new Thread(new SlideShow(this,settings.getSettingAsInt("slideShowTime")));
+            slideThread = new Thread(new SlideShow(this,Settings.getSettingAsInt("slideShowTime")));
             slideThread.start();
         } else {
             slideThread.interrupt();
@@ -354,7 +359,7 @@ class GUI {
         ToolBar.bSlideP.setVisible(!setPlaying);
         ToolBar.bSlideS.setVisible(setPlaying);
 
-        mainPanel.onResize();
+        RepaintManager.repaint(RepaintType.MainPanel);
     }
 
     void bluetoothDo() {
@@ -374,8 +379,10 @@ class GUI {
             IDTitle FilterTagIDTitle = (IDTitle) FilterTag;
             if (FilterTagIDTitle.getID().equals("-1")) {
                 setState(new ProgramState(LoadType.Refresh, this));
+                getState().imageChanged();
             } else {
                 setState(new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()));
+                getState().imageChanged();
             }
         }
         tagTree.updateTags();
@@ -426,8 +433,7 @@ class GUI {
                 }
                 if(tagID.equals(getState().currentFilter)){
                     setState(new ProgramState(LoadType.Filter, this, tagID));
-                    mainPanel.onResize();
-                    thumbPanel.onResize();
+                    RepaintManager.repaint(RepaintType.Window);
                 }
         }
         tagTree.updateTags();
@@ -481,18 +487,18 @@ class GUI {
         }
     }
     void showOptions(){
-        optionsGUI.setAllValues(settings);
+        optionsGUI.setAllValues();
         optionsGUI.setLocationRelativeTo(w);
         optionsGUI.setVisible(true);
         if(optionsGUI.getReturnStatus()==OptionsGUI.RET_OK){
-            optionsGUI.saveAllValues(settings);
+            optionsGUI.saveAllValues();
         }
-        mainPanel.onResize();
+        RepaintManager.repaint(RepaintType.MainPanel);
     }
     void imageToolbarToggle(){
         imageToolbar.setVisible(!imageToolbar.isVisible());
         w.validate();
-        mainPanel.onResize();
+        RepaintManager.repaint(RepaintType.MainPanel);
     }
 
     void deleteCurrentImage(){

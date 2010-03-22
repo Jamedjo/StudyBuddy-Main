@@ -66,8 +66,10 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
             NodeObject = (IDTitle) CurrentNode.getUserObject();
             if (NodeObject.getID().equals("-1")) {
                 mainGUI.setState(new ProgramState(LoadType.Refresh, mainGUI));
+                mainGUI.getState().imageChanged();
             } else {
                 mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, NodeObject.getID()));
+                mainGUI.getState().imageChanged();
             }
         }
     }

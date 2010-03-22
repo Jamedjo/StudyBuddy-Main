@@ -138,7 +138,7 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
         this.add(thumbHolder);
         this.setPreferredSize(thumbHolder.getPreferredSize());
         this.setMinimumSize(thumbHolder.getMinimumSize());
-        if(oldTilesHigh!=tilesHigh) mainGUI.mainPanel.onResize();
+        if(oldTilesHigh!=tilesHigh) RepaintManager.repaint(RepaintType.MainPanel);
         getParent().validate();
         this.validate();
 

@@ -43,9 +43,9 @@ class ProgramState{
     ProgramState(GUI parentGUI){
 	mainGUI = parentGUI;
         String temp;
-        temp = mainGUI.settings.getSetting("databaseFilePathAndName");
+        temp = Settings.getSetting("databaseFilePathAndName");
         if(temp==null) ConstructProgramState(LoadType.Init,  parentGUI,"");
-        else ConstructProgramState(LoadType.LoadLast,  parentGUI,mainGUI.settings.getSetting("lastFilterUsed"));
+        else ConstructProgramState(LoadType.LoadLast,  parentGUI,Settings.getSetting("lastFilterUsed"));
     }
     ProgramState(GUI parentGUI, String filterTag){
 	mainGUI = parentGUI;
@@ -56,15 +56,15 @@ class ProgramState{
 	ConstructProgramState(loadType, parentGUI, filterTag);
     }
     String getSetting(String name){
-        return mainGUI.settings.getSetting(name);
+        return Settings.getSetting(name);
     }
     void ConstructProgramState(LoadType loadType, GUI parentGUI, String filterTag){
         //mainGUI.isChangingState = true;
 	switch (loadType){
 	case Init:
-            mainGUI.settings.setSettingAndSave("databaseFilePathAndName", getSetting("homeDir")+getSetting("databasePathExt")+getSetting("databaseFileName"));
-            InitDemoDB.initDB(mainGUI.settings.getSetting("databaseFilePathAndName"));//Resets database
-            mainGUI.settings.setSettingAndSave("databaseVersion", ImageDatabase.getDatabaseVersion());
+            Settings.setSettingAndSave("databaseFilePathAndName", getSetting("homeDir")+getSetting("databasePathExt")+getSetting("databaseFileName"));
+            InitDemoDB.initDB(Settings.getSetting("databaseFilePathAndName"));//Resets database
+            Settings.setSettingAndSave("databaseVersion", ImageDatabase.getDatabaseVersion());
 	case Load:
 	    mainGUI.mainImageDB = new ImageDatabase(getSetting("databaseFileName"),getSetting("databaseFilePathAndName"));
             checkDBVersion();
@@ -92,13 +92,13 @@ class ProgramState{
 	    imageIDs = mainGUI.mainImageDB.getImageIDsFromTagIDChildren(filterTag); // Working on TagID not TagTitle
 	    break;
 	}
-        mainGUI.settings.setSettingAndSave("lastFilterUsed", currentFilter);
+        Settings.setSettingAndSave("lastFilterUsed", currentFilter);
 	//if imageIDs.length==0
 	//then a file should be added first (Construct with Init&imports, then return;)
       	imageList = new ImageReference[imageIDs.length];
         numberOfImages = imageList.length;
 	for(int i=0; i<imageIDs.length;i++){
-	    imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]),mainGUI);
+	    imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
 	}
 	lastIndex = (imageIDs.length - 1);
 
@@ -112,7 +112,7 @@ class ProgramState{
             imageIDs = new String[1];
             imageIDs[0] = "-1";
             imageList = new ImageReference[1];
-            imageList[0] = new ImageReference("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex",mainGUI);
+            imageList[0] = new ImageReference("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex");
         }
 
         imageChanged();
@@ -120,7 +120,7 @@ class ProgramState{
 
     void checkDBVersion() {
         try {
-            if (!mainGUI.settings.getSetting("databaseVersion").equals(ImageDatabase.getDatabaseVersion())) {
+            if (!Settings.getSetting("databaseVersion").equals(ImageDatabase.getDatabaseVersion())) {
                 log.print(LogType.Error, "Database version missmatch");
             }
         } catch (NullPointerException e) {
@@ -140,24 +140,24 @@ class ProgramState{
             if (currentFilter.equals("-1")) { // "-1" is now show all (working on TagID rather than Tag Title)
                 ArrayList<String> tempImageIDs = new ArrayList<String>(Arrays.asList(imageIDs));
                 ArrayList<ImageReference> tempImageList = new ArrayList<ImageReference>(Arrays.asList(imageList));
-                if(((String)tempImageIDs.get(0)).equals("-1")) {
+                if (((String) tempImageIDs.get(0)).equals("-1")) {
                     tempImageIDs.remove(0);
                     tempImageList.remove(0);
                 }
                 ArrayList<File> foldersList = new ArrayList<File>();
                 for (File f : files) {
-                    if(f.isDirectory()) foldersList.add(f);
-                    else{
+                    if (f.isDirectory()) foldersList.add(f);
+                    else {
                         //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
                         String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());//f.getName()?
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
                             //tempImageList.add(new ImageReference(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
-                            tempImageList.add(new ImageReference(f.getAbsolutePath(),mainGUI));
+                            tempImageList.add(new ImageReference(f.getAbsolutePath()));
                         }
                     }
                 }
-                for(File dir: foldersList.toArray(new File[0])){
+                for (File dir : foldersList.toArray(new File[0])) {
                     File[] children = dir.listFiles(new FileFilter() {
                         public boolean accept(File g) {
                             if (g.isDirectory()) {
@@ -167,13 +167,13 @@ class ProgramState{
                         }
                     });
                     for (File c : children) {
-                    if(c.isDirectory()) foldersList.add(c);
-                    String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());//c.getName()?
-                    if (currentImID != null) {
-                        tempImageIDs.add(currentImID);
-                        tempImageList.add(new ImageReference(c.getAbsolutePath(),mainGUI));
+                        if (c.isDirectory()) foldersList.add(c);
+                        String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());//c.getName()?
+                        if (currentImID != null) {
+                            tempImageIDs.add(currentImID);
+                            tempImageList.add(new ImageReference(c.getAbsolutePath()));
+                        }
                     }
-                }
                 }
                 imageIDs = new String[tempImageIDs.size()];
                 tempImageIDs.toArray(imageIDs);
@@ -186,7 +186,6 @@ class ProgramState{
                 currentI = lastIndex + 1;
                 lastIndex = imageIDs.length - 1;
                 numberOfImages = imageList.length;
-                mainGUI.getState().imageChanged();
             } else {
                 for (File f : files) {
                     //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
@@ -194,6 +193,7 @@ class ProgramState{
                 }
                 mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, currentFilter));
             }
+            mainGUI.getState().imageChanged();
         } catch (java.lang.OutOfMemoryError e) {
             JOptionPane.showMessageDialog(mainGUI.w, "Out of memory", "Fatal Error", JOptionPane.ERROR_MESSAGE);
         } finally {
@@ -243,8 +243,7 @@ class ProgramState{
         String imageName = mainGUI.mainImageDB.getImageFilename(imageIDs[currentI]);
         if(imageName!=null)mainGUI.setTitle("Image: "+imageName);
         else mainGUI.setTitle("");
-        mainGUI.mainPanel.onResize();
-	mainGUI.thumbPanel.onResize();
+        RepaintManager.repaint(RepaintType.Window);
         //mainGUI.tagTree.repaint();
     }
 
@@ -347,7 +346,6 @@ class ProgramState{
     }
     void imageColoursUpdated(){
         //getCurrentImage().filterImage();
-        mainGUI.mainPanel.repaint();
-        mainGUI.thumbPanel.repaint();
+        RepaintManager.repaint(RepaintType.ColourChange);
     }
 }

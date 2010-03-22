@@ -28,7 +28,7 @@ public class ImageSelectPane extends JScrollPane {
         imageIDs = mainGUI.mainImageDB.getAllImageIDs();
         imageList = new ImageReference[imageIDs.length];
         for (int i = 0;i<imageIDs.length;i++) {
-            imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]), mainGUI);
+            imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
         }
 
         GridLayout gridLayout = new GridLayout(0, noColumns,border,border);

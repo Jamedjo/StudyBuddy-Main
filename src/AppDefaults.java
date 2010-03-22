@@ -31,18 +31,18 @@ enum AppDefaults {
         return !bool;
     }
 
-    static void set(Settings settings) {
-        makeDirs(settings);
+    static void set() {
+        makeDirs();
         for (AppDefaults setting : AppDefaults.values()) {
-            settings.setSettingDontSaveYet(setting.key, setting.value);
+            Settings.setSettingDontSaveYet(setting.key, setting.value);
         }
-        settings.saveSettings();
+        Settings.saveSettings();
     }
 
-    static void makeDirs(Settings seTTings){
+    static void makeDirs(){
         for (AppDefaults setting : AppDefaults.values()) {
             if(setting.key.endsWith("PathExt")) {
-                String path = seTTings.getSetting("homeDir") +  setting.value;
+                String path = Settings.getSetting("homeDir") +  setting.value;
                 File folder = new File(path);
                 if (!folder.isDirectory()) {
                     boolean success = (new File(path)).mkdir();
@@ -54,9 +54,9 @@ enum AppDefaults {
         }
     }
 
-    static void getAndPrint(Settings settings){
+    static void getAndPrint(){
         for (AppDefaults setting : AppDefaults.values()) {
-            System.out.println("Default key: "+setting.key+" has value: "+settings.getSetting(setting.key));
+            System.out.println("Default key: "+setting.key+" has value: "+Settings.getSetting(setting.key));
         }        
     }
 

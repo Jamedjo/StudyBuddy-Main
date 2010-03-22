@@ -80,7 +80,7 @@ class NotePanel extends JPanel
 		{
 			MainGUI.contentPane.remove(MainGUI.notePane);
 			MainGUI.contentPane.validate();
-			MainGUI.mainPanel.onResize();
+                        RepaintManager.repaint(RepaintType.MainPanel);
 		}
 		else
 		{

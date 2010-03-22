@@ -49,9 +49,9 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("DragNote")) mainGUI.mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) mainGUI.bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) mainGUI.showImageAdjuster();
-        else if (ae.getActionCommand().equals("Flip")) {mainGUI.getState().getCurrentImage().img.transform.flip(); mainGUI.mainPanel.onResize();}
-        else if (ae.getActionCommand().equals("Mirror")){ mainGUI.getState().getCurrentImage().img.transform.mirror(); mainGUI.mainPanel.onResize();}
-        else if (ae.getActionCommand().equals("Rotate")) {mainGUI.getState().getCurrentImage().img.transform.rotate90(); mainGUI.mainPanel.onResize();}
+        else if (ae.getActionCommand().equals("Flip")) {mainGUI.getState().getCurrentImage().img.transform.flip(); RepaintManager.repaint(RepaintType.MainPanel);}
+        else if (ae.getActionCommand().equals("Mirror")){ mainGUI.getState().getCurrentImage().img.transform.mirror(); RepaintManager.repaint(RepaintType.MainPanel);}
+        else if (ae.getActionCommand().equals("Rotate")) {mainGUI.getState().getCurrentImage().img.transform.rotate90(); RepaintManager.repaint(RepaintType.MainPanel);}
         else if (ae.getActionCommand().equals("ExportCurrentImg")) FileDialogs.exportCurrentImage();
         else if (ae.getActionCommand().equals("Options")) mainGUI.showOptions();
         else if (ae.getActionCommand().equals("Exit")) {
@@ -73,8 +73,7 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
 
     @Override
     public void windowStateChanged(WindowEvent e) {
-        mainGUI.mainPanel.onResize();
-        mainGUI.thumbPanel.onResize();
+        RepaintManager.repaint(RepaintType.Window);
     }
 
     @Override
@@ -82,8 +81,7 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
         // if(e.getSource()==boardScroll) {
         //if(e.getSource()==mainPanel) {
         //**//log.print(LogType.Error,e.paramString());
-        mainGUI.mainPanel.onResize();
-        mainGUI.thumbPanel.onResize();
+        RepaintManager.repaint(RepaintType.Window);
         //}
         // 	if(e.getSource()==w){
         // 	    int newWidth = w.getWidth();

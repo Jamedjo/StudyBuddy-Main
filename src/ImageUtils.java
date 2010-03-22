@@ -14,9 +14,9 @@ import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
 
 class ImageUtils{
 
-    static void saveThumbToFile(Settings settings, BufferedImage bThumb,File pathFile,long fileLength, long modifiedDateTime){
+    static void saveThumbToFile(BufferedImage bThumb,File pathFile,long fileLength, long modifiedDateTime){
         try{
-            File thumbPath = new File(settings.getSetting("homeDir") + settings.getSetting("thumbnailPathExt"));
+            File thumbPath = new File(Settings.getSetting("homeDir") + Settings.getSetting("thumbnailPathExt"));
             File thumbfile = new File(thumbPath,getSaveEncoding(pathFile,fileLength, modifiedDateTime));
             ImageIO.write(bThumb,"jpg",thumbfile);//should use same format as file
         } catch (IOException e){
@@ -63,8 +63,10 @@ class ImageUtils{
         } catch (ImageReadException e) {
             Log.Print(LogType.DebugError, "Error reading exif of image " + pathFile.toString() + "\nError was: " + e.toString());
         } catch (IOException e) {
-	    Log.Print(LogType.DebugError,"Error- can not read dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
-	}
+	    Log.Print(LogType.DebugError,"Error- can not read exif of image " + pathFile.toString() + "\nError was: " + e.toString());
+	} catch (NullPointerException e) {
+	    Log.Print(LogType.DebugError,"Error: unable to get exif from image " + pathFile.toString() + "\nError was: " + e.toString());
+        }
         return tempImage;
     }
     

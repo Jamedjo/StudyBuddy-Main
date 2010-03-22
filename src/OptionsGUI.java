@@ -82,35 +82,35 @@ enum  UserOptions{//Need to add option for default options
         }
     }
 
-    void initValue(Settings settings){
+    void initValue(){
         if(settingName==null||settingName.equals("")) return;
         int iVal;
         Boolean bVal;
         switch(type){
             case CheckBox:
-                bVal = settings.getSettingAsBooleanObject(settingName);
+                bVal = Settings.getSettingAsBooleanObject(settingName);
                 if (bVal == null) return;
                 if(bVal.booleanValue()==false) ((JCheckBox)component).setSelected(false);
                 else if(bVal.booleanValue()==true) ((JCheckBox)component).setSelected(true);
                 break;
             case Spinner:
-                iVal = settings.getSettingAsInt(settingName) / factor;
+                iVal = Settings.getSettingAsInt(settingName) / factor;
                 ((JSpinner) component).setValue(iVal);
                 break;
             case Slider:
-                iVal = settings.getSettingAsInt(settingName) / factor;
+                iVal = Settings.getSettingAsInt(settingName) / factor;
                 ((JSlider) component).setValue(iVal);
                 break;
             case TextBox:
             default:
-                String sVal = settings.getSetting(settingName);
+                String sVal = Settings.getSetting(settingName);
                 if(sVal!=null) ((JTextField)component).setText(sVal);
         }
     }
 
-    void saveValue(Settings settings){
+    void saveValue(){
         if(settingName==null||settingName.equals("")) return;
-        settings.setSettingAndSave(settingName, getValue());
+        Settings.setSettingAndSave(settingName, getValue());
     }
 
     String getLabel(){
@@ -178,14 +178,14 @@ public class OptionsGUI extends JDialog {
         return returnStatus;
     }
 
-    void setAllValues(Settings setting){
+    void setAllValues(){
         for(UserOptions option : values){
-            option.initValue(setting);
+            option.initValue();
         }
     }
-    void saveAllValues(Settings setting){
+    void saveAllValues(){
         for(UserOptions option : values){
-            option.saveValue(setting);
+            option.saveValue();
         }
     }
 

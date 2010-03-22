@@ -20,7 +20,7 @@ public class FileDialogs {
 
     static void init(GUI gui){
         mainGUI = gui;
-        isWindows = mainGUI.settings.isWindows();
+        isWindows = Settings.isWindows();//false;//
     }
 
     static void exportCurrentImage() {
@@ -30,7 +30,7 @@ public class FileDialogs {
             String filePathAndName = jpgExporter.getSelectedFile().toString();
             String ext = ImageUtils.getFileExtLowercase(filePathAndName);
             if((ext==null)||(!(ext.equals("jpg")||ext.equals("jpeg")))) filePathAndName = filePathAndName + ".jpg";
-            mainGUI.settings.setSettingAndSave("lastOpenDirectory",jpgExporter.getCurrentDirectory().toString());
+            Settings.setSettingAndSave("lastOpenDirectory",jpgExporter.getCurrentDirectory().toString());
             mainGUI.getState().getCurrentImage().saveFullToPath(filePathAndName);
         }
     }
@@ -65,7 +65,7 @@ public class FileDialogs {
         }
 
         if (success) {
-            if (lastDir != null) mainGUI.settings.setSettingAndSave("lastOpenDirectory", lastDir);
+            if (lastDir != null) Settings.setSettingAndSave("lastOpenDirectory", lastDir);
             if (selectedFiles != null) mainGUI.getState().importImages(selectedFiles);
         }
 
@@ -99,7 +99,7 @@ public class FileDialogs {
         }
 
         if (success) {
-            if (lastDir != null) mainGUI.settings.setSettingAndSave("lastOpenDirectory", lastDir);
+            if (lastDir != null) Settings.setSettingAndSave("lastOpenDirectory", lastDir);
             if (selectedFiles != null) mainGUI.getState().importImages(selectedFiles);
         }
     }
@@ -120,6 +120,9 @@ public class FileDialogs {
 
    static void buildFileGetter() {
         fileGetter = new JFileChooser();
+        PreviewAccessory preview = new PreviewAccessory();
+        fileGetter.setAccessory(preview);
+        fileGetter.addPropertyChangeListener(preview);
         fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
             public boolean accept(File f) {
                 if (f.isDirectory()) {
@@ -170,7 +173,7 @@ public class FileDialogs {
         winFolderGetter.setFilters(desc, filts);
     }
     static File getLastDir() {
-        String lastSetDir = mainGUI.settings.getSetting("lastOpenDirectory");
+        String lastSetDir = Settings.getSetting("lastOpenDirectory");
         if ((lastSetDir == null) || lastSetDir.equals("")) return null;
         File lastDir = new File(lastSetDir);
         if (lastDir.exists() && lastDir.isDirectory()) return lastDir;

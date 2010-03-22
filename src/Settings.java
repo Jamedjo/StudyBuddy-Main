@@ -6,15 +6,21 @@ import java.io.IOException;
 //import java.io.FileNotFoundException;
 
 public class Settings {
-    Log log = new Log();
+    static Log log = new Log();
     //String path;
-    private String appPath;
-    private final String propertiesFile = "StudyBuddy.properties";//Name of the file use to store properties
-    private File propFile;
-    private Properties javaProperties;
+    static private String appPath;
+    static private final String propertiesFile = "StudyBuddy.properties";//Name of the file use to store properties
+    static private File propFile;
+    static private Properties javaProperties;
     //Default setting values moved to AppDefaults.java and controlled by an enum.
 
-    Settings(){
+    static void destroy(){
+        appPath = null;
+        propFile=null;
+        javaProperties=null;
+    }
+
+    static void init(){
         appPath = (System.getProperty("user.home"));
         if(isWindows()){
             //appPath = appPath + "\\Application Data\\StudyBuddy\\";//Windows uses backslash. Two needed as escape sequence
@@ -60,7 +66,7 @@ public class Settings {
         }   
     }
 
-    private void setupJavaPropertiesObject() {
+    static private void setupJavaPropertiesObject() {
         javaProperties = new Properties();
         try {
             FileInputStream inProps = new FileInputStream(propFile);
@@ -71,31 +77,31 @@ public class Settings {
         }
     }
 
-    public boolean isWindows(){
+    static public boolean isWindows(){
         String os = System.getProperty("os.name").toLowerCase();
         return (os.indexOf("win")>=0);
     }
 
-    private void setDefaults(){
+    static private void setDefaults(){
         setSettingDontSaveYet("homeDir",appPath);
-        AppDefaults.set(this);
+        AppDefaults.set();
     }
 
     //Use this when setting many settings. Use setSettingAndSave for final one.
-    public void setSettingDontSaveYet(String settingName, String settingValue){
+    static public void setSettingDontSaveYet(String settingName, String settingValue){
         javaProperties.setProperty(settingName, settingValue);
     }
-    public void setSettingAndSave(String settingName, boolean settingValue){
+    static public void setSettingAndSave(String settingName, boolean settingValue){
         String val = "false";
         if(settingValue) val = "true";
         setSettingAndSave(settingName,val);
     }
-    public void setSettingAndSave(String settingName, String settingValue){
+    static public void setSettingAndSave(String settingName, String settingValue){
         javaProperties.setProperty(settingName, settingValue);
         saveSettings();
     }
 
-    public void saveSettings(){
+    static public void saveSettings(){
         try{
         FileOutputStream outProps = new FileOutputStream(propFile);
         javaProperties.store(outProps, "---Empty Comment---");
@@ -106,25 +112,25 @@ public class Settings {
     }
 
     //May return null: returns null if not found.
-    public String getSetting(String settingName){
+    static public String getSetting(String settingName){
         return javaProperties.getProperty(settingName);
     }
-    Boolean getSettingAsBooleanObject(String settingName){
+    static Boolean getSettingAsBooleanObject(String settingName){
         String temp = getSetting(settingName);
         if(temp == null) return null;
         if(temp.toLowerCase().equals("true")) return Boolean.valueOf(true);
         if(temp.toLowerCase().equals("false")) return Boolean.valueOf(false);
         return null;
     }
-    boolean getSettingAsBool(String settingName, boolean defaultVal){
+    static boolean getSettingAsBool(String settingName, boolean defaultVal){
         Boolean b = getSettingAsBooleanObject(settingName);
         if(b==null) return defaultVal;
         return b.booleanValue();
     }
-    public int getSettingAsInt(String settingName) throws NumberFormatException{
+    static public int getSettingAsInt(String settingName) throws NumberFormatException{
         return Integer.parseInt(javaProperties.getProperty(settingName));//catch error
     }
-    public File getPropertiesFile(){
+    static public File getPropertiesFile(){
         try{
             return propFile.getCanonicalFile();
         } catch (IOException e) {
@@ -140,23 +146,20 @@ public class Settings {
     //containskey
 
     public static void main(String[] args){
-        Log log = new Log();
-        Settings props = new Settings();
-        log.print(LogType.Plain,"Os is windows?..."+props.isWindows());
-        log.print(LogType.Plain,"(private) StudyBudy folder is: "+props.appPath);
-        log.print(LogType.Plain,"(public) getSetting finds StudyBudy folder as: "+props.getSetting("homeDir"));
-        props.setSettingAndSave("testSaveAllSettigngsHere", "settingsvalue");//Test setting a property in the file and saving all settings to file
-        AppDefaults.getAndPrint(props);
-        props.setSettingDontSaveYet("numberOfThumbnails", "5");//Test setting a property in the file. Doesn't save Properties to file.
-        log.print(LogType.Plain,"Test property set at '5' has value: "+props.getSetting("numberOfThumbnails"));
-        props = null;
+        Settings.init();
+        log.print(LogType.Plain,"Os is windows?..."+Settings.isWindows());
+        log.print(LogType.Plain,"(private) StudyBudy folder is: "+Settings.appPath);
+        log.print(LogType.Plain,"(public) getSetting finds StudyBudy folder as: "+Settings.getSetting("homeDir"));
+        Settings.setSettingAndSave("testSaveAllSettigngsHere", "settingsvalue");//Test setting a property in the file and saving all settings to file
+        AppDefaults.getAndPrint();
+        Settings.setSettingDontSaveYet("numberOfThumbnails", "5");//Test setting a property in the file. Doesn't save Properties to file.
+        log.print(LogType.Plain,"Test property set at '5' has value: "+Settings.getSetting("numberOfThumbnails"));
 
         //Simulate closing StudyBudy and running a second time
-
         //Any settings which are not saved will no longer exist and return null
-        props = new Settings();
-        log.print(LogType.Plain,"\nFirst default setting has value: "+props.getSetting(AppDefaults.s1.key));
-        log.print(LogType.Plain,"(unsaved) Test property set at '5' has value: "+props.getSetting("numberOfThumbnails"));
+        Settings.destroy();Settings.init();
+        log.print(LogType.Plain,"\nFirst default setting has value: "+Settings.getSetting(AppDefaults.s1.key));
+        log.print(LogType.Plain,"(unsaved) Test property set at '5' has value: "+Settings.getSetting("numberOfThumbnails"));
 
     }
 }

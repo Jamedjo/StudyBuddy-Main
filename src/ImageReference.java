@@ -30,7 +30,7 @@ import javax.imageio.stream.ImageInputStream;
 
 class ImageReference {
     Log log = new Log(false);
-    GUI mainGUI;
+    //GUI mainGUI;
     File pathFile = null;
     ImageItem img = new ImageItem();
     ImageLoader imageLoader;
@@ -44,8 +44,8 @@ class ImageReference {
     ImgRequestSize lastRequestSize=ImgRequestSize.Thumb;//could be replaced with boolean- hasRequestedFull
     //String title,filename,comments?
     
-    ImageReference(String inputPath, GUI gui) {
-        mainGUI = gui;
+    ImageReference(String inputPath){//, GUI gui) {
+        //mainGUI = gui;
         String tempPath = "";
         try {
             if (inputPath.startsWith("///\\\\\\")) {
@@ -120,8 +120,7 @@ class ImageReference {
 
             if(lastRequestSize!=ImgRequestSize.Max) img.clearMem();
 
-            mainGUI.mainPanel.onResize();//resize as image have changed dimensions
-            mainGUI.thumbPanel.repaint();//repaint as no need to re-layout components
+            RepaintManager.repaint(RepaintType.ImageUpdated);
         }
         //else has been cancelled or has failed
 
@@ -220,7 +219,7 @@ class ImageReference {
             if (tempImage != null) {
                 Log.Print(LogType.Plain, "Read exif of image " + pathFile.toString());
                 img.setThumbImage(tempImage, ImageType.Original);
-                mainGUI.thumbPanel.repaint();//not onResize
+                RepaintManager.repaint(RepaintType.NewThumb);
                 return;
             }
             if (img.getFullDimensions() == null)
@@ -278,7 +277,7 @@ class ImageReference {
         }
     }
     void getThumbIfCached() {
-        File thumbPath = new File(mainGUI.settings.getSetting("homeDir") + mainGUI.settings.getSetting("thumbnailPathExt"));
+        File thumbPath = new File(Settings.getSetting("homeDir") + Settings.getSetting("thumbnailPathExt"));
         File checkFile = new File(thumbPath, (ImageUtils.getSaveEncoding(pathFile, imageFileLength, modifiedDateTime)));
         if (checkFile.isFile()) {
             try {
@@ -335,7 +334,7 @@ class ImageReference {
             g2.dispose();
             log.print(LogType.Debug, "  -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to scale thumbnail");
         }
-        ImageUtils.saveThumbToFile(mainGUI.settings, returnThumb, pathFile, imageFileLength, modifiedDateTime);
+        ImageUtils.saveThumbToFile(returnThumb, pathFile, imageFileLength, modifiedDateTime);
         return returnThumb;
     }
 //<editor-fold desc="unchecked methods">

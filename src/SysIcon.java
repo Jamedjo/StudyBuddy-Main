@@ -22,6 +22,7 @@ public enum SysIcon {
     ,Next("oxygen/go-next-6.png")
     ,Play("oxygen/media-playback-start-6.png")
     ,Stop("oxygen/media-playback-stop-6.png")
+    ,Directory("oxygen/folder.png")
     ,Tick("oxygenbig/dialog-ok-4.png")
     ,HideThumbs("oxygen/list-remove-4.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
     ,ShowThumbs("oxygen/list-add-3.png","oxygencustom/thumbnailbar-32.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
@@ -164,10 +165,15 @@ public enum SysIcon {
             log.print(LogType.DebugError,"Bad argument to SysIcon getBufferedImage");
             return null;
         }
+        try{
         int newW =(int)(Icon.getIconWidth()*shrinkFactor);
         int newH =(int)(Icon.getIconHeight()*shrinkFactor);
         BufferedImage tempB = new BufferedImage(newW,newH,imgType);
         Icon.paintIcon(null, tempB.createGraphics(), (newW-Icon.getIconWidth())/2, (newH-Icon.getIconHeight())/2);
         return tempB;
+        } catch(NullPointerException e){
+            log.print(LogType.Error,"Unable to find SysIcon "+this.toString()+" for getBufferedImage");
+            return new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB);
+        }
     }
 }
