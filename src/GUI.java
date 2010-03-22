@@ -14,12 +14,8 @@ import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.io.File;
-import java.io.IOException;
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -56,9 +52,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     QuickTagger quickTagger;
     Thread slideThread;
 
-    final JFileChooser fileGetter = new JFileChooser();
-    final JFileChooser folderGetter = new JFileChooser();
-    final JFileChooser jpgExporter = new JFileChooser();
     JMenuBar menuBar;
     JMenu imageMenu, viewMenu, tagMenu, helpMenu;
     JMenuItem Options;
@@ -118,9 +111,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         w.setLocationByPlatform(true);
         w.setIconImage(SysIcon.Logo.Icon.getImage());
         //w.addComponentListener(this);
-        buildFileGetter();
-        buildFolderGetter();
-        buildJpgExporter();
+        FileDialogs.init(this);
         setupCache();
         Thread errorImgsThread = new Thread(new ErrorImages(100,this));
         quickRestart();
@@ -141,75 +132,6 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         }
     }
 
-    boolean isImage(File f){
-        String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
-        //String[] readerNames = ImageIO.getReaderFormatNames();
-        //Sanselan.hasImageFileExtension();
-        String ext = null;
-        ext = ImageUtils.getFileExtLowercase(f.getName());
-        if (ext==null) return false;
-        for (String imgExt : exts) {
-            if (ext.equals(imgExt)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    void buildFileGetter() {
-        fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
-            public boolean accept(File f) {
-                if (f.isDirectory()) {
-                    return true;
-                }
-                return isImage(f);
-            }
-            public String getDescription() {
-                return "All Images";
-            }
-        });
-        fileGetter.setDialogTitle("Import Image");
-        setGetterDir(fileGetter);
-        fileGetter.setMultiSelectionEnabled(true);
-    }
-    void setGetterDir(JFileChooser getter){
-        String lastSetDir = settings.getSetting("lastOpenDirectory");
-        if((lastSetDir==null)||lastSetDir.equals("")) return;
-        File lastDir = new File(lastSetDir);
-        if((lastDir!=null)&&lastDir.exists()&&lastDir.isDirectory()){
-            try{
-            getter.setCurrentDirectory(lastDir);
-            } catch (IndexOutOfBoundsException e){
-                log.print(LogType.Error,"Error creating open/save dialog at: "+lastSetDir);
-                e.printStackTrace();
-            }
-        }
-    }
-    void buildFolderGetter() {
-        folderGetter.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        folderGetter.setDialogTitle("Import Folder(s)");
-        setGetterDir(folderGetter);
-        folderGetter.setMultiSelectionEnabled(true);
-    }
-    void buildJpgExporter() {
-        //jpgExporter.setFileSelectionMode(JFileChooser.SAVE_DIALOG);
-        jpgExporter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
-            public boolean accept(File f) {
-                if (f.isDirectory()) {
-                    return true;//Still want to show directories to browse
-                }
-                if(f.toString().toLowerCase().endsWith(".jpg")||f.toString().toLowerCase().endsWith(".jpeg")) return true;
-                return false;
-            }
-            public String getDescription() {
-                return "Jpg File";
-            }
-        });
-        jpgExporter.setDialogTitle("Export Image as JPG");
-        jpgExporter.setSelectedFile(new File("image.jpg"));
-        setGetterDir(jpgExporter);
-        jpgExporter.setMultiSelectionEnabled(false);
-    }
 
     void buildMenuBar() {
         menuBar = new JMenuBar();
@@ -334,8 +256,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             toggleThumbs(true);
             toggleZoomed(true);
             quickRestart();
-        } else if (ae.getActionCommand().equals("mImport")) importDo();
-        else if (ae.getActionCommand().equals("mImportD")) importDirDo();
+        } else if (ae.getActionCommand().equals("mImport")) FileDialogs.importDo();
+        else if (ae.getActionCommand().equals("mImportD")) FileDialogs.importDirDo();
         else if (ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
         else if (ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
         else if (ae.getActionCommand().equals("TagTree")) toggleTagTree();
@@ -362,7 +284,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("Flip")) {state.getCurrentImage().img.transform.flip(); mainPanel.onResize();}
         else if (ae.getActionCommand().equals("Mirror")){ state.getCurrentImage().img.transform.mirror(); mainPanel.onResize();}
         else if (ae.getActionCommand().equals("Rotate")) {state.getCurrentImage().img.transform.rotate90(); mainPanel.onResize();}
-        else if (ae.getActionCommand().equals("ExportCurrentImg")) exportCurrentImage();
+        else if (ae.getActionCommand().equals("ExportCurrentImg")) FileDialogs.exportCurrentImage();
         else if (ae.getActionCommand().equals("Options")) showOptions();
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);
@@ -556,10 +478,8 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
             IDTitle FilterTagIDTitle = (IDTitle) FilterTag;
             if (FilterTagIDTitle.getID().equals("-1")) {
                 setState(new ProgramState(LoadType.Refresh, this));
-                getState().imageChanged();
             } else {
                 setState(new ProgramState(LoadType.Filter, this, FilterTagIDTitle.getID()));
-                getState().imageChanged();
             }
         }
         tagTree.updateTags();
@@ -617,31 +537,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         tagTree.updateTags();
     }
 
-    void exportCurrentImage() {
-        int destReady = jpgExporter.showOpenDialog(w);
-        if (destReady == JFileChooser.APPROVE_OPTION) {
-            String filePathAndName = jpgExporter.getSelectedFile().toString();
-            String ext = ImageUtils.getFileExtLowercase(filePathAndName);
-            if((ext==null)||(!(ext.equals("jpg")||ext.equals("jpeg")))) filePathAndName = filePathAndName + ".jpg";
-            settings.setSettingAndSave("lastOpenDirectory",jpgExporter.getCurrentDirectory().toString());
-            getState().getCurrentImage().saveFullToPath(filePathAndName);
-        }
-    }
-    void importDo() {
-        int wasGot = fileGetter.showOpenDialog(w);
-        if (wasGot == JFileChooser.APPROVE_OPTION) {
-            settings.setSettingAndSave("lastOpenDirectory",fileGetter.getCurrentDirectory().toString());
-            getState().importImages(fileGetter.getSelectedFiles());
-        }
-    }
-    void importDirDo() {
-        int wasGot = folderGetter.showOpenDialog(w);
-        if (wasGot == JFileChooser.APPROVE_OPTION) {
-            settings.setSettingAndSave("lastOpenDirectory",folderGetter.getCurrentDirectory().toString());
-            getState().importImages(folderGetter.getSelectedFiles());
-        }
-    }
-
+    
     // Add a tag to the database and update tree
     void addTag() {
         String newTag = (String) JOptionPane.showInputDialog(w, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");

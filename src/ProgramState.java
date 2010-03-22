@@ -113,7 +113,9 @@ class ProgramState{
             imageIDs[0] = "-1";
             imageList = new ImageReference[1];
             imageList[0] = new ImageReference("NoExistingFiles:a:b:c:d:e:f:g:h.i.j.k.l.m.n:o:p:non.ex",mainGUI);
-        }        
+        }
+
+        imageChanged();
     }
 
     void checkDBVersion() {
@@ -137,12 +139,16 @@ class ProgramState{
             if (currentFilter.equals("-1")) { // "-1" is now show all (working on TagID rather than Tag Title)
                 ArrayList<String> tempImageIDs = new ArrayList<String>(Arrays.asList(imageIDs));
                 ArrayList<ImageReference> tempImageList = new ArrayList<ImageReference>(Arrays.asList(imageList));
+                if(((String)tempImageIDs.get(0)).equals("-1")) {
+                    tempImageIDs.remove(0);
+                    tempImageList.remove(0);
+                }
                 ArrayList<File> foldersList = new ArrayList<File>();
                 for (File f : files) {
                     if(f.isDirectory()) foldersList.add(f);
                     else{
                         //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
-                        String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
+                        String currentImID = mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());//f.getName()?
                         if (currentImID != null) {
                             tempImageIDs.add(currentImID);
                             //tempImageList.add(new ImageReference(mainGUI.mainImageDB.getImageFilename(currentImID) ,currentImID ));
@@ -156,12 +162,12 @@ class ProgramState{
                             if (g.isDirectory()) {
                                 return false;
                             }
-                            return mainGUI.isImage(g);
+                            return FileDialogs.isImage(g);
                         }
                     });
                     for (File c : children) {
                     if(c.isDirectory()) foldersList.add(c);
-                    String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());
+                    String currentImID = mainGUI.mainImageDB.addImage("Title 1", c.getAbsolutePath());//c.getName()?
                     if (currentImID != null) {
                         tempImageIDs.add(currentImID);
                         tempImageList.add(new ImageReference(c.getAbsolutePath(),mainGUI));
@@ -179,6 +185,7 @@ class ProgramState{
                 currentI = lastIndex + 1;
                 lastIndex = imageIDs.length - 1;
                 numberOfImages = imageList.length;
+                mainGUI.getState().imageChanged();
             } else {
                 for (File f : files) {
                     //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
@@ -186,7 +193,6 @@ class ProgramState{
                 }
                 mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, currentFilter));
             }
-            mainGUI.getState().imageChanged();
         } catch (java.lang.OutOfMemoryError e) {
             JOptionPane.showMessageDialog(mainGUI.w, "Out of memory", "Fatal Error", JOptionPane.ERROR_MESSAGE);
         } finally {
@@ -232,7 +238,10 @@ class ProgramState{
     }
 
     void imageChanged(){
-        mainGUI.setTitle("Image: "+(mainGUI.mainImageDB.getImageFilename(imageIDs[currentI])));
+        if(mainGUI.mainPanel==null||mainGUI.thumbPanel==null) return;
+        String imageName = mainGUI.mainImageDB.getImageFilename(imageIDs[currentI]);
+        if(imageName!=null)mainGUI.setTitle("Image: "+imageName);
+        else mainGUI.setTitle("");
         mainGUI.mainPanel.onResize();
 	mainGUI.thumbPanel.onResize();
         //mainGUI.tagTree.repaint();

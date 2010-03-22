@@ -272,7 +272,7 @@ enum ImageMenu {
     mImport("Import Image(s)", KeyEvent.VK_I, KeyEvent.VK_I, ActionEvent.CTRL_MASK, "mImport"),
     mImportD("Import Folder", KeyEvent.VK_F, KeyEvent.VK_I, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK, "mImportD"),
     mRemoveI("Remove Image from StudyBuddy", KeyEvent.VK_R, -1, -1, "mRemoveI"),
-    mRestart("Restart Viewer", KeyEvent.VK_R, KeyEvent.VK_N, ActionEvent.CTRL_MASK, "mRestart"),
+    mRestart("Restart Viewer", KeyEvent.VK_V, KeyEvent.VK_N, ActionEvent.CTRL_MASK, "mRestart"),
     mExit("Exit", KeyEvent.VK_X, KeyEvent.VK_W, ActionEvent.CTRL_MASK, "Exit");
     JMenuItem item;
 
