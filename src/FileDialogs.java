@@ -15,6 +15,7 @@ public class FileDialogs {
     static JFileChooser folderGetter=null;
     static JFileChooser jpgExporter=null;
     static XFileDialog winFileGetter=null;
+    static XFileDialog winFolderGetter=null;
     static final String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
 
     static void init(GUI gui){
@@ -58,7 +59,7 @@ public class FileDialogs {
                 for (int i = 0; i < filenames.length; i++) {
                     selectedFiles[i] = new File(foldername,filenames[i]);
                 }
-                lastDir=winFileGetter.getDirectory();
+                lastDir=foldername;
             }
             //winFileGetter.dispose();
         }
@@ -71,11 +72,35 @@ public class FileDialogs {
 
     }
     static void importDirDo() {
-        if(folderGetter==null) buildFolderGetter(mainGUI);
-        int wasGot = folderGetter.showOpenDialog(mainGUI.w);
-        if (wasGot == JFileChooser.APPROVE_OPTION) {
-            mainGUI.settings.setSettingAndSave("lastOpenDirectory",folderGetter.getCurrentDirectory().toString());
-            mainGUI.getState().importImages(folderGetter.getSelectedFiles());
+        boolean success = false;
+        String lastDir = null;
+        File[] selectedFiles = null;
+
+        if (!isWindows) {
+            if(folderGetter==null) buildFolderGetter(mainGUI);
+                int wasGot = folderGetter.showOpenDialog(mainGUI.w);
+                if (wasGot == JFileChooser.APPROVE_OPTION) {
+                success = true;
+                lastDir = folderGetter.getCurrentDirectory().toString();
+                selectedFiles = folderGetter.getSelectedFiles();
+
+            }
+        } else {
+            if (winFolderGetter == null) buildWinFolderGetter();
+            winFolderGetter.show();
+            String folder = winFolderGetter.getFolder();
+            //String foldername = winFolderGetter.getDirectory();//parent
+            if (folder != null) {
+                success = true;
+                selectedFiles = new File[1];
+                selectedFiles[0] = new File(folder);
+                lastDir=folder;//foldername;
+            }
+        }
+
+        if (success) {
+            if (lastDir != null) mainGUI.settings.setSettingAndSave("lastOpenDirectory", lastDir);
+            if (selectedFiles != null) mainGUI.getState().importImages(selectedFiles);
         }
     }
 
@@ -126,6 +151,23 @@ public class FileDialogs {
         String[] desc = {"All Images"};
         String[] filts = {imageFiltersSB.toString()};
         winFileGetter.setFilters(desc, filts);
+    }
+    static void buildWinFolderGetter() {
+        winFolderGetter = new XFileDialog(mainGUI.w);
+        winFolderGetter.setMode(FileDialog.LOAD);
+        winFolderGetter.setMultiSelectionEnabled(false);
+        winFolderGetter.setThumbnail(true);
+        winFolderGetter.setTitle("Import Images(s)");
+        File lastDir = getLastDir();
+        if(lastDir!=null) winFolderGetter.setDirectory(lastDir.toString());
+        StringBuilder imageFiltersSB = new StringBuilder();
+        for (String ext : exts) {
+            imageFiltersSB.append(ext);
+            imageFiltersSB.append(";");
+        }
+        String[] desc = {"All Images"};
+        String[] filts = {imageFiltersSB.toString()};
+        winFolderGetter.setFilters(desc, filts);
     }
     static File getLastDir() {
         String lastSetDir = mainGUI.settings.getSetting("lastOpenDirectory");

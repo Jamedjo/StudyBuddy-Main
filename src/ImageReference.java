@@ -109,8 +109,8 @@ class ImageReference {
 //if thumb image an icon just set both to icon and ignore full.
     void setImageFromLoader(BufferedImage returnImage, ImageType returnImageType,boolean outOfMemory) {//outOfMemory is equivelent to it being cancelled due to memory limitations. boolean outOfMemory will be true if cancelled for any reason from now.
         if(returnImage!=null){
+            if(img==null)return;
             img.setFullImage(returnImage, returnImageType);
-
             //lastRequstSize
 
             BufferedImage thmb=null;
