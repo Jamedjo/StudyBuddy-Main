@@ -76,20 +76,21 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
         RepaintManager.repaint(RepaintType.Window);
     }
 
+    static final int maxWindowWidth=400;
+    static final int maxWindowHeight=300;
     @Override
     public void componentResized(ComponentEvent e) {
+        if (e.getSource() == mainGUI.w) {
+            int newWidth = mainGUI.w.getWidth();
+            int newHeight = mainGUI.w.getHeight();
+            if (newWidth < maxWindowWidth) newWidth = maxWindowWidth;
+            if (newHeight < maxWindowHeight) newHeight = maxWindowHeight;
+            mainGUI.w.setSize(newWidth, newHeight);
+        }
         // if(e.getSource()==boardScroll) {
         //if(e.getSource()==mainPanel) {
         //**//log.print(LogType.Error,e.paramString());
         RepaintManager.repaint(RepaintType.Window);
-        //}
-        // 	if(e.getSource()==w){
-        // 	    int newWidth = w.getWidth();
-        // 	    int newHeight = w.getHeight();
-        // 	    if(newWidth<200) newWidth = 200;
-        // 	    if(newHeight<200) newHeight = 200;
-        // 	    w.setSize(newWidth,newHeight);
-        // 	}
     }
 
     @Override

@@ -112,6 +112,7 @@ class GUI {
         quickRestart();
         errorImgsThread.start();
         //w.setDefaultLookAndFeelDecorated(false);
+        w.addComponentListener(guiListener);
         w.setVisible(true);
         w.setMinimumSize(new Dimension(200,200));
     }
