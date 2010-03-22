@@ -137,7 +137,7 @@ int i=0;
 
 
 for (ToolBar b : ToolBar.values()){
-	    JButton bt = b.create((ActionListener)mainGUI);
+	    JButton bt = b.create(mainGUI.guiListener);
 
 
 if(b.isSeperatorHere){
@@ -245,7 +245,7 @@ enum ImageToolBar {
 
         int i = 0;
         for (ImageToolBar b : ImageToolBar.values()) {
-            JButton bt = b.create((ActionListener) mainGUI);
+            JButton bt = b.create(mainGUI.guiListener);
             if (b.isSeperatorHere) {
                 bar.addSeparator();//add seperator before positions 0,2&4 in the menu
             }

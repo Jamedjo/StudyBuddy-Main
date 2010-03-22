@@ -3,12 +3,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowStateListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
@@ -27,19 +21,12 @@ import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.tree.DefaultMutableTreeNode;
-//import javax.swing.ScrollPaneLayout;
 
 //We should use javadoc.
 
-
-//TODO: make amount scrolled by scroll wheel relative to current size.
-//At the moment it is linear i.e. zoooming out from 500% goes to
-//480% and zooming out from 40% goes to 20% both with same difference
-
 //Refresh image feature?
 
-//Should be seperated into intial thread, and an event dispatch thread which implements the listeners.
-class GUI implements ActionListener, ComponentListener, WindowStateListener, ChangeListener {
+class GUI {
     Log log;
     Settings settings = new Settings();;
     JFrame w;
@@ -70,6 +57,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
     JPanel imageAreas;
     JScrollPane notePane;
     JSlider zoomBar;
+    GuiListener guiListener = new GuiListener(this);
     //File thumbPath;
     final int tagTreeStartSize = 150;
     final int tagTreeMaxSize = 350;
@@ -135,10 +123,10 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
     void buildMenuBar() {
         menuBar = new JMenuBar();
-        imageMenu = ImageMenu.build((ActionListener) this);
-        tagMenu = TagMenu.build((ActionListener) this);
-        viewMenu = ViewMenu.build((ActionListener) this);
-        helpMenu = HelpMenu.build((ActionListener) this);
+        imageMenu = ImageMenu.build(guiListener);
+        tagMenu = TagMenu.build(guiListener);
+        viewMenu = ViewMenu.build(guiListener);
+        helpMenu = HelpMenu.build(guiListener);
         menuBar.add(imageMenu);
         menuBar.add(viewMenu);
         menuBar.add(tagMenu);
@@ -152,7 +140,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         zoomBar.setPaintLabels(true);
         zoomBar.setPaintTicks(true);
         zoomBar.setFocusable(false);//Otherwise arrows zoom when they shouldn't
-        zoomBar.addChangeListener(this);
+        zoomBar.addChangeListener(guiListener);
         return zoomBar;
     }
 
@@ -166,6 +154,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
         toolbarMain = ToolBar.build(this);
         toolbarMain.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(evt.getPropertyName().toLowerCase().equals("orientation")){
                     zoomBar.setOrientation((Integer)(evt.getNewValue()));
@@ -182,6 +171,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         //mainScrollPane.setBorder(BorderFactory.createEmptyBorder());
         mainScrollPane.getViewport().setBackground(Color.darkGray);//comment out to see scroll bar bug
         mainScrollPane.getViewport().addChangeListener(new ChangeListener(){
+            @Override
             public void stateChanged(ChangeEvent e){
                 mainScrollPane.getViewport().repaint();
             }
@@ -199,6 +189,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(tagTreeStartSize + splitpane.getInsets().left);
         splitpane.addPropertyChangeListener(new PropertyChangeListener() {
+            @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if(splitpane.isValid()){
                     if(evt.getPropertyName().toLowerCase().equals("dividerlocation")){
@@ -232,6 +223,7 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
 
         adjuster = new ImageAdjuster(w,true);
         adjuster.addChangeListeners( new ChangeListener(){
+            @Override
             public void stateChanged(ChangeEvent e){
                 getState().getCurrentImage().replaceFilter(adjuster.getCurrentInvertBox(), adjuster.getCurrentSliderContrast(),adjuster.getCurrentSliderBright());
                 getState().imageColoursUpdated();
@@ -244,122 +236,26 @@ class GUI implements ActionListener, ComponentListener, WindowStateListener, Cha
         tagTagger = new TagTagger(w,true);
 
         w.setContentPane(contentPane);
-        w.addWindowStateListener(this);
+        w.addWindowStateListener(guiListener);
         w.pack();
         getState().imageChanged();
-        contentPane.addComponentListener(this);//don't want it to trigger while building
+        contentPane.addComponentListener(guiListener);//don't want it to trigger while building
 
-    }
-
-    public void actionPerformed(ActionEvent ae) {
-        if (ae.getActionCommand().equals("mRestart")) {
-            toggleThumbs(true);
-            toggleZoomed(true);
-            quickRestart();
-        } else if (ae.getActionCommand().equals("mImport")) FileDialogs.importDo();
-        else if (ae.getActionCommand().equals("mImportD")) FileDialogs.importDirDo();
-        else if (ae.getActionCommand().equals("ThumbsS")) toggleThumbs(true);
-        else if (ae.getActionCommand().equals("ThumbsH")) toggleThumbs(false);
-        else if (ae.getActionCommand().equals("TagTree")) toggleTagTree();
-        else if (ae.getActionCommand().equals("SlideP")) toggleSlide(true);
-        else if (ae.getActionCommand().equals("SlideS")) toggleSlide(false);
-        else if (ae.getActionCommand().equals("ZoomFit")) toggleZoomed(true);
-        else if (ae.getActionCommand().equals("Zoom100")) zoomTo(100);
-        else if (ae.getActionCommand().equals("ZoomX")) zoomBox();
-        else if (ae.getActionCommand().equals("mRemoveI")) deleteCurrentImage();
-//        else if (ae.getActionCommand().equals("DeleteTag")) deleteTag();
-        else if (ae.getActionCommand().equals("Next")) getState().nextImage();
-        else if (ae.getActionCommand().equals("Prev")) getState().prevImage();
-        else if (ae.getActionCommand().equals("AddTag")) addTag();
-        else if (ae.getActionCommand().equals("TagThis")) tagThis();
-        else if (ae.getActionCommand().equals("QuickTag")) quickTag();
-        else if (ae.getActionCommand().equals("ImageBar")) imageToolbarToggle();
-        else if (ae.getActionCommand().equals("TagFilter")) tagFilter();
-        else if (ae.getActionCommand().equals("TagTag")) tagTag();
-        else if (ae.getActionCommand().equals("DragPan")) mainPanel.setCursorMode(mainPanel.getCurrentDrag());
-        else if (ae.getActionCommand().equals("DragLink")) dragLink();
-        else if (ae.getActionCommand().equals("DragNote")) mainPanel.setCursorMode(DragMode.Note);
-        else if (ae.getActionCommand().equals("BlueT")) bluetoothDo();
-        else if (ae.getActionCommand().equals("AdjustImage")) showImageAdjuster();
-        else if (ae.getActionCommand().equals("Flip")) {state.getCurrentImage().img.transform.flip(); mainPanel.onResize();}
-        else if (ae.getActionCommand().equals("Mirror")){ state.getCurrentImage().img.transform.mirror(); mainPanel.onResize();}
-        else if (ae.getActionCommand().equals("Rotate")) {state.getCurrentImage().img.transform.rotate90(); mainPanel.onResize();}
-        else if (ae.getActionCommand().equals("ExportCurrentImg")) FileDialogs.exportCurrentImage();
-        else if (ae.getActionCommand().equals("Options")) showOptions();
-        else if (ae.getActionCommand().equals("Exit")) {
-            System.exit(0);
-        } else if (ae.getActionCommand().equals("Help")) {
-            //Not final help- needs improving
-            JOptionPane.showMessageDialog(w, "Visit http://www.studybuddy.com for help and tutorials", "Study Help", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
-        } else if (ae.getActionCommand().equals("About")) {
-            JOptionPane.showMessageDialog(w, "StudyBuddy by Team StudyBuddy", "About StudyBuddy", JOptionPane.INFORMATION_MESSAGE, SysIcon.Help.Icon);
-        } else{
-            log.print(LogType.Error,"ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());
-        }
-        //+ ",\nwith source:\n\n " + e.getSource());
     }
 	
-	void dragLink()
-	{
-		Record TempRecord;
-		String DummyLinkID;
-		if (ImageLinker.getSelectingImage())
-		{
-			DummyLinkID = ImageLinker.getDummyLinkID();
-			TempRecord = mainImageDB.getLink(DummyLinkID);
-			mainImageDB.deleteLink(DummyLinkID);
-			mainImageDB.linkImage(TempRecord.getField(1), getState().getCurrentImageID(), Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)), Integer.parseInt(TempRecord.getField(6)));
-			JOptionPane.showMessageDialog(w, "Images Linked!");
-			mainPanel.repaint();
-			ImageLinker.setSelectingImage(false);
-		}
-		else
-		{
-			mainPanel.setCursorMode(DragMode.Link);
-		}
-	
-	}
-
-    public void windowStateChanged(WindowEvent e) {
-        mainPanel.onResize();
-        thumbPanel.onResize();
-    }
-
-    public void componentResized(ComponentEvent e) {
-        // if(e.getSource()==boardScroll) {
-        //if(e.getSource()==mainPanel) {
-        //**//log.print(LogType.Error,e.paramString());
-        mainPanel.onResize();
-        thumbPanel.onResize();
-        //}
-        // 	if(e.getSource()==w){
-        // 	    int newWidth = w.getWidth();
-        // 	    int newHeight = w.getHeight();
-        // 	    if(newWidth<200) newWidth = 200;
-        // 	    if(newHeight<200) newHeight = 200;
-        // 	    w.setSize(newWidth,newHeight);
-        // 	}
-    }
-
-    public void componentHidden(ComponentEvent e) {
-    }
-
-    public void componentMoved(ComponentEvent e) {
-    }
-
-    public void componentShown(ComponentEvent e) {
-    }
-
-    public void stateChanged(ChangeEvent e) {
-        //ZoomBar
-        JSlider src = (JSlider) e.getSource();
-        if (!src.getValueIsAdjusting()) {
-            int zoom = (int) src.getValue();
-            if (zoom == 0) {
-                toggleZoomed(true);
-            } else {
-                zoomTo(zoom);
-            }
+    void dragLink() {
+        Record TempRecord;
+        String DummyLinkID;
+        if (ImageLinker.getSelectingImage()) {
+            DummyLinkID = ImageLinker.getDummyLinkID();
+            TempRecord = mainImageDB.getLink(DummyLinkID);
+            mainImageDB.deleteLink(DummyLinkID);
+            mainImageDB.linkImage(TempRecord.getField(1), getState().getCurrentImageID(), Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)), Integer.parseInt(TempRecord.getField(6)));
+            JOptionPane.showMessageDialog(w, "Images Linked!");
+            mainPanel.repaint();
+            ImageLinker.setSelectingImage(false);
+        } else {
+            mainPanel.setCursorMode(DragMode.Link);
         }
     }
 
