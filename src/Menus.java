@@ -10,6 +10,8 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 
+//TODO: add dragmodes to a menu: pan,link,note ...... add bluetooth to a menu
+
 // <editor-fold defaultstate="collapsed" desc="ToolBar">
 enum
 
@@ -271,7 +273,9 @@ enum ImageMenu {
 
     mImport("Import Image(s)", KeyEvent.VK_I, KeyEvent.VK_I, ActionEvent.CTRL_MASK, "mImport"),
     mImportD("Import Folder", KeyEvent.VK_F, KeyEvent.VK_I, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK, "mImportD"),
+    mExportImg("Export Current Image", KeyEvent.VK_E, -1, -1, "ExportCurrentImg"),
     mRemoveI("Remove Image from StudyBuddy", KeyEvent.VK_R, -1, -1, "mRemoveI"),
+    mOptions("StudyBuddy Options",KeyEvent.VK_O,-1,-1,"Options"),
     mRestart("Restart Viewer", KeyEvent.VK_V, KeyEvent.VK_N, ActionEvent.CTRL_MASK, "mRestart"),
     mExit("Exit", KeyEvent.VK_X, KeyEvent.VK_W, ActionEvent.CTRL_MASK, "Exit");
     JMenuItem item;
@@ -316,20 +320,21 @@ enum ImageMenu {
     }
 }// </editor-fold>
 
-enum TagMenu{
-    AddTag("Create new tag",KeyEvent.VK_N,-1,-1,"AddTag"),
-    DeleteTag("Delete a tag",KeyEvent.VK_D,-1,-1,"DeleteTag"),
-    TagThis("Tag this Image",KeyEvent.VK_T,KeyEvent.VK_T,0,"TagThis"),
-    TagTag("Tag a Tag",KeyEvent.VK_A,-1,-1,"TagTag"),
-    TagFilter("Filter Images by Tag",KeyEvent.VK_F,-1,-1,"TagFilter");
-    
+// <editor-fold defaultstate="collapsed" desc="TagMenu">
+enum TagMenu {
+    AddTag("Create new tag", KeyEvent.VK_N, -1, -1, "AddTag"),
+    DeleteTag("Delete a tag", KeyEvent.VK_D, -1, -1, "DeleteTag"),
+    TagThis("Tag this Image", KeyEvent.VK_T, KeyEvent.VK_T, 0, "TagThis"),
+    QuickTag("QuickTag Images", KeyEvent.VK_Q, KeyEvent.VK_Q, 0, "QuickTag"),
+    TagTag("Tag a Tag", KeyEvent.VK_A, -1, -1, "TagTag"),
+    TagFilter("Filter Images by Tag", KeyEvent.VK_F, -1, -1, "TagFilter");
     JMenuItem item;
-    TagMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){
-        item = new JMenuItem(label,mnemonic);
-	if(acceleratorKey!=-1) {
-	    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey,acceleratorMask));
-	}
-	item.setActionCommand(command);
+    TagMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
+        item = new JMenuItem(label, mnemonic);
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
+        item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
     //TagMenu(String label, String command, boolean visible){
@@ -342,116 +347,111 @@ enum TagMenu{
     //void show(){
     //item.setVisible(true);
     //}
-
-    JMenuItem create(ActionListener l){
-	item.addActionListener(l);
-	return item;
+    JMenuItem create(ActionListener l) {
+        item.addActionListener(l);
+        return item;
     }
-
-    static JMenu build(ActionListener l){
-	JMenu menu = new JMenu("Tag");
-	menu.setMnemonic(KeyEvent.VK_T);
-	int i=0;
-	for (TagMenu iTM : TagMenu.values()){
-	    JMenuItem itm = iTM.create(l);
-	    menu.add(itm);
-	    i++;
-	}
-	return menu;
+    static JMenu build(ActionListener l) {
+        JMenu menu = new JMenu("Tag");
+        menu.setMnemonic(KeyEvent.VK_T);
+        int i = 0;
+        for (TagMenu iTM : TagMenu.values()) {
+            JMenuItem itm = iTM.create(l);
+            menu.add(itm);
+            i++;
+        }
+        return menu;
     }
-}
+}// </editor-fold>
 
-enum ViewMenu{
-    NextImage("Next Image",KeyEvent.VK_N,KeyEvent.VK_RIGHT,0,"Next"),
-	PrevImage("Previous Image",KeyEvent.VK_P,KeyEvent.VK_LEFT,0,"Prev"),
-	ShowThumbs("Show Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsS",false),
-	HideThumbs("Hide Thumbnails Bar",KeyEvent.VK_T,KeyEvent.VK_T,ActionEvent.CTRL_MASK,"ThumbsH"),
-	SlidePlay("Play Slideshow",KeyEvent.VK_S,KeyEvent.VK_SPACE,0,"SlideP"),
-	SlideStop("Stop Slideshow",KeyEvent.VK_T,KeyEvent.VK_SPACE,0,"SlideS",false),
-	ZoomToFit("Zoom: Fit Image",KeyEvent.VK_Z,KeyEvent.VK_Z,ActionEvent.ALT_MASK,"ZoomFit",false),
-	ZoomTo100("Zoom: 100%",KeyEvent.VK_Z,KeyEvent.VK_Z,ActionEvent.ALT_MASK,"Zoom100"),
-	ZoomToX("Zoom: Custom",KeyEvent.VK_C,KeyEvent.VK_Z,ActionEvent.SHIFT_MASK,"ZoomX");
-    
+// <editor-fold defaultstate="collapsed" desc="ViewMenu">
+enum ViewMenu {
+    NextImage("Next Image", KeyEvent.VK_N, KeyEvent.VK_RIGHT, 0, "Next"),
+    PrevImage("Previous Image", KeyEvent.VK_P, KeyEvent.VK_LEFT, 0, "Prev"),
+    ShowThumbs("Show Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.CTRL_MASK, "ThumbsS", false),
+    HideThumbs("Hide Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.CTRL_MASK, "ThumbsH"),
+    ToggleTree("Show/Hide Tag Tree", KeyEvent.VK_R, -1, -1, "TagTree"),
+    ToggleImgToolBar("Toggle Image ToolBar", KeyEvent.VK_I,-1, -1, "ImageBar"),
+    SlidePlay("Play Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE, 0, "SlideP"),
+    SlideStop("Stop Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE, 0, "SlideS", false),
+    ZoomToFit("Zoom: Fit Image", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "ZoomFit", false),
+    ZoomTo100("Zoom: 100%", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "Zoom100"),
+    ZoomToX("Zoom: Custom", KeyEvent.VK_C, KeyEvent.VK_Z, ActionEvent.SHIFT_MASK, "ZoomX");
     JMenuItem item;
-    ViewMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){
-        item = new JMenuItem(label,mnemonic);
-	if(acceleratorKey!=-1) {
-	    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey,acceleratorMask));
-	}
-	item.setActionCommand(command);
+    ViewMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
+        item = new JMenuItem(label, mnemonic);
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
+        item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
-    ViewMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command, boolean visible){
-	this(label, mnemonic, acceleratorKey, acceleratorMask, command);
-	item.setVisible(visible);
+    ViewMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command, boolean visible) {
+        this(label, mnemonic, acceleratorKey, acceleratorMask, command);
+        item.setVisible(visible);
     }
-
-    void hide(){
-	item.setVisible(false);
+    void hide() {
+        item.setVisible(false);
     }
-    void show(){
-	item.setVisible(true);
+    void show() {
+        item.setVisible(true);
     }
-    void setVisible(boolean value){
+    void setVisible(boolean value) {
         item.setVisible(value);
     }
-
-    JMenuItem create(ActionListener l){
-	item.addActionListener(l);
-	return item;
+    JMenuItem create(ActionListener l) {
+        item.addActionListener(l);
+        return item;
     }
-
-    static JMenu build(ActionListener l){
-	JMenu menu = new JMenu("View");
-	menu.setMnemonic(KeyEvent.VK_V);
-	int i=0;
-	for (ViewMenu iTM : ViewMenu.values()){
-	    if(i==2||i==4){
-		menu.addSeparator();//add seperator before positions 2 in the menu
-	    }
-	    JMenuItem itm = iTM.create(l);
-	    menu.add(itm);
-	    i++;
-	}
-	return menu;
+    static JMenu build(ActionListener l) {
+        JMenu menu = new JMenu("View");
+        menu.setMnemonic(KeyEvent.VK_V);
+        int i = 0;
+        for (ViewMenu iTM : ViewMenu.values()) {
+            if (i == 2 || i == 6) {
+                menu.addSeparator();//add seperator before positions 2 in the menu
+            }
+            JMenuItem itm = iTM.create(l);
+            menu.add(itm);
+            i++;
+        }
+        return menu;
     }
-}
+}// </editor-fold>
 
-enum HelpMenu{
-    About("About",KeyEvent.VK_A,-1,-1,"About"),
-	Help("StudyBuddy Help!",KeyEvent.VK_H,KeyEvent.VK_F1,0,"Help");
-    
+// <editor-fold defaultstate="collapsed" desc="HelpMenu">
+enum HelpMenu {
+    About("About", KeyEvent.VK_A, -1, -1, "About"),
+    Help("StudyBuddy Help!", KeyEvent.VK_H, KeyEvent.VK_F1, 0, "Help");
     JMenuItem item;
-    HelpMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command){
-        item = new JMenuItem(label,mnemonic);
-	if(acceleratorKey!=-1) {
-	    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey,acceleratorMask));
-	}
-	item.setActionCommand(command);
+    HelpMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
+        item = new JMenuItem(label, mnemonic);
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
+        item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
     //HelpMenu(String label,int mnemonic,int acceleratorKey,int acceleratorMask,String command, boolean visible){
     //this(label,command);
     //item.setVisible(visible);
     //}
-
-    JMenuItem create(ActionListener l){
-	item.addActionListener(l);
-	return item;
+    JMenuItem create(ActionListener l) {
+        item.addActionListener(l);
+        return item;
     }
-
-    static JMenu build(ActionListener l){
-	JMenu menu = new JMenu("Help");
-	menu.setMnemonic(KeyEvent.VK_H);
-	int i=0;
-	for (HelpMenu iTM : HelpMenu.values()){
-	    //if(i==2){
-	    //bar.addSeparator();//add seperator before positions 2 in the menu
-	    //}
-	    JMenuItem itm = iTM.create(l);
-	    menu.add(itm);
-	    i++;
-	}
-	return menu;
-    }
+    static JMenu build(ActionListener l) {
+        JMenu menu = new JMenu("Help");
+        menu.setMnemonic(KeyEvent.VK_H);
+        int i = 0;
+        for (HelpMenu iTM : HelpMenu.values()) {
+            //if(i==2){
+            //bar.addSeparator();//add seperator before positions 2 in the menu
+            //}
+            JMenuItem itm = iTM.create(l);
+            menu.add(itm);
+            i++;
+        }
+        return menu;
+    }// </editor-fold>
 }

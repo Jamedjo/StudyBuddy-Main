@@ -241,7 +241,7 @@ class ProgramState{
     void imageChanged(){
         if(mainGUI.mainPanel==null||mainGUI.thumbPanel==null) return;
         String imageName = mainGUI.mainImageDB.getImageFilename(imageIDs[currentI]);
-        if(imageName!=null)mainGUI.setTitle("Image: "+imageName);
+        if(imageName!=null)mainGUI.setTitle("- Image: "+(new File(imageName)).getName().toString());
         else mainGUI.setTitle("");
         RepaintManager.repaint(RepaintType.Window);
         //mainGUI.tagTree.repaint();
