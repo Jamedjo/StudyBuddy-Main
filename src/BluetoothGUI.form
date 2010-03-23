@@ -158,7 +158,7 @@
     </Container>
     <Container class="javax.swing.JPanel" name="loadingAnimation">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new LoadingAnimationPane()"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new LoadingAnimationPane(false)"/>
       </AuxValues>
 
       <Layout>

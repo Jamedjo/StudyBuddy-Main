@@ -47,7 +47,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
         connectButton = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         Logo = new javax.swing.JLabel();
-        loadingAnimation = new LoadingAnimationPane();
+        loadingAnimation = new LoadingAnimationPane(false);
         cancelButton = new javax.swing.JButton();
 
         setTitle("Bluetooth");

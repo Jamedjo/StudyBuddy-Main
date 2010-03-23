@@ -44,7 +44,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     private DragMode dragMode;//Change if zoomed in by default
     boolean mousePressed = false;
     boolean firstStart=false;
-    LoadingAnimationPane loadingPane = new LoadingAnimationPane();
+    LoadingAnimationPane loadingPane = new LoadingAnimationPane(true);
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -226,6 +226,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         AffineTransform originalAffine = g2.getTransform();
         g2.setTransform(mainGUI.getState().getCurrentImage().img.transform.getAffine(originalAffine,(leftOffset*2)+useWH.width,(topOffset*2)+useWH.height));//offset+(w/2)
         g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
+
         if(drawIconInFront) {
             int leftLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().x : 0 ;
             int topLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().y : 0 ;
@@ -234,6 +235,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             g2.setComposite(ac);
             g2.drawImage(b, ((boardW - loadingWH.width) / 2)+leftLoadOS, ((boardH - loadingWH.height) / 2)+topLoadOS, loadingWH.width, loadingWH.height, this);
         }
+
         drawLinkBoxes(g2, Settings.getSettingAsBool("showNotes",true), Settings.getSettingAsBool("showLinks",true));
         g2.setTransform(originalAffine);
 //        g.dispose();
