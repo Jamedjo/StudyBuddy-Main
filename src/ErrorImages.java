@@ -38,7 +38,6 @@ class ErrorImages implements Runnable {
     int t;//milliseconds
     static GUI mainGUI;
     static ArrayList<LoadingAnimationPane> panelAnims=new ArrayList<LoadingAnimationPane>();
-    static boolean mainPanelShouldRepaint = false;
 
     ErrorImages(int updatePeriod,GUI gui){
         t = updatePeriod;
@@ -62,7 +61,6 @@ class ErrorImages implements Runnable {
         else current++;
         //Should get rid of above lines, replace with setting a currentUpdatedImage using affinetransform from the original.
 
-        mainGUI.mainPanel.repaint();
         if (panelAnims != null) {
             for (LoadingAnimationPane panel : panelAnims) {
                 if (panel.shouldRepaint()) {
@@ -78,13 +76,4 @@ class ErrorImages implements Runnable {
     public static BufferedImage getLoading(){
         return loadingAnim[current];//Should be changed to use one loading image and rotate with affine transform.
     }
-    public static BufferedImage getMainLoading(){
-        mainPanelShouldRepaint=true;
-        return getLoading();
-    }
-
-    public static void stopMainAnim(){
-        mainPanelShouldRepaint=false;
-    }
-
 }

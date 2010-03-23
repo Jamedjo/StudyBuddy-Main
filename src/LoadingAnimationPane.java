@@ -17,12 +17,14 @@ public class LoadingAnimationPane extends JPanel {
     BufferedImage currentImage = blank;
 
     LoadingAnimationPane() {
-        ErrorImages.addPanel(this);
+        this.setOpaque(false);
+        ErrorImages.addPanel(this);//should have finalizer to remove this from via ErrorImages.removePanel(this) which should be created
     }
     public void stopAnimation(){
+        boolean wasPlaying = shouldRepaint;
         shouldRepaint = false;
         currentImage = blank;
-        repaint();
+        if(wasPlaying) repaint();
     }
     public void startAnimation(){
         shouldRepaint=true;
@@ -34,14 +36,13 @@ public class LoadingAnimationPane extends JPanel {
     @Override
     public void paintComponent(java.awt.Graphics g) {
         super.paintComponent(g);
-        Graphics2D g2 = (Graphics2D) g;
-        g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         if (shouldRepaint) {
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
             currentImage = ErrorImages.getLoading();
+            Dimension loadingWH = ImageUtils.scaleToMax(currentImage.getWidth(), currentImage.getHeight(), getWidth(), getHeight());
+            g2.drawImage(currentImage, ((getWidth() - loadingWH.width) / 2), ((getHeight() - loadingWH.height) / 2), loadingWH.width, loadingWH.height, this);
         }
-
-        Dimension loadingWH = ImageUtils.scaleToMax(currentImage.getWidth(), currentImage.getHeight(), getWidth(), getHeight());
-        if(shouldRepaint) g2.drawImage(currentImage, ((getWidth() - loadingWH.width) / 2), ((getHeight() - loadingWH.height) / 2), loadingWH.width, loadingWH.height, this);
         //g2.dispose();?
     }
 }

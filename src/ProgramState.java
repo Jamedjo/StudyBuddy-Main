@@ -249,8 +249,12 @@ class ProgramState{
 
     int relItoFixI(int in){
         int outI;
+        try{
         outI = (currentI + in) % (lastIndex + 1);//If the new posistion is larger than the array, use modulo
         if(outI<0) outI = (lastIndex+outI)+1;//If negative go back outI images
+        } catch(Exception e){//Arithmetic (/by0)null, etc. Caused by invalid indexes e.g.'-1' used when images placeholders are used
+            outI=currentI;
+        }
 	return outI;
     }
 

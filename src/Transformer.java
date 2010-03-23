@@ -47,30 +47,6 @@ public class Transformer {
     }
 }
 
-
-//    private boolean preTransform(){//returns true if it is safe to transform
-//        if(originalImage.fullDimensions==null){
-//            Log.Print(LogType.DebugError, "Cannot rotate/flip/transform before image has loaded");
-//            return false;
-//        }
-//        //transform.translate(-originalImage.fullDimensions.width/2, -originalImage.fullDimensions.height/2);
-//        return true;
-//    }
-//    private void postTransform(){
-//        //transform.translate(originalImage.fullDimensions.width/2, originalImage.fullDimensions.height/2);
-//    }
-//    void flip(){
-//        if(!preTransform()) return;
-//        transform.scale( 1.0, -1.0 );
-//        transform.translate(0,originalImage.fullDimensions.height);
-//        postTransform();
-//    }
-//    void mirror(){
-//        if(!preTransform()) return;
-//        transform.translate(-originalImage.fullDimensions.width,0);
-//        transform.scale( -1.0, 1.0 );
-//        postTransform();
-//    }
 //    void rotate90(){
 //        if(!preTransform()) return;
 //        //transform.quadrantRotate(1, anchorx, anchory);

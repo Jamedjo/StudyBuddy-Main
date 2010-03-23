@@ -44,6 +44,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     private DragMode dragMode;//Change if zoomed in by default
     boolean mousePressed = false;
     boolean firstStart=false;
+    LoadingAnimationPane loadingPane = new LoadingAnimationPane();
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -52,6 +53,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         boardH = boardH_start;
         setPreferredSize(gridSize);
         this.setBackground(Color.darkGray);
+        
+        this.setLayout(new BorderLayout());
+        this.add(loadingPane,BorderLayout.CENTER);
+
         this.addMouseWheelListener(this);
         this.addMouseMotionListener(this);
         this.addMouseListener(this);
@@ -169,17 +174,30 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,RenderingHints.VALUE_INTERPOLATION_BILINEAR );
+
         ImgRequestSize cSize;
         if (isZoomed())  cSize = ImgRequestSize.Max;
         else cSize = ImgRequestSize.Max;
         BufferedImage img = mainGUI.getState().getBImageI(0, cSize);
-        boolean iconOnThumb=false;BufferedImage b=null;firstStart=false;
-        if(img==ErrorImages.loading||img==ErrorImages.outOfMemory){
-            if(img==ErrorImages.loading) b =  ErrorImages.getMainLoading();
-            else b = img;
+
+        boolean drawIconInFront=false;
+        boolean thumbBehind=false;
+        BufferedImage b=null;
+        firstStart=false;
+
+        if(img==ErrorImages.outOfMemory){
+            b = img;
             img=mainGUI.getState().getBImageI(0,ImgRequestSize.Thumb);
-            iconOnThumb=true;
-        } else ErrorImages.stopMainAnim();
+            thumbBehind=true;
+            drawIconInFront=true;
+        }
+        if(img==ErrorImages.loading){
+            loadingPane.startAnimation();
+            thumbBehind=true;
+            img=mainGUI.getState().getBImageI(0,ImgRequestSize.Thumb);
+        }
+        else loadingPane.stopAnimation();
+        
         if(img==ErrorImages.noNotesFound){
             if(mainGUI.getState().currentFilter.equals("-1")){
                 if(isZoomed()) img=ErrorImages.splashScreenZoom;
@@ -190,7 +208,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         
         if (isZoomed()) {
             int w,h;
-            if(iconOnThumb||firstStart){
+            if(thumbBehind||firstStart){
                 w=img.getWidth();
                 h=img.getHeight();
             }else{
@@ -200,14 +218,14 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             this.setPreferredSize(ImageUtils.useMaxMax((int) (w * getZoomMult()),(int) (h * getZoomMult()),this.getParent().getWidth(),this.getParent().getHeight()));
             useWH = new Dimension((int) (w * getZoomMult()),(int) (h * getZoomMult()));
         } else {
-            if(iconOnThumb||firstStart) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
+            if(thumbBehind||firstStart) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
             else mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
         AffineTransform originalAffine = g2.getTransform();
         g2.setTransform(mainGUI.getState().getCurrentImage().img.transform.getAffine(originalAffine,(leftOffset*2)+useWH.width,(topOffset*2)+useWH.height));//offset+(w/2)
         g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
-        if(iconOnThumb) {
+        if(drawIconInFront) {
             int leftLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().x : 0 ;
             int topLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().y : 0 ;
             Dimension loadingWH = ImageUtils.scaleToMax(b.getWidth(), b.getHeight(), boardW, boardH);
@@ -217,7 +235,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
         drawLinkBoxes(g2, Settings.getSettingAsBool("showNotes",true), Settings.getSettingAsBool("showLinks",true));
         g2.setTransform(originalAffine);
-        g2.dispose();
+//        g.dispose();
+//        g2.dispose();
     }
 
     final static float dashA[] = {16.0f};
