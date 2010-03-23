@@ -46,10 +46,3 @@ public class Transformer {
         return affine;
     }
 }
-
-//    void rotate90(){
-//        if(!preTransform()) return;
-//        //transform.quadrantRotate(1, anchorx, anchory);
-//        //transform.rotate(Math.toRadians(90), anchorx, anchory);//rotate around w/2,h/2
-//        postTransform();
-//    }

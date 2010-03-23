@@ -153,6 +153,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         if(isZoomFit()){
         fixFitZoomMultiplier();
         }
+        loadingPane.onResize();
         //if (oldScr!=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible()) log.print(LogType.Debug,"Horizontal Scroll bar toggled");
     }
 

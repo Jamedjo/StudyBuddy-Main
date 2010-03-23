@@ -1,27 +1,11 @@
 
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 //enum ErrorImageType{FileNotFound,OutOfMemory}
 class ErrorImages implements Runnable {
-    private static final BufferedImage[] loadingAnim= {//very bad as creates 16 600x600 arrays from 300x300 images, which translates to 22MB of memory permanently used.
-        SysIcon.LoadingAni1.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni1b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni2.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni2b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni3.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni3b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni4.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni4b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni5.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni5b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni6.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni6b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni7.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni7b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni8.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
-        SysIcon.LoadingAni8b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB)
-    };
+    private static final BufferedImage loadingAnim=SysIcon.LoadingAni1.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage fileNotFound = SysIcon.FileNotFound.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage outOfMemory = SysIcon.OutOfMemory.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage loading = SysIcon.Loading.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
@@ -31,10 +15,6 @@ class ErrorImages implements Runnable {
     static final BufferedImage splashScreenZoom = SysIcon.Splash.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage directoryIcon = SysIcon.Directory.getBufferedImage(1.2, BufferedImage.TYPE_INT_ARGB);
     //improvement: use java graphics to draw without relying on any external files, so GUI won't crash if no external file access
-
-    static final int angle = 10;
-    static int current = 0;//animations go from 1to8, array from 0to7.
-    static final int numberOfSprites = 16;
     int t;//milliseconds
     static GUI mainGUI;
     static ArrayList<LoadingAnimationPane> panelAnims=new ArrayList<LoadingAnimationPane>();
@@ -57,14 +37,11 @@ class ErrorImages implements Runnable {
     }
 
     static void updateIcons(){
-        if(current==(numberOfSprites-1)) current=0;
-        else current++;
-        //Should get rid of above lines, replace with setting a currentUpdatedImage using affinetransform from the original.
-
         if (panelAnims != null) {
             for (LoadingAnimationPane panel : panelAnims) {
                 if (panel.shouldRepaint()) {
-                    panel.repaint();
+                    panel.updatetAffine();
+                    //panel.repaint();
                 }
             }
         }
@@ -74,6 +51,6 @@ class ErrorImages implements Runnable {
     }
 
     public static BufferedImage getLoading(){
-        return loadingAnim[current];//Should be changed to use one loading image and rotate with affine transform.
+        return loadingAnim;
     }
 }
