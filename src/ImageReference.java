@@ -302,6 +302,7 @@ class ImageReference {
     void flush() {//called externally
         if (imageLoader != null) {
             imageLoader.cancel(false);
+            imageLoader=null;
         }
         img.clearMem();
         lastRequestSize=ImgRequestSize.Thumb;

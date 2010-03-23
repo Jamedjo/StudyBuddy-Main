@@ -47,6 +47,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
         } catch (java.lang.OutOfMemoryError e) {
             log.print(LogType.Error, "Fatal Error. Out of heap memory.\nImage " + pathFile.toString() + " is probably too large to load");
             outOfMemory = true;
+            returnImage = null;
         } finally {
             return returnImage;
         }
@@ -68,9 +69,11 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
         } catch (Exception e) {
             //log.print(LogType.Error, e);
             e.printStackTrace();
+        } finally {
+            returnImage = null;
         }
-
     }
+
     //could merge two functions
 //    BufferedImage makeScreenImg(BufferedImage bigImg) {
 //        Dimension iconWH = ImageUtils.scaleDownToMax(bigImg.getWidth(), bigImg.getHeight(), screenWidth, screenHeight);

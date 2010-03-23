@@ -122,6 +122,7 @@ class ThumbIcon extends JPanel implements MouseListener {
                 g2.drawImage(selectedImg, 0, 0,size, size, this);
             }
         }
+        g2.dispose();
     }
 
     public void mouseClicked(MouseEvent e){}

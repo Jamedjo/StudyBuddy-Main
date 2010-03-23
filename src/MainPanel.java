@@ -217,7 +217,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
         drawLinkBoxes(g2, Settings.getSettingAsBool("showNotes",true), Settings.getSettingAsBool("showLinks",true));
         g2.setTransform(originalAffine);
-        //g2.dispose();?
+        g2.dispose();
     }
 
     final static float dashA[] = {16.0f};

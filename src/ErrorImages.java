@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 //enum ErrorImageType{FileNotFound,OutOfMemory}
 class ErrorImages implements Runnable {
-    static final BufferedImage[] loadingAnim= {
+    private static final BufferedImage[] loadingAnim= {//very bad as creates 16 600x600 arrays from 300x300 images, which translates to 22MB of memory permanently used.
         SysIcon.LoadingAni1.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
         SysIcon.LoadingAni1b.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
         SysIcon.LoadingAni2.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB),
@@ -60,6 +60,8 @@ class ErrorImages implements Runnable {
     static void updateIcons(){
         if(current==(numberOfSprites-1)) current=0;
         else current++;
+        //Should get rid of above lines, replace with setting a currentUpdatedImage using affinetransform from the original.
+
         mainGUI.mainPanel.repaint();
         if (panelAnims != null) {
             for (LoadingAnimationPane panel : panelAnims) {
@@ -74,11 +76,11 @@ class ErrorImages implements Runnable {
     }
 
     public static BufferedImage getLoading(){
-        return loadingAnim[current];
+        return loadingAnim[current];//Should be changed to use one loading image and rotate with affine transform.
     }
     public static BufferedImage getMainLoading(){
         mainPanelShouldRepaint=true;
-        return loadingAnim[current];
+        return getLoading();
     }
 
     public static void stopMainAnim(){

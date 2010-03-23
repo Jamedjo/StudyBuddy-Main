@@ -87,6 +87,6 @@ class ThumbPreview extends JPanel {
         useWH = ImageUtils.scaleToMax(img.getWidth(), img.getHeight(), size, size);
 
         g2.drawImage(img, 0 + ((size - useWH.width) / 2), 0 + ((size - useWH.height) / 2), useWH.width, useWH.height, this);
-
+        g2.dispose();
     }
 }

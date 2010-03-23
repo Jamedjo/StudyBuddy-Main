@@ -248,17 +248,9 @@ class ProgramState{
     }
 
     int relItoFixI(int in){
-	int c;
-	int outI = currentI;
-	if(in==0) return outI;
-	if(in>0){
-	    for(c=0;c!=in;c++){//>=
-		outI = next(outI);
-	    }
-	}
-	else for(c=0;c!=in;c--){//<=
-		outI = prev(outI);
-	    }
+        int outI;
+        outI = (currentI + in) % (lastIndex + 1);//If the new posistion is larger than the array, use modulo
+        if(outI<0) outI = (lastIndex+outI)+1;//If negative go back outI images
 	return outI;
     }
 
@@ -330,6 +322,7 @@ class ProgramState{
                 if(i==prev) imageList[prev].preload(size);//Preloads previous image
                 imageList[relItoFixI(i)].flush();//removes from memory all images after the preloaded ones
             }
+            //remove thumbnails after 250 thumbnails? //30 or so better but 250 should be max thumbnails stored.
         }
 	return returnImage;
     }
