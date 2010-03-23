@@ -28,6 +28,7 @@ class ErrorImages implements Runnable {
     static final BufferedImage unknownError = SysIcon.Error.getBufferedImage(2, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage noNotesFound = SysIcon.NoNotesFound.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage splashScreen = SysIcon.Splash.getBufferedImage(1.6, BufferedImage.TYPE_INT_ARGB);
+    static final BufferedImage splashScreenZoom = SysIcon.Splash.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     static final BufferedImage directoryIcon = SysIcon.Directory.getBufferedImage(1.2, BufferedImage.TYPE_INT_ARGB);
     //improvement: use java graphics to draw without relying on any external files, so GUI won't crash if no external file access
 

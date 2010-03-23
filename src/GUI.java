@@ -196,6 +196,7 @@ class GUI {
         splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tagTree, imageAreas);
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(tagTreeStartSize + splitpane.getInsets().left);
+        if(getState().getCurrentImageID().equals("-1")) splitpane.setDividerLocation(1);
         splitpane.addPropertyChangeListener(new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
@@ -505,5 +506,9 @@ class GUI {
     void deleteCurrentImage(){
         mainImageDB.deleteImage(getState().getCurrentImageID());
         getState().imageDeleted();
+    }
+
+    void showHelpGuide(){
+        System.out.println("monkeyseverywhere");
     }
 }

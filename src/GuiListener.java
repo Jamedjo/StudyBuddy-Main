@@ -53,6 +53,7 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("Mirror")){ mainGUI.getState().getCurrentImage().img.transform.mirror(); RepaintManager.repaint(RepaintType.MainPanel);}
         else if (ae.getActionCommand().equals("Rotate")) {mainGUI.getState().getCurrentImage().img.transform.rotate90(); RepaintManager.repaint(RepaintType.MainPanel);}
         else if (ae.getActionCommand().equals("ExportCurrentImg")) FileDialogs.exportCurrentImage();
+        else if (ae.getActionCommand().equals("StartHelp")) mainGUI.showHelpGuide();
         else if (ae.getActionCommand().equals("Options")) mainGUI.showOptions();
         else if (ae.getActionCommand().equals("Exit")) {
             System.exit(0);

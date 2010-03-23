@@ -43,6 +43,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     final int dragPeriod = 40;// 25fps is equivalent to every 40ms
     private DragMode dragMode;//Change if zoomed in by default
     boolean mousePressed = false;
+    boolean firstStart=false;
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -111,13 +112,15 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             if(getCursorMode()==DragMode.None) setCursorMode(DragMode.Drag);
         }
     }
-    void fixFitZoomMultiplier(){
+    void fixFitZoomMultiplier() {
         //if(useWH==null){
-            useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
+        useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
         //}
         //Potentially inefficient as forces full size image to load
         //log.print(LogType.Debug,"old zoomMultiplier- " + getZoomMult());
-        setZoomMult((double)((double) useWH.width) / ((double) mainGUI.getState().getImageWidthFromBig()));
+        double fixedVal = (double) ((double) useWH.width) / ((double) mainGUI.getState().getImageWidthFromBig());
+        if(firstStart) fixedVal = (fixedVal/2.78);
+        setZoomMult(fixedVal);
         //log.print(LogType.Debug,"new zoomMultiplier- " + getZoomMult());
         //log.print(LogType.Debug,"boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
     }
@@ -170,22 +173,24 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         if (isZoomed())  cSize = ImgRequestSize.Max;
         else cSize = ImgRequestSize.Max;
         BufferedImage img = mainGUI.getState().getBImageI(0, cSize);
-        boolean loading=false;BufferedImage b=null;boolean firstStart=false;
-        if(img==ErrorImages.loading){
+        boolean iconOnThumb=false;BufferedImage b=null;firstStart=false;
+        if(img==ErrorImages.loading||img==ErrorImages.outOfMemory){
+            if(img==ErrorImages.loading) b =  ErrorImages.getMainLoading();
+            else b = img;
             img=mainGUI.getState().getBImageI(0,ImgRequestSize.Thumb);
-            b =  ErrorImages.getMainLoading();
-            loading=true;
+            iconOnThumb=true;
         } else ErrorImages.stopMainAnim();
         if(img==ErrorImages.noNotesFound){
             if(mainGUI.getState().currentFilter.equals("-1")){
-                img=ErrorImages.splashScreen;
+                if(isZoomed()) img=ErrorImages.splashScreenZoom;
+                else img=ErrorImages.splashScreen;
                 firstStart=true;
             }
         }
         
         if (isZoomed()) {
             int w,h;
-            if(loading){
+            if(iconOnThumb||firstStart){
                 w=img.getWidth();
                 h=img.getHeight();
             }else{
@@ -195,14 +200,14 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             this.setPreferredSize(ImageUtils.useMaxMax((int) (w * getZoomMult()),(int) (h * getZoomMult()),this.getParent().getWidth(),this.getParent().getHeight()));
             useWH = new Dimension((int) (w * getZoomMult()),(int) (h * getZoomMult()));
         } else {
-            if(loading||firstStart) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
+            if(iconOnThumb||firstStart) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
             else mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
         setOffsets();
         AffineTransform originalAffine = g2.getTransform();
         g2.setTransform(mainGUI.getState().getCurrentImage().img.transform.getAffine(originalAffine,(leftOffset*2)+useWH.width,(topOffset*2)+useWH.height));//offset+(w/2)
         g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
-        if(loading) {
+        if(iconOnThumb) {
             int leftLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().x : 0 ;
             int topLoadOS = (isZoomed())? ((JViewport) this.getParent()).getViewPosition().y : 0 ;
             Dimension loadingWH = ImageUtils.scaleToMax(b.getWidth(), b.getHeight(), boardW, boardH);
@@ -261,7 +266,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         double oldZoom = getZoomMult();
         if (isZoomFit()) {
             //get multiplier from fit so zoom doesnt jump
-            setZoomMult(((double)useWH.width) / ((double)mainGUI.getState().getImageWidthFromBig()));
+            fixFitZoomMultiplier();
         }
         //Does not look at offsets as these imply image is not enlarged in that dimension.
         //If the image is zoomed out and has offsets then no need to change JViewport position
@@ -276,6 +281,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         Rectangle r = ((JViewport) this.getParent()).getViewRect();
         r.translate(newX-xpos,newY-ypos);
         this.scrollRectToVisible(r);
+        RepaintManager.repaint(RepaintType.MainPanel);
     }
     @Override public void mouseMoved(MouseEvent e) { }
 
@@ -325,6 +331,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
     }
     public void mouseClicked(MouseEvent e) {
+        if(mainGUI.getState().getCurrentImageID().equals("-1")){
+            mainGUI.showHelpGuide();
+        }
         NotePanel PointNotes = new NotePanel(mainGUI, mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
         String[] LinkedImageIDs = mainGUI.mainImageDB.getImageIDsFromImagePoint(mainGUI.getState().getCurrentImageID(), e.getX(), e.getY(), leftOffset, topOffset, getZoomMult());
         //String TempString = "";
