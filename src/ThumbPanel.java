@@ -32,7 +32,13 @@ class ThumbButton extends JPanel{
         addMouseListener(new MouseAdapter() {
           @Override
           public void mousePressed(MouseEvent e) {
-             if(thumbOffset!=0) parent.setToOffsetImage(thumbOffset);
+             if(thumbOffset!=0) {
+                 parent.setToOffsetImage(thumbOffset);
+             } else {
+                  int relative = (hOffset+(size/2)-e.getX());
+                  parent.restartDragTimer(relative);
+             }
+             //else start middle-drag update thead. also start middle-drag thread on drag events?
              parent.lastPressed=thumbOffset;
              parent.mousePressed = true;
              updateCursor();
@@ -59,14 +65,13 @@ class ThumbButton extends JPanel{
           public void mouseDragged(MouseEvent e){
               if(parent.lastPressed==0){
                   int relative = (hOffset+(size/2)-e.getX());
-                  if(relative>0){
-                      System.out.println("Left Drag, relative "+relative);
-                  }
-                  else{
-                      System.out.println("Right Drag, relative "+relative);
-                  }
-                  if(Math.random()<0.1)//bad code to ignore 9 out of 10 drag events.
-                      parent.updateOffsetRelative(relative/10);
+                    //if(relative>0){
+                    //  System.out.println("Left Drag, relative "+relative);
+                    //}
+                    //else{
+                    //  System.out.println("Right Drag, relative "+relative);
+                    //}
+                  parent.dragTimer.updatePoint(relative);
               }
           }
           @Override
@@ -143,7 +148,9 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
     ThumbButton[] thumbnails;
     final GUI mainGUI;
     int thumbNoOffset=0;
-    Thread timerThread= new Thread(new ScrollTimer(this,0));
+    Thread wheelTimerThread= new Thread(new ScrollWheelTimer(this,0));
+    ScrollDragTimer dragTimer =new ScrollDragTimer(this,0,0);
+    Thread dragTimerThread= new Thread(dragTimer);
     boolean mousePressed = false;
     int lastPressed=0;
 
@@ -227,8 +234,8 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
         return thumbNoOffset;
     }
     void setToOffsetImage(int thumbNum){
-        timerThread.interrupt();
-        timerThread = new Thread(new ScrollTimer(this, 300));
+        wheelTimerThread.interrupt();
+        wheelTimerThread = new Thread(new ScrollWheelTimer(this, 300));
         mainGUI.getState().offsetImage(thumbNoOffset + thumbNum);
         thumbNoOffset = 0;
         mousePressed=false;
@@ -246,9 +253,16 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
     public void mouseWheelMoved(MouseWheelEvent e) {
         updateOffsetRelative(e.getWheelRotation());//-e.getWheelRotation());//not sure which direction is better
 
-        timerThread.interrupt();
-        timerThread = new Thread(new ScrollTimer(this, 300));
-        timerThread.start();
+        wheelTimerThread.interrupt();
+        wheelTimerThread = new Thread(new ScrollWheelTimer(this, 300));
+        wheelTimerThread.start();
+    }
+
+    void restartDragTimer(int startX) {
+        dragTimerThread.interrupt();
+        dragTimer = new ScrollDragTimer(this, 100, startX);//update at 10fps
+        dragTimerThread = new Thread(dragTimer);
+        dragTimerThread.start();
     }
     
     @Override
@@ -264,20 +278,56 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
     }
 }
 
-class ScrollTimer implements Runnable {
+class ScrollWheelTimer implements Runnable {
     ThumbPanel parent;
-    int t;
+    final int t;
 
-    ScrollTimer(ThumbPanel parnt,int time){
+    ScrollWheelTimer(ThumbPanel parnt,int time){
         parent=parnt;
         t = time;
     }
     @Override public void run(){
+        if(t==0) return;
         while(true){
             try{
                 Thread.sleep(t);
                 parent.mainGUI.getState().offsetImage(parent.getOffsetNo());
                 parent.thumbNoOffset=0;
+            } catch (InterruptedException e){
+                return;
+                //remember when you 'stop' thread, to create a new one to allow thread to be started again
+            }
+        }
+    }
+}
+class ScrollDragTimer implements Runnable {
+    ThumbPanel parent;
+    int t;
+    int relativeX;
+    double prevRemainder=0;
+
+    ScrollDragTimer(ThumbPanel parnt,int time,int startXrel){
+        parent=parnt;
+        t = time;
+        relativeX=startXrel;
+    }
+    void updatePoint(int relX){
+        relativeX=relX;
+    }
+    @Override public void run(){
+        if(t==0) return;
+        while(true){
+            try{
+                if(!parent.mousePressed){
+                    parent.setToOffsetImage(0);
+                    return;
+                }
+                Thread.sleep(t);
+                double newVal = ((double)relativeX/(double)200) + prevRemainder;
+                //System.out.println("relX:"+relativeX+", prevRem:"+prevRemainder+", newVal:"+newVal);
+                prevRemainder = (newVal%1);
+                //System.out.println("new prevRem:"+prevRemainder+", updateBy:"+((int)(newVal-prevRemainder)));
+                parent.updateOffsetRelative((int)(newVal-prevRemainder));
             } catch (InterruptedException e){
                 return;
                 //remember when you 'stop' thread, to create a new one to allow thread to be started again
