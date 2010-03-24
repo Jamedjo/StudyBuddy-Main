@@ -6,6 +6,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import javax.swing.BorderFactory;
+import javax.swing.border.EtchedBorder;
 //import javax.swing.border.EtchedBorder;
 
 
@@ -13,29 +15,40 @@ class ThumbButton extends JPanel{
     Log log = new Log();
     GUI mainGUI;
     int size;
-    int thumbNumber;
+    int thumbOffset;
+    int currentOffset;
     int hOffset;
+    ThumbPanel parent;
 
-    ThumbButton(GUI parentGUI, int squareSize,int im,int hBorder){
+    ThumbButton(GUI parentGUI,ThumbPanel parentTP, int squareSize,int im,int hBorder){
         mainGUI = parentGUI;
         size = squareSize;
-        thumbNumber = im;
+        thumbOffset = im;
         hOffset = ((int)(hBorder/2));
+        parent=parentTP;
+        
+        currentOffset=thumbOffset+parent.thumbNoOffset;
 
         addMouseListener(new MouseAdapter() {
           public void mousePressed(MouseEvent e) {
               //set current image to one clicked
-              mainGUI.getState().offsetImage(thumbNumber);
+              mainGUI.getState().offsetImage(currentOffset);
           }
         });
 
         this.setMinimumSize(new Dimension(size,size));
+        this.setPreferredSize(new Dimension(size,size));
+        this.setMaximumSize(new Dimension(size,size));
         this.setBackground(Color.darkGray);
+        if(thumbOffset==0) {
+            this.setBackground(Color.gray);
+            this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED, Color.lightGray, Color.yellow));
+        }
     }
 
     //all scaling in terms of height. max size is 20 times minimum.????
     public void paintComponent(java.awt.Graphics g) {
-	if(mainGUI.getState().isLocked) return;
+	//if(mainGUI.getState().isLocked) return;
 
 	Dimension useWH;
         super.paintComponent(g);
@@ -46,17 +59,17 @@ class ThumbButton extends JPanel{
 	//Use icons for thumbnails, populate icons in loop and then position icons.
 
 	//int currentThumb = mainGUI.state.currentI;
-	int thumbOfsetW =0;
-	int thumbOfsetH = 0;
-	if(thumbNumber<mainGUI.getState().numberOfImages){// use <= to show currentI too
+        currentOffset=thumbOffset+parent.thumbNoOffset;
+
+	//if(currentOffset<mainGUI.getState().numberOfImages){//should allow large positives and negatives
 	    //set dimension
 	    //currentThumb = mainGUI.state.next(currentThumb);
-	    useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Thumb,size,size,thumbNumber);
-	    thumbOfsetW= (size - useWH.width)/2;
-	    thumbOfsetH= (size - useWH.height)/2;
+	    useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Thumb,size,size,currentOffset);
+	    int thumbOfsetW= (size - useWH.width)/2;
+	    int thumbOfsetH= (size - useWH.height)/2;
 	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgRequestSize.Thumb));
-	    g2.drawImage(mainGUI.getState().getBImageI(thumbNumber,ImgRequestSize.Thumb), thumbOfsetW+hOffset, thumbOfsetH,useWH.width,useWH.height, this);
-	}
+	    g2.drawImage(mainGUI.getState().getBImageI(currentOffset,ImgRequestSize.Thumb), thumbOfsetW+hOffset, thumbOfsetH,useWH.width,useWH.height, this);
+	//}
     }
 
 }
@@ -68,11 +81,13 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
     //int boardH_start = 100;
     int noTiles;
     int maxNoTiles;
-    int squareSize = 100;
+    int squareSize = 110;
     int hBorder = 3;
     int tilesHigh = 1;
     ThumbButton[] thumbnails;
     final GUI mainGUI;
+    int thumbNoOffset=0;
+    Thread timerThread= new Thread(new ScrollTimer(this,0));
 
     ThumbPanel(GUI parentGUI) {
 	mainGUI = parentGUI;
@@ -89,31 +104,33 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 
 //     JPanel buildThumbHolders(){
       synchronized JPanel buildThumbHolders(){
+        final int sizeDiff=20;
         int sizeW = squareSize + hBorder;
-        maxNoTiles = (boardW-(boardW % sizeW)) / sizeW; //removes remainder to ensure int
-//        while(mainGUI.isChangingState){
-//            try{
-//                wait();
-//            } catch (InterruptedException e){}
-//        }
-        noTiles = Math.min(maxNoTiles,(mainGUI.getState().numberOfImages-1));//remove -1 to show currentI too
+        if(boardW<=sizeW) maxNoTiles=1;
+        else maxNoTiles= (((boardW-sizeW)-(boardW % (sizeW-sizeDiff)))/(sizeW-sizeDiff) )+1;//finds space left after first (big) tile, divides this by size of smaller tiles. has modulo to help with rounding
+        if((maxNoTiles>3)&&((maxNoTiles%2)==0)) maxNoTiles--;
+
+        noTiles = Math.min(maxNoTiles,(mainGUI.getState().numberOfImages));//-1));//remove -1 to show currentI too
        //**// log.print(LogType.Debug,"now showing "+noTiles+" thumbnails");
           JPanel centrePan = new JPanel();
         if (noTiles < 0) noTiles=0;
         centrePan.setLayout(new BoxLayout(centrePan, BoxLayout.LINE_AXIS));
         centrePan.setBackground(Color.darkGray);
         thumbnails = new ThumbButton[noTiles];
+        int thumbNumber,useSize;
         for (int i=0;i<thumbnails.length;i++){
-            thumbnails[i] = new ThumbButton(mainGUI,squareSize,(i+1),hBorder);
+            thumbNumber=i-(noTiles/2);//(i+1)
+            useSize = (thumbNumber==0)? squareSize : squareSize-sizeDiff;//make non-current thumbs 3pixels smaller
+            thumbnails[i] = new ThumbButton(mainGUI,this,useSize,thumbNumber,hBorder);
             centrePan.add(thumbnails[i]);
             //if((i+1)<thumbnails.length) centrePan.add(Box.createRigidArea(new Dimension(2,0)));//gap between thumbnails
         }
         //centrePan.setMaximumSize(new Dimension(squareSize*thumbnails.length,squareSize*1));
 
-        if(noTiles>=1){
+        if(noTiles>=2){
             tilesHigh = 1;
             centrePan.setMinimumSize(new Dimension(squareSize,squareSize));
-            centrePan.setPreferredSize(new Dimension((squareSize+hBorder)*noTiles,squareSize));//Includes border
+            centrePan.setPreferredSize(new Dimension(((sizeW-sizeDiff)*(noTiles-1))+sizeW,squareSize));//Includes border
         } else {
             tilesHigh = 0;
             centrePan.setMinimumSize(new Dimension(0,0));
@@ -147,21 +164,27 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 	//this.setPreferredSize(new Dimension(boardW,boardH));
 	//this.revalidate();       
     }
-    
-//    public void repaint(){
-//        super.repaint();
-//        try{
-//        for(int i=0;i<thumbnails.length;i++){//Draw thumbs in correct order, so swingworker loads in order
-//            thumbnails[i].repaint();
-//        }
-//        } catch (NullPointerException e){
-//            Log.Print(LogType.Error, "Error painting thumnail");
-//        }
-//    }
 
-    @Override public void mouseWheelMoved(MouseWheelEvent e){
-        mainGUI.getState().offsetImage(-e.getWheelRotation());//not sure which direction is better
+    int getOffsetNo(){
+        return thumbNoOffset;
     }
+
+    void updateOffsetRelative(int by){
+        thumbNoOffset+=by;
+        if(Math.abs(thumbNoOffset)>mainGUI.getState().lastIndex)
+            thumbNoOffset%=mainGUI.getState().numberOfImages;
+        repaint();
+    }
+
+    @Override
+    public void mouseWheelMoved(MouseWheelEvent e) {
+        updateOffsetRelative(e.getWheelRotation());//-e.getWheelRotation());//not sure which direction is better
+
+        timerThread.interrupt();
+        timerThread = new Thread(new ScrollTimer(this, 300));
+        timerThread.start();
+    }
+    
     @Override
     public void paintComponent(java.awt.Graphics g) {
         try {
@@ -172,5 +195,27 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
             Log.Print(LogType.Error, "Error painting thumnail");
         }
         super.paintComponent(g);
+    }
+}
+
+class ScrollTimer implements Runnable {
+    ThumbPanel parent;
+    int t;
+
+    ScrollTimer(ThumbPanel parnt,int time){
+        parent=parnt;
+        t = time;
+    }
+    @Override public void run(){
+        while(true){
+            try{
+                Thread.sleep(t);
+                parent.mainGUI.getState().offsetImage(parent.getOffsetNo());
+                parent.thumbNoOffset=0;
+            } catch (InterruptedException e){
+                return;
+                //remember when you 'stop' thread, to create a new one to allow thread to be started again
+            }
+        }
     }
 }
