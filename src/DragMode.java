@@ -11,7 +11,11 @@ public enum DragMode {
     None(Cursor.getDefaultCursor(),Cursor.getDefaultCursor()),//Used instead of drag in 'zoom fit'
     Drag(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),SysIcon.DragPan,HotSpotPos.Centre),
     Link(SysIcon.LinkCursor,HotSpotPos.BottomLeft,Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)),
-    Note(SysIcon.NoteCursor,HotSpotPos.BottomLeft,Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+    Note(SysIcon.NoteCursor,HotSpotPos.BottomLeft,Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)),
+
+    //Thumb Modes:
+    Scroll(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),SysIcon.DragPan,HotSpotPos.Centre),
+    Click(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
     Cursor open,closed;
     static int count =0;

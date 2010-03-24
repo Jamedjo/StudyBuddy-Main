@@ -4,6 +4,7 @@ import javax.swing.JOptionPane.*;
 import javax.swing.BoxLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import javax.swing.BorderFactory;
@@ -13,6 +14,7 @@ import javax.swing.border.EtchedBorder;
 
 class ThumbButton extends JPanel{
     Log log = new Log();
+    private DragMode dragMode=DragMode.Click;
     GUI mainGUI;
     int size;
     int thumbOffset;
@@ -27,12 +29,48 @@ class ThumbButton extends JPanel{
         hOffset = ((int)(hBorder/2));
         parent=parentTP;
         
-        currentOffset=thumbOffset+parent.thumbNoOffset;
-
         addMouseListener(new MouseAdapter() {
+          @Override
           public void mousePressed(MouseEvent e) {
-              //set current image to one clicked
-              mainGUI.getState().offsetImage(currentOffset);
+             if(thumbOffset!=0) parent.setToOffsetImage(thumbOffset);
+             parent.lastPressed=thumbOffset;
+             parent.mousePressed = true;
+             updateCursor();
+             repaint();
+          }
+          @Override
+          public void mouseReleased(MouseEvent e) {
+            parent.mousePressed = false;
+            if(parent.lastPressed==0) parent.setToOffsetImage(0);
+            updateCursor();
+            repaint();
+          }
+          @Override
+          public void mouseEntered(MouseEvent e){
+              if((thumbOffset==0)&&(parent.lastPressed!=0)){
+                  parent.mousePressed=false;
+                  updateCursor();
+                  repaint();
+              }
+          }
+        });
+        addMouseMotionListener(new MouseMotionListener(){
+          @Override
+          public void mouseDragged(MouseEvent e){
+              if(parent.lastPressed==0){
+                  int relative = (hOffset+(size/2)-e.getX());
+                  if(relative>0){
+                      System.out.println("Left Drag, relative "+relative);
+                  }
+                  else{
+                      System.out.println("Right Drag, relative "+relative);
+                  }
+                  if(Math.random()<0.1)//bad code to ignore 9 out of 10 drag events.
+                      parent.updateOffsetRelative(relative/10);
+              }
+          }
+          @Override
+          public void mouseMoved(MouseEvent e){
           }
         });
 
@@ -43,12 +81,30 @@ class ThumbButton extends JPanel{
         if(thumbOffset==0) {
             this.setBackground(Color.gray);
             this.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED, Color.lightGray, Color.yellow));
+            dragMode=DragMode.Scroll;
+        }
+        updateCursor();
+    }
+    DragMode getCursorMode(){
+        return dragMode;
+    }
+    void setCursorMode(DragMode mode){
+        dragMode = mode;
+        updateCursor();
+    }
+    void updateCursor(){
+        if(parent.mousePressed){
+            setCursor(getCursorMode().closed);
+        } else{
+            setCursor(getCursorMode().open);
         }
     }
 
     //all scaling in terms of height. max size is 20 times minimum.????
     public void paintComponent(java.awt.Graphics g) {
 	//if(mainGUI.getState().isLocked) return;
+
+        updateCursor();
 
 	Dimension useWH;
         super.paintComponent(g);
@@ -88,6 +144,8 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
     final GUI mainGUI;
     int thumbNoOffset=0;
     Thread timerThread= new Thread(new ScrollTimer(this,0));
+    boolean mousePressed = false;
+    int lastPressed=0;
 
     ThumbPanel(GUI parentGUI) {
 	mainGUI = parentGUI;
@@ -167,6 +225,14 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
 
     int getOffsetNo(){
         return thumbNoOffset;
+    }
+    void setToOffsetImage(int thumbNum){
+        timerThread.interrupt();
+        timerThread = new Thread(new ScrollTimer(this, 300));
+        mainGUI.getState().offsetImage(thumbNoOffset + thumbNum);
+        thumbNoOffset = 0;
+        mousePressed=false;
+        repaint();
     }
 
     void updateOffsetRelative(int by){
