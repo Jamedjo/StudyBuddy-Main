@@ -273,7 +273,7 @@ class ImageReference {
         }
         else {
             flush();//if image is really huge we need to flush it.
-            System.gc();
+            //System.gc();
         }
     }
     void getThumbIfCached() {

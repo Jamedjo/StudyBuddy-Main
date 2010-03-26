@@ -141,17 +141,6 @@ class GUI {
         menuBar.add(helpMenu);
     }
 
-    JSlider buildZoomBar() {
-        zoomBar = new JSlider(JSlider.HORIZONTAL, 0, 300, 0);
-        zoomBar.setMajorTickSpacing(100);
-        zoomBar.setMinorTickSpacing(20);
-        zoomBar.setPaintLabels(true);
-        zoomBar.setPaintTicks(true);
-        zoomBar.setFocusable(false);//Otherwise arrows zoom when they shouldn't
-        zoomBar.addChangeListener(guiListener);
-        return zoomBar;
-    }
-
     void quickRestart(){
         state = new ProgramState(this);//Also initializes mainImageDB //Only time that state = should be used out side of setState()
         mainPanel = new MainPanel(this);

@@ -5,6 +5,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
@@ -13,9 +14,7 @@ import javax.swing.border.EtchedBorder;
 //TODO: add dragmodes to a menu: pan,link,note ...... add bluetooth to a menu
 
 // <editor-fold defaultstate="collapsed" desc="ToolBar">
-enum
-
-ToolBar{
+enum ToolBar{
     mImport(false,"Import Image","mImport", SysIcon.Import.Icon),
     mImportD(false, "Import Directory", "mImportD", SysIcon.ImportDir.Icon),
     mExprtImg(false, "Export Current Image", "ExportCurrentImg", SysIcon.Export.Icon),
@@ -41,144 +40,74 @@ ToolBar{
     bZoomMax(false, "Zoom: 100%", "Zoom100", SysIcon.Zoom100.Icon),
     bOptions(false, "Options", "Options", SysIcon.Options.Icon);
 
-    JButton
-
-button;
-
-
-boolean isSeperatorHere;
-    static final boolean
-
-putSeperatorAtEnd = false;
-    static final int
-
-sliderPosFromEnd = 1;//Hom many icons should come after the slider
-
+    JButton button;
+    boolean isSeperatorHere;
+    static final boolean putSeperatorAtEnd = false;
+    static final int sliderPosFromEnd = 1;//Hom many icons should come after the slider
+    
     ToolBar(
-
-boolean isNewGroup,String label, String command, ImageIcon icon, boolean visible) {
+            boolean isNewGroup, String label, String command, ImageIcon icon, boolean visible) {
         isSeperatorHere = isNewGroup;
-
-
-if (icon != null) {
+        if (icon != null) {
             button = new JButton(icon);
-            button.
-
-setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
-            button.
-
-setToolTipText(label);
+            button.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+            button.setToolTipText(label);
             //button.set text to hidden;
-
-
-}
-        else{
+        } else {
             button = new JButton(label);
-
-
-}
+        }
         button.setActionCommand(command);
-        button.
-
-setVisible(visible);
-
-
-}
-    ToolBar(boolean isNewGroup,String label, String command) {
-        this(isNewGroup,label, command, true);
-
-
-}
-    ToolBar(boolean isNewGroup,String label, String command, boolean visible) {
-        this(isNewGroup,label, command, null, visible);
-
-
-}
-    ToolBar(boolean isNewGroup,String label, String command, ImageIcon icon) {
-        this(isNewGroup,label, command, icon, true);
-
-
-}
-
-    void hide(){
-	button.setVisible(false);
-
-
-}
-
-    void show(){
-	button.setVisible(true);
-
-
-}
-
-    void setVisible(boolean value){
+        button.setVisible(visible);
+    }
+    ToolBar(boolean isNewGroup, String label, String command) {
+        this(isNewGroup, label, command, true);
+    }
+    ToolBar(boolean isNewGroup, String label, String command, boolean visible) {
+        this(isNewGroup, label, command, null, visible);
+    }
+    ToolBar(boolean isNewGroup, String label, String command, ImageIcon icon) {
+        this(isNewGroup, label, command, icon, true);
+    }
+    void hide() {
+        button.setVisible(false);
+    }
+    void show() {
+        button.setVisible(true);
+    }
+    void setVisible(boolean value) {
         button.setVisible(value);
+    }
+    JButton create(ActionListener l) {
+        button.addActionListener(l);
+        return button;
+    }
+    static JToolBar build(GUI mainGUI) {
+        JToolBar bar = new JToolBar("StudyBuddy Toolbar");
+        bar.setFocusable(false);
 
-
-}
-
-    JButton create(ActionListener l){
-	button.addActionListener(l);
-
-
-return button;
-
-
-}
-
-    static JToolBar build(GUI mainGUI){
-	JToolBar bar = new JToolBar("StudyBuddy Toolbar");
-	bar.
-
-setFocusable(false);
-
-
-
-int i=0;
-
-
-for (ToolBar b : ToolBar.values()){
-	    JButton bt = b.create(mainGUI.guiListener);
-
-
-if(b.isSeperatorHere){
-		bar.addSeparator();//add seperator before positions 0,2&4 in the menu
-
-
-}
-	    bar.add(bt);
-
-
-if(i==ToolBar.values().length-(1+sliderPosFromEnd)) bar.add(mainGUI.buildZoomBar());
-	    i++;
-
-}
-
-
-if (putSeperatorAtEnd) {
+        int i = 0;
+        for (ToolBar b : ToolBar.values()) {
+            JButton bt = b.create(mainGUI.guiListener);
+            if (b.isSeperatorHere) {
+                bar.addSeparator();//add seperator before positions 0,2&4 in the menu
+            }
+            bar.add(bt);
+            if (i == ToolBar.values().length - (1 + sliderPosFromEnd)){
+                bar.add(new ZoomBar(mainGUI));
+            }
+            i++;
+        }
+        if (putSeperatorAtEnd) {
             bar.addSeparator();
-
-
-}
+        }
 
         //workaround to prevent toolbar from steeling focus
-	for(i=0; i<
-
-bar.getComponentCount();i++
-
-){
-	    if(bar.getComponent(i) instanceof JButton){
-		((JButton)bar.getComponent(i)).setFocusable(false);
-
-
-}
-	}
-	return bar;
-
-
-
-
+        for (i = 0; i < bar.getComponentCount(); i++) {
+            if (bar.getComponent(i) instanceof JButton) {
+                ((JButton) bar.getComponent(i)).setFocusable(false);
+            }
+        }
+        return bar;
     }
 
 }// </editor-fold>

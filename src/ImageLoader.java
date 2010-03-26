@@ -24,6 +24,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
             if (!isCancelled()) {
                 long start = Calendar.getInstance().getTimeInMillis();
 
+                if(parent.getNoPixels()>(6 * 1024 * 1024))System.gc();//If greater than 6megapixels, or unknown, hint at garbage collection
                 returnImage = ImageIO.read(pathFile);
 
                 log.print(LogType.Debug, "Loading image " + pathFile.toString() + "\n      -Took " + (Calendar.getInstance().getTimeInMillis() - start) + " milliseconds to read image to memory");
