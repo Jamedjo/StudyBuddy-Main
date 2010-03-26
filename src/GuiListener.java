@@ -108,8 +108,8 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
 
     @Override
     public void stateChanged(ChangeEvent e) {
-        //ZoomBar
         JSlider src = (JSlider) e.getSource();
+            ToolBar.zoomBar.zoomEditor.update();
         if (!src.getValueIsAdjusting()) {
             int zoom = (int) src.getValue();
             if (zoom == 0) {

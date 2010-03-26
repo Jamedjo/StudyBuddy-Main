@@ -29,6 +29,7 @@ import javax.swing.plaf.basic.BasicSliderUI;
 public class ZoomBar extends JComboBox{
     JSlider zoomSlider;
     RefreshableComboBoxModel refresher;
+    ZoomEditor zoomEditor;
     ComponentRenderer renderer;
 
     ZoomBar(GUI mainGUI,ToolBar[] buttons){
@@ -46,7 +47,7 @@ public class ZoomBar extends JComboBox{
         renderer =new ComponentRenderer();
         this.setRenderer(renderer);
         this.setEditable(true);
-        ZoomEditor zoomEditor = new ZoomEditor(zoomSlider);
+        zoomEditor = new ZoomEditor(zoomSlider);
         JLabel proto = new JLabel(SysIcon.ZoomToX.Icon);
         proto.setMaximumSize(new Dimension(zoomSlider.getWidth(),proto.getHeight()));
         this.setEditor(zoomEditor);
@@ -163,6 +164,10 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     ZoomEditor(JSlider zoomSlider){
         super();
         slider=zoomSlider;
+    }
+
+    public void update(){
+        setItem(null);
     }
 
     @Override

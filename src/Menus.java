@@ -47,6 +47,7 @@ enum ToolBar{
     boolean isSeperatorHere;
     static final boolean putSeperatorAtEnd = false;
     static final int sliderPosFromEnd = 0;//Hom many icons should come after the slider
+    static ZoomBar zoomBar;
     
     ToolBar(boolean isNewGroup, String label, String command, ImageIcon ic, boolean visible) {
         icon=ic;
@@ -99,7 +100,8 @@ enum ToolBar{
                 bar.addSeparator();
                 bar.add(Box.createHorizontalGlue());
                 ToolBar[] zoomButtons= {bZoomFit,bZoomMax};
-                bar.add(new ZoomBar(mainGUI,zoomButtons));
+                zoomBar=new ZoomBar(mainGUI,zoomButtons);
+                bar.add(zoomBar);
             }
             i++;
         }
