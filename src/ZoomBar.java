@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.lang.reflect.Field;
+import javax.swing.Box;
 import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
@@ -19,6 +20,7 @@ import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
+import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
 import javax.swing.plaf.basic.BasicSliderUI;
@@ -33,7 +35,7 @@ public class ZoomBar extends JComboBox{
         buildZoomBar(mainGUI);
         
         Object[] items = new Object[buttons.length+1];
-        items[0]=zoomSlider;//,SysIcon.ZoomFit.Icon,SysIcon.Zoom100.Icon};
+        items[0]=zoomSlider;
         for(int i=0;i<buttons.length;i++){
             items[i+1]=buttons[i];
         }
@@ -43,7 +45,7 @@ public class ZoomBar extends JComboBox{
         renderer =new ComponentRenderer();
         this.setRenderer(renderer);
         this.setEditable(true);
-        ZoomEditor zoomEditor = new ZoomEditor();
+        ZoomEditor zoomEditor = new ZoomEditor(zoomSlider);
         JLabel proto = new JLabel(SysIcon.ZoomToX.Icon);
         proto.setMaximumSize(new Dimension(zoomSlider.getWidth(),proto.getHeight()));
         this.setEditor(zoomEditor);
@@ -55,8 +57,9 @@ public class ZoomBar extends JComboBox{
 
     void buildZoomBar(GUI mainGUI) {
         zoomSlider = new JSlider(JSlider.VERTICAL, 0, 300, 0);
-        zoomSlider.setMajorTickSpacing(100);
-        zoomSlider.setMinorTickSpacing(20);
+        zoomSlider.setInverted(true);
+        zoomSlider.setMajorTickSpacing(50);
+        zoomSlider.setMinorTickSpacing(10);
         zoomSlider.setPaintLabels(true);
         zoomSlider.setPaintTicks(true);
         zoomSlider.setFocusable(false);//Otherwise arrows zoom when they shouldn't
@@ -125,6 +128,7 @@ class DropButton extends JToolBar {
     public DropButton(ToolBar tbItem) {
         item=tbItem;
         setFloatable(false);
+        add(Box.createHorizontalGlue());
         add(item.button);
     }
 }
@@ -143,7 +147,7 @@ class ComponentRenderer implements ListCellRenderer{
         if ((value instanceof JSlider)){
             sliderHasFocus=isSelected;
         }
-        if(isSelected){
+        if(isSelected){//Alt text?
             selectedIndex = index;
         }
         return (JComponent)value;
@@ -151,9 +155,12 @@ class ComponentRenderer implements ListCellRenderer{
 }
 
 class ZoomEditor implements ComboBoxEditor{// extends BasicComboBoxEditor{//
-    static final DropButton showIcon=new DropButton(ToolBar.bZoomToX);
+    static final DropButton showIcon=new DropButton(ToolBar.bZoomToX);//replace with text editor
+    JSlider slider;
 
-    ZoomEditor(){
+    ZoomEditor(JSlider zoomSlider){
+        super();
+        slider=zoomSlider;
     }
 
     @Override
@@ -167,7 +174,9 @@ class ZoomEditor implements ComboBoxEditor{// extends BasicComboBoxEditor{//
     @Override
     public void selectAll(){}
     @Override
-    public void setItem(Object anObject){}
+    public void setItem(Object anObject){
+        //editor.setText(Integer.toString(slider.getValue()));
+    }
     @Override
     public Object getItem(){
         return showIcon;
