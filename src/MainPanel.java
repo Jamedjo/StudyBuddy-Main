@@ -103,6 +103,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         if (getZoomMult() < minimumZoomLevel) {
             zoomMultiplier = minimumZoomLevel;
         }
+        ToolBar.zoomBar.zoomEditor.update();
     }
     boolean isZoomFit(){
         return (!bIsZoomed);

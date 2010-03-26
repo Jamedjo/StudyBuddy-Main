@@ -31,9 +31,11 @@ public class ZoomBar extends JComboBox{
     RefreshableComboBoxModel refresher;
     ZoomEditor zoomEditor;
     ComponentRenderer renderer;
+    GUI mainGUI;
 
-    ZoomBar(GUI mainGUI,ToolBar[] buttons){
+    ZoomBar(GUI gui,ToolBar[] buttons){
         super();
+        mainGUI = gui;
         buildZoomBar(mainGUI);
         
         Object[] items = new Object[buttons.length+1];
@@ -47,7 +49,7 @@ public class ZoomBar extends JComboBox{
         renderer =new ComponentRenderer();
         this.setRenderer(renderer);
         this.setEditable(true);
-        zoomEditor = new ZoomEditor(zoomSlider);
+        zoomEditor = new ZoomEditor(mainGUI,zoomSlider);
         JLabel proto = new JLabel(SysIcon.ZoomToX.Icon);
         proto.setMaximumSize(new Dimension(zoomSlider.getWidth(),proto.getHeight()));
         this.setEditor(zoomEditor);
@@ -160,10 +162,12 @@ class ComponentRenderer implements ListCellRenderer{
 class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     static final DropButton showIcon=new DropButton(ToolBar.bZoomToX);//replace with text editor
     JSlider slider;
+    GUI mainGUI;
 
-    ZoomEditor(JSlider zoomSlider){
+    ZoomEditor(GUI gui,JSlider zoomSlider){
         super();
         slider=zoomSlider;
+        mainGUI=gui;
     }
 
     public void update(){
@@ -180,6 +184,7 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     public void setItem(Object anObject){
         String setText="Zoom: Fit";
         int sliderVal =slider.getValue();
+        if(sliderVal>=300) sliderVal = ((int)(mainGUI.mainPanel.getZoomMult()*100));
         if (sliderVal!=0) setText=Integer.toString(sliderVal)+"%";
         editor.setText(setText);
     }
@@ -187,6 +192,7 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     public Object getItem(){
         slider.setValueIsAdjusting(true);
         String editorText = editor.getText();
+        int newVal =0;
         if(editorText!=null){
             if(editorText.toLowerCase().endsWith("fit")) slider.setValue(0);
             else{
@@ -199,14 +205,19 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
                     }
                 }
                 try{
-                    slider.setValue(Integer.parseInt(numbers.toString()));
+                    newVal=Integer.parseInt(numbers.toString());
+                    slider.setValue(newVal);
                 } catch (Exception e){
                     //fail silently if invalid
                 }
             }
         }
-        slider.setValueIsAdjusting(false);
+        if(slider.getValue()<300) {
+            slider.setValueIsAdjusting(false);
         return slider.getValue();
+        }
+        mainGUI.zoomTo(newVal);
+        return newVal;
     }
 }
 class RefreshableComboBoxModel extends DefaultComboBoxModel{
