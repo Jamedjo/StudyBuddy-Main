@@ -184,7 +184,7 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     public void setItem(Object anObject){
         String setText="Zoom: Fit";
         int sliderVal =slider.getValue();
-        if(sliderVal>=300) sliderVal = ((int)(mainGUI.mainPanel.getZoomMult()*100));
+        if(sliderVal>=300) sliderVal = Math.max(300,(int)(mainGUI.mainPanel.getZoomMult()*100));
         if (sliderVal!=0) setText=Integer.toString(sliderVal)+"%";
         editor.setText(setText);
     }
@@ -212,7 +212,7 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
                 }
             }
         }
-        if(slider.getValue()<300) {
+        if(slider.getValue()<=300) {
             slider.setValueIsAdjusting(false);
         return slider.getValue();
         }
