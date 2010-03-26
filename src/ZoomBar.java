@@ -108,7 +108,12 @@ public class ZoomBar extends JComboBox{
     }
 
     void dispatchSliderEvent(MouseEvent e, int eventType) {
-        if(!renderer.sliderHasFocus) if(eventType!=MouseEvent.MOUSE_RELEASED) return;
+        if(!renderer.sliderHasFocus) if(eventType!=MouseEvent.MOUSE_RELEASED){
+            if(eventType==MouseEvent.MOUSE_PRESSED){
+                ((ToolBar)this.getItemAt(renderer.selectedIndex)).button.doClick();
+            }
+            return;
+        }
         int yOffset = 0;//32;//Verticle distance from top of popup to start of slder component.
         //System.out.println("event at:("+e.getX()+","+(e.getY()-yOffset)+")");//-dropCombo.getY()
         zoomSlider.dispatchEvent(new MouseEvent((Component) e.getSource(), eventType, e.getWhen(), e.getModifiers(), e.getX(), e.getY() - yOffset, e.getClickCount(), e.isPopupTrigger(), e.getButton()));
@@ -116,7 +121,9 @@ public class ZoomBar extends JComboBox{
     }
 }
 class DropButton extends JToolBar {
-    public DropButton(ToolBar item) {
+    ToolBar item;
+    public DropButton(ToolBar tbItem) {
+        item=tbItem;
         setFloatable(false);
         add(item.button);
     }
@@ -124,6 +131,7 @@ class DropButton extends JToolBar {
 
 class ComponentRenderer implements ListCellRenderer{
     boolean sliderHasFocus=false;
+    int selectedIndex=0;
 
     ComponentRenderer(){
     }
@@ -132,17 +140,11 @@ class ComponentRenderer implements ListCellRenderer{
         if (value instanceof javax.swing.Icon) value = new JLabel((Icon) value);
         if (value instanceof ToolBar) value=new DropButton((ToolBar)value);
         ((JComponent)value).setOpaque(true);
-        if (!(value instanceof JSlider)){
-//            if (isSelected) {
-//                ((JComponent) value).setBackground(list.getSelectionBackground());
-//                ((JComponent) value).setForeground(list.getSelectionForeground());
-//            } else {
-//                ((JComponent) value).setBackground(list.getBackground());
-//                ((JComponent) value).setForeground(list.getForeground());
-//            }
-        }
-        else{
+        if ((value instanceof JSlider)){
             sliderHasFocus=isSelected;
+        }
+        if(isSelected){
+            selectedIndex = index;
         }
         return (JComponent)value;
     }

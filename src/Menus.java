@@ -92,10 +92,11 @@ enum ToolBar{
         for (ToolBar b : ToolBar.values()) {
             JButton bt = b.create(mainGUI.guiListener);
             if (b.isSeperatorHere) {
-                bar.addSeparator();//add seperator before positions 0,2&4 in the menu
+                bar.addSeparator();
             }
             bar.add(bt);
             if (i == ToolBar.values().length - (1 + sliderPosFromEnd)){
+                bar.addSeparator();
                 bar.add(Box.createHorizontalGlue());
                 ToolBar[] zoomButtons= {bZoomFit,bZoomMax};
                 bar.add(new ZoomBar(mainGUI,zoomButtons));
