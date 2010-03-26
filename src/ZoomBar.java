@@ -1,16 +1,17 @@
 
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionListener;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.awt.image.RescaleOp;
 import java.lang.reflect.Field;
 import javax.swing.Box;
-import javax.swing.ComboBoxEditor;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -24,7 +25,6 @@ import javax.swing.ListCellRenderer;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
-import javax.swing.plaf.basic.BasicSliderUI;
 
 public class ZoomBar extends JComboBox{
     JSlider zoomSlider;
@@ -135,6 +135,7 @@ class DropButton extends JToolBar {
         setFloatable(false);
         add(Box.createHorizontalGlue());
         add(item.button);
+        add(Box.createHorizontalGlue());
     }
 }
 
@@ -161,6 +162,7 @@ class ComponentRenderer implements ListCellRenderer{
 
 class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     static final DropButton showIcon=new DropButton(ToolBar.bZoomToX);//replace with text editor
+    static final BufferedImage img =SysIcon.ZoomToX.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
     JSlider slider;
     GUI mainGUI;
 
@@ -176,7 +178,18 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
 
     @Override
     public JTextField createEditorComponent() {
-        editor = new JTextField("",4);
+        editor = new JTextField("",4){
+        @Override
+        public void paint(Graphics g){
+            super.paint(g);
+            float trans = 0.15f;
+            float[] scale = {trans,trans,trans,trans};
+            RescaleOp op = new RescaleOp(scale,(new float[4]),null);
+            Graphics2D g2 = ((Graphics2D)g);
+            g2.drawImage(img,op, (getWidth()/2)-(img.getWidth()/2), 0);
+        }
+        };
+        editor.setHorizontalAlignment(JTextField.CENTER);
         editor.setBorder(null);
         return editor;
     }
@@ -212,7 +225,7 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
                 }
             }
         }
-        if(slider.getValue()<=300) {
+        if(slider.getValue()<300) {
             slider.setValueIsAdjusting(false);
         return slider.getValue();
         }
