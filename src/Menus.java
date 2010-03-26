@@ -4,6 +4,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
 import javax.swing.JMenu;
@@ -41,12 +43,13 @@ enum ToolBar{
     bOptions(false, "Options", "Options", SysIcon.Options.Icon);
 
     JButton button;
+    ImageIcon icon;
     boolean isSeperatorHere;
     static final boolean putSeperatorAtEnd = false;
-    static final int sliderPosFromEnd = 1;//Hom many icons should come after the slider
+    static final int sliderPosFromEnd = 0;//Hom many icons should come after the slider
     
-    ToolBar(
-            boolean isNewGroup, String label, String command, ImageIcon icon, boolean visible) {
+    ToolBar(boolean isNewGroup, String label, String command, ImageIcon ic, boolean visible) {
+        icon=ic;
         isSeperatorHere = isNewGroup;
         if (icon != null) {
             button = new JButton(icon);
@@ -93,7 +96,9 @@ enum ToolBar{
             }
             bar.add(bt);
             if (i == ToolBar.values().length - (1 + sliderPosFromEnd)){
-                bar.add(new ZoomBar(mainGUI));
+                bar.add(Box.createHorizontalGlue());
+                ToolBar[] zoomButtons= {bZoomFit,bZoomMax};
+                bar.add(new ZoomBar(mainGUI,zoomButtons));
             }
             i++;
         }

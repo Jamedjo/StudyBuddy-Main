@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
 import javax.swing.plaf.basic.BasicComboBoxUI;
@@ -25,27 +26,31 @@ import javax.swing.plaf.basic.BasicSliderUI;
 public class ZoomBar extends JComboBox{
     JSlider zoomSlider;
     RefreshableComboBoxModel refresher;
+    ComponentRenderer renderer;
 
-    ZoomBar(GUI mainGUI){
+    ZoomBar(GUI mainGUI,ToolBar[] buttons){
         super();
         buildZoomBar(mainGUI);
-        init();
-    }
-    void init(){
-        Object[] items = {SysIcon.TagThis.Icon,zoomSlider,SysIcon.ZoomFit.Icon,SysIcon.Zoom100.Icon};
+        
+        Object[] items = new Object[buttons.length+1];
+        items[0]=zoomSlider;//,SysIcon.ZoomFit.Icon,SysIcon.Zoom100.Icon};
+        for(int i=0;i<buttons.length;i++){
+            items[i+1]=buttons[i];
+        }
         refresher=new RefreshableComboBoxModel(items);
         this.setModel(refresher);
-        setSliderListeners();
         this.addPopupMenuListener(null);
-        this.setRenderer(new ComponentRenderer());
+        renderer =new ComponentRenderer();
+        this.setRenderer(renderer);
         this.setEditable(true);
         ZoomEditor zoomEditor = new ZoomEditor();
         JLabel proto = new JLabel(SysIcon.ZoomToX.Icon);
         proto.setMaximumSize(new Dimension(zoomSlider.getWidth(),proto.getHeight()));
         this.setEditor(zoomEditor);
         this.setPrototypeDisplayValue(proto);
-        //dropCombo.updateUI();
-        //this.setMaximumSize(new Dimension(200,200));
+        this.updateUI();
+        this.setMaximumSize(new Dimension(120,120));
+        setSliderListeners();
     }
 
     void buildZoomBar(GUI mainGUI) {
@@ -103,45 +108,48 @@ public class ZoomBar extends JComboBox{
     }
 
     void dispatchSliderEvent(MouseEvent e, int eventType) {
-        Object c = this.getSelectedItem();//dropCombo.getComponentAt(e.getPoint());//Should not use selected item without first making this the selected item
-        if (!(c instanceof JSlider))
-            return;
-        //JSlider popSlider=((JSlider)c);
-        int yOffset = 32;
+        if(!renderer.sliderHasFocus) if(eventType!=MouseEvent.MOUSE_RELEASED) return;
+        int yOffset = 0;//32;//Verticle distance from top of popup to start of slder component.
         //System.out.println("event at:("+e.getX()+","+(e.getY()-yOffset)+")");//-dropCombo.getY()
         zoomSlider.dispatchEvent(new MouseEvent((Component) e.getSource(), eventType, e.getWhen(), e.getModifiers(), e.getX(), e.getY() - yOffset, e.getClickCount(), e.isPopupTrigger(), e.getButton()));
         refresher.refresh();
     }
 }
+class DropButton extends JToolBar {
+    public DropButton(ToolBar item) {
+        setFloatable(false);
+        add(item.button);
+    }
+}
 
 class ComponentRenderer implements ListCellRenderer{
+    boolean sliderHasFocus=false;
+
     ComponentRenderer(){
     }
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         if (value instanceof javax.swing.Icon) value = new JLabel((Icon) value);
+        if (value instanceof ToolBar) value=new DropButton((ToolBar)value);
         ((JComponent)value).setOpaque(true);
         if (!(value instanceof JSlider)){
-            if (isSelected) {
-                ((JComponent) value).setBackground(list.getSelectionBackground());
-                ((JComponent) value).setForeground(list.getSelectionForeground());
-            } else {
-                ((JComponent) value).setBackground(list.getBackground());
-                ((JComponent) value).setForeground(list.getForeground());
-            }
-        } else{
-//            JSlider slider=((JSlider)value);
-//            JPanel container=new JPanel(new FlowLayout(FlowLayout.CENTER));
-//            container.add(slider);
-//            value=container;
+//            if (isSelected) {
+//                ((JComponent) value).setBackground(list.getSelectionBackground());
+//                ((JComponent) value).setForeground(list.getSelectionForeground());
+//            } else {
+//                ((JComponent) value).setBackground(list.getBackground());
+//                ((JComponent) value).setForeground(list.getForeground());
+//            }
         }
-
+        else{
+            sliderHasFocus=isSelected;
+        }
         return (JComponent)value;
     }
 }
 
 class ZoomEditor implements ComboBoxEditor{// extends BasicComboBoxEditor{//
-    static final JLabel showIcon=new JLabel(SysIcon.ZoomToX.Icon);
+    static final DropButton showIcon=new DropButton(ToolBar.bZoomToX);
 
     ZoomEditor(){
     }
