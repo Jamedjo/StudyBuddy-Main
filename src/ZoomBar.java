@@ -17,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
@@ -113,7 +114,8 @@ public class ZoomBar extends JComboBox{
     void dispatchSliderEvent(MouseEvent e, int eventType) {
         if(!renderer.sliderHasFocus) if(eventType!=MouseEvent.MOUSE_RELEASED){
             if(eventType==MouseEvent.MOUSE_PRESSED){
-                ((ToolBar)this.getItemAt(renderer.selectedIndex)).button.doClick();
+                Object item = this.getItemAt(renderer.selectedIndex);
+                if(item instanceof ToolBar) ((ToolBar)item).button.doClick();
             }
             return;
         }
@@ -154,7 +156,7 @@ class ComponentRenderer implements ListCellRenderer{
     }
 }
 
-class ZoomEditor implements ComboBoxEditor{// extends BasicComboBoxEditor{//
+class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     static final DropButton showIcon=new DropButton(ToolBar.bZoomToX);//replace with text editor
     JSlider slider;
 
@@ -164,22 +166,42 @@ class ZoomEditor implements ComboBoxEditor{// extends BasicComboBoxEditor{//
     }
 
     @Override
-    public Component getEditorComponent(){
-        return showIcon;
+    public JTextField createEditorComponent() {
+        editor = new JTextField("",4);
+        editor.setBorder(null);
+        return editor;
     }
     @Override
-    public void addActionListener(ActionListener l){}
-    @Override
-    public void removeActionListener(ActionListener l){}
-    @Override
-    public void selectAll(){}
-    @Override
     public void setItem(Object anObject){
-        //editor.setText(Integer.toString(slider.getValue()));
+        String setText="Zoom: Fit";
+        int sliderVal =slider.getValue();
+        if (sliderVal!=0) setText=Integer.toString(sliderVal)+"%";
+        editor.setText(setText);
     }
     @Override
     public Object getItem(){
-        return showIcon;
+        slider.setValueIsAdjusting(true);
+        String editorText = editor.getText();
+        if(editorText!=null){
+            if(editorText.toLowerCase().endsWith("fit")) slider.setValue(0);
+            else{
+                StringBuffer numbers = new StringBuffer();
+                char c;
+                for (int i=0;i<editorText.length();i++) {
+                    c = editorText.charAt(i);
+                    if (Character.isDigit(c)) {
+                        numbers.append(c);
+                    }
+                }
+                try{
+                    slider.setValue(Integer.parseInt(numbers.toString()));
+                } catch (Exception e){
+                    //fail silently if invalid
+                }
+            }
+        }
+        slider.setValueIsAdjusting(false);
+        return slider.getValue();
     }
 }
 class RefreshableComboBoxModel extends DefaultComboBoxModel{

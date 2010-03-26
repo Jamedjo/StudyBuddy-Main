@@ -300,25 +300,6 @@ class GUI {
         RepaintManager.repaint(RepaintType.MainPanel);
     }
 
-    void zoomBox() {
-        double percent = 100;
-        String[] options = {"Fit", "25", "50", "75", "100", "200", "500"};
-        String value = (String) JOptionPane.showInputDialog(w, "Enter percentage zoom:", "Set Zoom",
-                JOptionPane.PLAIN_MESSAGE, SysIcon.Question.Icon, options, null);
-        if (value!=null){
-            if (value.toLowerCase().equals("Fit".toLowerCase())) {
-                toggleZoomed(true);
-            } else {
-                percent = Double.parseDouble(value);
-                //catch num format exception
-                //deal with non number characters? e.g. '%'
-                // deal with blank input
-                //make editable
-                zoomTo(percent);
-            }
-        }
-    }
-
     void zoomTo(double percent) {
         double oldZoom = mainPanel.getZoomMult();
         int width = mainScrollPane.getViewport().getExtentSize().width;

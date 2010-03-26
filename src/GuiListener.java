@@ -33,7 +33,7 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("SlideS")) mainGUI.toggleSlide(false);
         else if (ae.getActionCommand().equals("ZoomFit")) mainGUI.toggleZoomed(true);
         else if (ae.getActionCommand().equals("Zoom100")) mainGUI.zoomTo(100);
-        else if (ae.getActionCommand().equals("ZoomX")) mainGUI.zoomBox();
+        //else if (ae.getActionCommand().equals("ZoomX")) mainGUI.zoomBox();
         else if (ae.getActionCommand().equals("mRemoveI")) mainGUI.deleteCurrentImage();
 //        else if (ae.getActionCommand().equals("DeleteTag")) deleteTag();
         else if (ae.getActionCommand().equals("Next")) mainGUI.getState().nextImage();
