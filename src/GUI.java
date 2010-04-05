@@ -294,8 +294,8 @@ class GUI {
 
         ViewMenu.ZoomToFit.setVisible(!makeFit);
         ViewMenu.ZoomTo100.setVisible(makeFit);
-        ToolBar.bZoomFit.setVisible(!makeFit);
-        ToolBar.bZoomMax.setVisible(makeFit);
+        ZoomButtons.bZoomFit.setVisible(!makeFit);
+        ZoomButtons.bZoomMax.setVisible(makeFit);
 
         RepaintManager.repaint(RepaintType.MainPanel);
     }

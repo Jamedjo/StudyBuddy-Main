@@ -16,6 +16,7 @@ public class FileDialogs {
     static JFileChooser jpgExporter=null;
     static XFileDialog winFileGetter=null;
     static XFileDialog winFolderGetter=null;
+    static XFileDialog winFileSaver=null;
     static final String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
 
     static void init(GUI gui){
@@ -24,14 +25,35 @@ public class FileDialogs {
     }
 
     static void exportCurrentImage() {
-        if(jpgExporter==null) buildJpgExporter(mainGUI);
-        int destReady = jpgExporter.showOpenDialog(mainGUI.w);
-        if (destReady == JFileChooser.APPROVE_OPTION) {
-            String filePathAndName = jpgExporter.getSelectedFile().toString();
-            String ext = ImageUtils.getFileExtLowercase(filePathAndName);
-            if((ext==null)||(!(ext.equals("jpg")||ext.equals("jpeg")))) filePathAndName = filePathAndName + ".jpg";
-            Settings.setSettingAndSave("lastOpenDirectory",jpgExporter.getCurrentDirectory().toString());
-            mainGUI.getState().getCurrentImage().saveFullToPath(filePathAndName);
+        boolean success = false;
+        String lastDir = null;
+        String filePathAndName = null;
+
+        if(!isWindows) {
+            if(jpgExporter==null) buildJpgExporter(mainGUI);
+            int destReady = jpgExporter.showOpenDialog(mainGUI.w);
+            if (destReady == JFileChooser.APPROVE_OPTION) {
+                success = true;
+                filePathAndName = jpgExporter.getSelectedFile().toString();
+                String ext = ImageUtils.getFileExtLowercase(filePathAndName);
+                if((ext==null)||(!(ext.equals("jpg")||ext.equals("jpeg")))) filePathAndName = filePathAndName + ".jpg";
+                lastDir = jpgExporter.getCurrentDirectory().toString();
+            }
+        } else{
+                if (winFileSaver == null) buildWinFileSaver();
+                winFileSaver.show();
+                filePathAndName = winFileSaver.getFile();
+                String foldername = winFileSaver.getDirectory();
+                if (filePathAndName != null) {
+                    success = true;
+                    lastDir=foldername;
+                }
+                //winFileSaver.dispose();
+            }
+
+        if (success) {
+            if (lastDir != null) Settings.setSettingAndSave("lastOpenDirectory", lastDir);
+            if (filePathAndName != null) mainGUI.getState().getCurrentImage().saveFullToPath(filePathAndName);
         }
     }
     static void importDo() {
@@ -154,6 +176,18 @@ public class FileDialogs {
         String[] desc = {"All Images"};
         String[] filts = {imageFiltersSB.toString()};
         winFileGetter.setFilters(desc, filts);
+    }
+    static void buildWinFileSaver() {
+        winFileSaver = new XFileDialog(mainGUI.w);
+        winFileSaver.setMode(FileDialog.SAVE);
+        winFileSaver.setThumbnail(true);
+        winFileSaver.setTitle("Export Image as JPG");
+        winFileSaver.setFile("image.jpg");
+        File lastDir = getLastDir();
+        if(lastDir!=null) winFileSaver.setDirectory(lastDir.toString());
+        String[] desc = {"JPEG Image"};
+        String[] filts = {"jpg;jpeg;"};
+        winFileSaver.setFilters(desc, filts);
     }
     static void buildWinFolderGetter() {
         winFolderGetter = new XFileDialog(mainGUI.w);

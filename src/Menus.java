@@ -1,3 +1,4 @@
+import java.awt.Component;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
 import java.awt.event.ActionListener;
@@ -5,9 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
@@ -37,9 +36,7 @@ enum ToolBar{
     bDragNote(false, "Drag Mode: Add Note", "DragNote", SysIcon.DragNote.Icon),
     bImageToolBar(true, "Toggle Image ToolBar", "ImageBar", SysIcon.ImageBar.Icon),
     bBlueDemo(true, "Bluetooth", "BlueT", SysIcon.BlueTooth.Icon),
-    bZoomToX(true, "Zoom Dialog", "ZoomX", SysIcon.ZoomToX.Icon),
-    bZoomFit(false, "Zoom: Fit     ", "ZoomFit", SysIcon.ZoomFit.Icon, false),
-    bZoomMax(false, "Zoom: 100%", "Zoom100", SysIcon.Zoom100.Icon),
+    //bZoomToX(true, "Zoom Dialog", "ZoomX", SysIcon.ZoomToX.Icon),
     bOptions(false, "Options", "Options", SysIcon.Options.Icon);
 
     JButton button;
@@ -48,7 +45,7 @@ enum ToolBar{
     static final boolean putSeperatorAtEnd = false;
     static final int sliderPosFromEnd = 0;//Hom many icons should come after the slider
     static ZoomBar zoomBar;
-    
+
     ToolBar(boolean isNewGroup, String label, String command, ImageIcon ic, boolean visible) {
         icon=ic;
         isSeperatorHere = isNewGroup;
@@ -99,8 +96,7 @@ enum ToolBar{
             if (i == ToolBar.values().length - (1 + sliderPosFromEnd)){
                 bar.addSeparator();
                 bar.add(Box.createHorizontalGlue());
-                ToolBar[] zoomButtons= {bZoomFit,bZoomMax};
-                zoomBar=new ZoomBar(mainGUI,zoomButtons);
+                zoomBar=new ZoomBar(mainGUI);
                 bar.add(zoomBar);
             }
             i++;
@@ -111,13 +107,65 @@ enum ToolBar{
 
         //workaround to prevent toolbar from steeling focus
         for (i = 0; i < bar.getComponentCount(); i++) {
-            if (bar.getComponent(i) instanceof JButton) {
-                ((JButton) bar.getComponent(i)).setFocusable(false);
+            Component currentComponent = bar.getComponent(i);
+            if (currentComponent instanceof JButton) {
+                ((JButton) currentComponent).setFocusable(false);
+            }
+            else if (currentComponent instanceof ZoomBar){
+                ((ZoomBar)currentComponent).setFocusable(false);
             }
         }
         return bar;
     }
 
+}// </editor-fold>
+// <editor-fold defaultstate="collapsed" desc="ZoomBar">
+enum ZoomButtons{
+    //On Slider drop down
+    bZoomFit(false, "Zoom: Fit", "ZoomFit", SysIcon.ZoomSmall.Icon, false),
+    bZoomMax(false, "Zoom: 100%", "Zoom100", SysIcon.ZoomBig.Icon);
+
+    JButton button;
+    ImageIcon icon;
+    boolean isSeperatorHere;
+    static final boolean putSeperatorAtEnd = false;
+
+    ZoomButtons(boolean isNewGroup, String label, String command, ImageIcon ic, boolean visible) {
+        icon=ic;
+        isSeperatorHere = isNewGroup;
+        if (icon != null) {
+            button = new JButton(icon);
+            button.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+            button.setToolTipText(label);
+            //button.set text to hidden;
+        } else {
+            button = new JButton(label);
+        }
+        button.setActionCommand(command);
+        button.setVisible(visible);
+    }
+    ZoomButtons(boolean isNewGroup, String label, String command) {
+        this(isNewGroup, label, command, true);
+    }
+    ZoomButtons(boolean isNewGroup, String label, String command, boolean visible) {
+        this(isNewGroup, label, command, null, visible);
+    }
+    ZoomButtons(boolean isNewGroup, String label, String command, ImageIcon icon) {
+        this(isNewGroup, label, command, icon, true);
+    }
+    void hide() {
+        button.setVisible(false);
+    }
+    void show() {
+        button.setVisible(true);
+    }
+    void setVisible(boolean value) {
+        button.setVisible(value);
+    }
+    JButton create(ActionListener l) {
+        button.addActionListener(l);
+        return button;
+    }
 }// </editor-fold>
 // <editor-fold defaultstate="collapsed" desc="ImageToolBar">
 enum ImageToolBar {

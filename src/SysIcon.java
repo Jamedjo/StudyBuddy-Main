@@ -31,6 +31,8 @@ public enum SysIcon {
     ,ImageBar("oxygen/applications-graphics-3.png","oxygencustom/toolbar-32.png"){@Override void drawIt(){drawMidRight();}}
     ,Zoom100("oxygen/zoom-original-4.png")
     ,ZoomFit("oxygen/document-preview.png")
+    ,ZoomBig("oxygencustom/zoomBig32.png")
+    ,ZoomSmall("oxygencustom/zoomSmall32.png")
     ,ZoomToX("oxygencustom/zoom-32.png")//preferences-system-windows-move.png"),//zoom-fit-best-4.png")
     ,AddTag("oxygen/list-add-3.png","oxygen/edit-rename.png"){@Override void drawIt(){drawBottomRight();}}//document-edit.png")
     ,TagThis("oxygen/feed-subscribe.png","oxygen/knotes-4.png"){@Override void drawIt(){drawBottomRight();}}

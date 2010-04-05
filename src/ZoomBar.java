@@ -30,33 +30,65 @@ public class ZoomBar extends JComboBox{
     JSlider zoomSlider;
     RefreshableComboBoxModel refresher;
     ZoomEditor zoomEditor;
-    ComponentRenderer renderer;
+    ComponentRenderer myrenderer;
     GUI mainGUI;
 
-    ZoomBar(GUI gui,ToolBar[] buttons){
+    ZoomBar(GUI gui){
         super();
         mainGUI = gui;
         buildZoomBar(mainGUI);
         
-        Object[] items = new Object[buttons.length+1];
+        Object[] items = new Object[ZoomButtons.values().length+1];
         items[0]=zoomSlider;
-        for(int i=0;i<buttons.length;i++){
-            items[i+1]=buttons[i];
+        for(int i=0;i<ZoomButtons.values().length;i++){
+            ZoomButtons.values()[i].create(mainGUI.guiListener);
+            items[i+1]=ZoomButtons.values()[i];
         }
         refresher=new RefreshableComboBoxModel(items);
         this.setModel(refresher);
         this.addPopupMenuListener(null);
-        renderer =new ComponentRenderer();
-        this.setRenderer(renderer);
+        myrenderer =new ComponentRenderer();
+        this.setRenderer(myrenderer);
         this.setEditable(true);
-        zoomEditor = new ZoomEditor(mainGUI,zoomSlider);
+        zoomEditor = new ZoomEditor(mainGUI,this);
         JLabel proto = new JLabel(SysIcon.ZoomToX.Icon);
         proto.setMaximumSize(new Dimension(zoomSlider.getWidth(),proto.getHeight()));
         this.setEditor(zoomEditor);
         this.setPrototypeDisplayValue(proto);
+        setEditorMouseListener();
         this.updateUI();
         this.setMaximumSize(new Dimension(120,120));
         setSliderListeners();
+    }
+    
+    private void setEditorMouseListener(){
+        try {
+            Field field = BasicComboBoxUI.class.getDeclaredField("editor");
+            field.setAccessible(true);
+            ((Component) field.get(this.getUI())).addMouseListener(
+                    new MouseListener() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {}
+                        @Override
+                        public void mousePressed(MouseEvent e) {
+                            boolean focusWasLocked = zoomEditor.focusWasLocked();
+                            zoomEditor.makeFocusable();
+                            if(focusWasLocked) zoomEditor.dispatchMouse(e);
+                        }
+                        @Override
+                        public void mouseReleased(MouseEvent e) {}
+                        @Override
+                        public void mouseEntered(MouseEvent e) {}
+                        @Override
+                        public void mouseExited(MouseEvent e) {
+                            //setFocusable(false);
+                        }
+                    });
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
     }
 
     void buildZoomBar(GUI mainGUI) {
@@ -76,8 +108,6 @@ public class ZoomBar extends JComboBox{
         if((v==false)&&(getSelectedItem() instanceof JSlider)) return;
         getUI().setPopupVisible(this, v);
     }
-
-
 
     void setSliderListeners() {
         try {
@@ -115,10 +145,10 @@ public class ZoomBar extends JComboBox{
     }
 
     void dispatchSliderEvent(MouseEvent e, int eventType) {
-        if(!renderer.sliderHasFocus) if(eventType!=MouseEvent.MOUSE_RELEASED){
+        if(!myrenderer.sliderHasFocus) if(eventType!=MouseEvent.MOUSE_RELEASED){
             if(eventType==MouseEvent.MOUSE_PRESSED){
-                Object item = this.getItemAt(renderer.selectedIndex);
-                if(item instanceof ToolBar) ((ToolBar)item).button.doClick();
+                Object item = this.getItemAt(myrenderer.selectedIndex);
+                if(item instanceof ZoomButtons) ((ZoomButtons)item).button.doClick();
             }
             return;
         }
@@ -129,13 +159,20 @@ public class ZoomBar extends JComboBox{
     }
 }
 class DropButton extends JToolBar {
-    ToolBar item;
-    public DropButton(ToolBar tbItem) {
+    ZoomButtons item;
+    public DropButton(ZoomButtons tbItem) {
         item=tbItem;
+        if(!item.button.isVisible()){
+            this.setVisible(false);
+            this.setPreferredSize(new Dimension(0,0));
+            this.setMaximumSize(new Dimension(0,0));
+        }
+        else{
         setFloatable(false);
         add(Box.createHorizontalGlue());
         add(item.button);
         add(Box.createHorizontalGlue());
+        }
     }
 }
 
@@ -148,7 +185,7 @@ class ComponentRenderer implements ListCellRenderer{
     @Override
     public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
         if (value instanceof javax.swing.Icon) value = new JLabel((Icon) value);
-        if (value instanceof ToolBar) value=new DropButton((ToolBar)value);
+        if (value instanceof ZoomButtons) value=new DropButton((ZoomButtons)value);
         ((JComponent)value).setOpaque(true);
         if ((value instanceof JSlider)){
             sliderHasFocus=isSelected;
@@ -161,19 +198,28 @@ class ComponentRenderer implements ListCellRenderer{
 }
 
 class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
-    static final DropButton showIcon=new DropButton(ToolBar.bZoomToX);//replace with text editor
     static final BufferedImage img =SysIcon.ZoomToX.getBufferedImage(1, BufferedImage.TYPE_INT_ARGB);
-    JSlider slider;
+    ZoomBar parent;
     GUI mainGUI;
 
-    ZoomEditor(GUI gui,JSlider zoomSlider){
+    ZoomEditor(GUI gui,ZoomBar parnt){
         super();
-        slider=zoomSlider;
+        parent=parnt;
         mainGUI=gui;
     }
 
     public void update(){
         setItem(null);
+    }
+    public void makeFocusable(){
+        editor.setFocusable(true);
+    }
+    boolean focusWasLocked(){
+        return !editor.isFocusable();
+    }
+
+    void dispatchMouse(MouseEvent e){
+        editor.dispatchEvent(e);
     }
 
     @Override
@@ -196,18 +242,19 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
     @Override
     public void setItem(Object anObject){
         String setText="Zoom: Fit";
-        int sliderVal =slider.getValue();
+        int sliderVal =parent.zoomSlider.getValue();
         if(sliderVal>=300) sliderVal = Math.max(300,(int)(mainGUI.mainPanel.getZoomMult()*100));
         if (sliderVal!=0) setText=Integer.toString(sliderVal)+"%";
         editor.setText(setText);
+        editor.setFocusable(false);
     }
     @Override
     public Object getItem(){
-        slider.setValueIsAdjusting(true);
+        parent.zoomSlider.setValueIsAdjusting(true);
         String editorText = editor.getText();
         int newVal =0;
         if(editorText!=null){
-            if(editorText.toLowerCase().endsWith("fit")) slider.setValue(0);
+            if(editorText.toLowerCase().endsWith("fit")) parent.zoomSlider.setValue(0);
             else{
                 StringBuffer numbers = new StringBuffer();
                 char c;
@@ -219,15 +266,15 @@ class ZoomEditor  extends BasicComboBoxEditor{//implements ComboBoxEditor{//
                 }
                 try{
                     newVal=Integer.parseInt(numbers.toString());
-                    slider.setValue(newVal);
+                    parent.zoomSlider.setValue(newVal);
                 } catch (Exception e){
                     //fail silently if invalid
                 }
             }
         }
-        if(slider.getValue()<300) {
-            slider.setValueIsAdjusting(false);
-        return slider.getValue();
+        if(parent.zoomSlider.getValue()<300) {
+            parent.zoomSlider.setValueIsAdjusting(false);
+        return parent.zoomSlider.getValue();
         }
         mainGUI.zoomTo(newVal);
         return newVal;
