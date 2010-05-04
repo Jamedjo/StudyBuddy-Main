@@ -1,6 +1,9 @@
 
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Vector;
 import javax.bluetooth.DeviceClass;
@@ -129,7 +132,8 @@ public class BlueDemo implements DiscoveryListener,Runnable {
             for (int i = 0; i < deviceCount; i++) {
                 RemoteDevice remoteDevice = (RemoteDevice) vecDevices.elementAt(i);
                 try {
-                    devicelist[i] = "" + remoteDevice.getBluetoothAddress() + ": " + remoteDevice.getFriendlyName(true);
+                    //devicelist[i] = "" + remoteDevice.getBluetoothAddress() + ": " + remoteDevice.getFriendlyName(true);
+                    devicelist[i] = ""+ remoteDevice.getFriendlyName(true);
                     blueGUI.message("Found: "+devicelist[i]);
                 } catch (IOException e) {
                     //e.printStackTrace();
@@ -181,13 +185,26 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         InputStream portIn = port.openInputStream();
         OutputStream portOut = port.openOutputStream();
 
-        portOut.write("Hello Android!!".getBytes());
+        BlueFrame frameSender = new BlueFrame(portOut);
+
+        frameSender.sendString(FrameType.Text, "Hello Android!!");
+        frameSender.sendImage(FrameType.Image, "test.jpg",(new File("C:\\Users\\Public\\Pictures\\new_labour_new_danger_demon_eyes.jpg")));
+        frameSender.sendString(FrameType.Text, "Hello Android!!!!!!!!!\nThis is multi-line!!!!!!!!");
+
         portOut.flush();
+
+        blueGUI.message("Hello sent");
+        BufferedReader inReader = new BufferedReader(new InputStreamReader(portIn));
+                        String in;
+                        if ((in = inReader.readLine()) != null) {
+                            blueGUI.message("Read: '" + in + "'");
+                        }
+
 
         portIn.close();
         portOut.close();
         port.close();
-        blueGUI.message("Hello sent");
+
         } catch (IOException e){
             //Do somthing more here
             e.printStackTrace();
