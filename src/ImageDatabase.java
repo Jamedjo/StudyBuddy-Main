@@ -303,7 +303,7 @@ class ImageDatabase
 			case 1:
 				ImageRecordArray = new String[3];
 				ImageRecordArray[0] = Fields[0];
-				ImageRecordArray[1] = "";
+				ImageRecordArray[1] = "Image" + Fields[0];
 				ImageRecordArray[2] = PathForImages + Fields[1];
 				ComputerID = ImageTable.addRecord(new Record(ImageRecordArray));
 				if (ComputerID != -1)
