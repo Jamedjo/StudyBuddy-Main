@@ -1,5 +1,7 @@
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Vector;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
@@ -8,18 +10,11 @@ import javax.bluetooth.LocalDevice;
 import javax.bluetooth.RemoteDevice;
 import javax.bluetooth.ServiceRecord;
 import javax.bluetooth.UUID;
+import javax.microedition.io.Connector;
+import javax.microedition.io.StreamConnection;
 
 enum BlueTthOp{GetDevices,CheckServices}//Type of bluetooth operation toe perform
 
-/**
- *
- * Class that discovers all bluetooth devices in the neighbourhood,
- *
- * Connects to the chosen device and checks for the presence of OBEX push service in it.
- * and displays their name and bluetooth address.
- *
- * 
- */
 public class BlueDemo implements DiscoveryListener,Runnable {
     //object used for waiting
 
@@ -34,10 +29,6 @@ public class BlueDemo implements DiscoveryListener,Runnable {
     int devNo;
     boolean devNoIsSet = false;
 
-    /**
-     * Called when a bluetooth device is discovered.
-     * Used for device search.
-     */
     public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
         //add the device to the vector
         if (!vecDevices.contains(btDevice)) {
@@ -45,10 +36,6 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         }
     }
 
-    /**
-     * Called when a bluetooth service is discovered.
-     * Used for service search.
-     */
     public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
         if (servRecord != null && servRecord.length > 0) {
             connectionURL = servRecord[0].getConnectionURL(0, false);
@@ -58,18 +45,12 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         }
     }
 
-    /**
-     * Called when the service search is over.
-     */
     public void serviceSearchCompleted(int transID, int respCode) {
         synchronized (lock) {
             lock.notify();
         }
     }
 
-    /**
-     * Called when the device search is over.
-     */
     public void inquiryCompleted(int discType) {
         synchronized (lock) {
             lock.notify();
@@ -144,12 +125,17 @@ public class BlueDemo implements DiscoveryListener,Runnable {
             //print bluetooth device addresses and names in the format [ No. address (name) ]
             blueGUI.message("Bluetooth Devices: ");
             devicelist = new String[deviceCount];
+            blueGUI.message("Found "+deviceCount+" devices. Getting device names.");
             for (int i = 0; i < deviceCount; i++) {
                 RemoteDevice remoteDevice = (RemoteDevice) vecDevices.elementAt(i);
                 try {
                     devicelist[i] = "" + remoteDevice.getBluetoothAddress() + ": " + remoteDevice.getFriendlyName(true);
+                    blueGUI.message("Found: "+devicelist[i]);
                 } catch (IOException e) {
-                    //
+                    //e.printStackTrace();
+                }
+                finally {
+                    blueGUI.message("...");
                 }
             }
         }
@@ -161,7 +147,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         //check for obex service
         RemoteDevice remoteDevice = (RemoteDevice) vecDevices.elementAt(index - 1);
         UUID[] uuidSet = new UUID[1];
-        uuidSet[0] = new UUID("1105", true);
+        uuidSet[0] = new UUID("7e1e6390578211df98790800200c9a66", false);
         blueGUI.message("\nSearching for service...");
         try {
             agent.searchServices(null, uuidSet, remoteDevice, this);
@@ -177,81 +163,39 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         }
         blueGUI.message("Bluetooth service discovery:");
         if (connectionURL == null) {
-            blueGUI.message("Device does not support Object Push,\nor is no longer reachable");
+            blueGUI.message("Device does not support required connection,\nor is no longer reachable");
             blueGUI.serviceCheckFinished(false);
         } else {
-            blueGUI.message("Device supports OBEX Push.");
+            blueGUI.message("Device supports RFCOMM bluetooth.");
             blueGUI.serviceCheckFinished(true);//Stops animation for now
-            OBEX_Put_Server(connectionURL);
+            RFCOMM_Start(connectionURL);
         }
     }
 
-    void OBEX_Put_Server(String connectionURL){
-        String thisServerUUID="12358934876238497239847328957152";
-//        LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);
+    void RFCOMM_Start(String connectionURL){
+        //String thisServerUUID="12358934876238497239847328957152";
+        //LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);
+        try{
+        blueGUI.message("Conection URL :"+connectionURL);
+        StreamConnection port = (StreamConnection) Connector.open(connectionURL);
+        InputStream portIn = port.openInputStream();
+        OutputStream portOut = port.openOutputStream();
 
+        portOut.write("Hello Android!!".getBytes());
+        portOut.flush();
+
+        portIn.close();
+        portOut.close();
+        port.close();
+        blueGUI.message("Hello sent");
+        } catch (IOException e){
+            //Do somthing more here
+            e.printStackTrace();
+        }
+        finally{
+        }
+
+        //Connector.open(connectionURL, READ_WRITE, timeout);
 
     }
-
-
-
-
 }
-// <editor-fold defaultstate="collapsed" desc="main class from example usage">
-//	public static void mains(String[] args){
-//		BlueDemo bluetoothServiceDiscovery=new BlueDemo();
-//		//display local device address and name
-//		LocalDevice localDevice = LocalDevice.getLocalDevice();
-//		System.out.println("Address: "+localDevice.getBluetoothAddress());
-//		System.out.println("Name: "+localDevice.getFriendlyName());
-//		//find devices
-//		DiscoveryAgent agent = localDevice.getDiscoveryAgent();
-//		System.out.println("Starting device inquiry...");
-//		agent.startInquiry(DiscoveryAgent.GIAC, bluetoothServiceDiscovery);
-//		try {
-//			synchronized(lock){
-//				lock.wait();
-//			}
-//		}
-//		catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println("Device Inquiry Completed. ");
-//		//print all devices in vecDevices
-//		int deviceCount=vecDevices.size();
-//		if(deviceCount <= 0){
-//			System.out.println("No Devices Found .");
-//		}
-//		else{
-//			//print bluetooth device addresses and names in the format [ No. address (name) ]
-//			System.out.println("Bluetooth Devices: ");
-//			for (int i = 0; i <deviceCount; i++) {
-//				RemoteDevice remoteDevice=(RemoteDevice)vecDevices.elementAt(i);
-//				System.out.println((i+1)+". "+remoteDevice.getBluetoothAddress()+" ("+remoteDevice.getFriendlyName(true)+")");
-//			}
-//		}
-//		System.out.print("Choose the device to search for Obex Push service : ");
-//		BufferedReader bReader=new BufferedReader(new InputStreamReader(System.in));
-//		String chosenIndex=bReader.readLine();
-//		int index=Integer.parseInt(chosenIndex.trim());
-//		//check for obex service
-//		RemoteDevice remoteDevice=(RemoteDevice)vecDevices.elementAt(index-1);
-//		UUID[] uuidSet = new UUID[1];
-//		uuidSet[0]=new UUID("1105",true);
-//		System.out.println("\nSearching for service...");
-//		agent.searchServices(null,uuidSet,remoteDevice,bluetoothServiceDiscovery);
-//		try {
-//			synchronized(lock){
-//				lock.wait();
-//			}
-//		}
-//		catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		if(connectionURL==null){
-//			System.out.println("Device does not support Object Push.");
-//		}
-//		else{
-//			System.out.println("Device supports Object Push.");
-//		}
-//	}// </editor-fold>

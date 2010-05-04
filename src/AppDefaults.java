@@ -11,11 +11,12 @@ enum AppDefaults {
     s3("thumbnailPathExt", "thumbnails"+File.separator),
     DBname("databaseFileName","gammaDB"),
     s5("databasePathExt","database"+File.separator),
-    ver("appVersionLast","0.9.2_r276"),//change this whenever you change this enum.
+    ver("appVersionLast","0.9.4_r337"),//change this whenever you change this enum.
     s7("lastFilterUsed","-1"),
     s8("lastCurrentI","0"),
     s9("showLinks","true"),
-    s10("showNotes","true");
+    s10("showNotes","true"),
+    s11("newImagePathExt","mobileImages");
     //use , to seperate but ; after last
 
     String key, value;

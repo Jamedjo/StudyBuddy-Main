@@ -68,7 +68,6 @@ public class FileDialogs {
                 success = true;
                 lastDir = fileGetter.getCurrentDirectory().toString();
                 selectedFiles = fileGetter.getSelectedFiles();
-
             }
         } else {
             if (winFileGetter == null) buildWinFileGetter();
