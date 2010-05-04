@@ -359,17 +359,10 @@ class ImageDatabase
 		return Result;
   }
   
-  int refreshChanges()
+  void refreshChanges()
   {
-  	try 
-  	{
-    	UpdateTable = new IndexedTable(Filename + "_UpdateTable");
-    } catch (Exception TheError)
-    {
-        log.print(LogType.DebugError, "Unable to load UpdateTable: "+TheError.toString());
-        BuildUpdateTable();
-        save(StoredFilename);
-    }
+      BuildUpdateTable();
+      save(StoredFilename);
   }
   
   // Add a new image to the database
