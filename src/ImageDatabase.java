@@ -239,7 +239,7 @@ class ImageDatabase
 		for (int f=0; f<RecordChanged.getNumFields(); f++)
 		{
 			// If doing image filename, just add filename not path
-			if (f==2 && TableNum == 1)
+			if ((f==2) && (TableNum == 1))
 			{
 				String PathString = RecordChanged.getField(f);
 				File PathFile = new File(PathString);
