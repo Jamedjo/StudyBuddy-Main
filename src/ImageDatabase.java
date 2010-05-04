@@ -238,7 +238,15 @@ class ImageDatabase
 		String RecordString = "";
 		for (int f=0; f<RecordChanged.getNumFields(); f++)
 		{
-			RecordString = RecordString + FileUtils.escape(RecordChanged.getField(f));
+			// If doing image filename, just add filename not path
+			if (f==2 && TableNum == 1)
+			{
+				String PathString = RecordChanged.getField(f);
+				File PathFile = new File(PathString);
+				RecordString = RecordString + FileUtils.escape(PathFile.getName());
+			}
+			else
+				RecordString = RecordString + FileUtils.escape(RecordChanged.getField(f));
 			if (f < RecordChanged.getNumFields() - 1)
 				RecordString = RecordString + ',';
 			else
@@ -274,11 +282,12 @@ class ImageDatabase
   }
   
   // Add items from the mobile and assign IDs
-  String assignMobileItemsIDs(String StringFromMobile)
+  String assignMobileItemsIDs(String StringFromMobile, String PathForImages)
   {
 	String[] Updates = StringFromMobile.split("\n");
 	String[] Fields;
 	String[] RecordArray;
+	String[] ImageRecordArray;
 	String Result = "";
 	int TableNum;
 	int ComputerID;
@@ -292,7 +301,11 @@ class ImageDatabase
 		switch (TableNum)
 		{
 			case 1:
-				ComputerID = ImageTable.addRecord(new Record(RecordArray));
+				ImageRecordArray = new String[3];
+				ImageRecordArray[0] = Fields[0];
+				ImageRecordArray[1] = "";
+				ImageRecordArray[2] = PathForImages + Fields[1];
+				ComputerID = ImageTable.addRecord(new Record(ImageRecordArray));
 				if (ComputerID != -1)
 					Result = Result + Fields[0] + "," + Fields[1] + "," + Integer.toString(ComputerID) + "\n";
 				break;
@@ -327,7 +340,9 @@ class ImageDatabase
 			{
 				case 1:
 					if (Fields[1].equals("Add"))
-						TempResult = ImageTable.addRecord(new Record(RecordArray));
+					{
+						TempResult = -1;
+					}
 					if (Fields[1].equals("Delete"))
 						TempResult = ImageTable.deleteRecord(new Record(RecordArray));
 					if (TempResult < Result)
@@ -335,7 +350,7 @@ class ImageDatabase
 					break;
 				case 2:
 					if (Fields[1].equals("Add"))
-						TempResult = TagTable.addRecord(new Record(RecordArray));
+						TempResult = -1;
 					if (Fields[1].equals("Delete"))
 						TempResult = TagTable.deleteRecord(new Record(RecordArray));
 					if (TempResult < Result)
