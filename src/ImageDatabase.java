@@ -7,13 +7,14 @@ import java.awt.Rectangle;
 class ImageDatabase
 {
   Log log = new Log();
-  private IndexedTable ImageTable;
-  private IndexedTable TagTable;
-  private IndexedTable ImageToTagTable;
-  private IndexedTable TagToTagTable;
-  private IndexedTable ImageToImageTable;
-  private IndexedTable ImageToNoteTable;
-  private IndexedTable ImageToSpecialTable;
+  private IndexedTable ImageTable; // Table 1
+  private IndexedTable TagTable; // Table 2
+  private IndexedTable ImageToTagTable; // Table 3
+  private IndexedTable TagToTagTable; // Table 4
+  private IndexedTable ImageToImageTable; // Table 5
+  private IndexedTable ImageToNoteTable; // Table 6
+  private IndexedTable ImageToSpecialTable; // Table 7
+  private IndexedTable UpdateTable;
   private String Name;
   private String StoredFilename;
   private boolean DoAutosave;
@@ -88,6 +89,12 @@ class ImageDatabase
         boolean[] ImageToSpecialKeys = {true, true, false};
         ImageToSpecialTable = new IndexedTable("ImageToSpecialTable", new Record(ImageToSpecialHeader), ImageToSpecialKeys);
     }
+	
+	private void BuildUpdateTable() {
+		String[] UpdateHeader = {"TableNum", "UpdateType", "RecordString"};
+        boolean[] UpdateKeys = {true, true, true};
+        UpdateTable = new IndexedTable("UpdateTable", new Record(UpdateHeader), UpdateKeys);
+	}
 
   // Loads the image database from the files it's stored in
   ImageDatabase(String NewName, String Filename)
@@ -155,6 +162,12 @@ class ImageDatabase
           log.print(LogType.DebugError, "Unable to load ImageToSpecialTable: "+TheError.toString());
           BuildImageToSpecialTable();
       }
+	  try {
+          UpdateTable = new IndexedTable(Filename + "_UpdateTable");
+      } catch (Exception TheError) {
+          log.print(LogType.DebugError, "Unable to load UpdateTable: "+TheError.toString());
+          BuildUpdateTable();
+      }
   }
   
   String getName() { return Name; }
@@ -165,6 +178,7 @@ class ImageDatabase
   IndexedTable getImageToImageTable() { return ImageToImageTable; }
   IndexedTable getImageToNoteTable() { return ImageToNoteTable; }
   IndexedTable getImageToSpecialTable() { return ImageToSpecialTable; }
+  IndexedTable getUpdateTable() { return UpdateTable; }
   
   void Autosave()
   {
@@ -187,6 +201,7 @@ class ImageDatabase
       System.out.println(TagToTagTable.toString());
       System.out.println(ImageToImageTable.toString());
       System.out.println(ImageToNoteTable.toString());
+      System.out.println(UpdateTable.toString());
   }
   
   // Save the entire database to the desired filename
@@ -213,6 +228,148 @@ class ImageDatabase
     ImageToImageTable.save(Filename + "_ImageToImageTable");
     ImageToNoteTable.save(Filename + "_ImageToNoteTable");
     ImageToSpecialTable.save(Filename + "_ImageToSpecialTable");
+    UpdateTable.save(Filename + "_UpdateTable");
+  }
+  
+  // Add a change to the database
+  int addChange(int TableNum, String UpdateType, Record RecordChanged)
+  {
+		Record TempRecord;
+		String RecordString = "";
+		for (int f=0; f<RecordChanged.getNumFields(); f++)
+		{
+			RecordString = RecordString + FileUtils.escape(RecordChanged.getField(f));
+			if (f < RecordChanged.getNumFields() - 1)
+				RecordString = RecordString + ',';
+			else
+				RecordString = RecordString + '\n';
+		}
+		String[] ChangeRecordArray = {Integer.toString(TableNum), UpdateType, RecordString};
+		String[] AddRecordArray = {Integer.toString(TableNum), "Add", RecordString};
+		// If deleting from a table, and addition was only since last update, just remove the addition from the changes table
+		if (UpdateType.equals("Delete"))
+		{
+			TempRecord = UpdateTable.getRecord(new Record(AddRecordArray));
+			if (TempRecord != null)
+				return UpdateTable.deleteRecord(TempRecord);
+			else
+				return -1;
+		}
+		else
+			return UpdateTable.addRecord(new Record(ChangeRecordArray));
+  }
+  
+  // Produce the string of update tables
+  String makeUpdateString()
+  {
+		Enumeration UpdateRecords = UpdateTable.elements();
+		Record TempRecord;
+		String ResultString = "";
+		while (UpdateRecords.hasMoreElements())
+		{
+			TempRecord = (Record) UpdateRecords.nextElement();
+			ResultString = ResultString + TempRecord.getField(0) + "," + TempRecord.getField(1) + "," + TempRecord.getField(2);
+		}
+		return ResultString;
+  }
+  
+  // Add items from the mobile and assign IDs
+  String assignMobileItemsIDs(String StringFromMobile)
+  {
+	String[] Updates = StringFromMobile.split("\n");
+	String[] Fields;
+	String[] RecordArray;
+	String Result = "";
+	int TableNum;
+	int ComputerID;
+	for (int u=0; u<Updates.length; u++)
+	{
+		Fields = Updates[u].split(",");
+		TableNum = Integer.parseInt(Fields[0]);
+		RecordArray = new String[Fields.length - 2];
+		for (int f=0; f<RecordArray.length; f++)
+			RecordArray[f] = FileUtils.unEscape(Fields[f+2]);
+		switch (TableNum)
+		{
+			case 1:
+				ComputerID = ImageTable.addRecord(new Record(RecordArray));
+				if (ComputerID != -1)
+					Result = Result + Fields[0] + "," + Fields[1] + "," + Integer.toString(ComputerID) + "\n";
+				break;
+			case 2:
+				ComputerID = TagTable.addRecord(new Record(RecordArray));
+				if (ComputerID != -1)
+					Result = Result + Fields[0] + "," + Fields[1] + "," + Integer.toString(ComputerID) + "\n";
+				break;
+		}
+	}
+	return Result;
+  }
+  
+  // Add items from the mobile and assign IDs
+  int makeChangesFromMobile(String StringFromMobile)
+  {
+		String[] Updates = StringFromMobile.split("\n");
+		String[] Fields;
+		String[] RecordArray;
+		int TempResult = 1;
+		int Result = 1;
+		int TableNum;
+		String ComputerID;
+		for (int u=0; u<Updates.length; u++)
+		{
+			Fields = Updates[u].split(",");
+			TableNum = Integer.parseInt(Fields[0]);
+			RecordArray = new String[Fields.length - 2];
+			for (int f=0; f<RecordArray.length; f++)
+				RecordArray[f] = FileUtils.unEscape(Fields[f+2]);
+			switch (TableNum)
+			{
+				case 1:
+					if (Fields[1].equals("Add"))
+						TempResult = ImageTable.addRecord(new Record(RecordArray));
+					if (Fields[1].equals("Delete"))
+						TempResult = ImageTable.deleteRecord(new Record(RecordArray));
+					if (TempResult < Result)
+						Result = TempResult;
+					break;
+				case 2:
+					if (Fields[1].equals("Add"))
+						TempResult = TagTable.addRecord(new Record(RecordArray));
+					if (Fields[1].equals("Delete"))
+						TempResult = TagTable.deleteRecord(new Record(RecordArray));
+					if (TempResult < Result)
+						Result = TempResult;
+				case 3:
+					if (Fields[1].equals("Add"))
+						TempResult = ImageToTagTable.addRecord(new Record(RecordArray));
+					if (Fields[1].equals("Delete"))
+						TempResult = ImageToTagTable.deleteRecord(new Record(RecordArray));
+					if (TempResult < Result)
+						Result = TempResult;
+				case 4:
+					if (Fields[1].equals("Add"))
+						TempResult = TagToTagTable.addRecord(new Record(RecordArray));
+					if (Fields[1].equals("Delete"))
+						TempResult = TagToTagTable.deleteRecord(new Record(RecordArray));
+					if (TempResult < Result)
+						Result = TempResult;
+			}
+		}
+		return Result;
+  }
+  
+  int refreshChanges()
+  {
+  	try 
+  	{
+    	UpdateTable = new IndexedTable(Filename + "_UpdateTable");
+    } catch (Exception TheError)
+    {
+        log.print(LogType.DebugError, "Unable to load UpdateTable: "+TheError.toString());
+        BuildUpdateTable();
+        save(StoredFilename);
+    }
   }
   
   // Add a new image to the database
