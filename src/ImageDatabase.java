@@ -299,7 +299,7 @@ class ImageDatabase
   			// ImageRecordFields[0] is the ImageID
   			Filenames.add(getImageFilename(ImageRecordFields[0]));
   	}
-  	return Filenames.toArray();
+  	return Filenames.toArray(new String[0]);
   }
   
   // Add items from the mobile and assign IDs
