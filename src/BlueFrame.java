@@ -28,17 +28,28 @@ public class BlueFrame {
     }
 
     public boolean sendCommand(FrameType type){
-
+        try{
+            outPort.write(type.val);
+            return true;
+        } catch (IOException e){
+            e.printStackTrace();
+        }
         return true;
     }
     public boolean sendImage(FrameType type,String filename,File imageFile){
         try{
-            if(writeMessageHeader(type.val, (int)imageFile.length())){
-                FileInputStream is = new FileInputStream(imageFile);
-                for(int i=0;i<imageFile.length();i++){
-                    outPort.write(is.read());
+            if(sendString(FrameType.Text,filename)){
+                Log.Print(LogType.Log, "Sending file: "+filename);
+                if(writeMessageHeader(type.val, (int)imageFile.length())){
+                    FileInputStream is = new FileInputStream(imageFile);
+                    for(int i=0;i<imageFile.length();i++){
+                        outPort.write(is.read());
+                        //System.out.print(".");
+                        //System.out.flush();
+                    }
+                Log.Print(LogType.Log, "Sent"+filename);
+                    return true;
                 }
-                return true;
             }
         } catch (IOException e){
             e.printStackTrace();
@@ -49,7 +60,7 @@ public class BlueFrame {
     private boolean writeMessageHeader(byte typeByte, int l){
         try{
             outPort.write(typeByte);
-            byte[] len = new byte[] {(byte)l, (byte)(l>>8), (byte)(l>>16), (byte)(l>>>24)};//Converts int to byte[]
+            byte[] len = new byte[] {(byte)l, (byte)(l>>8), (byte)(l>>16), (byte)(l>>24)};//Converts int to byte[]
             outPort.write(len);
             return true;
         } catch (IOException e){
@@ -62,9 +73,9 @@ public class BlueFrame {
 enum FrameType{
     Text((byte) 0x00)
     ,Image((byte) 0x01)
-    ,ImagesDone((byte) 0x02)
-    ,Command((byte) 0x03)
-    ,SomthingElse((byte) 0x04)
+    ,ImagesStart((byte) 0x02)
+    ,ImagesDone((byte) 0x03)
+    //,ImageFileName((byte) 0x04)
 
             ;
 

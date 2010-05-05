@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.util.Iterator;
 import java.util.Vector;
 import javax.bluetooth.DeviceClass;
 import javax.bluetooth.DiscoveryAgent;
@@ -19,24 +20,44 @@ import javax.microedition.io.StreamConnection;
 enum BlueTthOp{GetDevices,CheckServices}//Type of bluetooth operation toe perform
 
 public class BlueDemo implements DiscoveryListener,Runnable {
-    //object used for waiting
+    private static Vector<KnownDevice> deviceList = new Vector<KnownDevice>();
 
     private static Object lock = new Object();
-    //vector containing the devices discovered
-    private static Vector<RemoteDevice> vecDevices = new Vector<RemoteDevice>();
     private static String connectionURL = null;
     DiscoveryAgent agent;
-    String[] devicelist = null;
+    String[] deviceNames = null;
     BluetoothGUI blueGUI=null;
     BlueTthOp runType=null;
     int devNo;
     boolean devNoIsSet = false;
 
+    @Override
     public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
-        //add the device to the vector
-        if (!vecDevices.contains(btDevice)) {
-            vecDevices.addElement(btDevice);
+        addDevice(btDevice);
+    }
+    
+    void addDevice(RemoteDevice btDevice){
+        Iterator<KnownDevice> it = deviceList.iterator();
+        boolean contains = false;
+        while(it.hasNext()&&(contains==false)){
+            if(it.next().equalsDev(btDevice)) contains=true;
         }
+        if (!contains) {
+            deviceList.addElement(new KnownDevice(btDevice,blueGUI));
+        }
+    }
+    
+    String[] getDeviceNames(){
+        Iterator<KnownDevice> it = deviceList.iterator();
+        String[]devNames = new String[deviceList.size()];
+        int i=0;
+        while(it.hasNext()){
+            KnownDevice kDev= it.next();
+            //devNames[i] = kDev.getAddress()+": "+kDev.getName();
+            devNames[i] = kDev.getName();
+            i++;
+        }
+        return devNames;
     }
 
     public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
@@ -96,15 +117,27 @@ public class BlueDemo implements DiscoveryListener,Runnable {
     }
 
     void getDevices(){
-        //display local device address and name
+        boolean shouldSearch=true;//Set false to only use Preknown and cached devices
+
         try{
         LocalDevice localDevice = LocalDevice.getLocalDevice();
-        blueGUI.message("Address: " + localDevice.getBluetoothAddress());
-        blueGUI.message("Name: " + localDevice.getFriendlyName());
-        //find devices
+        //blueGUI.message("Address: " + localDevice.getBluetoothAddress());
+        blueGUI.message("Computer Name: " + localDevice.getFriendlyName());
         agent = localDevice.getDiscoveryAgent();
-        blueGUI.message("Starting device inquiry...");
-        agent.startInquiry(DiscoveryAgent.GIAC, this);
+        blueGUI.message("Searching for devices...");
+
+
+        RemoteDevice[] list = agent.retrieveDevices(DiscoveryAgent.PREKNOWN);
+        for(RemoteDevice d :list){
+            addDevice(d);
+        }
+        list = agent.retrieveDevices(DiscoveryAgent.CACHED);
+        for(RemoteDevice d :list){
+            addDevice(d);
+        }
+        if(shouldSearch) agent.startInquiry(DiscoveryAgent.GIAC, this);
+
+
         } catch(javax.bluetooth.BluetoothStateException er){
             blueGUI.message("Unable to find bluetooth installed on this PC");
             blueGUI.bluetoothStartError();
@@ -112,47 +145,33 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         } catch (IOException er) {
             er.printStackTrace();
         }
-        try {
-            synchronized (lock) {
-                lock.wait();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        blueGUI.message("Device Inquiry Completed. ");
-        //print all devices in vecDevices
-        int deviceCount = vecDevices.size();
-        if (deviceCount <= 0) {
-            blueGUI.message("No Devices Found .");
-        } else {
-            //print bluetooth device addresses and names in the format [ No. address (name) ]
-            blueGUI.message("Bluetooth Devices: ");
-            devicelist = new String[deviceCount];
-            blueGUI.message("Found "+deviceCount+" devices. Getting device names.");
-            for (int i = 0; i < deviceCount; i++) {
-                RemoteDevice remoteDevice = (RemoteDevice) vecDevices.elementAt(i);
+        if(shouldSearch) {
                 try {
-                    //devicelist[i] = "" + remoteDevice.getBluetoothAddress() + ": " + remoteDevice.getFriendlyName(true);
-                    devicelist[i] = ""+ remoteDevice.getFriendlyName(true);
-                    blueGUI.message("Found: "+devicelist[i]);
-                } catch (IOException e) {
-                    //e.printStackTrace();
+                synchronized (lock) {
+                    lock.wait();
                 }
-                finally {
-                    blueGUI.message("...");
-                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
-        blueGUI.updateDevices(devicelist);
+        //blueGUI.message("Device Search Finished.");
+        if (deviceList.size() > 0) {
+            //blueGUI.message("Bluetooth Devices: ");
+            blueGUI.message("Found "+deviceList.size()+" devices. Getting device names.");
+            deviceNames = getDeviceNames();
+        } else {
+            blueGUI.message("No Bluetooth Devices Found.");
+        }
+        blueGUI.updateDevices(deviceNames);
     }
 
     void checkServices(){
         int index = devNo + 1;
-        //check for obex service
-        RemoteDevice remoteDevice = (RemoteDevice) vecDevices.elementAt(index - 1);
+        //check for custom service
+        RemoteDevice remoteDevice = deviceList.elementAt(index - 1).getDevice();
         UUID[] uuidSet = new UUID[1];
         uuidSet[0] = new UUID("7e1e6390578211df98790800200c9a66", false);
-        blueGUI.message("\nSearching for service...");
+        blueGUI.message("\nSearching for StudyBuddy on phone...");
         try {
             agent.searchServices(null, uuidSet, remoteDevice, this);
         } catch (IOException er) {
@@ -165,12 +184,12 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        blueGUI.message("Bluetooth service discovery:");
+       //blueGUI.message("Looking for StudyBuddy on phone:");
         if (connectionURL == null) {
-            blueGUI.message("Device does not support required connection,\nor is no longer reachable");
+            blueGUI.message("StudyBuddy is not running on chosen phone,\nor phone has disconnected");
             blueGUI.serviceCheckFinished(false);
         } else {
-            blueGUI.message("Device supports RFCOMM bluetooth.");
+            blueGUI.message("Found StudyBuddy on remote phone.");
             blueGUI.serviceCheckFinished(true);//Stops animation for now
             RFCOMM_Start(connectionURL);
         }
@@ -188,7 +207,13 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         BlueFrame frameSender = new BlueFrame(portOut);
 
         frameSender.sendString(FrameType.Text, "Hello Android!!");
-        frameSender.sendImage(FrameType.Image, "test.jpg",(new File("C:\\Users\\Public\\Pictures\\new_labour_new_danger_demon_eyes.jpg")));
+        
+        frameSender.sendCommand(FrameType.ImagesStart);
+        frameSender.sendImage(FrameType.Image, "zoomSmall32.png",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\icons\\oxygencustom\\zoomSmall32.png")));
+        frameSender.sendImage(FrameType.Image, "img_6088b_small.jpg",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\img\\img_6088b_small.jpg")));
+
+        frameSender.sendCommand(FrameType.ImagesDone);
+
         frameSender.sendString(FrameType.Text, "Hello Android!!!!!!!!!\nThis is multi-line!!!!!!!!");
 
         portOut.flush();
@@ -214,5 +239,44 @@ public class BlueDemo implements DiscoveryListener,Runnable {
 
         //Connector.open(connectionURL, READ_WRITE, timeout);
 
+    }
+}
+
+class KnownDevice{
+    BluetoothGUI blueGUI;
+    private RemoteDevice device;
+    private String devName = null;
+    private String address = null;
+
+    KnownDevice(RemoteDevice d,BluetoothGUI bGUI){
+        device = d;
+        blueGUI=bGUI;
+    }
+
+    String getName(){
+        if(devName==null){
+            try{
+                devName = device.getFriendlyName(true);
+                blueGUI.message("Found: "+devName);
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+        }
+        return devName;
+    }
+
+    String getAddress(){
+        if(address==null){
+            address = device.getBluetoothAddress();
+        }
+        return address;
+    }
+
+    boolean equalsDev(RemoteDevice d){
+        return (device==d);
+    }
+
+    RemoteDevice getDevice(){
+        return device;
     }
 }
