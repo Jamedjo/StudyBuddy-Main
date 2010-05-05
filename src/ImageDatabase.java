@@ -384,10 +384,10 @@ class ImageDatabase
   }
   
   // Produce a list of images to send to the Mobile()
-  String[] imageFilenamesForMobile()
+  File[] imageFilenamesForMobile()
   {
   	String[] SearchArray = {"1", "Add", null};
-  	ArrayList<String> Filenames = new ArrayList<String>();
+  	ArrayList<File> Filenames = new ArrayList<File>();
   	Record AddRecord;
   	String ImageRecordString;
   	String[] ImageRecordFields;
@@ -399,9 +399,9 @@ class ImageDatabase
   			ImageRecordString = AddRecord.getField(2);
   			ImageRecordFields = ImageRecordString.split(",");
   			// ImageRecordFields[0] is the ImageID
-  			Filenames.add(getImageFilename(ImageRecordFields[0]));
+  			Filenames.add(new File(getImageFilename(ImageRecordFields[0])));
   	}
-  	return Filenames.toArray(new String[Filenames.size()]);
+  	return Filenames.toArray(new File[Filenames.size()]);
   }
   
   // Add items from the mobile and assign IDs

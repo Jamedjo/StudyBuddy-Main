@@ -335,7 +335,7 @@ class GUI {
     }
 
     void bluetoothDo() {
-        BluetoothGUI blueGUI = new BluetoothGUI(w,true);
+        BluetoothGUI blueGUI = new BluetoothGUI(w,true,this);
         blueGUI.setVisible(true);
     }
 

@@ -75,18 +75,42 @@ public class BlueFrame {
     }
 }
 
-enum FrameType{
-    Text((byte) 0x00)
-    ,Image((byte) 0x01)
-    ,ImagesStart((byte) 0x02)
-    ,ImagesDone((byte) 0x03)
-    //,ImageFileName((byte) 0x04)
+enum FrameTypeGroup{Command,String,Data}
 
+enum FrameType{
+    Text(FrameTypeGroup.String,              (byte) 0x00)
+    ,Image(FrameTypeGroup.Data,              (byte) 0x01)
+    ,ImagesStart(FrameTypeGroup.Command,     (byte) 0x02)
+    ,ImagesDone(FrameTypeGroup.Command,      (byte) 0x03)
+    ,ImageFileName(FrameTypeGroup.String,    (byte) 0x04)
+    ,FinishedSending(FrameTypeGroup.Command, (byte) 0x05)
+
+
+    ,ErrorValue(FrameTypeGroup.Command,      (byte)0xFF)
             ;
 
     byte val;
+    FrameTypeGroup group;
 
-    FrameType(byte value){
+    FrameType(FrameTypeGroup frameGroup, byte value){
         val=value;
+        group=frameGroup;
+    }
+    public boolean isCommand(){
+        if(group==FrameTypeGroup.Command) return true;
+        return false;
+    }
+    public boolean isString(){
+        if(group==FrameTypeGroup.String) return true;
+        return false;
+    }
+    //hasLength
+    //isImage
+    public static FrameType byteToType(byte t){
+        //should use switch statement for speed later
+        for(FrameType type : FrameType.values()){
+            if(type.val==t) return type;
+        }
+        return ErrorValue;
     }
 }

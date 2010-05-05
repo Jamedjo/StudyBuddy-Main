@@ -196,16 +196,15 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         } else {
             blueGUI.message("Found StudyBuddy on remote phone.");
             blueGUI.serviceCheckFinished(true);//Stops animation for now
-            RFCOMM_Start(connectionURL);
+            blueGUI.deviceConnected(connectionURL);
         }
     }
 
-    void RFCOMM_Start(String connectionURL){
-        //String thisServerUUID="12358934876238497239847328957152";
-        //LocalDevice.getLocalDevice().setDiscoverable(DiscoveryAgent.GIAC);
+    void RFCOMM_Start(String connectionURL, ImageDatabase mainDB){
         try{
         blueGUI.message("Conection URL :"+connectionURL);
         StreamConnection port = (StreamConnection) Connector.open(connectionURL);
+        //StreamConnection port = (StreamConnection) Connector.open(connectionURL, READ_WRITE, timeout);
         InputStream portIn = port.openInputStream();
         OutputStream portOut = port.openOutputStream();
 
@@ -214,22 +213,26 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         frameSender.sendString(FrameType.Text, "Hello Android!!");
         
         frameSender.sendCommand(FrameType.ImagesStart);
+
+        
+
+        recieveFrames(portIn);
+
+        File[] files = mainDB.imageFilenamesForMobile();
+        String updateString=mainDB.makeUpdateString();
         frameSender.sendImage(FrameType.Image, "zoomSmall32.png",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\icons\\oxygencustom\\zoomSmall32.png")));
         frameSender.sendImage(FrameType.Image, "img_6088b_small.jpg",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\img\\img_6088b_small.jpg")));
 
         frameSender.sendCommand(FrameType.ImagesDone);
 
         frameSender.sendString(FrameType.Text, "Hello Android!!!!!!!!!\nThis is multi-line!!!!!!!!");
+        frameSender.sendString(FrameType.Text, updateString);
+        frameSender.sendCommand(FrameType.FinishedSending);
 
         portOut.flush();
-
         blueGUI.message("Hello sent");
-        BufferedReader inReader = new BufferedReader(new InputStreamReader(portIn));
-                        String in;
-                        if ((in = inReader.readLine()) != null) {
-                            blueGUI.message("Read: '" + in + "'");
-                        }
 
+        recieveFrames(portIn);
 
         portIn.close();
         portOut.close();
@@ -241,9 +244,54 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         }
         finally{
         }
+    }
 
-        //Connector.open(connectionURL, READ_WRITE, timeout);
 
+    void recieveFrames(InputStream portIn){
+        try{
+            while(true){
+                FrameType type = readFrameType(portIn);
+                if(type==FrameType.FinishedSending) break;
+                if(type.isCommand()) {
+                    System.out.println("Got command: "+type.toString());
+                    continue;//Dosn't need to read length, does nothing for now.
+                }
+            
+                int length = readFrameLength(portIn);
+
+                switch(type){
+                    case Text:
+                        System.out.println(readFrameText(portIn, length));
+                    case Image:
+                    case ImagesStart:
+                    case ImagesDone:
+                    case ImageFileName:
+                    case FinishedSending:
+                    case ErrorValue:
+                    default:
+                }
+            }
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    FrameType readFrameType(InputStream portIn) throws IOException{
+        return FrameType.byteToType((byte)portIn.read());
+    }
+    int readFrameLength(InputStream portIn) throws IOException{
+        byte[] b = new byte[4];
+        portIn.read(b);//should throw error if failed
+        int l = (b[0] & 0xff) + ((b[1]&0xff)<<8) + ((b[2]&0xff)<<16) + ((b[3]&0xff)<<24);
+        return l;
+    }
+    String readFrameText(InputStream portIn,int length) throws IOException{
+        return new String(readFrameData(portIn, length));
+    }
+    byte[] readFrameData(InputStream portIn,int length) throws IOException{
+        byte[] data = new byte[length];
+        portIn.read(data);
+        return data;
     }
 }
 
@@ -264,9 +312,11 @@ class KnownDevice{
                 devName = device.getFriendlyName(true);
                 blueGUI.message("Found: "+devName);
             } catch (IOException e){
-                e.printStackTrace();
+                Log.Print(LogType.Error, "Unable to resolve device name");
+                //e.printStackTrace();
             }
         }
+        if (devName==null) return "Unknown Device";
         return devName;
     }
 

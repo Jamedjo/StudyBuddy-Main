@@ -8,6 +8,7 @@ import javax.swing.SwingUtilities;
 
 public class BluetoothGUI extends javax.swing.JDialog {
     Log log = new Log(false);
+    GUI mainGUI;
     BlueDemo blD;
     Object[] DevIDs;
 
@@ -17,8 +18,9 @@ public class BluetoothGUI extends javax.swing.JDialog {
     public static final int RET_OK = 1;
 
     /** Creates new form TagTagger */
-    public BluetoothGUI(java.awt.Frame parent, boolean modal) {
+    public BluetoothGUI(java.awt.Frame parent, boolean modal, GUI mainGui) {
         super(parent, modal);
+        mainGUI=mainGui;
         getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"CloseWindow");
         getRootPane().getActionMap().put("CloseWindow", new AbstractAction(){
             public void actionPerformed(ActionEvent e){
@@ -288,6 +290,10 @@ public class BluetoothGUI extends javax.swing.JDialog {
         blD.threadCheckServices(chosenDevId);
     }//GEN-LAST:event_connectButtonActionPerformed
 
+    public void deviceConnected(String connectionURL){
+        blD.RFCOMM_Start(connectionURL,mainGUI.mainImageDB);
+    }
+
     private void phoneSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_phoneSearchActionPerformed
         this.getDevicesBluetooth(true);//badly named 'searchButton'
     }//GEN-LAST:event_phoneSearchActionPerformed
@@ -308,7 +314,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                BluetoothGUI dialog = new BluetoothGUI(new javax.swing.JFrame(), true);
+                BluetoothGUI dialog = new BluetoothGUI(new javax.swing.JFrame(), true,new GUI());
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
