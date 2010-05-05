@@ -2,6 +2,7 @@ import java.io.*;
 import java.util.Enumeration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.awt.Rectangle;
 
 class ImageDatabase
@@ -231,6 +232,106 @@ class ImageDatabase
     UpdateTable.save(Filename + "_UpdateTable");
   }
   
+  // Merge Tags of the same title
+  int mergeCommonTagTitles()
+  {
+  	Enumeration AllTags;
+  	Enumeration TagsWithTitle;
+  	Enumeration TempRecords;
+  	Record TempRecord;
+  	String MergeToID;
+  	String OldID;
+  	HashSet<String> UniqueTitles = new HashSet<String>();
+  	String[] TagTitles;
+  	AllTags = ImageTable.elements();
+  	int Result=1;
+  	int TempResult;
+  	while (AllTags.hasMoreElements())
+  	{
+  		TempRecord = (Record) AllTags.nextElement();
+  		UniqueTitles.add(TempRecord.getField(1));
+  	}
+  	TagTitles = new String[UniqueTitles.size()];
+  	TagTitles = UniqueTitles.toArray(TagTitles);
+  	for (int i=0; i<TagTitles.length; i++)
+  	{
+  		TagsWithTitle = TagTable.getRecords(TagTitles[i], 1).elements();
+  		if (TagsWithTitle.hasMoreElements())
+  		{
+	  		TempRecord = (Record) TagsWithTitle.nextElement();
+	  		MergeToID = TempRecord.getField(0);
+	  		while (TagsWithTitle.hasMoreElements())
+	  		{
+	  			TempRecord = (Record) TagsWithTitle.nextElement();
+	  			OldID = TempRecord.getField(0);
+	  			TempResult = TagTable.deleteRecord(TempRecord);
+	  			if (TempResult == -1)
+	  				Result = -1;
+	  			else
+	  				addChange(2, "Delete", TempRecord);
+	  			// Update ImageToTagTable
+	  			TempRecords = ImageToTagTable.getRecords(OldID, 1).elements();
+	  			while (TempRecords.hasMoreElements())
+		  		{
+		  			TempRecord = (Record) TempRecords.nextElement();
+		  			TempResult = ImageToTagTable.deleteRecord(TempRecord);
+		  			if (TempResult == -1)
+	  					Result = -1;
+	  				else
+		  				addChange(3, "Delete", TempRecord);
+		  			TempRecord.setField(0, MergeToID);
+		  			TempResult = ImageToTagTable.addRecord(TempRecord);
+		  			if (TempResult == -1)
+	  					Result = -1;
+	  				else
+		  				addChange(3, "Add", TempRecord);
+		  		}
+		  		// Update TagToTagTable
+		  		TempRecords = TagToTagTable.getRecords(OldID, 0).elements();
+	  			while (TempRecords.hasMoreElements())
+		  		{
+		  			TempRecord = (Record) TempRecords.nextElement();
+		  			TempResult = TagToTagTable.deleteRecord(TempRecord);
+		  			if (TempResult == -1)
+	  					Result = -1;
+	  				else
+		  				addChange(4, "Delete", TempRecord);
+		  			TempRecord.setField(0, MergeToID);
+		  			if (!(TempRecord.getField(0).equals(TempRecord.getField(1))))
+		  			{
+		  				TempResult = TagToTagTable.addRecord(TempRecord);
+		  				if (TempResult == -1)
+	  						Result = -1;
+	  					else
+	  						addChange(4, "Add", TempRecord);
+		  			}
+		  			
+		  		}
+		  		TempRecords = TagToTagTable.getRecords(OldID, 1).elements();
+	  			while (TempRecords.hasMoreElements())
+		  		{
+		  			TempRecord = (Record) TempRecords.nextElement();
+		  			TempResult = TagToTagTable.deleteRecord(TempRecord);
+		  			if (TempResult == -1)
+	  						Result = -1;
+	  				else
+	  					addChange(4, "Delete", TempRecord);
+		  			TempRecord.setField(1, MergeToID);
+		  			if (!(TempRecord.getField(0).equals(TempRecord.getField(1))))
+		  			{
+		  				TempResult = TagToTagTable.addRecord(TempRecord);
+		  				if (TempResult == -1)
+	  						Result = -1;
+	  					else
+	  						addChange(4, "Add", TempRecord);
+		  			}
+		  		}
+	  		}
+  		}
+  	}
+  	return Result;
+  }
+  
   // Add a change to the database
   int addChange(int TableNum, String UpdateType, Record RecordChanged)
   {
@@ -249,8 +350,6 @@ class ImageDatabase
 				RecordString = RecordString + FileUtils.escape(RecordChanged.getField(f));
 			if (f < RecordChanged.getNumFields() - 1)
 				RecordString = RecordString + ',';
-			else
-				RecordString = RecordString + '\n';
 		}
 		String[] ChangeRecordArray = {Integer.toString(TableNum), UpdateType, RecordString};
 		String[] AddRecordArray = {Integer.toString(TableNum), "Add", RecordString};
@@ -276,7 +375,7 @@ class ImageDatabase
 		while (UpdateRecords.hasMoreElements())
 		{
 			TempRecord = (Record) UpdateRecords.nextElement();
-			ResultString = ResultString + TempRecord.getField(0) + "," + TempRecord.getField(1) + "," + TempRecord.getField(2);
+			ResultString = ResultString + TempRecord.getField(0) + "," + TempRecord.getField(1) + "," + TempRecord.getField(2) + "\n";
 		}
 		return ResultString;
   }
