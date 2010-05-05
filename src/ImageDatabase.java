@@ -418,24 +418,24 @@ class ImageDatabase
 	{
 		Fields = Updates[u].split(",");
 		TableNum = Integer.parseInt(Fields[0]);
-		RecordArray = new String[Fields.length - 2];
+		RecordArray = new String[Fields.length - 1];
 		for (int f=0; f<RecordArray.length; f++)
-			RecordArray[f] = FileUtils.unEscape(Fields[f+2]);
+			RecordArray[f] = FileUtils.unEscape(Fields[f+1]);
 		switch (TableNum)
 		{
 			case 1:
 				ImageRecordArray = new String[3];
-				ImageRecordArray[0] = Fields[0];
-				ImageRecordArray[1] = "Image" + Fields[0];
-				ImageRecordArray[2] = PathForImages + Fields[1];
+				ImageRecordArray[0] = Fields[1];
+				ImageRecordArray[1] = "Image" + Fields[1];
+				ImageRecordArray[2] = PathForImages + Fields[2];
 				ComputerID = ImageTable.addRecord(new Record(ImageRecordArray));
 				if (ComputerID != -1)
-					Result = Result + Fields[0] + "," + Fields[1] + "," + Integer.toString(ComputerID) + "\n";
+					Result = Result + Fields[0] + "," + Integer.toString(ComputerID) + "\n";
 				break;
 			case 2:
 				ComputerID = TagTable.addRecord(new Record(RecordArray));
 				if (ComputerID != -1)
-					Result = Result + Fields[0] + "," + Fields[1] + "," + Integer.toString(ComputerID) + "\n";
+					Result = Result + Fields[0] + "," + Integer.toString(ComputerID) + "\n";
 				break;
 		}
 	}
