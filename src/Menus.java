@@ -267,9 +267,9 @@ enum ImageMenu {
 
     ImageMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        if (acceleratorKey != -1) {
-            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        }
+        //if (acceleratorKey != -1) {
+        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        //}
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
@@ -316,9 +316,9 @@ enum TagMenu {
     JMenuItem item;
     TagMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        if (acceleratorKey != -1) {
-            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        }
+        //if (acceleratorKey != -1) {
+        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        //}
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
@@ -366,9 +366,9 @@ enum ViewMenu {
     JMenuItem item;
     ViewMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        if (acceleratorKey != -1) {
-            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        }
+        //if (acceleratorKey != -1) {
+        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        //}
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
@@ -413,9 +413,9 @@ enum HelpMenu {
     JMenuItem item;
     HelpMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        if (acceleratorKey != -1) {
-            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        }
+        //if (acceleratorKey != -1) {
+        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        //}
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
