@@ -421,12 +421,12 @@ class ImageDatabase
 		switch (TableNum)
 		{
 			case 1:
-				ComputerID = this.addImageFromMob("Image at " + Fields[1], PathForImages + Fields[1]);
+				ComputerID = this.addImage("Image at " + Fields[1], PathForImages + Fields[1]);
 				if (ComputerID != null)
 					Result = Result + Fields[0] + "," + Fields[1] + "," + ComputerID + "\n";
 				break;
 			case 2:
-				ComputerID = this.addTagFromMob(Fields[1]);
+				ComputerID = this.addTag(Fields[1]);
 				if (ComputerID != null)
 					Result = Result + Fields[0] + "," + Fields[1] + "," + ComputerID + "\n";
 				break;
@@ -507,19 +507,6 @@ class ImageDatabase
                 Autosave();
 		return Integer.toString(NextImageID - 1);
 	  }
-  }
-
-  String addImageFromMob(String Title, String Filename)
-  {
-      String[] RecordArray = {Integer.toString(NextImageID), Title, Filename};
-      NextImageID++;
-      if (ImageTable.addRecord(new Record(RecordArray)) == -1)
-        return null; // Failed, record already present
-      else
-      {
-        Autosave();
-        return Integer.toString(NextImageID - 1);
-      }
   }
 
   // Add a new special tag for an image
@@ -773,22 +760,6 @@ class ImageDatabase
 	  return Integer.toString(NextTagID - 1);
 	}
   }
-
-  String addTagFromMob(String Title)
-  {
-    String[] RecordArray = {Integer.toString(NextTagID), Title};
-    NextTagID++;
-    if (TagTable.addRecord(new Record(RecordArray)) == -1)
-    {
-      return null;
-    }
-    else
-    {
-      Autosave();
-      return Integer.toString(NextTagID - 1);
-    }
-  }
-
 
   // Link an image with a tag
   int tagImage(String ImageID, String TagID)
