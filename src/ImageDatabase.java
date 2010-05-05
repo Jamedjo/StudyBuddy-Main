@@ -421,12 +421,12 @@ class ImageDatabase
 		switch (TableNum)
 		{
 			case 1:
-				ComputerID = this.addImage("Image at " + Fields[1], PathForImages + Fields[1]);
+				ComputerID = this.addImageFromMob("Image at " + Fields[1], PathForImages + Fields[1]);
 				if (ComputerID != null)
 					Result = Result + Fields[0] + "," + Fields[1] + "," + ComputerID + "\n";
 				break;
 			case 2:
-				ComputerID = this.addTag(Fields[1]);
+				ComputerID = this.addTagFromMob(Fields[1]);
 				if (ComputerID != null)
 					Result = Result + Fields[0] + "," + Fields[1] + "," + ComputerID + "\n";
 				break;
@@ -503,9 +503,23 @@ class ImageDatabase
         return null; // Failed, record already present
       else
 	  {
-        Autosave();
+                this.addChange(1, "Add", new Record(RecordArray));
+                Autosave();
 		return Integer.toString(NextImageID - 1);
 	  }
+  }
+
+  String addImageFromMob(String Title, String Filename)
+  {
+      String[] RecordArray = {Integer.toString(NextImageID), Title, Filename};
+      NextImageID++;
+      if (ImageTable.addRecord(new Record(RecordArray)) == -1)
+        return null; // Failed, record already present
+      else
+      {
+        Autosave();
+        return Integer.toString(NextImageID - 1);
+      }
   }
 
   // Add a new special tag for an image
@@ -579,14 +593,14 @@ class ImageDatabase
 	// Delete ImageToImage records containing the image
 	Matches = ImageToImageTable.getRecords(r.getField(0),1);
 	Records = Matches.elements();
-	while (Records.hasMoreElements())
+    while (Records.hasMoreElements())
     {
       if (ImageToImageTable.deleteRecord((Record)Records.nextElement()) == -1)
         return -1;
     }
 	Matches = ImageToImageTable.getRecords(r.getField(0),2);
 	Records = Matches.elements();
-	while (Records.hasMoreElements())
+    while (Records.hasMoreElements())
     {
       if (ImageToImageTable.deleteRecord((Record)Records.nextElement()) == -1)
         return -1;
@@ -609,7 +623,9 @@ class ImageDatabase
     }
 	// Delete the image record from the image table
 	if (ImageTable.deleteRecord(r) == -1)
-      return -1;
+            return -1;
+        else
+            this.addChange(1, "Delete", r);
 	Autosave();
     return 1;
   }
@@ -656,7 +672,7 @@ class ImageDatabase
   // Delete an ImageToTag link from the database (by fields)
   int deleteImageTag(String ImageID, String TagID)
   {
-	String[] RecordArray = {ImageID, ImageID};
+    String[] RecordArray = {ImageID, ImageID};
     return deleteImageTag(new Record(RecordArray));
   }
 
@@ -665,7 +681,10 @@ class ImageDatabase
   {
     int Result = ImageToTagTable.deleteRecord(r);
 	if (Result == 1)
-		Autosave();
+        {
+            this.addChange(3, "Delete", r);
+            Autosave();
+        }
 	return Result;
   }
 
@@ -680,8 +699,11 @@ class ImageDatabase
   int deleteTagTag(Record r)
   {
     int Result = TagToTagTable.deleteRecord(r);
-	if (Result == 1)
-		Autosave();
+    if (Result == 1)
+    {
+	this.addChange(4, "Delete", r);
+        Autosave();
+    }
 	return Result;
   }
 
@@ -705,8 +727,9 @@ class ImageDatabase
     TagRecords = TagMatches.elements();
     while (TagRecords.hasMoreElements())
     {
-      if (ImageToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
-        return -1;
+        if (ImageToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
+            return -1;
+
     }
     // Get tag to tag records including the tag (as tagee) and delete them
     TagMatches = TagToTagTable.getRecords(r.getField(0), 0);
@@ -722,13 +745,15 @@ class ImageDatabase
     TagRecords = TagMatches.elements();
     while (TagRecords.hasMoreElements())
     {
-      if (TagToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
-        return -1;
+        if (TagToTagTable.deleteRecord((Record) TagRecords.nextElement()) == -1)
+            return -1;
     }
     // Delete tag from tagtable
     if (TagTable.deleteRecord(r) == -1)
       return -1;
-	Autosave();
+    else
+      this.addChange(2, "Delete", r);
+    Autosave();
     return 1;
   }
 
@@ -743,10 +768,27 @@ class ImageDatabase
     }
     else
 	{
-      Autosave();
+          this.addChange(2, "Add", new Record(RecordArray));
+          Autosave();
 	  return Integer.toString(NextTagID - 1);
 	}
   }
+
+  String addTagFromMob(String Title)
+  {
+    String[] RecordArray = {Integer.toString(NextTagID), Title};
+    NextTagID++;
+    if (TagTable.addRecord(new Record(RecordArray)) == -1)
+    {
+      return null;
+    }
+    else
+    {
+      Autosave();
+      return Integer.toString(NextTagID - 1);
+    }
+  }
+
 
   // Link an image with a tag
   int tagImage(String ImageID, String TagID)
@@ -760,7 +802,8 @@ class ImageDatabase
       else
       {
         ImageToTagTable.addRecord(new Record(RecordString));
-		Autosave();
+        this.addChange(3, "Add", new Record(RecordString));
+        Autosave();
         return 1;
       }
   }
