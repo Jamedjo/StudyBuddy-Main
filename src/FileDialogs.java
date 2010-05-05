@@ -144,7 +144,7 @@ public class FileDialogs {
         PreviewAccessory preview = new PreviewAccessory();
         fileGetter.setAccessory(preview);
         fileGetter.addPropertyChangeListener(preview);
-
+        fileGetter.setAcceptAllFileFilterUsed(false);
         fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
             public boolean accept(File f) {
                 if (f.isDirectory()) {

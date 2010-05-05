@@ -40,16 +40,19 @@ public class BlueFrame {
     }
     public boolean sendImage(FrameType type,String filename,File imageFile){
         try{
-            if(sendString(FrameType.Text,filename)){
+            if(sendString(FrameType.ImageFileName,filename)){
                 Log.Print(LogType.Log, "Sending file: "+filename);
                 if(writeMessageHeader(type.val, (int)imageFile.length())){
                     FileInputStream is = new FileInputStream(imageFile);
                     blueGUI.setProgress(0);
-                    for(int i=0;i<imageFile.length();i++){
-                        outPort.write(is.read());
-                        //System.out.print(".");
-                        //System.out.flush();
-                        blueGUI.setProgress((100/(int)imageFile.length())*i);
+                    byte[] buf = new byte[512];
+                    int read;
+                    while((read=is.read(buf))!=-1){
+                        outPort.write(buf,0,read);
+                        outPort.flush();
+                        System.out.print(".");
+                        System.out.flush();
+                        //blueGUI.setProgress((100/(int)imageFile.length())*i);
                     }
                     blueGUI.setProgress(100);
                 Log.Print(LogType.Log, "Sent"+filename);
@@ -85,6 +88,7 @@ enum FrameType{
     ,ImageFileName(FrameTypeGroup.String,           (byte) 0x04)
     ,FinishedSending(FrameTypeGroup.Command,        (byte) 0x05)
     ,NewDBValues(FrameTypeGroup.String,             (byte) 0x06)
+    ,Sync(FrameTypeGroup.String,             (byte) 0x07)
 
     ,CommunicationsFinished(FrameTypeGroup.Command, (byte) 0xEE)
     ,ErrorValue(FrameTypeGroup.Command,             (byte) 0xFF)

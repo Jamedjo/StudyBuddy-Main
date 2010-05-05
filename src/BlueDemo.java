@@ -32,6 +32,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
     boolean devNoIsSet = false;
     String newMobileDBValues;
     String nextFileName;
+    String newMiobileSyncVal;
     String imageStorePath="C:\\Users\\Student\\AppData\\Roaming\\StudyBuddy\\imageStoreTEMP\\";
 
     @Override
@@ -59,6 +60,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
             KnownDevice kDev= it.next();
             //devNames[i] = kDev.getAddress()+": "+kDev.getName();
             devNames[i] = kDev.getName();
+            if(devNames[i].equals("stork")) break;
             i++;
             blueGUI.setProgress((100/deviceList.size())*i);
         }
@@ -218,31 +220,34 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         //call make changes from moblile and print return value
 
         // Must prepare this before doing updates
-        // File[] files = mainDB.imageFilenamesForMobile();
-        // String updateString=mainDB.makeUpdateString();
+        File[] files = mainDB.imageFilenamesForMobile();
+        String updateString=mainDB.makeUpdateString();
         System.out.println("Calling mainDB.assignMobileItemsIDs(newMobileDBValues, imageStorePath)\nRecieved: "+newMobileDBValues);
         frameSender.sendString(FrameType.NewDBValues, mainDB.assignMobileItemsIDs(newMobileDBValues, imageStorePath));
         frameSender.sendCommand(FrameType.FinishedSending);
         //mainDB.print();
         recieveFrames(portIn);
+        mainDB.makeChangesFromMobile(newMiobileSyncVal);
+        
+        mainDB.refreshChanges();
+        mainDB.mergeCommonTagTitles();
+        String mergedUpdateString = updateString+mainDB.makeUpdateString();
+        System.out.println(mergedUpdateString);
+        mainDB.refreshChanges();
+        frameSender.sendString(FrameType.Sync,mergedUpdateString);
+        frameSender.sendCommand(FrameType.ImagesStart);
+        
+        //for each image
+        for(File f: files){
+            frameSender.sendImage(FrameType.Image, f.getName(),f);
+        }
 
-//
-//        frameSender.sendString(FrameType.Text, "Hello Android!!");
-//
-//        frameSender.sendCommand(FrameType.ImagesStart);
-//        frameSender.sendImage(FrameType.Image, "zoomSmall32.png",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\icons\\oxygencustom\\zoomSmall32.png")));
-//        frameSender.sendImage(FrameType.Image, "img_6088b_small.jpg",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\img\\img_6088b_small.jpg")));
-//
-//        frameSender.sendCommand(FrameType.ImagesDone);
-//
-//        frameSender.sendString(FrameType.Text, "Hello Android!!!!!!!!!\nThis is multi-line!!!!!!!!");
-//        frameSender.sendString(FrameType.Text, updateString);
-//        frameSender.sendCommand(FrameType.FinishedSending);
-//
+        frameSender.sendCommand(FrameType.ImagesDone);
+
 //        portOut.flush();
-//        blueGUI.message("Hello sent");
-//
-//        recieveFrames(portIn);
+        blueGUI.message("All sent");
+        frameSender.sendCommand(FrameType.FinishedSending);
+        recieveFrames(portIn);
 
         portIn.close();
         portOut.close();
@@ -261,13 +266,15 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         try{
             while(true){
                 FrameType type = readFrameType(portIn);
-                if(type==FrameType.FinishedSending) {
+                if(type==FrameType.FinishedSending||type==FrameType.CommunicationsFinished) {
                     System.out.println("Finished recieving");
                     break;
                 }
                 if(type.isCommand()) {
-                    System.out.println("Got command: "+type.toString());
-
+                    if(type==FrameType.ErrorValue){
+                        System.out.print(".err");
+                    }
+                    else System.out.println("Got command: "+type.toString());
                     continue;//Dosn't need to read length, does nothing for now.
                 }
 
@@ -290,6 +297,9 @@ public class BlueDemo implements DiscoveryListener,Runnable {
                     case NewDBValues:
                         newMobileDBValues=readFrameText(portIn, length);
                         break;
+                    case Sync:
+                        newMiobileSyncVal=readFrameText(portIn,length);
+                        break;
                     //case FinishedSending:
                     //case ErrorValue:
                     //default:
@@ -307,12 +317,12 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         byte[] b = new byte[4];
         portIn.read(b);//should throw error if failed
         int l = (b[0] & 0xff) + ((b[1]&0xff)<<8) + ((b[2]&0xff)<<16) + ((b[3]&0xff)<<24);
-        System.out.println("length is: "+l);
+        //System.out.println("length is: "+l);
         return l;
     }
     String readFrameText(InputStream portIn,int length) throws IOException{
         String str=new String(readFrameData(portIn, length));
-        System.out.println("**"+str+"**");
+        //System.out.println("**"+str+"**");
         return str;
     }
     byte[] readFrameData(InputStream portIn,int length) throws IOException{

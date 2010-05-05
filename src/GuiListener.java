@@ -42,6 +42,7 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("TagThis")) mainGUI.tagThis();
         else if (ae.getActionCommand().equals("QuickTag")) mainGUI.quickTag();
         else if (ae.getActionCommand().equals("ImageBar")) mainGUI.imageToolbarToggle();
+        else if (ae.getActionCommand().equals("DeleteTag")) {mainGUI.mainImageDB.deleteTag(mainGUI.getState().currentFilter);mainGUI.tagTree.updateTags();}
         else if (ae.getActionCommand().equals("TagFilter")) mainGUI.tagFilter();
         else if (ae.getActionCommand().equals("TagTag")) mainGUI.tagTag();
         else if (ae.getActionCommand().equals("DragPan")) mainGUI.mainPanel.setCursorMode(mainGUI.mainPanel.getCurrentDrag());

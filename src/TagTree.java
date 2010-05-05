@@ -18,7 +18,7 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
     GUI mainGUI;
     DefaultMutableTreeNode treeNode;
     JPopupMenu rightClickMenu = new JPopupMenu();
-    JMenuItem mTagThis;
+    JMenuItem mTagThis,mDeleteTag;
     int lastX,lastY;
 
     TagTree(ImageDatabase mainDB, GUI gui) {
@@ -47,7 +47,11 @@ public class TagTree extends JTree implements TreeSelectionListener,ActionListen
         mTagThis = new JMenuItem("Tag current image with this");
         mTagThis.addActionListener(this);
         mTagThis.setActionCommand("rTagThis");
+        mDeleteTag = new JMenuItem("Delete this tag");
+        mDeleteTag.addActionListener(this);
+        mDeleteTag.setActionCommand("rDeleteThisTag");
         rightClickMenu.add(mTagThis);
+        rightClickMenu.add(mDeleteTag);
     }
 
     public void updateTags(){
@@ -78,6 +82,11 @@ public void actionPerformed(ActionEvent ae) {//ensue x and y are from first clic
         if (ae.getActionCommand().equals("rTagThis")){
             IDTitle idT =(IDTitle)((DefaultMutableTreeNode)this.getPathForLocation(lastX,lastY).getLastPathComponent()).getUserObject();
             mainImageDB.tagImage(mainGUI.getState().getCurrentImageID(), idT.getID());
+        }
+        else if (ae.getActionCommand().equals("rDeleteThisTag")){
+            IDTitle idT =(IDTitle)((DefaultMutableTreeNode)this.getPathForLocation(lastX,lastY).getLastPathComponent()).getUserObject();
+            mainImageDB.deleteTag(idT.getID());
+            updateTags();
         }
         else {
             System.err.println("ActionEvent " + ae.getActionCommand() + " was not dealt with,\nand had prameter string " + ae.paramString());

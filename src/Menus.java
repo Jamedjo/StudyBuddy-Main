@@ -361,7 +361,8 @@ enum ViewMenu {
     SlideStop("Stop Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE, 0, "SlideS", false),
     ZoomToFit("Zoom: Fit Image", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "ZoomFit", false),
     ZoomTo100("Zoom: 100%", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "Zoom100"),
-    ZoomToX("Zoom: Custom", KeyEvent.VK_C, KeyEvent.VK_Z, ActionEvent.SHIFT_MASK, "ZoomX");
+//    ZoomToX("Zoom: Custom", KeyEvent.VK_C, KeyEvent.VK_Z, ActionEvent.SHIFT_MASK, "ZoomX")
+    ;
     JMenuItem item;
     ViewMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);

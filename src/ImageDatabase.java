@@ -27,7 +27,7 @@ class ImageDatabase
   //Change this when database structure changes, e.g. after new table created
   //Used to check for database incompatabilities
   static String getDatabaseVersion(){
-      return "gamma_r276";
+      return "final_r400";
   }
 
   // Create an image database with the supplied name
@@ -279,7 +279,7 @@ class ImageDatabase
 	  					Result = -1;
 	  				else
 		  				addChange(3, "Delete", TempRecord);
-		  			TempRecord.setField(0, MergeToID);
+		  			TempRecord.setField(1, MergeToID);
 		  			TempResult = ImageToTagTable.addRecord(TempRecord);
 		  			if (TempResult == -1)
 	  					Result = -1;
@@ -374,12 +374,16 @@ class ImageDatabase
   {
 		Enumeration UpdateRecords = UpdateTable.elements();
 		Record TempRecord;
+                ArrayList<String> UpdateStrings = new ArrayList<String>();
 		String ResultString = "";
 		while (UpdateRecords.hasMoreElements())
 		{
 			TempRecord = (Record) UpdateRecords.nextElement();
-			ResultString = ResultString + TempRecord.getField(0) + "," + TempRecord.getField(1) + "," + TempRecord.getField(2) + "\n";
+			UpdateStrings.add(TempRecord.getField(0) + "," + TempRecord.getField(1) + "," + TempRecord.getField(2) + "\n");
 		}
+                java.util.Collections.sort(UpdateStrings);
+                for (int i=0; i<UpdateStrings.size(); i++)
+                    ResultString = ResultString + UpdateStrings.get(i);
 		return ResultString;
   }
 
@@ -391,15 +395,15 @@ class ImageDatabase
   	Record AddRecord;
   	String ImageRecordString;
   	String[] ImageRecordFields;
-  	IndexedTable AddedImagesTable = ImageTable.getRecords(new Record(SearchArray));
+  	IndexedTable AddedImagesTable = UpdateTable.getRecords(new Record(SearchArray));
   	Enumeration AddedImages = AddedImagesTable.elements();
   	while(AddedImages.hasMoreElements())
   	{
-  			AddRecord = (Record) AddedImages.nextElement();
-  			ImageRecordString = AddRecord.getField(2);
-  			ImageRecordFields = ImageRecordString.split(",");
-  			// ImageRecordFields[0] is the ImageID
-  			Filenames.add(new File(getImageFilename(ImageRecordFields[0])));
+            AddRecord = (Record) AddedImages.nextElement();
+            ImageRecordString = AddRecord.getField(2);
+            ImageRecordFields = ImageRecordString.split(",");
+            // ImageRecordFields[0] is the ImageID
+            Filenames.add(new File(getImageFilename(ImageRecordFields[0])));
   	}
   	return Filenames.toArray(new File[Filenames.size()]);
   }
@@ -438,53 +442,56 @@ class ImageDatabase
   // Add items from the mobile and assign IDs
   int makeChangesFromMobile(String StringFromMobile)
   {
-		String[] Updates = StringFromMobile.split("\n");
 		String[] Fields;
 		String[] RecordArray;
 		int TempResult = 1;
 		int Result = 1;
 		int TableNum;
 		String ComputerID;
-		for (int u=0; u<Updates.length; u++)
-		{
-			Fields = Updates[u].split(",");
-			TableNum = Integer.parseInt(Fields[0]);
-			RecordArray = new String[Fields.length - 2];
-			for (int f=0; f<RecordArray.length; f++)
-				RecordArray[f] = FileUtils.unEscape(Fields[f+2]);
-			switch (TableNum)
-			{
-				case 1:
-					if (Fields[1].equals("Add"))
-						TempResult = -1;
-					if (Fields[1].equals("Delete"))
-						TempResult = this.deleteImage(RecordArray[0]);
-					if (TempResult < Result)
-						Result = TempResult;
-					break;
-				case 2:
-					if (Fields[1].equals("Add"))
-						TempResult = -1;
-					if (Fields[1].equals("Delete"))
-						TempResult = this.deleteTag(RecordArray[0]);
-					if (TempResult < Result)
-						Result = TempResult;
-				case 3:
-					if (Fields[1].equals("Add"))
-						TempResult = this.tagImage(RecordArray[0], RecordArray[1]);
-					if (Fields[1].equals("Delete"))
-						TempResult = this.deleteImageTag(RecordArray[0], RecordArray[1]);
-					if (TempResult < Result)
-						Result = TempResult;
-				case 4:
-					if (Fields[1].equals("Add"))
-						TempResult = this.tagTag(RecordArray[0], RecordArray[1]);
-					if (Fields[1].equals("Delete"))
-						TempResult = this.deleteTagTag(RecordArray[0], RecordArray[1]);
-					if (TempResult < Result)
-						Result = TempResult;
-			}
-		}
+                if (!StringFromMobile.equals(""))
+                {
+                    String[] Updates = StringFromMobile.split("\n");
+                    for (int u=0; u<Updates.length; u++)
+                    {
+                            Fields = Updates[u].split(",");
+                            TableNum = Integer.parseInt(Fields[0]);
+                            RecordArray = new String[Fields.length - 2];
+                            for (int f=0; f<RecordArray.length; f++)
+                                    RecordArray[f] = FileUtils.unEscape(Fields[f+2]);
+                            switch (TableNum)
+                            {
+                                    case 1:
+                                            if (Fields[1].equals("Add"))
+                                                    TempResult = -1;
+                                            if (Fields[1].equals("Delete"))
+                                                    TempResult = this.deleteImage(RecordArray[0]);
+                                            if (TempResult < Result)
+                                                    Result = TempResult;
+                                            break;
+                                    case 2:
+                                            if (Fields[1].equals("Add"))
+                                                    TempResult = -1;
+                                            if (Fields[1].equals("Delete"))
+                                                    TempResult = this.deleteTag(RecordArray[0]);
+                                            if (TempResult < Result)
+                                                    Result = TempResult;
+                                    case 3:
+                                            if (Fields[1].equals("Add"))
+                                                    TempResult = this.tagImage(RecordArray[0], RecordArray[1]);
+                                            if (Fields[1].equals("Delete"))
+                                                    TempResult = this.deleteImageTag(RecordArray[0], RecordArray[1]);
+                                            if (TempResult < Result)
+                                                    Result = TempResult;
+                                    case 4:
+                                            if (Fields[1].equals("Add"))
+                                                    TempResult = this.tagTag(RecordArray[0], RecordArray[1]);
+                                            if (Fields[1].equals("Delete"))
+                                                    TempResult = this.deleteTagTag(RecordArray[0], RecordArray[1]);
+                                            if (TempResult < Result)
+                                                    Result = TempResult;
+                            }
+                    }
+                }
 		return Result;
   }
 
