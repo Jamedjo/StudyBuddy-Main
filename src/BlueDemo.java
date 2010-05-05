@@ -52,11 +52,13 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         Iterator<KnownDevice> it = deviceList.iterator();
         String[]devNames = new String[deviceList.size()];
         int i=0;
+        blueGUI.setProgress(0);
         while(it.hasNext()){
             KnownDevice kDev= it.next();
             //devNames[i] = kDev.getAddress()+": "+kDev.getName();
             devNames[i] = kDev.getName();
             i++;
+            blueGUI.setProgress((100/deviceList.size())*i);
         }
         return devNames;
     }
@@ -207,7 +209,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         InputStream portIn = port.openInputStream();
         OutputStream portOut = port.openOutputStream();
 
-        BlueFrame frameSender = new BlueFrame(portOut);
+        BlueFrame frameSender = new BlueFrame(blueGUI,portOut);
 
         frameSender.sendString(FrameType.Text, "Hello Android!!");
         

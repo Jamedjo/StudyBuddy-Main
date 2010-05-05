@@ -6,9 +6,11 @@ import java.io.OutputStream;
 
 public class BlueFrame {
     private OutputStream outPort;
+    BluetoothGUI blueGUI;
 
-    public BlueFrame(OutputStream portOut){
+    public BlueFrame(BluetoothGUI blueGui, OutputStream portOut){
         outPort=portOut;
+        blueGUI=blueGui;
     }
     
     //Need to make sure FrameType is valid for command
@@ -42,11 +44,14 @@ public class BlueFrame {
                 Log.Print(LogType.Log, "Sending file: "+filename);
                 if(writeMessageHeader(type.val, (int)imageFile.length())){
                     FileInputStream is = new FileInputStream(imageFile);
+                    blueGUI.setProgress(0);
                     for(int i=0;i<imageFile.length();i++){
                         outPort.write(is.read());
                         //System.out.print(".");
                         //System.out.flush();
+                        blueGUI.setProgress((100/(int)imageFile.length())*i);
                     }
+                    blueGUI.setProgress(100);
                 Log.Print(LogType.Log, "Sent"+filename);
                     return true;
                 }
