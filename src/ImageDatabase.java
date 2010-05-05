@@ -347,8 +347,11 @@ class ImageDatabase
 				RecordString = RecordString + FileUtils.escape(PathFile.getName());
 			}
 			else
-				RecordString = RecordString + FileUtils.escape(RecordChanged.getField(f));
-			if (f < RecordChanged.getNumFields() - 1)
+			{
+				if (!((TableNum ==1) && (f==1)))
+					RecordString = RecordString + FileUtils.escape(RecordChanged.getField(f));
+			}
+			if ((f < RecordChanged.getNumFields() - 1) && !((TableNum ==1) && (f==1)))
 				RecordString = RecordString + ',';
 		}
 		String[] ChangeRecordArray = {Integer.toString(TableNum), UpdateType, RecordString};
