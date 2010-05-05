@@ -22,12 +22,13 @@ enum BlueTthOp{GetDevices,CheckServices}//Type of bluetooth operation toe perfor
 public class BlueDemo implements DiscoveryListener,Runnable {
     private static Vector<KnownDevice> deviceList = new Vector<KnownDevice>();
 
-    private static Object lock = new Object();
+    private static final Object lock = new Object();
     private static String connectionURL = null;
     DiscoveryAgent agent;
     String[] deviceNames = null;
     BluetoothGUI blueGUI=null;
     BlueTthOp runType=null;
+    boolean shouldSearch=true;
     int devNo;
     boolean devNoIsSet = false;
 
@@ -60,6 +61,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         return devNames;
     }
 
+    @Override
     public void servicesDiscovered(int transID, ServiceRecord[] servRecord) {
         if (servRecord != null && servRecord.length > 0) {
             connectionURL = servRecord[0].getConnectionURL(0, false);
@@ -69,12 +71,14 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         }
     }
 
+    @Override
     public void serviceSearchCompleted(int transID, int respCode) {
         synchronized (lock) {
             lock.notify();
         }
     }
 
+    @Override
     public void inquiryCompleted(int discType) {
         synchronized (lock) {
             lock.notify();
@@ -90,8 +94,9 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         devNo = device;
         devNoIsSet=true;
     }
-    void threadGetDevices(){
+    void threadGetDevices(boolean search){
         runType = BlueTthOp.GetDevices;
+        shouldSearch=search;
         (new Thread(this)).start();
     }
     void threadCheckServices(int deviceNumber){
@@ -117,8 +122,6 @@ public class BlueDemo implements DiscoveryListener,Runnable {
     }
 
     void getDevices(){
-        boolean shouldSearch=true;//Set false to only use Preknown and cached devices
-
         try{
         LocalDevice localDevice = LocalDevice.getLocalDevice();
         //blueGUI.message("Address: " + localDevice.getBluetoothAddress());
