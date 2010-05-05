@@ -17,7 +17,7 @@ public class FileDialogs {
     static XFileDialog winFileGetter=null;
     static XFileDialog winFolderGetter=null;
     static XFileDialog winFileSaver=null;
-    static final String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm", "svg","wbmp"};
+    static final String[] exts = {"jpeg", "jpg", "gif", "bmp", "png", "tiff", "tif", "tga", "pcx", "xbm","wbmp"};//"svg"
 
     static void init(GUI gui){
         mainGUI = gui;
@@ -144,6 +144,7 @@ public class FileDialogs {
         PreviewAccessory preview = new PreviewAccessory();
         fileGetter.setAccessory(preview);
         fileGetter.addPropertyChangeListener(preview);
+
         fileGetter.addChoosableFileFilter(new javax.swing.filechooser.FileFilter() {
             public boolean accept(File f) {
                 if (f.isDirectory()) {

@@ -84,13 +84,13 @@ class ImageDatabase
         boolean[] ImageToNoteKeys = {true, false, false, false, false, false, false};
         ImageToNoteTable = new IndexedTable("ImageToNoteTable", new Record(ImageToNoteHeader), ImageToNoteKeys);
     }
-	
+
 	private void BuildImageToSpecialTable() {
         String[] ImageToSpecialHeader = {"ImageID", "SpecialType", "SpecialString"};
         boolean[] ImageToSpecialKeys = {true, true, false};
         ImageToSpecialTable = new IndexedTable("ImageToSpecialTable", new Record(ImageToSpecialHeader), ImageToSpecialKeys);
     }
-	
+
 	private void BuildUpdateTable() {
 		String[] UpdateHeader = {"TableNum", "UpdateType", "RecordString"};
         boolean[] UpdateKeys = {true, true, true};
@@ -170,7 +170,7 @@ class ImageDatabase
           BuildUpdateTable();
       }
   }
-  
+
   String getName() { return Name; }
   IndexedTable getImageTable() { return ImageTable; }
   IndexedTable getTagTable() { return TagTable; }
@@ -180,19 +180,19 @@ class ImageDatabase
   IndexedTable getImageToNoteTable() { return ImageToNoteTable; }
   IndexedTable getImageToSpecialTable() { return ImageToSpecialTable; }
   IndexedTable getUpdateTable() { return UpdateTable; }
-  
+
   void Autosave()
   {
 	if (DoAutosave == true)
 		save(StoredFilename);
   }
-  
+
   void setAutosave(boolean Set) { DoAutosave = Set; }
   boolean getAutosave() { return DoAutosave; }
   void setStoredFilename(String Filename) { StoredFilename = Filename; }
   String getStoredFilename() { return StoredFilename; }
-  
-  
+
+
   // Prints out a representation of the different tables
   void print()
   {
@@ -204,7 +204,7 @@ class ImageDatabase
       System.out.println(ImageToNoteTable.toString());
       System.out.println(UpdateTable.toString());
   }
-  
+
   // Save the entire database to the desired filename
   void save(String Filename)
   {
@@ -220,8 +220,8 @@ class ImageDatabase
     }
     catch (Exception TheError)
     {
-      throw new Error(TheError);    
-    } 
+      throw new Error(TheError);
+    }
     ImageTable.save(Filename + "_ImageTable");
     TagTable.save(Filename + "_TagTable");
     ImageToTagTable.save(Filename + "_ImageToTagTable");
@@ -231,7 +231,7 @@ class ImageDatabase
     ImageToSpecialTable.save(Filename + "_ImageToSpecialTable");
     UpdateTable.save(Filename + "_UpdateTable");
   }
-  
+
   // Merge Tags of the same title
   int mergeCommonTagTitles()
   {
@@ -305,7 +305,7 @@ class ImageDatabase
 	  					else
 	  						addChange(4, "Add", TempRecord);
 		  			}
-		  			
+
 		  		}
 		  		TempRecords = TagToTagTable.getRecords(OldID, 1).elements();
 	  			while (TempRecords.hasMoreElements())
@@ -331,7 +331,7 @@ class ImageDatabase
   	}
   	return Result;
   }
-  
+
   // Add a change to the database
   int addChange(int TableNum, String UpdateType, Record RecordChanged)
   {
@@ -368,7 +368,7 @@ class ImageDatabase
 		else
 			return UpdateTable.addRecord(new Record(ChangeRecordArray));
   }
-  
+
   // Produce the string of update tables
   String makeUpdateString()
   {
@@ -382,7 +382,7 @@ class ImageDatabase
 		}
 		return ResultString;
   }
-  
+
   // Produce a list of images to send to the Mobile()
   File[] imageFilenamesForMobile()
   {
@@ -403,45 +403,38 @@ class ImageDatabase
   	}
   	return Filenames.toArray(new File[Filenames.size()]);
   }
-  
+
   // Add items from the mobile and assign IDs
   String assignMobileItemsIDs(String StringFromMobile, String PathForImages)
   {
 	String[] Updates = StringFromMobile.split("\n");
 	String[] Fields;
-	String[] RecordArray;
-	String[] ImageRecordArray;
 	String Result = "";
 	int TableNum;
-	int ComputerID;
+	String ComputerID;
+        if (StringFromMobile.equals(""))
+            return "";
 	for (int u=0; u<Updates.length; u++)
 	{
 		Fields = Updates[u].split(",");
 		TableNum = Integer.parseInt(Fields[0]);
-		RecordArray = new String[Fields.length - 1];
-		for (int f=0; f<RecordArray.length; f++)
-			RecordArray[f] = FileUtils.unEscape(Fields[f+1]);
 		switch (TableNum)
 		{
 			case 1:
-				ImageRecordArray = new String[3];
-				ImageRecordArray[0] = Fields[1];
-				ImageRecordArray[1] = "Image" + Fields[1];
-				ImageRecordArray[2] = PathForImages + Fields[2];
-				ComputerID = ImageTable.addRecord(new Record(ImageRecordArray));
-				if (ComputerID != -1)
-					Result = Result + Fields[0] + "," + Integer.toString(ComputerID) + "\n";
+				ComputerID = this.addImage("Image at " + Fields[1], PathForImages + Fields[1]);
+				if (ComputerID != null)
+					Result = Result + Fields[0] + "," + Fields[1] + "," + ComputerID + "\n";
 				break;
 			case 2:
-				ComputerID = TagTable.addRecord(new Record(RecordArray));
-				if (ComputerID != -1)
-					Result = Result + Fields[0] + "," + Integer.toString(ComputerID) + "\n";
+				ComputerID = this.addTag(Fields[1]);
+				if (ComputerID != null)
+					Result = Result + Fields[0] + "," + Fields[1] + "," + ComputerID + "\n";
 				break;
 		}
 	}
 	return Result;
   }
-  
+
   // Add items from the mobile and assign IDs
   int makeChangesFromMobile(String StringFromMobile)
   {
@@ -463,11 +456,9 @@ class ImageDatabase
 			{
 				case 1:
 					if (Fields[1].equals("Add"))
-					{
 						TempResult = -1;
-					}
 					if (Fields[1].equals("Delete"))
-						TempResult = this.deleteImage(Fields[2]);
+						TempResult = this.deleteImage(RecordArray[0]);
 					if (TempResult < Result)
 						Result = TempResult;
 					break;
@@ -475,34 +466,34 @@ class ImageDatabase
 					if (Fields[1].equals("Add"))
 						TempResult = -1;
 					if (Fields[1].equals("Delete"))
-						TempResult = TagTable.deleteRecord(new Record(RecordArray));
+						TempResult = this.deleteTag(RecordArray[0]);
 					if (TempResult < Result)
 						Result = TempResult;
 				case 3:
 					if (Fields[1].equals("Add"))
-						TempResult = ImageToTagTable.addRecord(new Record(RecordArray));
+						TempResult = this.tagImage(RecordArray[0], RecordArray[1]);
 					if (Fields[1].equals("Delete"))
-						TempResult = ImageToTagTable.deleteRecord(new Record(RecordArray));
+						TempResult = this.deleteImageTag(RecordArray[0], RecordArray[1]);
 					if (TempResult < Result)
 						Result = TempResult;
 				case 4:
 					if (Fields[1].equals("Add"))
-						TempResult = TagToTagTable.addRecord(new Record(RecordArray));
+						TempResult = this.tagTag(RecordArray[0], RecordArray[1]);
 					if (Fields[1].equals("Delete"))
-						TempResult = TagToTagTable.deleteRecord(new Record(RecordArray));
+						TempResult = this.deleteTagTag(RecordArray[0], RecordArray[1]);
 					if (TempResult < Result)
 						Result = TempResult;
 			}
 		}
 		return Result;
   }
-  
+
   void refreshChanges()
   {
       BuildUpdateTable();
       save(StoredFilename);
   }
-  
+
   // Add a new image to the database
   String addImage(String Title, String Filename)
   {
@@ -516,7 +507,7 @@ class ImageDatabase
 		return Integer.toString(NextImageID - 1);
 	  }
   }
-  
+
   // Add a new special tag for an image
   int addSpecial(String ImageID, String SpecialType, String Special)
   {
@@ -527,7 +518,7 @@ class ImageDatabase
 		Autosave();
 	return Result;
   }
-  
+
   // Delete special tag for an image
   int deleteSpecial(String ImageID, String SpecialType)
   {
@@ -541,16 +532,16 @@ class ImageDatabase
 		Result = ImageToSpecialTable.deleteRecord(TempRecord);
 		if (Result == 1)
 			Autosave();
-		return Result; 
+		return Result;
 	}
   }
-  
+
   // Return all special tags for an image
   IndexedTable getImageSpecials(String ImageID)
   {
 	return ImageToSpecialTable.getRecords(ImageID, 0);
   }
-  
+
   // Return special string of a certain type
   String getImageSpecial(String ImageID, String SpecialType)
   {
@@ -561,7 +552,7 @@ class ImageDatabase
     else
 		return TempRecord.getField(2);
   }
-  
+
   // Delete an image from the database (by fields)
   int deleteImage(String ImageID)
   {
@@ -571,12 +562,12 @@ class ImageDatabase
 	else
 		return deleteImage(TempRecord);
   }
-  
+
   // Delete an image from the database (by record)
   int deleteImage(Record r)
   {
     IndexedTable Matches;
-    Enumeration Records;	
+    Enumeration Records;
 	// Delete ImageToTag records containing the image
     Matches = ImageToTagTable.getRecords(r.getField(0), 0);
     Records = Matches.elements();
@@ -622,7 +613,7 @@ class ImageDatabase
 	Autosave();
     return 1;
   }
-  
+
   // Delete an ImageToImage link from the database (by fields)
   int deleteLink(String LinkID)
   {
@@ -632,7 +623,7 @@ class ImageDatabase
 	else
 		return deleteLink(TempRecord);
   }
-  
+
   // Delete an ImageToImage link from the database (by record)
   int deleteLink(Record r)
   {
@@ -642,7 +633,7 @@ class ImageDatabase
 		Autosave();
 	return Result;
   }
-  
+
   // Delete an ImageToNote link from the database (by fields)
   int deleteNote(String NoteID)
   {
@@ -652,7 +643,7 @@ class ImageDatabase
 	else
 		return deleteNote(TempRecord);
   }
-  
+
   // Delete an ImageToImage link from the database (by record)
   int deleteNote(Record r)
   {
@@ -661,14 +652,14 @@ class ImageDatabase
 		Autosave();
 	return Result;
   }
-  
+
   // Delete an ImageToTag link from the database (by fields)
   int deleteImageTag(String ImageID, String TagID)
   {
 	String[] RecordArray = {ImageID, ImageID};
     return deleteImageTag(new Record(RecordArray));
   }
-  
+
   // Delete an ImageToTag link from the database (by record)
   int deleteImageTag(Record r)
   {
@@ -677,14 +668,14 @@ class ImageDatabase
 		Autosave();
 	return Result;
   }
-  
+
   // Delete an TagToTag link from the database (by fields)
   int deleteTagTag(String ImageID, String TagID)
   {
 	String[] RecordArray = {ImageID, ImageID};
 	return deleteTagTag(new Record(RecordArray));
   }
-  
+
   // Delete an TagToTag link from the database (by record)
   int deleteTagTag(Record r)
   {
@@ -693,7 +684,7 @@ class ImageDatabase
 		Autosave();
 	return Result;
   }
-  
+
   // Delete a tag from the database (by fields)
   int deleteTag(String TagID)
   {
@@ -703,7 +694,7 @@ class ImageDatabase
 	else
 		return deleteTag(TempRecord);
   }
-  
+
   // Delete a tag from the database (by record)
   int deleteTag(Record r)
   {
@@ -740,7 +731,7 @@ class ImageDatabase
 	Autosave();
     return 1;
   }
-  
+
   // Add a new tag to the database
   String addTag(String Title)
   {
@@ -756,7 +747,7 @@ class ImageDatabase
 	  return Integer.toString(NextTagID - 1);
 	}
   }
-  
+
   // Link an image with a tag
   int tagImage(String ImageID, String TagID)
   {
@@ -773,7 +764,7 @@ class ImageDatabase
         return 1;
       }
   }
-  
+
   // Link an area of an image to a note
   String addImageNote(String ImageID, String Note, int X, int Y, int Width, int Height) {
         String[] RecordString = {Integer.toString(NextNoteID), ImageID, Note, Integer.toString(X), Integer.toString(Y), Integer.toString(Width), Integer.toString(Height)};
@@ -787,7 +778,7 @@ class ImageDatabase
             return Integer.toString(NextNoteID-1);
 		}
   }
-  
+
   // Link an area of an image to another image
   String linkImage(String ToImageID, String FromImageID, int X, int Y, int Width, int Height)
   {
@@ -805,17 +796,17 @@ class ImageDatabase
 		return Integer.toString(NextLinkID-1);
       }
   }
-  
+
   // Link an area of an image to another image
   Record getLink(String LinkID)
   {
     return ImageToImageTable.getRecord(LinkID, 0);
   }
-  
+
   // Link a tag with another tag, tagee is tagged with tagger
   int tagTag(String TageeID, String TaggerID)
   {
-    String[] RecordString = { TageeID, TaggerID }; 
+    String[] RecordString = { TageeID, TaggerID };
     if (TagTable.getRecord(TageeID, 0) == null)
       return -1;
     else
@@ -828,19 +819,19 @@ class ImageDatabase
           return 1;
       }
   }
-  
+
   // Produce a sub table of Notes for a certain ImageID
   IndexedTable getNotesFromImageID(String ImageID)
   {
 	return ImageToNoteTable.getRecords(ImageID, 1);
   }
-  
+
   // Produce a sub table of links for a certain ImageID
   IndexedTable getLinksFromImageID(String ImageID)
   {
 	return ImageToImageTable.getRecords(ImageID, 1);
   }
-  
+
   // Produce the rectangles of note links for a certain ImageID
   Rectangle[] getNoteRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
@@ -869,7 +860,7 @@ class ImageDatabase
 		return Result;
 	}
   }
-  
+
   // Produce the rectangles of image links for a certain ImageID
   Rectangle[] getLinkRectanglesFromImageID(String ImageID, int XOffset, int YOffset, double Scale)
   {
@@ -898,7 +889,7 @@ class ImageDatabase
 		return Result;
 	}
   }
-  
+
   // Produce the notes for a certain point in an image
   IndexedTable getNotesFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
   {
@@ -917,7 +908,7 @@ class ImageDatabase
 	}
 	return PointNotes;
   }
-  
+
   // Produce an array of String that describe the point in the image
   IDTitle[] getNoteStringsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
   {
@@ -934,7 +925,7 @@ class ImageDatabase
 	}
 	return Result;
   }
-  
+
   // Produce the links for a certain point in an image
   IndexedTable getLinksFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
   {
@@ -953,13 +944,13 @@ class ImageDatabase
 	}
 	return PointLinks;
   }
-  
+
   // Produce an array of imageIDs pointed to by the point in the image
   String[] getImageIDsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
   {
 	return getLinksFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(2);
   }
-  
+
   // Produce a sub table of Images that are tagged with the TagID
   IndexedTable getImagesFromTagID(String TagID)
   {
@@ -983,7 +974,7 @@ class ImageDatabase
     TagIDs = ImageToTagTable.getRecords(ImageID, 0).getColArray(1);
     return TagIDs;
   }
-  
+
   // Produce a sub table of Tags that are tagged with the TagID
   IndexedTable getTagsFromTagID(String TagID)
   {
@@ -999,7 +990,7 @@ class ImageDatabase
         Result.addRecord(TagTable.getRecord(TagIDs[i], 0));
     return Result;
   }
-  
+
   // Get the title of a tag from its tagID
   String getTagTitleFromTagID(String TagID)
   {
@@ -1009,7 +1000,7 @@ class ImageDatabase
     else
         return TempRecord.getField(1);
   }
-  
+
   // Get the tagIDa tag from its title
   String getTagIDFromTagTitle(String TagTitle)
   {
@@ -1018,8 +1009,8 @@ class ImageDatabase
         return null;
     else
         return TempRecord.getField(0);
-  }  
-  
+  }
+
   // Get an array of image IDs tagged with the tag
   String[] getImageIDsFromTagID(String TagID)
   {
@@ -1043,7 +1034,7 @@ class ImageDatabase
       }
     return imagesSoFar.toArray(new String[imagesSoFar.size()]);
   }
-  
+
   // Returns a table of images tagged with the tag, includes children
   IndexedTable getImagesFromTagIDChildren(String TagID)
   {
@@ -1061,13 +1052,13 @@ class ImageDatabase
 		}
 	return ResultTable;
   }
-  
+
   // Returns an array of ImageIDs tagged with the tag, includes children
   String[] getImageIDsFromTagIDChildren(String TagID)
   {
 	return getImagesFromTagIDChildren(TagID).getColArray(0);
   }
-  
+
   // Get an array of tag IDs tagged with the tag
   String[] getTagIDsFromTagID(String TagID)
   {
@@ -1077,7 +1068,7 @@ class ImageDatabase
     else
       return TempTable.getColArray(0);
   }
-  
+
   // Get an array of image IDs tagged with the tag title (matches tag title to first tagID)
   String[] getImageIDsFromTagTitle(String TagTitle)
   {
@@ -1087,7 +1078,7 @@ class ImageDatabase
     else
       return getImageIDsFromTagID(TagID);
   }
-  
+
   // Get an array of image IDs tagged with the tag title (matches tag title to all tagIDs)
   String[] getImageIDsFromTagTitleAll(String TagTitle)
   {
@@ -1109,7 +1100,7 @@ class ImageDatabase
     ResultList.toArray(Result);
     return Result;
   }
-  
+
   // Get an array of image filenames tagged with the tag
   String[] getFilenamesFromTagID(String TagID)
   {
@@ -1120,13 +1111,13 @@ class ImageDatabase
     else
       return TempTable.getColArray(2);
   }
-  
+
   // Get an array of all the image IDs
   String[] getAllImageIDs()
   {
     return ImageTable.getColArray(0);
   }
-  
+
   // Get an array of all the tag IDs
   IDTitle[] getTagIDTitles()
   {
@@ -1136,19 +1127,19 @@ class ImageDatabase
       Result[i] = new IDTitle(TagIDs[i], getTagTitleFromTagID(TagIDs[i]));
     return Result;
   }
-  
+
   // Get an array of TagIDs of all tags
   String[] getAllTagIDs()
   {
     return TagTable.getColArray(0);
   }
-  
+
   // Get an array of all the tag Titles (shouldnt be used - title not key field - titles not unique)
   String[] getAllTagTitles()
   {
     return TagTable.getColArray(1);
   }
-  
+
   // Get the filename of a certain image (by ID)
   String getImageFilename(String ImageID)
   {
@@ -1158,7 +1149,7 @@ class ImageDatabase
     else
       return FoundRecord.getField(2);
   }
-  
+
   // Get a list of possible ImageIDs from the image title (which doesnt have to be unique)
   String[] getPossibleIDs(String Title)
   {
@@ -1168,22 +1159,22 @@ class ImageDatabase
     else
       return FoundRecords.getColArray(0);
   }
-  
+
   // Get a particular images record (by ID)
   Record getImageRecord(String ImageID)
   {
-    Record FoundRecord = ImageTable.getRecord(ImageID, 0); 
+    Record FoundRecord = ImageTable.getRecord(ImageID, 0);
     if (FoundRecord == null)
       return null;
     else
       return FoundRecord;
   }
-  
-  
+
+
   // Get an array of all the image filenames
   String[] getAllFilenames()
-  {    
+  {
     return ImageTable.getColArray(2);
   }
-  
+
 }

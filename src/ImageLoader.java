@@ -58,7 +58,7 @@ class ImageLoader extends SwingWorker<BufferedImage, Void> {
             if (outOfMemory) {
                 returnImage = ErrorImages.outOfMemory;
                 returnImageType = ImageType.Icon;
-            } else if (returnImageType == ImageType.None) {
+            } else if (returnImage==null) {
                 returnImage = ErrorImages.fileNotFound;
                 returnImageType = ImageType.Icon;
                 if(isCancelled()) outOfMemory = true;//analagous to having been cancelled for memory reasons

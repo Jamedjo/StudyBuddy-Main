@@ -30,11 +30,12 @@ enum OptionType{
 
 enum  UserOptions{//Need to add option for default options
     //Name(Label,Type,SettingName,factor),
-    SlideshowTime("Slideshow Time",OptionType.Spinner,"slideShowTime",1000),
+    SlideshowTime("Slideshow Time(s)",OptionType.Spinner,"slideShowTime",1000),
     showLinks("Show Links",OptionType.CheckBox,"showLinks"),
     showNotes("Show Notes",OptionType.CheckBox,"showNotes"),
-    SliderExample("Slider Example",OptionType.Slider),
-    TextBoxExample("TextBox Example");
+//    SliderExample("Slider Example",OptionType.Slider),
+//    TextBoxExample("TextBox Example")
+    ;
     private OptionType type;
     private JComponent component;
     private String text;
@@ -79,6 +80,8 @@ enum  UserOptions{//Need to add option for default options
             case TextBox:
             default:
                 component = new JTextField(10);
+                ((JTextField)component).setText("          ");
+
         }
     }
 

@@ -1,9 +1,8 @@
 
-import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.Vector;
@@ -31,6 +30,9 @@ public class BlueDemo implements DiscoveryListener,Runnable {
     boolean shouldSearch=true;
     int devNo;
     boolean devNoIsSet = false;
+    String newMobileDBValues;
+    String nextFileName;
+    String imageStorePath="C:\\sdjlfkasklfjskladsjfioewtuierwhgks";
 
     @Override
     public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
@@ -210,29 +212,36 @@ public class BlueDemo implements DiscoveryListener,Runnable {
 
         BlueFrame frameSender = new BlueFrame(blueGUI,portOut);
 
-        frameSender.sendString(FrameType.Text, "Hello Android!!");
-        
-        frameSender.sendCommand(FrameType.ImagesStart);
-
-        
-
         recieveFrames(portIn);
+        //call assignMobileItemsIDs with string recieved (and place to store images)
+        //send return value back
+        //call make changes from moblile and print return value
 
-        File[] files = mainDB.imageFilenamesForMobile();
-        String updateString=mainDB.makeUpdateString();
-        frameSender.sendImage(FrameType.Image, "zoomSmall32.png",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\icons\\oxygencustom\\zoomSmall32.png")));
-        frameSender.sendImage(FrameType.Image, "img_6088b_small.jpg",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\img\\img_6088b_small.jpg")));
-
-        frameSender.sendCommand(FrameType.ImagesDone);
-
-        frameSender.sendString(FrameType.Text, "Hello Android!!!!!!!!!\nThis is multi-line!!!!!!!!");
-        frameSender.sendString(FrameType.Text, updateString);
+        System.out.println("Calling mainDB.assignMobileItemsIDs(newMobileDBValues, imageStorePath)\nRecieved: "+newMobileDBValues);
+        frameSender.sendString(FrameType.NewDBValues, mainDB.assignMobileItemsIDs(newMobileDBValues, imageStorePath));
         frameSender.sendCommand(FrameType.FinishedSending);
-
-        portOut.flush();
-        blueGUI.message("Hello sent");
-
+        mainDB.print();
         recieveFrames(portIn);
+
+//        File[] files = mainDB.imageFilenamesForMobile();
+//        String updateString=mainDB.makeUpdateString();
+//
+//        frameSender.sendString(FrameType.Text, "Hello Android!!");
+//
+//        frameSender.sendCommand(FrameType.ImagesStart);
+//        frameSender.sendImage(FrameType.Image, "zoomSmall32.png",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\icons\\oxygencustom\\zoomSmall32.png")));
+//        frameSender.sendImage(FrameType.Image, "img_6088b_small.jpg",(new File("D:\\Users\\Student\\Documents\\NetBeansProjects\\StudyBuddyMarch\\etc\\img\\img_6088b_small.jpg")));
+//
+//        frameSender.sendCommand(FrameType.ImagesDone);
+//
+//        frameSender.sendString(FrameType.Text, "Hello Android!!!!!!!!!\nThis is multi-line!!!!!!!!");
+//        frameSender.sendString(FrameType.Text, updateString);
+//        frameSender.sendCommand(FrameType.FinishedSending);
+//
+//        portOut.flush();
+//        blueGUI.message("Hello sent");
+//
+//        recieveFrames(portIn);
 
         portIn.close();
         portOut.close();
@@ -251,24 +260,37 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         try{
             while(true){
                 FrameType type = readFrameType(portIn);
-                if(type==FrameType.FinishedSending) break;
+                if(type==FrameType.FinishedSending) {
+                    System.out.println("Finished recieving");
+                    break;
+                }
                 if(type.isCommand()) {
                     System.out.println("Got command: "+type.toString());
+
                     continue;//Dosn't need to read length, does nothing for now.
                 }
-            
+
+                System.out.println("Got frame type: "+type.toString());
                 int length = readFrameLength(portIn);
 
                 switch(type){
                     case Text:
                         System.out.println(readFrameText(portIn, length));
                     case Image:
-                    case ImagesStart:
-                    case ImagesDone:
+                        FileOutputStream fileOut = new FileOutputStream(imageStorePath+nextFileName);
+                        this.readFrameImage(portIn, fileOut, length);
+                        break;
+                    //case ImagesStart:
+                    //case ImagesDone:
                     case ImageFileName:
-                    case FinishedSending:
-                    case ErrorValue:
-                    default:
+                        nextFileName=readFrameText(portIn,length);
+                        break;
+                    case NewDBValues:
+                        newMobileDBValues=readFrameText(portIn, length);
+                        break;
+                    //case FinishedSending:
+                    //case ErrorValue:
+                    //default:
                 }
             }
         } catch (IOException e){
@@ -292,6 +314,9 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         byte[] data = new byte[length];
         portIn.read(data);
         return data;
+    }
+    void readFrameImage(InputStream portIn,FileOutputStream fileOut,int length){
+        
     }
 }
 
