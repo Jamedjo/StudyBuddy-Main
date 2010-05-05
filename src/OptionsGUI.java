@@ -30,7 +30,7 @@ enum OptionType{
 
 enum  UserOptions{//Need to add option for default options
     //Name(Label,Type,SettingName,factor),
-    SlideshowTime("Slideshow Time(s)",OptionType.Spinner,"slideShowTime",1000),
+    SlideshowTime("Slideshow Time (s)",OptionType.Spinner,"slideShowTime",1000),
     showLinks("Show Links",OptionType.CheckBox,"showLinks"),
     showNotes("Show Notes",OptionType.CheckBox,"showNotes"),
 //    SliderExample("Slider Example",OptionType.Slider),
