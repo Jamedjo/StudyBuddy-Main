@@ -1219,5 +1219,5 @@ class ImageDatabase
   {
     return ImageTable.getColArray(2);
   }
-
+  
 }

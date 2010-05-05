@@ -78,15 +78,16 @@ public class BlueFrame {
 enum FrameTypeGroup{Command,String,Data}
 
 enum FrameType{
-    Text(FrameTypeGroup.String,              (byte) 0x00)
-    ,Image(FrameTypeGroup.Data,              (byte) 0x01)
-    ,ImagesStart(FrameTypeGroup.Command,     (byte) 0x02)
-    ,ImagesDone(FrameTypeGroup.Command,      (byte) 0x03)
-    ,ImageFileName(FrameTypeGroup.String,    (byte) 0x04)
-    ,FinishedSending(FrameTypeGroup.Command, (byte) 0x05)
-    ,NewDBValues(FrameTypeGroup.String,      (byte) 0x06)
+    Text(FrameTypeGroup.String,                     (byte) 0x00)
+    ,Image(FrameTypeGroup.Data,                     (byte) 0x01)
+    ,ImagesStart(FrameTypeGroup.Command,            (byte) 0x02)
+    ,ImagesDone(FrameTypeGroup.Command,             (byte) 0x03)
+    ,ImageFileName(FrameTypeGroup.String,           (byte) 0x04)
+    ,FinishedSending(FrameTypeGroup.Command,        (byte) 0x05)
+    ,NewDBValues(FrameTypeGroup.String,             (byte) 0x06)
 
-    ,ErrorValue(FrameTypeGroup.Command,      (byte)0xFF)
+    ,CommunicationsFinished(FrameTypeGroup.Command, (byte) 0xEE)
+    ,ErrorValue(FrameTypeGroup.Command,             (byte) 0xFF)
             ;
 
     byte val;

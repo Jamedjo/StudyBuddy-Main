@@ -32,7 +32,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
     boolean devNoIsSet = false;
     String newMobileDBValues;
     String nextFileName;
-    String imageStorePath="C:\\sdjlfkasklfjskladsjfioewtuierwhgks";
+    String imageStorePath="C:\\Users\\Student\\AppData\\Roaming\\StudyBuddy\\imageStoreTEMP\\";
 
     @Override
     public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {
@@ -217,14 +217,15 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         //send return value back
         //call make changes from moblile and print return value
 
+        // Must prepare this before doing updates
+        // File[] files = mainDB.imageFilenamesForMobile();
+        // String updateString=mainDB.makeUpdateString();
         System.out.println("Calling mainDB.assignMobileItemsIDs(newMobileDBValues, imageStorePath)\nRecieved: "+newMobileDBValues);
         frameSender.sendString(FrameType.NewDBValues, mainDB.assignMobileItemsIDs(newMobileDBValues, imageStorePath));
         frameSender.sendCommand(FrameType.FinishedSending);
-        mainDB.print();
+        //mainDB.print();
         recieveFrames(portIn);
 
-//        File[] files = mainDB.imageFilenamesForMobile();
-//        String updateString=mainDB.makeUpdateString();
 //
 //        frameSender.sendString(FrameType.Text, "Hello Android!!");
 //
@@ -278,7 +279,8 @@ public class BlueDemo implements DiscoveryListener,Runnable {
                         System.out.println(readFrameText(portIn, length));
                     case Image:
                         FileOutputStream fileOut = new FileOutputStream(imageStorePath+nextFileName);
-                        this.readFrameImage(portIn, fileOut, length);
+                        readFrameImage(portIn, fileOut, length);
+                        fileOut.close();
                         break;
                     //case ImagesStart:
                     //case ImagesDone:
@@ -305,18 +307,25 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         byte[] b = new byte[4];
         portIn.read(b);//should throw error if failed
         int l = (b[0] & 0xff) + ((b[1]&0xff)<<8) + ((b[2]&0xff)<<16) + ((b[3]&0xff)<<24);
+        System.out.println("length is: "+l);
         return l;
     }
     String readFrameText(InputStream portIn,int length) throws IOException{
-        return new String(readFrameData(portIn, length));
+        String str=new String(readFrameData(portIn, length));
+        System.out.println("**"+str+"**");
+        return str;
     }
     byte[] readFrameData(InputStream portIn,int length) throws IOException{
         byte[] data = new byte[length];
-        portIn.read(data);
+        for(int i=0;i<length;i++){
+            data[i] = (byte)portIn.read();
+        }
         return data;
     }
-    void readFrameImage(InputStream portIn,FileOutputStream fileOut,int length){
-        
+    void readFrameImage(InputStream portIn,FileOutputStream fileOut,int length) throws IOException{
+        for(int i=0;i<length;i++){
+           fileOut.write(portIn.read());
+        }
     }
 }
 
