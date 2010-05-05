@@ -467,7 +467,7 @@ class ImageDatabase
 						TempResult = -1;
 					}
 					if (Fields[1].equals("Delete"))
-						TempResult = ImageTable.deleteRecord(new Record(RecordArray));
+						TempResult = this.deleteImage(Fields[2]);
 					if (TempResult < Result)
 						Result = TempResult;
 					break;
