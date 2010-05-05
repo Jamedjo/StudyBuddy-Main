@@ -16,6 +16,7 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -152,7 +153,7 @@ public class ZoomBar extends JComboBox{
             }
             return;
         }
-        int yOffset = 0;//32;//Verticle distance from top of popup to start of slder component.
+        int yOffset = 90;//32;//Verticle distance from top of popup to start of slder component.
         //System.out.println("event at:("+e.getX()+","+(e.getY()-yOffset)+")");//-dropCombo.getY()
         zoomSlider.dispatchEvent(new MouseEvent((Component) e.getSource(), eventType, e.getWhen(), e.getModifiers(), e.getX(), e.getY() - yOffset, e.getClickCount(), e.isPopupTrigger(), e.getButton()));
         refresher.refresh();
@@ -188,6 +189,9 @@ class ComponentRenderer implements ListCellRenderer{
         if (value instanceof ZoomButtons) value=new DropButton((ZoomButtons)value);
         ((JComponent)value).setOpaque(true);
         if ((value instanceof JSlider)){
+            //On linux the slider component does not function correctly so do not display it
+            if (!Settings.isWindows())
+                return new JPanel();
             sliderHasFocus=isSelected;
         }
         if(isSelected){//Alt text?
