@@ -153,7 +153,7 @@ public class ZoomBar extends JComboBox{
             }
             return;
         }
-        int yOffset = 90;//32;//Verticle distance from top of popup to start of slder component.
+        int yOffset = 0;//32;//Verticle distance from top of popup to start of slder component.
         //System.out.println("event at:("+e.getX()+","+(e.getY()-yOffset)+")");//-dropCombo.getY()
         zoomSlider.dispatchEvent(new MouseEvent((Component) e.getSource(), eventType, e.getWhen(), e.getModifiers(), e.getX(), e.getY() - yOffset, e.getClickCount(), e.isPopupTrigger(), e.getButton()));
         refresher.refresh();
