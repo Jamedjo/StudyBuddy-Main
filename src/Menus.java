@@ -96,6 +96,12 @@ enum ToolBar{
             if (i == ToolBar.values().length - (1 + sliderPosFromEnd)){
                 bar.addSeparator();
                 bar.add(Box.createHorizontalGlue());
+               if (!Settings.isWindows()) {
+                   for(int k=0;k<ZoomButtons.values().length;k++){
+                    ZoomButtons.values()[k].create(mainGUI.guiListener);
+                    bar.add(ZoomButtons.values()[k].button);
+            }
+        }
                 zoomBar=new ZoomBar(mainGUI);
                 bar.add(zoomBar);
             }
@@ -267,9 +273,9 @@ enum ImageMenu {
 
     ImageMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        //if (acceleratorKey != -1) {
-        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        //}
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
@@ -309,16 +315,16 @@ enum ImageMenu {
 enum TagMenu {
     AddTag("Create new tag", KeyEvent.VK_N, -1, -1, "AddTag"),
     DeleteTag("Delete a tag", KeyEvent.VK_D, -1, -1, "DeleteTag"),
-    TagThis("Tag this Image", KeyEvent.VK_T, KeyEvent.VK_T, 0, "TagThis"),
-    QuickTag("QuickTag Images", KeyEvent.VK_Q, KeyEvent.VK_Q, 0, "QuickTag"),
+    TagThis("Tag this Image", KeyEvent.VK_T, KeyEvent.VK_T,  ActionEvent.CTRL_MASK, "TagThis"),
+    QuickTag("QuickTag Images", KeyEvent.VK_Q, KeyEvent.VK_Q,  ActionEvent.CTRL_MASK, "QuickTag"),
     TagTag("Tag a Tag", KeyEvent.VK_A, -1, -1, "TagTag"),
     TagFilter("Filter Images by Tag", KeyEvent.VK_F, -1, -1, "TagFilter");
     JMenuItem item;
     TagMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        //if (acceleratorKey != -1) {
-        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        //}
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
@@ -351,14 +357,14 @@ enum TagMenu {
 
 // <editor-fold defaultstate="collapsed" desc="ViewMenu">
 enum ViewMenu {
-    NextImage("Next Image", KeyEvent.VK_N, KeyEvent.VK_RIGHT, 0, "Next"),
-    PrevImage("Previous Image", KeyEvent.VK_P, KeyEvent.VK_LEFT, 0, "Prev"),
-    ShowThumbs("Show Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.CTRL_MASK, "ThumbsS", false),
-    HideThumbs("Hide Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.CTRL_MASK, "ThumbsH"),
+    NextImage("Next Image", KeyEvent.VK_N, KeyEvent.VK_RIGHT,  ActionEvent.CTRL_MASK, "Next"),
+    PrevImage("Previous Image", KeyEvent.VK_P, KeyEvent.VK_LEFT,  ActionEvent.CTRL_MASK, "Prev"),
+    ShowThumbs("Show Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsS", false),
+    HideThumbs("Hide Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsH"),
     ToggleTree("Show/Hide Tag Tree", KeyEvent.VK_R, -1, -1, "TagTree"),
     ToggleImgToolBar("Toggle Image ToolBar", KeyEvent.VK_I,-1, -1, "ImageBar"),
-    SlidePlay("Play Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE, 0, "SlideP"),
-    SlideStop("Stop Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE, 0, "SlideS", false),
+    SlidePlay("Play Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE,  ActionEvent.CTRL_MASK, "SlideP"),
+    SlideStop("Stop Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE,  ActionEvent.CTRL_MASK, "SlideS", false),
     ZoomToFit("Zoom: Fit Image", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "ZoomFit", false),
     ZoomTo100("Zoom: 100%", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "Zoom100"),
 //    ZoomToX("Zoom: Custom", KeyEvent.VK_C, KeyEvent.VK_Z, ActionEvent.SHIFT_MASK, "ZoomX")
@@ -366,9 +372,9 @@ enum ViewMenu {
     JMenuItem item;
     ViewMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        //if (acceleratorKey != -1) {
-        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        //}
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
@@ -413,9 +419,9 @@ enum HelpMenu {
     JMenuItem item;
     HelpMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
         item = new JMenuItem(label, mnemonic);
-        //if (acceleratorKey != -1) {
-        //    item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
-        //}
+        if (acceleratorKey != -1) {
+            item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
+        }
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
