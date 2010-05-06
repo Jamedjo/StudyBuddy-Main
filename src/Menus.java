@@ -93,15 +93,15 @@ enum ToolBar{
                 bar.addSeparator();
             }
             bar.add(bt);
-            if (i == ToolBar.values().length - (1 + sliderPosFromEnd)){
+            if (i == ToolBar.values().length - (1 + sliderPosFromEnd)) {
                 bar.addSeparator();
                 bar.add(Box.createHorizontalGlue());
-               if (!Settings.isWindows()) {
-                   for(int k=0;k<ZoomButtons.values().length;k++){
-                    ZoomButtons.values()[k].create(mainGUI.guiListener);
-                    bar.add(ZoomButtons.values()[k].button);
-            }
-        }
+//                if (!Settings.isWindows()) {
+//                    for (int k = 0; k < ZoomButtons.values().length; k++) {
+//                        ZoomButtons.values()[k].create(mainGUI.guiListener);
+//                        bar.add(ZoomButtons.values()[k].button);
+//                    }
+//                }
                 zoomBar=new ZoomBar(mainGUI);
                 bar.add(zoomBar);
             }

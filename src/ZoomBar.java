@@ -42,12 +42,12 @@ public class ZoomBar extends JComboBox{
         Object[] items = new Object[ZoomButtons.values().length+1];
         items[0]=zoomSlider;
           for (int i = 0; i < ZoomButtons.values().length; i++) {
-            if (Settings.isWindows()) {
+//            if (Settings.isWindows()) {
                 ZoomButtons.values()[i].create(mainGUI.guiListener);
                 items[i + 1] = ZoomButtons.values()[i];
-            } else {
-                items[i + 1] = new JPanel();
-            }
+//            } else {
+//                items[i + 1] = new JPanel();
+//            }
         }
         refresher=new RefreshableComboBoxModel(items);
         this.setModel(refresher);
