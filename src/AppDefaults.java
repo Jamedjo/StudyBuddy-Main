@@ -11,7 +11,7 @@ enum AppDefaults {
     s3("thumbnailPathExt", "thumbnails"+File.separator),
     DBname("databaseFileName","gammaDB"),
     s5("databasePathExt","database"+File.separator),
-    ver("appVersionLast","0.9.4_r337"),//change this whenever you change this enum.
+    ver("appVersionLast","0.9.4_r358"),//change this whenever you change this enum.
     s7("lastFilterUsed","-1"),
     s8("lastCurrentI","0"),
     s9("showLinks","true"),

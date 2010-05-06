@@ -12,6 +12,8 @@ import java.lang.reflect.Field;
 import javax.swing.Box;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -23,6 +25,8 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.JViewport;
 import javax.swing.ListCellRenderer;
+import javax.swing.plaf.ComboBoxUI;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicComboBoxEditor;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicComboPopup;
@@ -42,12 +46,12 @@ public class ZoomBar extends JComboBox{
         Object[] items = new Object[ZoomButtons.values().length+1];
         items[0]=zoomSlider;
           for (int i = 0; i < ZoomButtons.values().length; i++) {
-//            if (Settings.isWindows()) {
+            if (Settings.isWindows()) {
                 ZoomButtons.values()[i].create(mainGUI.guiListener);
                 items[i + 1] = ZoomButtons.values()[i];
-//            } else {
-//                items[i + 1] = new JPanel();
-//            }
+            } else {
+                items[i + 1] = new JPanel();
+            }
         }
         refresher=new RefreshableComboBoxModel(items);
         this.setModel(refresher);
@@ -63,6 +67,8 @@ public class ZoomBar extends JComboBox{
         setEditorMouseListener();
         this.updateUI();
         this.setMaximumSize(new Dimension(120,120));
+        //if(!Settings.isWindows())
+            //this.setUI((ComboBoxUI) HiddenComboBoxUI.createUI(this));
         setSliderListeners();
     }
     
@@ -163,6 +169,32 @@ public class ZoomBar extends JComboBox{
         refresher.refresh();
     }
 }
+
+//class EmptyIcon extends ImageIcon{
+//    @Override
+//    public int getIconWidth(){
+//        return 1;
+//    }
+//    @Override
+//    public int getIconHeight(){
+//        return 1;
+//    }
+//}
+
+class HiddenComboBoxUI extends BasicComboBoxUI {
+    public static ComponentUI createUI(JComponent c) {
+      return new HiddenComboBoxUI();
+    }
+
+    //Create blank button
+    @Override
+    protected JButton createArrowButton() {
+      JButton button = new JButton(new ImageIcon());
+      button.setBorder(null);
+      return button;
+    }
+}
+
 class DropButton extends JToolBar {
     ZoomButtons item;
     public DropButton(ZoomButtons tbItem) {

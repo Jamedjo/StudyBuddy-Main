@@ -291,7 +291,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
     }//GEN-LAST:event_connectButtonActionPerformed
 
     public void deviceConnected(String connectionURL){
-        blD.RFCOMM_Start(connectionURL,mainGUI.mainImageDB);
+        blD.RFCOMM_Start(connectionURL,mainGUI);
     }
 
     private void phoneSearchActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_phoneSearchActionPerformed

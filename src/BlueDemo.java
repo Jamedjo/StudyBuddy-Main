@@ -60,7 +60,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
             KnownDevice kDev= it.next();
             //devNames[i] = kDev.getAddress()+": "+kDev.getName();
             devNames[i] = kDev.getName();
-            if(devNames[i].equals("stork")) break;
+            //if(devNames[i].equals("stork")) break;
             i++;
             blueGUI.setProgress((100/deviceList.size())*i);
         }
@@ -204,7 +204,8 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         }
     }
 
-    void RFCOMM_Start(String connectionURL, ImageDatabase mainDB){
+    void RFCOMM_Start(String connectionURL, GUI mainGUI){
+        ImageDatabase mainDB = mainGUI.mainImageDB;
         try{
         blueGUI.message("Conection URL :"+connectionURL);
         StreamConnection port = (StreamConnection) Connector.open(connectionURL);
@@ -245,6 +246,7 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         frameSender.sendCommand(FrameType.ImagesDone);
 
 //        portOut.flush();
+        mainGUI.tagTree.updateTags();
         blueGUI.message("All sent");
         frameSender.sendCommand(FrameType.FinishedSending);
         recieveFrames(portIn);
