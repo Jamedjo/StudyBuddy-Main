@@ -60,7 +60,7 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
             System.exit(0);
         } else if (ae.getActionCommand().equals("Help")) {
             //Not final help- needs improving
-            JOptionPane.showMessageDialog(mainGUI.w, "Visit https://sites.google.com/site/studybuddy10/ for help and tutorials", "Study Help", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
+            JOptionPane.showMessageDialog(mainGUI.w, "Visit https://sites.google.com/site/studybuddy10 for help and tutorials", "Study Help", JOptionPane.INFORMATION_MESSAGE, SysIcon.Info.Icon);
         } else if (ae.getActionCommand().equals("About")) {
             JOptionPane.showMessageDialog(mainGUI.w, "StudyBuddy by Team StudyBuddy\nhttps://sites.google.com/site/studybuddy10/", "About StudyBuddy", JOptionPane.INFORMATION_MESSAGE, SysIcon.Help.Icon);
         } else{
