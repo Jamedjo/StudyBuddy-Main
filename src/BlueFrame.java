@@ -88,7 +88,7 @@ enum FrameType{
     ,ImageFileName(FrameTypeGroup.String,           (byte) 0x04)
     ,FinishedSending(FrameTypeGroup.Command,        (byte) 0x05)
     ,NewDBValues(FrameTypeGroup.String,             (byte) 0x06)
-    ,Sync(FrameTypeGroup.String,             (byte) 0x07)
+    ,Sync(FrameTypeGroup.String,                    (byte) 0x07)
 
     ,CommunicationsFinished(FrameTypeGroup.Command, (byte) 0xEE)
     ,ErrorValue(FrameTypeGroup.Command,             (byte) 0xFF)

@@ -414,7 +414,7 @@ enum ViewMenu {
 // <editor-fold defaultstate="collapsed" desc="HelpMenu">
 enum HelpMenu {
     About("About", KeyEvent.VK_A, -1, -1, "About"),
-    Start("StartHere Guide", KeyEvent.VK_S, -1, -1, "StartHelp"),
+//    Start("StartHere Guide", KeyEvent.VK_S, -1, -1, "StartHelp"),
     Help("StudyBuddy Help!", KeyEvent.VK_H, KeyEvent.VK_F1, 0, "Help");
     JMenuItem item;
     HelpMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
