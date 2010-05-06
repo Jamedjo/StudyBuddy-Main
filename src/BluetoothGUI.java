@@ -9,7 +9,7 @@ import javax.swing.SwingUtilities;
 public class BluetoothGUI extends javax.swing.JDialog {
     Log log = new Log(false);
     GUI mainGUI;
-    BlueDemo blD;
+    BlueTransfer blD;
     Object[] DevIDs;
 
     /** A return status code - returned if Cancel button has been pressed */
@@ -238,7 +238,7 @@ public class BluetoothGUI extends javax.swing.JDialog {
         existingPhone.setEnabled(false);
         phoneSearch.setEnabled(false);
         ((LoadingAnimationPane)loadingAnimation).startAnimation();
-        blD = BlueDemo.setup(this);
+        blD = BlueTransfer.setup(this);
         blD.threadGetDevices(shouldSearch);
     }
 

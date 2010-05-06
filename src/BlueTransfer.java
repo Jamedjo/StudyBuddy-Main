@@ -18,7 +18,7 @@ import javax.microedition.io.StreamConnection;
 
 enum BlueTthOp{GetDevices,CheckServices}//Type of bluetooth operation toe perform
 
-public class BlueDemo implements DiscoveryListener,Runnable {
+public class BlueTransfer implements DiscoveryListener,Runnable {
     private static Vector<KnownDevice> deviceList = new Vector<KnownDevice>();
 
     private static final Object lock = new Object();
@@ -91,8 +91,8 @@ public class BlueDemo implements DiscoveryListener,Runnable {
         }
     }//end method
 
-    static BlueDemo setup(BluetoothGUI BlueGUI) {
-        BlueDemo blSeDi = new BlueDemo();
+    static BlueTransfer setup(BluetoothGUI BlueGUI) {
+        BlueTransfer blSeDi = new BlueTransfer();
         blSeDi.blueGUI = BlueGUI;
         return blSeDi;
     }
