@@ -2,11 +2,9 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
@@ -14,7 +12,6 @@ import javax.swing.event.ChangeListener;
 import java.io.File;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -214,7 +211,8 @@ class GUI {
         JPanel leftPanel = new JPanel();
         leftPanel.setLayout(new BorderLayout());
         leftPanel.add(newTagBar, BorderLayout.NORTH);
-        leftPanel.add(tagTree, BorderLayout.CENTER);
+        JScrollPane tagTreeScrollPane=new JScrollPane(tagTree,JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        leftPanel.add(tagTreeScrollPane, BorderLayout.CENTER);
 
         splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, imageAreas);
         splitpane.setOneTouchExpandable(true);
