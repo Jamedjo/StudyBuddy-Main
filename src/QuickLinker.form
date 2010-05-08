@@ -95,7 +95,7 @@
     </Component>
     <Container class="javax.swing.JScrollPane" name="imageSelector">
       <AuxValues>
-        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ImageSelectPane(mainGUI,3,true)"/>
+        <AuxValue name="JavaCodeGenerator_CreateCodeCustom" type="java.lang.String" value="new ImageSelectPane(mainGUI,3,false)"/>
       </AuxValues>
 
       <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>

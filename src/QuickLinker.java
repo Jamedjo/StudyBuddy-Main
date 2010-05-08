@@ -49,7 +49,7 @@ public class QuickLinker extends javax.swing.JDialog {
         cancelButton = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         Logo = new javax.swing.JLabel();
-        imageSelector = new ImageSelectPane(mainGUI,3,true);
+        imageSelector = new ImageSelectPane(mainGUI,3,false);
 
         setTitle("Link Image- Select image link will point to");
         setIconImage(null);
