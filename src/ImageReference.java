@@ -43,6 +43,7 @@ class ImageReference {
     boolean hasCalledLoad = false;
     ImgRequestSize lastRequestSize=ImgRequestSize.Thumb;//could be replaced with boolean- hasRequestedFull
     //String title,filename,comments?
+    boolean rotationExifChecked=false;
     
     ImageReference(String inputPath){//, GUI gui) {
         //mainGUI = gui;
@@ -134,6 +135,14 @@ class ImageReference {
     }
     //loadViaWorker exists to allow thumbnails to signal they only want lowQ versions if the calling method is aware of the flush/preload system in use.
     BufferedImage getImage(ImgRequestSize size,boolean loadViaWorker) {
+        if(!rotationExifChecked) {
+            int rotval = ImageUtils.getRotationFromExif(pathFile);
+            for(;rotval>=90;rotval-=90){
+                img.transform.rotate90();
+            }
+            rotationExifChecked=true;
+        }
+
         //If requested image already exists, return it.
         if (size.isThumb() && img.hasGoodThumbImage()) {
             return img.getCurrentThumbImage();

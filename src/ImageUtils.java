@@ -5,12 +5,13 @@ import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.Date;
 import javax.imageio.ImageIO;
 import org.apache.sanselan.ImageReadException;
 import org.apache.sanselan.Sanselan;
 import org.apache.sanselan.common.IImageMetadata;
 import org.apache.sanselan.formats.jpeg.JpegImageMetadata;
+import org.apache.sanselan.formats.tiff.TiffField;
+import org.apache.sanselan.formats.tiff.constants.TiffTagConstants;
 
 class ImageUtils{
 
@@ -93,6 +94,31 @@ class ImageUtils{
             Log.Print(LogType.DebugError,"Error reading exif dimensions of image " + pathFile.toString() + "\nError was: " + e.toString());
 	}
         return image_d;
+    }
+
+    static int getRotationFromExif(File pathFile){
+        if(pathFile==null) return 0;
+        try{
+            IImageMetadata metaData = Sanselan.getMetadata(pathFile);
+            if(metaData instanceof JpegImageMetadata){
+                TiffField ori = ((JpegImageMetadata) metaData).findEXIFValue(TiffTagConstants.TIFF_TAG_ORIENTATION);
+                if(ori==null) return 0;
+                int iOri = ori.getIntValue();
+                switch (iOri){
+                    case 1:
+                        return 0;//0;
+                    case 8:
+                        return 270;//90;
+                    case 3:
+                        return 180;//180;
+                    case 6:
+                        return 90;//270;
+                }
+            }
+        } catch (ImageReadException e) {
+        } catch (IOException e){
+        }
+        return 0;
     }
 
         //Finds maximum with and height somthing can be scaled to, without changing aspect ratio

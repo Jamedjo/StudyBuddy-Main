@@ -136,6 +136,8 @@ class ProgramState{
 
     void importImages(File[] files) {// redo if hierarchy. Work out why GUI freezes when importing large files. Ensure import folder works.
         isLocked = true;
+        boolean oldAutoSave = mainGUI.mainImageDB.getAutosave();
+        mainGUI.mainImageDB.setAutosave(false);
         try {
             if (currentFilter.equals("-1")) { // "-1" is now show all (working on TagID rather than Tag Title)
                 ArrayList<String> tempImageIDs = new ArrayList<String>(Arrays.asList(imageIDs));
@@ -181,16 +183,22 @@ class ProgramState{
                 tempImageList.toArray(imageList);
                 if (lastIndex >= (imageIDs.length - 1)) {
                     //Print error loading images?
+                    mainGUI.mainImageDB.setAutosave(oldAutoSave);
+                    mainGUI.mainImageDB.Autosave();
                     return; //If there are no more images than before import, then failure
                 }
                 currentI = lastIndex + 1;
                 lastIndex = imageIDs.length - 1;
                 numberOfImages = imageList.length;
+                mainGUI.mainImageDB.setAutosave(oldAutoSave);
+                mainGUI.mainImageDB.Autosave();
             } else {
                 for (File f : files) {
                     //log.print(LogType.Debug,f.getPath()+ " is the getPath and the absPath is " +f.getAbsolutePath());//Should be removed later
                     mainGUI.mainImageDB.addImage("Title 1", f.getAbsolutePath());
                 }
+                mainGUI.mainImageDB.setAutosave(oldAutoSave);
+                mainGUI.mainImageDB.Autosave();
                 mainGUI.setState(new ProgramState(LoadType.Filter, mainGUI, currentFilter));
             }
             mainGUI.getState().imageChanged();
@@ -198,6 +206,8 @@ class ProgramState{
             JOptionPane.showMessageDialog(mainGUI.w, "Out of memory", "Fatal Error", JOptionPane.ERROR_MESSAGE);
         } finally {
             isLocked = false;
+            mainGUI.mainImageDB.setAutosave(oldAutoSave);
+            mainGUI.mainImageDB.Autosave();
         }
     }
 
