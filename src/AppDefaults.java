@@ -9,14 +9,15 @@ enum AppDefaults {
     s2("slideShowTime", "2000"),
     //example s99("nestedDirectoryTest_PathExt","topDir"+File.separator+"subDir"+File.separator),//just using the subDir will not create the dir
     s3("thumbnailPathExt", "thumbnails"+File.separator),
-    DBname("databaseFileName","gammaDB"),
+    DBname("databaseFileName","v1DB"),
     s5("databasePathExt","database"+File.separator),
-    ver("appVersionLast","0.9.4_r358"),//change this whenever you change this enum.
+    ver("appVersionLast","1.00_r372"),//change this whenever you change this enum.
     s7("lastFilterUsed","-1"),
     s8("lastCurrentI","0"),
     s9("showLinks","true"),
     s10("showNotes","true"),
-    s11("newImagePathExt","mobileImages");
+    //s11("newImagePathExt","mobileImages")
+    ;
     //use , to seperate but ; after last
 
     String key, value;

@@ -33,7 +33,11 @@ public class BlueTransfer implements DiscoveryListener,Runnable {
     String newMobileDBValues;
     String nextFileName;
     String newMiobileSyncVal;
-    String imageStorePath="C:\\Users\\Student\\AppData\\Roaming\\StudyBuddy\\imageStoreTEMP\\";
+    String imageStorePath;//="C:\\Users\\Student\\AppData\\Roaming\\StudyBuddy\\imageStoreTEMP\\";
+
+    BlueTransfer(){
+        imageStorePath=Settings.getSetting("homeDir")+Settings.getSetting("importPathExt");
+    }
 
     @Override
     public void deviceDiscovered(RemoteDevice btDevice, DeviceClass cod) {

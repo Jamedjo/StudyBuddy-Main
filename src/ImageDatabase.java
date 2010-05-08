@@ -27,7 +27,7 @@ class ImageDatabase
   //Change this when database structure changes, e.g. after new table created
   //Used to check for database incompatabilities
   static String getDatabaseVersion(){
-      return "final_r400";
+      return "version1_r372";
   }
 
   // Create an image database with the supplied name
@@ -46,7 +46,8 @@ class ImageDatabase
           BuildTagToTagTable();
           BuildImageToImageTable();
           BuildImageToNoteTable();
-		  BuildImageToSpecialTable();
+	  BuildImageToSpecialTable();
+          BuildUpdateTable();
   }
 
   private void BuildImageTable() {

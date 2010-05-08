@@ -82,7 +82,7 @@ class GUI {
     }
 
     void setTitle(String suffix) {
-        String prefix = "Study Buddy 0.94";
+        String prefix = "Study Buddy 1.00";
         if (suffix == null) suffix = "";
         else prefix = prefix.concat("  ");
         w.setTitle(prefix + suffix);

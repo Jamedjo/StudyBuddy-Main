@@ -20,7 +20,7 @@ public class Log {
         l.print(type, message);
     }
     void print(LogType type, Object message){
-        String msg = message.toString();
+        //String msg = message.toString();
         switch(type){
             case DebugError:
                 if(!showDebug) return;//comment out to force all errors to be shown
