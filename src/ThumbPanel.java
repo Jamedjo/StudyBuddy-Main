@@ -293,7 +293,7 @@ class ScrollWheelTimer implements Runnable {
         if (t == 0) return;
         try {
             Thread.sleep(t);
-            System.out.println("scroll Updating");
+            //System.out.println("scroll Updating");
             parent.mainGUI.getState().offsetImage(parent.getOffsetNo());
             parent.thumbNoOffset = 0;
         } catch (InterruptedException e) {
@@ -325,7 +325,7 @@ class ScrollDragTimer implements Runnable {
                 //System.out.println("relX:"+relativeX+", prevRem:"+prevRemainder+", newVal:"+newVal);
                 prevRemainder = (newVal%1);
                 //System.out.println("new prevRem:"+prevRemainder+", updateBy:"+((int)(newVal-prevRemainder)));
-                if(((int)(newVal-prevRemainder))!=0) System.out.println("dragUpdating:"+((int)(newVal-prevRemainder)));
+                //if(((int)(newVal-prevRemainder))!=0) System.out.println("dragUpdating:"+((int)(newVal-prevRemainder)));
                 parent.updateOffsetRelative((int)(newVal-prevRemainder));
             } catch (InterruptedException e){
                 return;

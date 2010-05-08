@@ -2,13 +2,19 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.io.File;
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -19,8 +25,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSplitPane;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
-import javax.swing.UIManager;
+import javax.swing.border.EtchedBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 //We should use javadoc.
@@ -182,7 +189,34 @@ class GUI {
         imageAreas.add(mainScrollPane, BorderLayout.CENTER);
         imageAreas.add(thumbPanel, BorderLayout.PAGE_END);
 
-        splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tagTree, imageAreas);
+        final JTextField newTagBox = new JTextField();
+        class textAddTag implements ActionListener{
+            @Override
+            public void actionPerformed(ActionEvent e){
+                //newTagBox.text is used
+                //if tag doesn't exist add it
+                addTag(newTagBox.getText());
+                //tag current image with the tag
+                mainImageDB.tagImage(getState().getCurrentImageID(), mainImageDB.getTagIDFromTagTitle(newTagBox.getText()));
+                tagTree.updateTags();
+                newTagBox.setText("");
+            }
+        }
+        newTagBox.addActionListener(new textAddTag());
+        JPanel newTagBar = new JPanel();
+        newTagBar.setLayout(new BorderLayout());
+        newTagBar.add(newTagBox, BorderLayout.CENTER);
+        JButton tagButton =new JButton(new ImageIcon(SysIcon.TagThis.getBufferedImage(1,BufferedImage.TYPE_INT_ARGB).getScaledInstance(25, 25, Image.SCALE_SMOOTH)));//AddTag.Icon);//JButton("Tag");
+        tagButton.addActionListener(new textAddTag());
+        tagButton.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
+        newTagBar.add(tagButton,BorderLayout.EAST);
+
+        JPanel leftPanel = new JPanel();
+        leftPanel.setLayout(new BorderLayout());
+        leftPanel.add(newTagBar, BorderLayout.NORTH);
+        leftPanel.add(tagTree, BorderLayout.CENTER);
+
+        splitpane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, imageAreas);
         splitpane.setOneTouchExpandable(true);
         splitpane.setDividerLocation(tagTreeStartSize + splitpane.getInsets().left);
         if(getState().getCurrentImageID().equals("-1")) splitpane.setDividerLocation(1);
@@ -411,13 +445,21 @@ class GUI {
         tagTree.updateTags();
     }
 
-    
-    // Add a tag to the database and update tree
+
+    // Prompt for name of new tag with dialog box
     void addTag() {
         String newTag = (String) JOptionPane.showInputDialog(w, "Name of new Tag", "Create Tag", JOptionPane.PLAIN_MESSAGE, null, null, "");
+        addTag(newTag);
+    }
+
+    // Add a tag to the database and update tree
+    void addTag(String newTag) {
         String newTagID;
         // Check user inputted tag name is valid
         if ((newTag != null) && (newTag.length() > 0)) {
+            //if tag already exists return
+            String alreadyExists=mainImageDB.getTagIDFromTagTitle(newTag);
+            if(alreadyExists!=null) return;
             // Add the new tag into the tag table
             newTagID = mainImageDB.addTag(newTag);
             if (newTagID != null) {
@@ -479,6 +521,6 @@ class GUI {
     }
 
     void showHelpGuide(){
-        System.out.println("monkeyseverywhere");
+        //System.out.println("No Start Here Guide Yet");
     }
 }
