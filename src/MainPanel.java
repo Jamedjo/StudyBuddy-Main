@@ -284,6 +284,26 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
     }
 
+    void linkImages(Rectangle rec) {
+        QuickLinker linker = new QuickLinker(mainGUI.w,true,mainGUI);
+        linker.loadAllTags(mainGUI.mainImageDB.getTagIDTitles());
+        linker.setLocationRelativeTo(mainGUI.w);
+        boolean done=false;
+        while(!done){
+            linker.setVisible(true);
+            if(linker.getReturnStatus()==TagTagger.RET_OK){
+                String[] SelectedImages = (String[])linker.getSelctedImageIDs();
+                if (SelectedImages.length>0){
+                    done = true;
+                    String fromImageID=SelectedImages[0];
+                    mainGUI.mainImageDB.linkImage(mainGUI.getState().getCurrentImageID(), fromImageID, rec.x, rec.y, rec.width, rec.height);
+                    JOptionPane.showMessageDialog(mainGUI.w, "Images Linked!");
+                }
+            } else done=true;
+            if(!done) JOptionPane.showMessageDialog(mainGUI.w, "Select an image to link to.");
+        }
+    }
+    
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
         double oldZoom = getZoomMult();
@@ -345,10 +365,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             if (mode == DragMode.Note) {
                 mainGUI.mainImageDB.addImageNote(mainGUI.getState().getCurrentImageID(), "", rec.x, rec.y, rec.width, rec.height);
             } else if (mode == DragMode.Link) {
-                ImageLinker.setSelectingImage(true);
-                ImageLinker.setDummyLinkID(mainGUI.mainImageDB.linkImage(mainGUI.getState().getCurrentImageID(), mainGUI.getState().getCurrentImageID(), rec.x, rec.y, rec.width, rec.height));
-                JOptionPane.showMessageDialog(mainGUI.w, "Navigate to the image to link to and repress the link button");
-            }
+                linkImages(rec);
+                }
             setCursorMode(getCurrentDrag());
             this.repaint();
         }

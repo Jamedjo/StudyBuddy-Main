@@ -5,14 +5,14 @@ import javax.swing.AbstractAction;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 
-public class QuickTagger extends javax.swing.JDialog {
+public class QuickLinker extends javax.swing.JDialog {
     public static final int RET_CANCEL = 0;
     public static final int RET_OK = 1;
     Log log = new Log(false);
     GUI mainGUI;
 
     /** Creates new form TagTagger */
-    public QuickTagger(java.awt.Frame parent, boolean modal,GUI gui) {
+    public QuickLinker(java.awt.Frame parent, boolean modal,GUI gui) {
         super(parent, modal);
         mainGUI = gui;
         getRootPane().getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0),"CloseWindow");
@@ -25,13 +25,10 @@ public class QuickTagger extends javax.swing.JDialog {
     }
 
     public void loadAllTags(Object[] tags){
-        tagList.setListData(tags);
+        //tagList.setListData(tags);
     }
     Object[] getSelctedImageIDs(){
         return ((ImageSelectPane)imageSelector).getSelectedImageIDs();
-    }
-    Object getSelectedTag(){
-        return tagList.getSelectedValue();
     }
 
     /** @return the return status of this dialog - one of RET_OK or RET_CANCEL */
@@ -50,15 +47,11 @@ public class QuickTagger extends javax.swing.JDialog {
 
         okButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
-        jScrollPane2 = new javax.swing.JScrollPane();
-        tagList = new javax.swing.JList();
-        jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
         Logo = new javax.swing.JLabel();
         imageSelector = new ImageSelectPane(mainGUI,3,true);
 
-        setTitle("Quick Tag- for multiple images");
+        setTitle("Link Image- Select image link will point to");
         setIconImage(null);
         setModal(true);
         setResizable(false);
@@ -82,19 +75,7 @@ public class QuickTagger extends javax.swing.JDialog {
             }
         });
 
-        tagList.setModel(new javax.swing.AbstractListModel() {
-            String[] strings = { "Error loading tags.", "Press Cancel." };
-            public int getSize() { return strings.length; }
-            public Object getElementAt(int i) { return strings[i]; }
-        });
-        tagList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        jScrollPane2.setViewportView(tagList);
-
-        jLabel1.setText("Pick A Tag");
-
-        jLabel2.setText("Select image(s) to be tagged");
-
-        jLabel3.setText("->");
+        jLabel2.setText("Select image to be linked");
 
         Logo.setIcon(SysIcon.QuickTag.Icon);
 
@@ -105,53 +86,26 @@ public class QuickTagger extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 221, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel3)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(166, 166, 166)
-                                .addComponent(Logo))
-                            .addComponent(jLabel2)
-                            .addComponent(imageSelector, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cancelButton)))
+                    .addComponent(imageSelector, javax.swing.GroupLayout.DEFAULT_SIZE, 265, Short.MAX_VALUE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jLabel2)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                            .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 95, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
-
-        layout.linkSize(javax.swing.SwingConstants.HORIZONTAL, new java.awt.Component[] {cancelButton, okButton});
-
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(Logo)
-                                .addGap(20, 20, 20))
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel1))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
-                                .addGap(11, 11, 11))
-                            .addComponent(imageSelector, javax.swing.GroupLayout.DEFAULT_SIZE, 249, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(cancelButton)
-                            .addComponent(okButton)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(139, 139, 139)
-                        .addComponent(jLabel3)))
+                .addGap(17, 17, 17)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(imageSelector, javax.swing.GroupLayout.PREFERRED_SIZE, 255, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(cancelButton)
+                    .addComponent(okButton))
                 .addContainerGap())
         );
 
@@ -198,12 +152,8 @@ public class QuickTagger extends javax.swing.JDialog {
     private javax.swing.JLabel Logo;
     private javax.swing.JButton cancelButton;
     private javax.swing.JScrollPane imageSelector;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JButton okButton;
-    private javax.swing.JList tagList;
     // End of variables declaration//GEN-END:variables
 
     private int returnStatus = RET_CANCEL;

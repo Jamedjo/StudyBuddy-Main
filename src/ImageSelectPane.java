@@ -22,10 +22,20 @@ public class ImageSelectPane extends JScrollPane {
     private final int thumbSize = 80;
     private final int border = 1;
     final int noColumns;
+    boolean multiSelectEnabled;
 
-    public ImageSelectPane(GUI mainGUI,int columns) {
+    ImageSelectPane(GUI mainGUI,int columns, boolean multiSelect,String filterTag) {
+        noColumns=columns;
+        imageIDs = mainGUI.mainImageDB.getImageIDsFromTagID(filterTag);
+        construct(mainGUI, multiSelect);
+    }
+    ImageSelectPane(GUI mainGUI,int columns, boolean multiSelect) {
         noColumns=columns;
         imageIDs = mainGUI.mainImageDB.getAllImageIDs();
+        construct(mainGUI, multiSelect);
+    }
+    private void construct(GUI mainGUI, boolean multiSelect){
+        multiSelectEnabled=multiSelect;
         imageList = new ImageReference[imageIDs.length];
         for (int i = 0;i<imageIDs.length;i++) {
             imageList[i] = new ImageReference(mainGUI.mainImageDB.getImageFilename(imageIDs[i]));
@@ -80,6 +90,15 @@ public class ImageSelectPane extends JScrollPane {
         }
         return (String[])selectedIDs.toArray(new String[0]);
     }
+    public void selectionChaned(){
+        if(multiSelectEnabled) return;
+        ThumbIcon thumb;
+        for(int i=0;i<imageIDs.length;i++){
+            thumb=((ThumbIcon)imageGrid.getComponent(i));
+            thumb.isSelected=false;
+            thumb.repaint();
+        }
+    }
 }
 
 class ThumbIcon extends JPanel implements MouseListener {
@@ -88,7 +107,7 @@ class ThumbIcon extends JPanel implements MouseListener {
     int size;
     int thumbNumber;
     boolean isSelected = false;
-    BufferedImage selectedImg = SysIcon.Tick.getBufferedImage(1.5, BufferedImage.TYPE_INT_ARGB);
+    static BufferedImage selectedImg = SysIcon.Tick.getBufferedImage(1.5, BufferedImage.TYPE_INT_ARGB);
 
     ThumbIcon(ImageSelectPane parentPane, int squareSize, int imgNo, String altText) {
         parent = parentPane;
@@ -128,6 +147,7 @@ class ThumbIcon extends JPanel implements MouseListener {
     public void mouseClicked(MouseEvent e){}
     public void mousePressed(MouseEvent e){}
     public void mouseReleased(MouseEvent e){
+        if(!isSelected) parent.selectionChaned();//Unselects all images
         isSelected ^= true;
         repaint();
     }

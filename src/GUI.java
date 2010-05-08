@@ -275,19 +275,7 @@ class GUI {
     }
 	
     void dragLink() {
-        Record TempRecord;
-        String DummyLinkID;
-        if (ImageLinker.getSelectingImage()) {
-            DummyLinkID = ImageLinker.getDummyLinkID();
-            TempRecord = mainImageDB.getLink(DummyLinkID);
-            mainImageDB.deleteLink(DummyLinkID);
-            mainImageDB.linkImage(TempRecord.getField(1), getState().getCurrentImageID(), Integer.parseInt(TempRecord.getField(3)), Integer.parseInt(TempRecord.getField(4)), Integer.parseInt(TempRecord.getField(5)), Integer.parseInt(TempRecord.getField(6)));
-            JOptionPane.showMessageDialog(w, "Images Linked!");
-            mainPanel.repaint();
-            ImageLinker.setSelectingImage(false);
-        } else {
-            mainPanel.setCursorMode(DragMode.Link);
-        }
+        mainPanel.setCursorMode(DragMode.Link);
     }
 
     void toggleThumbs(boolean makeVisible) {//true to show
