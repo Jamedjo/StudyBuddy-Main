@@ -206,7 +206,7 @@ class GUI {
         JPanel newTagBar = new JPanel();
         newTagBar.setLayout(new BorderLayout());
         newTagBar.add(newTagBox, BorderLayout.CENTER);
-        JButton tagButton =new JButton(new ImageIcon(SysIcon.TagThis.getBufferedImage(1,BufferedImage.TYPE_INT_ARGB).getScaledInstance(25, 25, Image.SCALE_SMOOTH)));//AddTag.Icon);//JButton("Tag");
+        JButton tagButton =new JButton(SysIcon.TagThis.smallIcon(25));//AddTag.Icon);//JButton("Tag");
         tagButton.addActionListener(new textAddTag());
         tagButton.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
         newTagBar.add(tagButton,BorderLayout.EAST);

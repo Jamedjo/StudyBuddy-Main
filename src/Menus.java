@@ -262,17 +262,19 @@ enum ImageToolBar {
 // <editor-fold defaultstate="collapsed" desc="ImageMenu">
 enum ImageMenu {
 
-    mImport("Import Image(s)", KeyEvent.VK_I, KeyEvent.VK_I, ActionEvent.CTRL_MASK, "mImport"),
-    mImportD("Import Folder", KeyEvent.VK_F, KeyEvent.VK_I, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK, "mImportD"),
-    mExportImg("Export Current Image", KeyEvent.VK_E, -1, -1, "ExportCurrentImg"),
-    mRemoveI("Remove Image from StudyBuddy", KeyEvent.VK_R, -1, -1, "mRemoveI"),
-    mOptions("StudyBuddy Options",KeyEvent.VK_O,-1,-1,"Options"),
-    mRestart("Restart Viewer", KeyEvent.VK_V, KeyEvent.VK_N, ActionEvent.CTRL_MASK, "mRestart"),
-    mExit("Exit", KeyEvent.VK_X, KeyEvent.VK_W, ActionEvent.CTRL_MASK, "Exit");
+    mImport("Import Image(s)",SysIcon.Import.smallIcon(20), KeyEvent.VK_I, KeyEvent.VK_I, ActionEvent.CTRL_MASK, "mImport"),
+    mImportD("Import Folder",SysIcon.ImportDir.smallIcon(20), KeyEvent.VK_F, KeyEvent.VK_I, ActionEvent.CTRL_MASK + ActionEvent.SHIFT_MASK, "mImportD"),
+    mExportImg("Export Current Image",SysIcon.Export.smallIcon(20), KeyEvent.VK_E, -1, -1, "ExportCurrentImg"),
+    mRemoveI("Remove Image from StudyBuddy",null, KeyEvent.VK_R, -1, -1, "mRemoveI"),
+    mOptions("StudyBuddy Options",SysIcon.Options.smallIcon(20),KeyEvent.VK_O,-1,-1,"Options"),
+    mRestart("Restart Viewer",null, KeyEvent.VK_V, KeyEvent.VK_N, ActionEvent.CTRL_MASK, "mRestart"),
+    mExit("Exit",null, KeyEvent.VK_X, KeyEvent.VK_W, ActionEvent.CTRL_MASK, "Exit");
     JMenuItem item;
 
-    ImageMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
-        item = new JMenuItem(label, mnemonic);
+    ImageMenu(String label,ImageIcon icon, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
+        if(icon!=null) item = new JMenuItem(label, icon);
+        else item = new JMenuItem(label);
+        item.setMnemonic(mnemonic);
         if (acceleratorKey != -1) {
             item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
         }
@@ -313,15 +315,18 @@ enum ImageMenu {
 
 // <editor-fold defaultstate="collapsed" desc="TagMenu">
 enum TagMenu {
-    AddTag("Create new tag", KeyEvent.VK_N, -1, -1, "AddTag"),
-    DeleteTag("Delete a tag", KeyEvent.VK_D, -1, -1, "DeleteTag"),
-    TagThis("Tag this Image", KeyEvent.VK_T, KeyEvent.VK_T,  ActionEvent.CTRL_MASK, "TagThis"),
-    QuickTag("QuickTag Images", KeyEvent.VK_Q, KeyEvent.VK_Q,  ActionEvent.CTRL_MASK, "QuickTag"),
-    TagTag("Tag a Tag", KeyEvent.VK_A, -1, -1, "TagTag"),
-    TagFilter("Filter Images by Tag", KeyEvent.VK_F, -1, -1, "TagFilter");
+    AddTag("Create new tag",SysIcon.AddTag.smallIcon(20), KeyEvent.VK_N, -1, -1, "AddTag"),
+    DeleteTag("Delete a tag",null, KeyEvent.VK_D, -1, -1, "DeleteTag"),
+    TagThis("Tag this Image",SysIcon.TagThis.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T,  ActionEvent.CTRL_MASK, "TagThis"),
+    QuickTag("QuickTag Images",SysIcon.QuickTag.smallIcon(20), KeyEvent.VK_Q, KeyEvent.VK_Q,  ActionEvent.CTRL_MASK, "QuickTag"),
+    TagTag("Tag a Tag",SysIcon.TagTag.smallIcon(20), KeyEvent.VK_A, -1, -1, "TagTag"),
+    TagFilter("Filter Images by Tag",SysIcon.TagFilter.smallIcon(20), KeyEvent.VK_F, -1, -1, "TagFilter");
     JMenuItem item;
-    TagMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
-        item = new JMenuItem(label, mnemonic);
+
+    TagMenu(String label,ImageIcon icon, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
+        if(icon!=null) item = new JMenuItem(label, icon);
+        else item = new JMenuItem(label);
+        item.setMnemonic(mnemonic);
         if (acceleratorKey != -1) {
             item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
         }
@@ -357,29 +362,31 @@ enum TagMenu {
 
 // <editor-fold defaultstate="collapsed" desc="ViewMenu">
 enum ViewMenu {
-    NextImage("Next Image", KeyEvent.VK_N, KeyEvent.VK_RIGHT,  ActionEvent.CTRL_MASK, "Next"),
-    PrevImage("Previous Image", KeyEvent.VK_P, KeyEvent.VK_LEFT,  ActionEvent.CTRL_MASK, "Prev"),
-    ShowThumbs("Show Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsS", false),
-    HideThumbs("Hide Thumbnails Bar", KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsH"),
-    ToggleTree("Show/Hide Tag Tree", KeyEvent.VK_R, -1, -1, "TagTree"),
-    ToggleImgToolBar("Toggle Image ToolBar", KeyEvent.VK_I,-1, -1, "ImageBar"),
-    SlidePlay("Play Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE,  ActionEvent.CTRL_MASK, "SlideP"),
-    SlideStop("Stop Slideshow", KeyEvent.VK_S, KeyEvent.VK_SPACE,  ActionEvent.CTRL_MASK, "SlideS", false),
-    ZoomToFit("Zoom: Fit Image", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "ZoomFit", false),
-    ZoomTo100("Zoom: 100%", KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "Zoom100"),
+    NextImage("Next Image",SysIcon.Next.smallIcon(20), KeyEvent.VK_N, KeyEvent.VK_RIGHT,  ActionEvent.CTRL_MASK, "Next"),
+    PrevImage("Previous Image",SysIcon.Prev.smallIcon(20), KeyEvent.VK_P, KeyEvent.VK_LEFT,  ActionEvent.CTRL_MASK, "Prev"),
+    ShowThumbs("Show Thumbnails Bar",SysIcon.ShowThumbs.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsS", false),
+    HideThumbs("Hide Thumbnails Bar",SysIcon.HideThumbs.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsH"),
+    ToggleTree("Show/Hide Tag Tree",SysIcon.JTree.smallIcon(20), KeyEvent.VK_R, -1, -1, "TagTree"),
+    ToggleImgToolBar("Toggle Image ToolBar",SysIcon.ImageBar.smallIcon(20), KeyEvent.VK_I,-1, -1, "ImageBar"),
+    SlidePlay("Play Slideshow",SysIcon.Play.smallIcon(20), KeyEvent.VK_S, KeyEvent.VK_SPACE,  ActionEvent.CTRL_MASK, "SlideP"),
+    SlideStop("Stop Slideshow",SysIcon.Stop.smallIcon(20), KeyEvent.VK_S, KeyEvent.VK_SPACE,  ActionEvent.CTRL_MASK, "SlideS", false),
+    ZoomToFit("Zoom: Fit Image",SysIcon.ZoomFit.smallIcon(20), KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "ZoomFit", false),
+    ZoomTo100("Zoom: 100%",SysIcon.Zoom100.smallIcon(20), KeyEvent.VK_Z, KeyEvent.VK_Z, ActionEvent.ALT_MASK, "Zoom100"),
 //    ZoomToX("Zoom: Custom", KeyEvent.VK_C, KeyEvent.VK_Z, ActionEvent.SHIFT_MASK, "ZoomX")
     ;
     JMenuItem item;
-    ViewMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
-        item = new JMenuItem(label, mnemonic);
+    ViewMenu(String label,ImageIcon icon, int mnemonic, int acceleratorKey, int acceleratorMask, String command) {
+        if(icon!=null) item = new JMenuItem(label, icon);
+        else item = new JMenuItem(label);
+        item.setMnemonic(mnemonic);
         if (acceleratorKey != -1) {
             item.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey, acceleratorMask));
         }
         item.setActionCommand(command);
         //item.setToolTipText(toolTipText);
     }
-    ViewMenu(String label, int mnemonic, int acceleratorKey, int acceleratorMask, String command, boolean visible) {
-        this(label, mnemonic, acceleratorKey, acceleratorMask, command);
+    ViewMenu(String label,ImageIcon icon, int mnemonic, int acceleratorKey, int acceleratorMask, String command, boolean visible) {
+        this(label,icon, mnemonic, acceleratorKey, acceleratorMask, command);
         item.setVisible(visible);
     }
     void hide() {

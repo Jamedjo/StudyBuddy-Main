@@ -1,6 +1,7 @@
 
 import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -161,5 +162,9 @@ public enum SysIcon {
             log.print(LogType.Error,"Unable to find SysIcon "+this.toString()+" for getBufferedImage");
             return new BufferedImage(4,4,BufferedImage.TYPE_INT_ARGB);
         }
+    }
+
+    ImageIcon smallIcon(int size){
+        return new ImageIcon(getBufferedImage(1,BufferedImage.TYPE_INT_ARGB).getScaledInstance(size, size, Image.SCALE_SMOOTH));
     }
 }
