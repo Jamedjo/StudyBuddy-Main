@@ -426,21 +426,25 @@ class GUI {
         quickTagger = new QuickTagger(w,true,this);
         quickTagger.loadAllTags(mainImageDB.getTagIDTitles());
         quickTagger.setLocationRelativeTo(w);
-        quickTagger.setVisible(true);
-        if(quickTagger.getReturnStatus()==TagTagger.RET_OK){
-            Object[] SelectedImages = quickTagger.getSelctedImageIDs();
-            Object NewTag = quickTagger.getSelectedTag();
-            if ((NewTag == null) || !(NewTag instanceof IDTitle)) return;
-            if(SelectedImages.length<1) return;
-
-                String tagID = ((IDTitle)NewTag).getID();
-                for(Object Img: SelectedImages){
-                    mainImageDB.tagImage(Img.toString(), tagID);
+        boolean done=false;
+        while(!done){
+            quickTagger.setVisible(true);
+            if(quickTagger.getReturnStatus()==TagTagger.RET_OK){
+                Object[] SelectedImages = quickTagger.getSelctedImageIDs();
+                Object NewTag = quickTagger.getSelectedTag();
+                if ((NewTag != null) && (NewTag instanceof IDTitle) && !(SelectedImages.length<1)){
+                    done = true;
+                    String tagID = ((IDTitle)NewTag).getID();
+                    for(Object Img: SelectedImages){
+                        mainImageDB.tagImage(Img.toString(), tagID);
+                    }
+                    if(tagID.equals(getState().currentFilter)){
+                        setState(new ProgramState(LoadType.Filter, this, tagID));
+                        RepaintManager.repaint(RepaintType.Window);
+                    }
                 }
-                if(tagID.equals(getState().currentFilter)){
-                    setState(new ProgramState(LoadType.Filter, this, tagID));
-                    RepaintManager.repaint(RepaintType.Window);
-                }
+            } else done=true;
+            if(!done) JOptionPane.showMessageDialog(w, "Select one tag and at least one image.");
         }
         tagTree.updateTags();
     }

@@ -316,7 +316,7 @@ enum ImageMenu {
 // <editor-fold defaultstate="collapsed" desc="TagMenu">
 enum TagMenu {
     AddTag("Create new tag",SysIcon.AddTag.smallIcon(20), KeyEvent.VK_N, -1, -1, "AddTag"),
-    DeleteTag("Delete a tag",null, KeyEvent.VK_D, -1, -1, "DeleteTag"),
+    DeleteTag("Delete current tag",null, KeyEvent.VK_D, -1, -1, "DeleteTag"),
     TagThis("Tag this Image",SysIcon.TagThis.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T,  ActionEvent.CTRL_MASK, "TagThis"),
     QuickTag("QuickTag Images",SysIcon.QuickTag.smallIcon(20), KeyEvent.VK_Q, KeyEvent.VK_Q,  ActionEvent.CTRL_MASK, "QuickTag"),
     TagTag("Tag a Tag",SysIcon.TagTag.smallIcon(20), KeyEvent.VK_A, -1, -1, "TagTag"),
