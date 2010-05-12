@@ -1,9 +1,9 @@
 import java.io.*;
 import java.util.Enumeration;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.awt.Rectangle;
+import java.util.Stack;
 
 class ImageDatabase
 {
@@ -960,7 +960,10 @@ class ImageDatabase
 	while(Records.hasMoreElements())
 	{
 		TempRecord = (Record) Records.nextElement();
-		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))), (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(4)))), (int) (Scale*Integer.parseInt(TempRecord.getField(5))), (int) (Scale*Integer.parseInt(TempRecord.getField(6))));
+		TempRectangle = new Rectangle((int) (XOffset + (Scale*Integer.parseInt(TempRecord.getField(3)))),
+                                              (int)(YOffset + (Scale*Integer.parseInt(TempRecord.getField(4)))),
+                                              (int) (Scale*Integer.parseInt(TempRecord.getField(5))),
+                                              (int) (Scale*Integer.parseInt(TempRecord.getField(6))));
 		if (TempRectangle.contains(X, Y))
 			PointLinks.addRecord(TempRecord);
 	}
@@ -970,7 +973,7 @@ class ImageDatabase
   // Produce an array of imageIDs pointed to by the point in the image
   String[] getImageIDsFromImagePoint(String ImageID, int X, int Y, int XOffset, int YOffset, double Scale)
   {
-	return getLinksFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(2);
+	return getLinksFromImagePoint(ImageID, X, Y, XOffset, YOffset, Scale).getColArray(2, true);
   }
 
   // Produce a sub table of Images that are tagged with the TagID
@@ -979,7 +982,7 @@ class ImageDatabase
     IndexedTable Result;
     String[] ImageIDs;
     // Get the ImageIDs that are tagged with the TagID
-    ImageIDs = ImageToTagTable.getRecords(TagID, 1).getColArray(0);
+    ImageIDs = ImageToTagTable.getRecords(TagID, 1).getColArray(0, true);
     // Result is an indexed table in the format of ImageTable
     Result = new IndexedTable("Result_Table", ImageTable.getHeader(), ImageTable.getKeyFields());
     // For all the ImageIDs find the complete image record and add it to the result table
@@ -993,7 +996,7 @@ class ImageDatabase
   {
     String[] TagIDs;
     // Get the TagIDs that are used  by the ImageID
-    TagIDs = ImageToTagTable.getRecords(ImageID, 0).getColArray(1);
+    TagIDs = ImageToTagTable.getRecords(ImageID, 0).getColArray(1, true);
     return TagIDs;
   }
 
@@ -1003,7 +1006,7 @@ class ImageDatabase
     IndexedTable Result;
     String[] TagIDs;
     // Get the TagIDs that are tagged with the TagID
-    TagIDs = TagToTagTable.getRecords(TagID, 1).getColArray(0);
+    TagIDs = TagToTagTable.getRecords(TagID, 1).getColArray(0, true);
     // Result is an indexed table in the format of ImageTable
     Result = new IndexedTable("Result_Table", TagTable.getHeader(), TagTable.getKeyFields());
     // For all the TagIDs find the complete tag record and add it to the result table
@@ -1037,48 +1040,43 @@ class ImageDatabase
   String[] getImageIDsFromTagID(String TagID)
   {
     IndexedTable TempTable = getImagesFromTagID(TagID);
-    return TempTable.getColArray(0);
+    return TempTable.getColArray(0, true);
   }
-
-  // Get an array of image IDs tagged with the tag
-  // Also include any images tagged with an ID tagged by this tag.
-  // Should change to hashtable or somthing is used instead of array list.
-  //This is so we can check if each image is already going to be returned to prevent duplicates
-  String[] getImageIDsFromTagIDRecursively(String TagID)
-  {
-    IndexedTable tempTable = getImagesFromTagID(TagID);
-    String[] tempTagTable = getTagIDsFromTagID(TagID);
-    ArrayList<String> imagesSoFar = new ArrayList<String>(Arrays.asList(tempTable.getColArray(0)));
-	if(tempTagTable!=null)
-	  for(String tag: tempTagTable)
-	  {
-        imagesSoFar.addAll(Arrays.asList(getImageIDsFromTagIDRecursively(tag)));
-      }
-    return imagesSoFar.toArray(new String[imagesSoFar.size()]);
-  }
-
-  // Returns a table of images tagged with the tag, includes children
+  
+   // Returns a table of images tagged with the tag, includes children
   IndexedTable getImagesFromTagIDChildren(String TagID)
   {
-	IndexedTable TempImageTable;
 	Enumeration TempImages;
+        String CurrentID;
+        Stack<String> TagsToDo = new Stack<String>();
+        HashSet<String> ProcessedTags = new HashSet<String>();
 	IndexedTable ResultTable = getImagesFromTagID(TagID);
+        ProcessedTags.add(TagID);
 	String[] TaggedTags = getTagIDsFromTagID(TagID);
 	if (TaggedTags != null)
-		for(int i=0; i<TaggedTags.length; i++)
-		{
-			TempImageTable = getImagesFromTagID(TaggedTags[i]);
-			TempImages = TempImageTable.elements();
-			while (TempImages.hasMoreElements())
-				ResultTable.addRecord((Record) TempImages.nextElement());
-		}
+            for(int i=0; i<TaggedTags.length; i++)
+                TagsToDo.push(TaggedTags[i]);
+        while (!(TagsToDo.empty()))
+        {
+            CurrentID = TagsToDo.pop();
+            TempImages = getImagesFromTagID(CurrentID).elements();
+            while(TempImages.hasMoreElements())
+                ResultTable.addRecord( (Record) TempImages.nextElement());
+            TaggedTags = getTagIDsFromTagID(CurrentID);
+            if (TaggedTags != null)
+                for(int i=0; i<TaggedTags.length; i++)
+                {
+                    if (!(ProcessedTags.contains(TaggedTags[i])))
+                        TagsToDo.push(TaggedTags[i]);
+                }
+        }
 	return ResultTable;
   }
 
   // Returns an array of ImageIDs tagged with the tag, includes children
   String[] getImageIDsFromTagIDChildren(String TagID)
   {
-	return getImagesFromTagIDChildren(TagID).getColArray(0);
+	return getImagesFromTagIDChildren(TagID).getColArray(0, true);
   }
 
   // Get an array of tag IDs tagged with the tag
@@ -1088,7 +1086,7 @@ class ImageDatabase
     if (TempTable.getNumRecords() == 0)
       return null;
     else
-      return TempTable.getColArray(0);
+      return TempTable.getColArray(0, false);
   }
 
   // Get an array of image IDs tagged with the tag title (matches tag title to first tagID)
@@ -1105,7 +1103,7 @@ class ImageDatabase
   String[] getImageIDsFromTagTitleAll(String TagTitle)
   {
     String[] TempResult;
-    String[] TagIDs = TagTable.getRecords(TagTitle, 1).getColArray(0);
+    String[] TagIDs = TagTable.getRecords(TagTitle, 1).getColArray(0, true);
     ArrayList<String> ResultList = new ArrayList<String>();
     String[] Result;
     for (int i=0; i<TagIDs.length; i++)
@@ -1131,19 +1129,19 @@ class ImageDatabase
     if (TempTable.getNumRecords() == 0)
       return null;
     else
-      return TempTable.getColArray(2);
+      return TempTable.getColArray(2, true);
   }
 
   // Get an array of all the image IDs
   String[] getAllImageIDs()
   {
-    return ImageTable.getColArray(0);
+    return ImageTable.getColArray(0, true);
   }
 
   // Get an array of all the tag IDs
   IDTitle[] getTagIDTitles()
   {
-    String[] TagIDs = TagTable.getColArray(0);
+    String[] TagIDs = TagTable.getColArray(0, true);
     IDTitle[] Result = new IDTitle[TagIDs.length];
     for (int i=0; i<Result.length; i++)
       Result[i] = new IDTitle(TagIDs[i], getTagTitleFromTagID(TagIDs[i]));
@@ -1153,13 +1151,13 @@ class ImageDatabase
   // Get an array of TagIDs of all tags
   String[] getAllTagIDs()
   {
-    return TagTable.getColArray(0);
+    return TagTable.getColArray(0, true);
   }
 
   // Get an array of all the tag Titles (shouldnt be used - title not key field - titles not unique)
   String[] getAllTagTitles()
   {
-    return TagTable.getColArray(1);
+    return TagTable.getColArray(1, true);
   }
 
   // Get the filename of a certain image (by ID)
@@ -1179,7 +1177,7 @@ class ImageDatabase
     if (FoundRecords.getNumRecords() == 0)
       return null;
     else
-      return FoundRecords.getColArray(0);
+      return FoundRecords.getColArray(0, true);
   }
 
   // Get a particular images record (by ID)
@@ -1196,7 +1194,7 @@ class ImageDatabase
   // Get an array of all the image filenames
   String[] getAllFilenames()
   {
-    return ImageTable.getColArray(2);
+    return ImageTable.getColArray(2, true);
   }
   
 }

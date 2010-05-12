@@ -46,9 +46,9 @@ class IndexedTable
   }
   
   // Returns a whole column of the table as an arraylist
-  String[] getColArray(int col)
+  String[] getColArray(int col, boolean sort)
   {
-    return MainTable.getColArray(col);
+    return MainTable.getColArray(col, sort);
   }
   
   // Store table and indexes in files

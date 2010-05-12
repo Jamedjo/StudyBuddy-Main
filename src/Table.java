@@ -251,19 +251,29 @@ class Table
     }
       
     // Returns a whole column of the table as an array
-    String[] getColArray(int col)
+    String[] getColArray(int col, boolean sort)
     {
       int i=0;
       Record TempRecord;
       String[] Result = new String[this.getNumRecords()];
+      ArrayList<String> SortResult = new ArrayList<String>();
       Enumeration AllRecords = Records.elements();
       while (AllRecords.hasMoreElements())
       {
         TempRecord = (Record) AllRecords.nextElement();
-        Result[i] = TempRecord.getField(col);
+        if (sort)
+            SortResult.add(TempRecord.getField(col));
+        else
+            Result[i] = TempRecord.getField(col);
         i++;
       }
-      return Result;
+      if (sort)
+      {
+        java.util.Collections.sort(SortResult);
+        return SortResult.toArray(Result);
+      }
+      else
+        return Result;
     }
     // Retreive the fieldname of col from the header
     String getFieldName(int col)
