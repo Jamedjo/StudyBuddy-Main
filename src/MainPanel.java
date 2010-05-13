@@ -470,12 +470,12 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         boxHeight = (int) Math.abs(scaledYstart - scaledYstop);
         boxXleft = (int) Math.min(scaledXstart, scaledXstop);
         boxYtop = (int) Math.min(scaledYstart, scaledYstop);
-        if (useScale)System.out.println("rot180:"+rot180+" rot90:"+rot90+"  scale:"+scale);
-        if (useScale)System.out.println("topOffset:"+topOffset+" leftOffset:"+leftOffset+" boardW:"+boardW+" boardH:"+boardH);
-        if (useScale)System.out.println("pressX:"+pressX+" pressY:"+pressY+" currentMouseX:"+currentMouseX+" currentMouseY:"+currentMouseY);
-        if (useScale)System.out.println("Xstart:"+scaledXstart*scale+" Ystart:"+scaledYstart*scale+" scaledXstop:"+scaledXstop+" scaledYstop:"+scaledYstop);
-        if (useScale)System.out.println("boxXleft:"+boxXleft+" boxYtop:"+boxYtop+" boxHeight:"+boxHeight+" boxWidth:"+boxWidth);
-        if (useScale)System.out.println("(w/2)+(h/2):"+((w/2)+(h/2))+"  (h/2)-(w/2):"+((h/2)-(w/2)));
+//        if (useScale)System.out.println("rot180:"+rot180+" rot90:"+rot90+"  scale:"+scale);
+//        if (useScale)System.out.println("topOffset:"+topOffset+" leftOffset:"+leftOffset+" boardW:"+boardW+" boardH:"+boardH);
+//        if (useScale)System.out.println("pressX:"+pressX+" pressY:"+pressY+" currentMouseX:"+currentMouseX+" currentMouseY:"+currentMouseY);
+//        if (useScale)System.out.println("Xstart:"+scaledXstart*scale+" Ystart:"+scaledYstart*scale+" scaledXstop:"+scaledXstop+" scaledYstop:"+scaledYstop);
+//        if (useScale)System.out.println("boxXleft:"+boxXleft+" boxYtop:"+boxYtop+" boxHeight:"+boxHeight+" boxWidth:"+boxWidth);
+//        if (useScale)System.out.println("(w/2)+(h/2):"+((w/2)+(h/2))+"  (h/2)-(w/2):"+((h/2)-(w/2)));
 
 //        if(!mainGUI.getState().getCurrentImage().img.transform.isNewOrientation())
          if (((rot90==1)||(rot90==3))&&useScale)
