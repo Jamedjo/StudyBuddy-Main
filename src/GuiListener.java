@@ -50,9 +50,9 @@ public class GuiListener  implements ComponentListener, WindowStateListener, Cha
         else if (ae.getActionCommand().equals("DragNote")) mainGUI.mainPanel.setCursorMode(DragMode.Note);
         else if (ae.getActionCommand().equals("BlueT")) mainGUI.bluetoothDo();
         else if (ae.getActionCommand().equals("AdjustImage")) mainGUI.showImageAdjuster();
-        else if (ae.getActionCommand().equals("Flip")) {mainGUI.getState().getCurrentImage().img.transform.flip(); RepaintManager.repaint(RepaintType.MainPanel);}
-        else if (ae.getActionCommand().equals("Mirror")){ mainGUI.getState().getCurrentImage().img.transform.mirror(); RepaintManager.repaint(RepaintType.MainPanel);}
-        else if (ae.getActionCommand().equals("Rotate")) {mainGUI.getState().getCurrentImage().img.transform.rotate90(); RepaintManager.repaint(RepaintType.MainPanel);}
+        else if (ae.getActionCommand().equals("Flip")) {mainGUI.getState().getCurrentImage().img.transform.flip(); RepaintManager.repaint(RepaintType.ImageUpdated);}
+        else if (ae.getActionCommand().equals("Mirror")){ mainGUI.getState().getCurrentImage().img.transform.mirror(); RepaintManager.repaint(RepaintType.ImageUpdated);}
+        else if (ae.getActionCommand().equals("Rotate")) {mainGUI.getState().getCurrentImage().img.transform.rotate90(); RepaintManager.repaint(RepaintType.ImageUpdated);}
         else if (ae.getActionCommand().equals("ExportCurrentImg")) FileDialogs.exportCurrentImage();
         else if (ae.getActionCommand().equals("StartHelp")) mainGUI.showHelpGuide();
         else if (ae.getActionCommand().equals("Options")) mainGUI.showOptions();

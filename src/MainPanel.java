@@ -43,7 +43,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     final int dragPeriod = 40;// 25fps is equivalent to every 40ms
     private DragMode dragMode;//Change if zoomed in by default
     boolean mousePressed = false;
-    boolean firstStart=false;
+    boolean noNotesStart=false;
     LoadingAnimationPane loadingPane = new LoadingAnimationPane(true);
     AffineTransform originalAffine;
 
@@ -119,15 +119,18 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             if(getCursorMode()==DragMode.None) setCursorMode(DragMode.Drag);
         }
     }
-    void fixFitZoomMultiplier() {
-        //if(useWH==null){
-        if(!isNewOri()) useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
-        else useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardH, boardW, 0);
-        //}
+    void fixFitZoomMultiplier() {//Get zoom multiplier from zoom fit size
+        useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
+        if(isNewOri())  useWH = ImageUtils.invertDimension(useWH);
+
         //Potentially inefficient as forces full size image to load
         //log.print(LogType.Debug,"old zoomMultiplier- " + getZoomMult());
-        double fixedVal = (double) ((double) useWH.width) / ((double) mainGUI.getState().getImageWidthFromBig());
-        if(firstStart) fixedVal = (fixedVal/2.78);
+        double fixedVal;
+        if(isNewOri())
+            fixedVal = (double) ((double) useWH.width) / ((double) mainGUI.getState().getImageHeightFromBig());
+        else
+            fixedVal = (double) ((double) useWH.width) / ((double) mainGUI.getState().getImageWidthFromBig());
+        if(noNotesStart) fixedVal = (fixedVal/2.78);
         setZoomMult(fixedVal);
         //log.print(LogType.Debug,"new zoomMultiplier- " + getZoomMult());
         //log.print(LogType.Debug,"boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
@@ -140,7 +143,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     void onResize() {
         //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
         if ( isZoomed() ) {
-            this.setPreferredSize(ImageUtils.useMaxMax((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult()), this.getParent().getWidth(), this.getParent().getHeight()));
+            this.setPreferredSize(new Dimension((int) (mainGUI.getState().getImageWidthFromBig() * getZoomMult()), (int) (mainGUI.getState().getImageHeightFromBig() * getZoomMult())));
             if((getCursorMode()==DragMode.Drag)||(getCursorMode()==DragMode.None)){
                 setCursorMode(getCurrentDrag());
             }
@@ -156,10 +159,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         getParent().validate();
         this.revalidate();
         //getParent().validate();
-        repaint();
         if(isZoomFit()){
-        fixFitZoomMultiplier();
+            fixFitZoomMultiplier();
         }
+        repaint();
         loadingPane.onResize();
         //if (oldScr!=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible()) log.print(LogType.Debug,"Horizontal Scroll bar toggled");
     }
@@ -191,7 +194,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         boolean drawIconInFront=false;
         boolean thumbBehind=false;
         BufferedImage b=null;
-        firstStart=false;
+        noNotesStart=false;
 
         if(img==ErrorImages.outOfMemory){
             b = img;
@@ -210,13 +213,13 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             if(mainGUI.getState().currentFilter.equals("-1")){
                 if(isZoomed()) img=ErrorImages.splashScreenZoom;
                 else img=ErrorImages.splashScreen;
-                firstStart=true;
+                noNotesStart=true;
             }
         }
         
         if (isZoomed()) {
             int w,h;
-            if(thumbBehind||firstStart){
+            if(thumbBehind||noNotesStart){
                 w=img.getWidth();
                 h=img.getHeight();
             }else{
@@ -225,8 +228,9 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             }
             this.setPreferredSize(ImageUtils.useMaxMax((int) (w * getZoomMult()),(int) (h * getZoomMult()),this.getParent().getWidth(),this.getParent().getHeight()));
             useWH = new Dimension((int) (w * getZoomMult()),(int) (h * getZoomMult()));
+            if(isNewOri()) useWH=ImageUtils.invertDimension(useWH);
         } else {
-            if(thumbBehind||firstStart) {
+            if(thumbBehind||noNotesStart) {
                     useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
             }
             else mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
@@ -440,15 +444,15 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
                 currentMouseY = h - currentMouseY;
             }
 //        if((rot90==1)||(rot90==3)){
-//            pressX=(w/2)+(h/2)-pressX;
-//            pressY=(h/2)-(w/2)+pressY;
-//            currentMouseX=(w/2)+(h/2)-currentMouseX;
-//            currentMouseY=(h/2)-(w/2)+currentMouseY;
+//            pressX=(w/2)+(h/2)-pressY;
+//            pressY=(h/2)-(w/2)+pressX;
+//            currentMouseX=(w/2)+(h/2)-currentMouseY;
+//            currentMouseY=(h/2)-(w/2)+currentMouseX;
 //        }
             scale = getZoomMult();
             if ((rot90 == 1) || (rot90 == 3)) {
-                if(leftOffset>topOffset)xTranslate = topOffset+leftOffset;
-                if(leftOffset<topOffset)yTranslate = leftOffset+topOffset;
+                xTranslate = leftOffset;
+                yTranslate = topOffset;
             } else {
                 xTranslate = leftOffset;
                 yTranslate = topOffset;
@@ -466,16 +470,16 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         boxHeight = (int) Math.abs(scaledYstart - scaledYstop);
         boxXleft = (int) Math.min(scaledXstart, scaledXstop);
         boxYtop = (int) Math.min(scaledYstart, scaledYstop);
-//        if (useScale)System.out.println("rot180:"+rot180+" rot90:"+rot90+"  scale:"+scale);
-//        if (useScale)System.out.println("topOffset:"+topOffset+" leftOffset:"+leftOffset+" boardW:"+boardW+" boardH:"+boardH);
-//        if (useScale)System.out.println("pressX:"+pressX+" pressY:"+pressY+" currentMouseX:"+currentMouseX+" currentMouseY:"+currentMouseY);
-//        if (useScale)System.out.println("scaledXstart:"+scaledXstart+" scaledYstart:"+scaledYstart+" scaledXstop:"+scaledXstop+" scaledYstop:"+scaledYstop);
-//        if (useScale)System.out.println("boxXleft:"+boxXleft+" boxYtop:"+boxYtop+" boxHeight:"+boxHeight+" boxWidth:"+boxWidth);
-//        if (useScale)System.out.println("(w/2)+(h/2):"+((w/2)+(h/2))+"  (h/2)-(w/2):"+((h/2)-(w/2)));
+        if (useScale)System.out.println("rot180:"+rot180+" rot90:"+rot90+"  scale:"+scale);
+        if (useScale)System.out.println("topOffset:"+topOffset+" leftOffset:"+leftOffset+" boardW:"+boardW+" boardH:"+boardH);
+        if (useScale)System.out.println("pressX:"+pressX+" pressY:"+pressY+" currentMouseX:"+currentMouseX+" currentMouseY:"+currentMouseY);
+        if (useScale)System.out.println("Xstart:"+scaledXstart*scale+" Ystart:"+scaledYstart*scale+" scaledXstop:"+scaledXstop+" scaledYstop:"+scaledYstop);
+        if (useScale)System.out.println("boxXleft:"+boxXleft+" boxYtop:"+boxYtop+" boxHeight:"+boxHeight+" boxWidth:"+boxWidth);
+        if (useScale)System.out.println("(w/2)+(h/2):"+((w/2)+(h/2))+"  (h/2)-(w/2):"+((h/2)-(w/2)));
 
 //        if(!mainGUI.getState().getCurrentImage().img.transform.isNewOrientation())
          if (((rot90==1)||(rot90==3))&&useScale)
-            return new Rectangle(boxXleft,boxYtop, boxHeight, boxWidth);
+            return new Rectangle(boxYtop,boxXleft, boxHeight, boxWidth);
          else return new Rectangle(boxXleft, boxYtop, boxWidth, boxHeight);
     }
 }

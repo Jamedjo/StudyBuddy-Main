@@ -66,7 +66,7 @@ class ImageItem{
     }
 
     Dimension getOrientatedFullDimensions(MultiSizeImage img){
-//        if(transform.isNewOrientation()) return  new Dimension(img.fullDimensions.height,img.fullDimensions.width);
+        if(transform.isNewOrientation()) return  new Dimension(img.fullDimensions.height,img.fullDimensions.width);
         return img.fullDimensions;
     }
     Dimension getCurrentFullDimensions(){//output of this is checked for null at geyDimensionsWithMake
