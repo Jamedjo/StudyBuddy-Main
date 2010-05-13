@@ -5,6 +5,13 @@ public class Transformer {
     private boolean flip =false;
     private boolean  mirror=false;
     private int rotate90 =0;
+
+    int getRot90(){
+        if(flip&mirror) {
+            return (rotate90+2)%4;
+        }
+        return rotate90;
+    }
     
     void flip(){
         flip ^=true;
@@ -24,7 +31,16 @@ public class Transformer {
     boolean isRotated(){
         return (rotate90==0)? false : true;
     }
-
+    boolean isNewOrientation(){
+        if((rotate90==1)||(rotate90==3)) return true;
+        return false;
+    }
+    boolean is180(){
+        if (flip&mirror){
+            return (((rotate90+2)%4)==2);
+        }
+        return (rotate90==2);
+    }
     //gets an affine transform centred around the given width and height
     AffineTransform getAffine(AffineTransform inAffine,int width,int height){
         //if mirror or rotate: centre horizonatally

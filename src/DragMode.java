@@ -14,7 +14,7 @@ public enum DragMode {
     Note(SysIcon.NoteCursor,HotSpotPos.BottomLeft,Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR)),
 
     //Thumb Modes:
-    Scroll(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),SysIcon.DragPan,HotSpotPos.Centre),
+    Scroll(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),SysIcon.DragLeftRight,HotSpotPos.Centre),
     Click(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR),Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
     Cursor open,closed;

@@ -40,9 +40,10 @@ public enum SysIcon {
     ,QuickTag("oxygen/feed-subscribe.png","oxygen/view-pim-notes.png"){@Override void drawIt(){drawBottomRight();}}
     ,TagTag("oxygen/feed-subscribe.png","oxygen/feed-subscribe.png"){@Override void drawIt(){drawBottomRight();}}
     ,TagFilter("oxygencustom/zoom-32.png","oxygen/feed-subscribe.png")//("oxygen/strigi.png")
-    ,DragPan("oxygen/transform-move.png")
+    ,DragPan("oxygencustom/dragPan32.png")//("oxygen/transform-move.png")
     ,DragNote("oxygen/insert-text-2.png")//knotes-4.png")
     ,DragLink("oxygen/insert-link-2.png")
+    ,DragLeftRight("oxygencustom/arrowDrag32.png")
     ,BlueTooth("oxygen/preferences-system-bluetooth.png")//phone-3.png")
     ,Adjust("oxygen/color-fill.png")
     ,BigAdjust("oxygenbig/color-fill.png")

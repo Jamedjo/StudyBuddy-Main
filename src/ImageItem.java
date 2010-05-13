@@ -65,12 +65,16 @@ class ImageItem{
 //        iconImage.thumbDimensions=iconImage.fullDimensions;
     }
 
+    Dimension getOrientatedFullDimensions(MultiSizeImage img){
+//        if(transform.isNewOrientation()) return  new Dimension(img.fullDimensions.height,img.fullDimensions.width);
+        return img.fullDimensions;
+    }
     Dimension getCurrentFullDimensions(){//output of this is checked for null at geyDimensionsWithMake
         switch(fullType){
             case Original:
-                return originalImage.fullDimensions;
+                return getOrientatedFullDimensions(originalImage);
             case Filtered:
-                return filteredImage.fullDimensions;
+                return getOrientatedFullDimensions(filteredImage);
             default:
                 return iconImage.fullDimensions;
         }

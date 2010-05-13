@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
+import java.awt.geom.AffineTransform;
 import javax.swing.BorderFactory;
 import javax.swing.border.EtchedBorder;
 //import javax.swing.border.EtchedBorder;
@@ -131,7 +132,13 @@ class ThumbButton extends JPanel{
 	    int thumbOfsetW= (size - useWH.width)/2;
 	    int thumbOfsetH= (size - useWH.height)/2;
 	    //mainGUI.mainPhoto.setIcon(mainGUI.state.imageList[currentThumb].getIcon(ImgRequestSize.Thumb));
+
+            AffineTransform originalAffine = g2.getTransform();
+            g2.setTransform(mainGUI.getState().getImageI(mainGUI.getState().relItoFixI(currentOffset)).img.transform.getAffine(originalAffine,(thumbOfsetW*2)+useWH.width,(thumbOfsetH*2)+useWH.height));//offset+(w/2)
+
 	    g2.drawImage(mainGUI.getState().getBImageI(currentOffset,ImgRequestSize.Thumb), thumbOfsetW+hOffset, thumbOfsetH,useWH.width,useWH.height, this);
+
+            g2.setTransform(originalAffine);
 	//}
     }
 
@@ -170,16 +177,16 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
     }
 
 //     JPanel buildThumbHolders(){
-      synchronized JPanel buildThumbHolders(){
+synchronized JPanel buildThumbHolders(){
         final int sizeDiff=20;
         int sizeW = squareSize + hBorder;
         if(boardW<=sizeW) maxNoTiles=1;
-        else maxNoTiles= (((boardW-sizeW)-(boardW % (sizeW-sizeDiff)))/(sizeW-sizeDiff) )+1;//finds space left after first (big) tile, divides this by size of smaller tiles. has modulo to help with rounding
+        else maxNoTiles= (((boardW-sizeW)-((boardW-sizeW) % (sizeW-sizeDiff)))/(sizeW-sizeDiff) )+1;//finds space left after first (big) tile, divides this by size of smaller tiles. has modulo to help with rounding
         if((maxNoTiles>3)&&((maxNoTiles%2)==0)) maxNoTiles--;
 
         noTiles = Math.min(maxNoTiles,(mainGUI.getState().numberOfImages));//-1));//remove -1 to show currentI too
-       //**// log.print(LogType.Debug,"now showing "+noTiles+" thumbnails");
-          JPanel centrePan = new JPanel();
+        //**// log.print(LogType.Debug,"now showing "+noTiles+" thumbnails");
+        JPanel centrePan = new JPanel();
         if (noTiles < 0) noTiles=0;
         centrePan.setLayout(new BoxLayout(centrePan, BoxLayout.LINE_AXIS));
         centrePan.setBackground(Color.darkGray);
@@ -197,7 +204,7 @@ class ThumbPanel extends JPanel implements MouseWheelListener{
         if(noTiles>=2){
             tilesHigh = 1;
             centrePan.setMinimumSize(new Dimension(squareSize,squareSize));
-            centrePan.setPreferredSize(new Dimension(((sizeW-sizeDiff)*(noTiles-1))+sizeW,squareSize));//Includes border
+            centrePan.setPreferredSize(new Dimension(((sizeW-sizeDiff)*(noTiles)),squareSize));//Includes border
         } else {
             tilesHigh = 0;
             centrePan.setMinimumSize(new Dimension(0,0));

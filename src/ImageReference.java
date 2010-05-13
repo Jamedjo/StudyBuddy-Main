@@ -226,7 +226,7 @@ class ImageReference {
         if (pathFile != null) {
             BufferedImage tempImage = ImageUtils.getThumbFromExif(pathFile);
             if (tempImage != null) {
-                Log.Print(LogType.Plain, "Read exif of image " + pathFile.toString());
+                log.print(LogType.Debug, "Read exif of image " + pathFile.toString());
                 img.setThumbImage(tempImage, ImageType.Original);
                 RepaintManager.repaint(RepaintType.NewThumb);
                 return;

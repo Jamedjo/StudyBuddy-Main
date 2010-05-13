@@ -169,4 +169,8 @@ Dimension outWH = new Dimension();
         useWH= scaleToMax(relImageDimension.width,relImageDimension.height, MaxW, MaxH);
 	return useWH;
     }
+
+    static Dimension invertDimension(Dimension d){
+        return new Dimension(d.height,d.width);
+    }
 }

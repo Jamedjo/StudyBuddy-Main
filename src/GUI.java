@@ -5,14 +5,18 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.io.File;
 import javax.imageio.ImageIO;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -24,6 +28,7 @@ import javax.swing.JSlider;
 import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 import javax.swing.border.EtchedBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 
@@ -185,6 +190,23 @@ class GUI {
         imageAreas.setLayout(new BorderLayout());
         imageAreas.add(mainScrollPane, BorderLayout.CENTER);
         imageAreas.add(thumbPanel, BorderLayout.PAGE_END);
+//        imageAreas.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), "right");
+//        imageAreas.getInputMap(JComponent.WHEN_FOCUSED).put(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), "left");
+//        Action leftAction = new AbstractAction(){
+//            @Override
+//            public void actionPerformed(ActionEvent e){
+//                System.out.println("hjk8979s7df9789789SDJFKLDSJFKL");
+//                getState().prevImage();
+//            }};
+//        Action rightAction = new AbstractAction(){
+//            @Override
+//            public void actionPerformed(ActionEvent e){
+//                System.out.println("LJDSKFKLSDJFKLDSJFKL");
+//                getState().nextImage();
+//            }
+//        };
+//        imageAreas.getActionMap().put("left",leftAction);
+//        imageAreas.getActionMap().put("right",rightAction);
 
         final JTextField newTagBox = new JTextField();
         class textAddTag implements ActionListener{
@@ -234,6 +256,7 @@ class GUI {
         //splitpane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
 
         notePane = new JScrollPane();
+        //notePane.getInputMap().put(,"none");
 
 //        rightArea = new JPanel();
 //        rightArea.setLayout(new BoxLayout(rightArea,BoxLayout.Y_AXIS));

@@ -45,6 +45,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     boolean mousePressed = false;
     boolean firstStart=false;
     LoadingAnimationPane loadingPane = new LoadingAnimationPane(true);
+    AffineTransform originalAffine;
 
     MainPanel(GUI parentGUI) {
         mainGUI = parentGUI;
@@ -120,7 +121,8 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     }
     void fixFitZoomMultiplier() {
         //if(useWH==null){
-        useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
+        if(!isNewOri()) useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardW, boardH, 0);
+        else useWH = mainGUI.getState().getRelImageWH(ImgRequestSize.Max, boardH, boardW, 0);
         //}
         //Potentially inefficient as forces full size image to load
         //log.print(LogType.Debug,"old zoomMultiplier- " + getZoomMult());
@@ -131,6 +133,10 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         //log.print(LogType.Debug,"boardW: "+boardW+" boardH: "+boardH+"\nuseWH.width: "+useWH.width+" useWH.height: "+useWH.height);
     }
 
+    boolean isNewOri(){
+        return mainGUI.getState().getCurrentImage().img.transform.isNewOrientation();
+    }
+    
     void onResize() {
         //boolean oldScr=mainGUI.mainScrollPane.getHorizontalScrollBar().isVisible();;
         if ( isZoomed() ) {
@@ -220,12 +226,17 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
             this.setPreferredSize(ImageUtils.useMaxMax((int) (w * getZoomMult()),(int) (h * getZoomMult()),this.getParent().getWidth(),this.getParent().getHeight()));
             useWH = new Dimension((int) (w * getZoomMult()),(int) (h * getZoomMult()));
         } else {
-            if(thumbBehind||firstStart) useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
+            if(thumbBehind||firstStart) {
+                    useWH= ImageUtils.scaleToMax(img.getWidth(),img.getHeight(), boardW, boardH);
+            }
             else mainGUI.getState().getRelImageWH(cSize, boardW, boardH, 0);
         }
+        
         setOffsets();
-        AffineTransform originalAffine = g2.getTransform();
-        g2.setTransform(mainGUI.getState().getCurrentImage().img.transform.getAffine(originalAffine,(leftOffset*2)+useWH.width,(topOffset*2)+useWH.height));//offset+(w/2)
+        originalAffine = g2.getTransform();
+        Transformer transform=mainGUI.getState().getCurrentImage().img.transform;
+        g2.setTransform(transform.getAffine(originalAffine,(leftOffset*2)+useWH.width,(topOffset*2)+useWH.height));//offset+(w/2)
+        
         g2.drawImage(img, leftOffset, topOffset, useWH.width, useWH.height, this);
 
         if(drawIconInFront) {
@@ -238,7 +249,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         }
 
         drawLinkBoxes(g2, Settings.getSettingAsBool("showNotes",true), Settings.getSettingAsBool("showLinks",true));
-        g2.setTransform(originalAffine);
+        
 //        g.dispose();
 //        g2.dispose();
     }
@@ -275,6 +286,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
                 }
                 linksRect = null;
             }
+        g2.setTransform(originalAffine);
             //If dragging rectagle in relevent mode, draw it.
             if(mousePressed&&(getCursorMode()==DragMode.Link||getCursorMode()==DragMode.Note)){
                 if(getCursorMode()==DragMode.Link) g2.setColor(Color.blue);
@@ -362,6 +374,7 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         if ((mode == DragMode.Note) || (mode == DragMode.Link)) {
             setOffsets();
             Rectangle rec = getBoxFromPress(e.getX(), e.getY(), true);
+            //if(isNewOri()) rec=new Rectangle(rec.y,-rec.x,rec.height,rec.width);
             if (mode == DragMode.Note) {
                 mainGUI.mainImageDB.addImageNote(mainGUI.getState().getCurrentImageID(), "", rec.x, rec.y, rec.width, rec.height);
             } else if (mode == DragMode.Link) {
@@ -406,14 +419,40 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
     public void mouseExited(MouseEvent e){ }
 
     Rectangle getBoxFromPress(int currentMouseX, int currentMouseY,boolean useScale) {
+        boolean rot180 = mainGUI.getState().getCurrentImage().img.transform.is180();
+        int rot90 = mainGUI.getState().getCurrentImage().img.transform.getRot90();
+            int w=0;int h=0;
         double scale = 1;
         int xTranslate = 0;
         int yTranslate = 0;
-
-        if (useScale){
+        if (useScale) {
+            if (isZoomed()) {
+                w = this.getParent().getWidth();
+                h = this.getParent().getHeight();
+            } else {
+                w = boardW;
+                h = boardH;
+            }
+            if (rot180 || (rot90 == 3)) {
+                pressX = w - pressX;
+                pressY = h - pressY;
+                currentMouseX = w - currentMouseX;
+                currentMouseY = h - currentMouseY;
+            }
+//        if((rot90==1)||(rot90==3)){
+//            pressX=(w/2)+(h/2)-pressX;
+//            pressY=(h/2)-(w/2)+pressY;
+//            currentMouseX=(w/2)+(h/2)-currentMouseX;
+//            currentMouseY=(h/2)-(w/2)+currentMouseY;
+//        }
             scale = getZoomMult();
-            xTranslate = leftOffset;
-            yTranslate = topOffset;
+            if ((rot90 == 1) || (rot90 == 3)) {
+                if(leftOffset>topOffset)xTranslate = topOffset+leftOffset;
+                if(leftOffset<topOffset)yTranslate = leftOffset+topOffset;
+            } else {
+                xTranslate = leftOffset;
+                yTranslate = topOffset;
+            }
         }
         // x and y values scaled apropriately, and tranlated if image is centred on mainPanel.
         double scaledXstart, scaledYstart, scaledXstop, scaledYstop;
@@ -427,7 +466,16 @@ public class MainPanel extends JPanel implements MouseWheelListener, MouseListen
         boxHeight = (int) Math.abs(scaledYstart - scaledYstop);
         boxXleft = (int) Math.min(scaledXstart, scaledXstop);
         boxYtop = (int) Math.min(scaledYstart, scaledYstop);
+//        if (useScale)System.out.println("rot180:"+rot180+" rot90:"+rot90+"  scale:"+scale);
+//        if (useScale)System.out.println("topOffset:"+topOffset+" leftOffset:"+leftOffset+" boardW:"+boardW+" boardH:"+boardH);
+//        if (useScale)System.out.println("pressX:"+pressX+" pressY:"+pressY+" currentMouseX:"+currentMouseX+" currentMouseY:"+currentMouseY);
+//        if (useScale)System.out.println("scaledXstart:"+scaledXstart+" scaledYstart:"+scaledYstart+" scaledXstop:"+scaledXstop+" scaledYstop:"+scaledYstop);
+//        if (useScale)System.out.println("boxXleft:"+boxXleft+" boxYtop:"+boxYtop+" boxHeight:"+boxHeight+" boxWidth:"+boxWidth);
+//        if (useScale)System.out.println("(w/2)+(h/2):"+((w/2)+(h/2))+"  (h/2)-(w/2):"+((h/2)-(w/2)));
 
-        return new Rectangle(boxXleft, boxYtop, boxWidth, boxHeight);
+//        if(!mainGUI.getState().getCurrentImage().img.transform.isNewOrientation())
+         if (((rot90==1)||(rot90==3))&&useScale)
+            return new Rectangle(boxXleft,boxYtop, boxHeight, boxWidth);
+         else return new Rectangle(boxXleft, boxYtop, boxWidth, boxHeight);
     }
 }
