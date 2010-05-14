@@ -14,10 +14,10 @@ public enum SysIcon {
 
     Logo("logo.png"){@Override ImageIcon fail(){return new ImageIcon();}}//Create empty icon if logo missing so GUI still loads.
     ,Splash("splash.png")
-    ,Question("question.gif")
-    ,Error("error.gif")
+    ,Question("oxygen/help-contents-5.png")
+    ,Error("oxygen/dialog-error-4.png")
     ,Info("oxygen/dialog-information-3.png")//info.gif")
-    ,Help("help.gif")
+    ,Help("oxygen/system-help-2.png")
     ,Export("oxygen/document-save-as-3.png")
     ,Prev("oxygen/go-previous-6.png")
     ,Next("oxygen/go-next-6.png")

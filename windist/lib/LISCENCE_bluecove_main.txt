@@ -1,0 +1,10 @@
+Apache version 2.0
+
+BlueCove is a Java library for Bluetooth (JSR-82 implementation) that currently interfaces with the Mac OS X, WIDCOMM, BlueSoleil and Microsoft Bluetooth stack found in Windows XP SP2 or Windows Vista and WIDCOMM and Microsoft Bluetooth stack on Windows Mobile.
+http://bluecove.org/
+
+
+Legal
+
+BlueCove is licensed under Apache License, Version 2.0 . The license allows linking and distributing commercial software with BlueCove.
+http://www.apache.org/licenses/LICENSE-2.0

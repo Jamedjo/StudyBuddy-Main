@@ -1,0 +1,10 @@
+Sanselan has been used to read image dimensions and image exif data. Code taken from version 0.98-SNAPSHOT 12th March 2010 is liscenced under Apache liscence. Sections of this code which have been modified by the creators of StudyBuddy and distributed with StudyBuddy in commons-sanselan-0.98-SNAPSHOT.jar is liscenced under the terms of the main StudyBuddy liscence.
+
+http://commons.apache.org/sanselan/
+Sanselan: a Pure-Java Image Library
+Introduction
+This Pure-Java library reads and writes a variety of image formats, including fast parsing of image info (size, color space, icc profile, etc.) and metadata.
+This library is pure Java. It's slow, consequently, but perfectly portable. It's easier to use than ImageIO/JAI/Toolkit (Sun/Java's image support), supports more formats (and supports them more correctly). It also provides easy access to metadata.
+Although not yet version 1.0, sanselan is working and is used by a number of projects in production.
+This project is Open Source; free as in freedom and free as in beer. It is available under the ASF (Apache) License. This is a non-viral Open Source license.
+

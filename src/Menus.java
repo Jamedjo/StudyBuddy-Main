@@ -364,8 +364,8 @@ enum TagMenu {
 enum ViewMenu {
     NextImage("Next Image",SysIcon.Next.smallIcon(20), KeyEvent.VK_N, KeyEvent.VK_RIGHT,  ActionEvent.CTRL_MASK, "Next"),
     PrevImage("Previous Image",SysIcon.Prev.smallIcon(20), KeyEvent.VK_P, KeyEvent.VK_LEFT,  ActionEvent.CTRL_MASK, "Prev"),
-    ShowThumbs("Show Thumbnails Bar",SysIcon.ShowThumbs.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsS", false),
-    HideThumbs("Hide Thumbnails Bar",SysIcon.HideThumbs.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK, "ThumbsH"),
+    ShowThumbs("Show Thumbnails Bar",SysIcon.ShowThumbs.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK+ActionEvent.CTRL_MASK, "ThumbsS", false),
+    HideThumbs("Hide Thumbnails Bar",SysIcon.HideThumbs.smallIcon(20), KeyEvent.VK_T, KeyEvent.VK_T, ActionEvent.SHIFT_MASK+ActionEvent.CTRL_MASK, "ThumbsH"),
     ToggleTree("Show/Hide Tag Tree",SysIcon.JTree.smallIcon(20), KeyEvent.VK_R, -1, -1, "TagTree"),
     ToggleImgToolBar("Toggle Image ToolBar",SysIcon.ImageBar.smallIcon(20), KeyEvent.VK_I,-1, -1, "ImageBar"),
     SlidePlay("Play Slideshow",SysIcon.Play.smallIcon(20), KeyEvent.VK_S, KeyEvent.VK_SPACE,  ActionEvent.CTRL_MASK, "SlideP"),

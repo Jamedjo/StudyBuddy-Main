@@ -1,0 +1,34 @@
+<launch4jConfig>
+  <dontWrapJar>true</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>StudyBuddyPC.jar</jar>
+  <outfile>D:\Users\Student\Documents\NetBeansProjects\StudyBuddyMarch\windist\StudyBuddy.exe</outfile>
+  <errTitle>StudyBuddy</errTitle>
+  <cmdLine></cmdLine>
+  <chdir></chdir>
+  <priority>normal</priority>
+  <downloadUrl>http://java.com/download</downloadUrl>
+  <supportUrl></supportUrl>
+  <customProcName>true</customProcName>
+  <stayAlive>false</stayAlive>
+  <manifest></manifest>
+  <icon>D:\Users\Student\Documents\NetBeansProjects\StudyBuddyMarch\etc\icons\logo.ico</icon>
+  <jre>
+    <path></path>
+    <minVersion>1.6.0_14</minVersion>
+    <maxVersion></maxVersion>
+    <jdkPreference>preferJre</jdkPreference>
+  </jre>
+  <versionInfo>
+    <fileVersion>1.0.0.0</fileVersion>
+    <txtFileVersion>1.00</txtFileVersion>
+    <fileDescription>StudyBuddy 1.00</fileDescription>
+    <copyright>Copyright StudyBuddy Team, free to use.</copyright>
+    <productVersion>1.0.0.0</productVersion>
+    <txtProductVersion>1.00</txtProductVersion>
+    <productName>StudyBuddy</productName>
+    <companyName></companyName>
+    <internalName>StudyBuddy</internalName>
+    <originalFilename>StudyBuddy.exe</originalFilename>
+  </versionInfo>
+</launch4jConfig>

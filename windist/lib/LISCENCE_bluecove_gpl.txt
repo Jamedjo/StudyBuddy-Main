@@ -1,0 +1,7 @@
+BlueCove-gpl is additional module for BlueCove to support bluecove on Linux. This module distributed as different jar because of the License differences.
+
+Compiled for i386 and x86-64 versions of the native code (shared library) is included in jar distribution. Native shared library have been tested and should work on Ubuntu, OpenSUSE and Fedora. For other Linux distributions you may need to compile it yourself.
+
+BlueCove-gpl is licensed under GNU General Public License . http://www.gnu.org/licenses/gpl.html
+
+If you know how we can legaly make a library for BlueZ licensed differently please let us know.
